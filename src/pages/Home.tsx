@@ -2,6 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { GraduationCap, ArrowRight, Sparkles, Music, Play, Pause, SkipForward, RotateCcw, Volume2, Heart, BookOpen, Users, Timer } from 'lucide-react';
 import { useAudioStore, AMBIENCES } from '../stores/audioStore';
+import InstallCTA from '../components/InstallCTA';
+import IOSInstallHint from '../components/IOSInstallHint';
 
 const Home: React.FC = () => {
   const {
@@ -599,6 +601,11 @@ const Home: React.FC = () => {
             })}
           </div>
         </div>
+      </section>
+      
+      {/* PWA Installation CTA */}
+      <section className="px-4 pb-6">
+        <InstallCTA />
       </section>
       
       {/* Citation inspirante avec rotation */}
