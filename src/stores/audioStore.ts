@@ -386,6 +386,9 @@ export const useAudioStore = create<AudioState & AudioActions>()(
           masterGain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 4);
           
           oscillator1.start(audioContext.currentTime);
+          oscillator2.start(audioContext.currentTime);
+          oscillator3.start(audioContext.currentTime);
+          
           oscillator1.stop(audioContext.currentTime + 4);
           oscillator2.stop(audioContext.currentTime + 4);
           oscillator3.stop(audioContext.currentTime + 4);
