@@ -101,6 +101,20 @@ CREATE POLICY "Users can delete own images" ON storage.objects
 
 ## ⚙️ Configuration Auth
 
+### Configuration Email (IMPORTANT)
+Dans Supabase Dashboard → Authentication → Settings:
+
+**Option 1: Désactiver la confirmation par email (recommandé pour le développement)**
+```
+Enable email confirmations: OFF
+```
+
+**Option 2: Configurer les emails (pour la production)**
+```
+Enable email confirmations: ON
+SMTP Settings: Configurez votre serveur SMTP
+```
+
 ### URL Configuration (Dashboard → Auth → URL Configuration)
 ```
 Site URL: https://your-domain.com

@@ -95,7 +95,18 @@ const Register: React.FC = () => {
       await signUp(formData.email.trim(), formData.password, {
         firstName: formData.firstName.trim() || undefined
       });
-      setEmailSent(true);
+      
+      // Si l'inscription réussit, rediriger vers le profil ou afficher un message de succès
+      console.log('Registration successful, checking if user is logged in...');
+      
+      // Attendre un peu pour que l'état d'authentification se mette à jour
+      setTimeout(() => {
+        // Si l'utilisateur n'est pas automatiquement connecté, afficher le message d'email
+        if (!user) {
+          setEmailSent(true);
+        }
+      }, 1000);
+      
     } catch (error: any) {
       console.error('Registration error:', error);
       

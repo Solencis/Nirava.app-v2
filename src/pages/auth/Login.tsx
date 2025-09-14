@@ -60,9 +60,9 @@ const Login: React.FC = () => {
       
       // Messages d'erreur plus clairs pour l'utilisateur
       if (error.message?.includes('Invalid login credentials')) {
-        setError('❌ E-mail ou mot de passe incorrect. Vérifiez vos informations ou utilisez "Mot de passe oublié ?" ci-dessous.');
+        setError('❌ E-mail ou mot de passe incorrect. Si vous venez de vous inscrire, votre compte pourrait ne pas être encore activé. Vérifiez vos informations ou contactez le support.');
       } else if (error.message?.includes('Email not confirmed')) {
-        setError('Veuillez confirmer votre adresse email avant de vous connecter');
+        setError('⚠️ Votre compte n\'est pas encore confirmé. Si vous ne recevez pas d\'email de confirmation, contactez le support.');
       } else if (error.message?.includes('rate limit')) {
         setError('Trop de tentatives. Veuillez patienter quelques minutes.');
       } else {

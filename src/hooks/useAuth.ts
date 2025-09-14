@@ -101,11 +101,7 @@ export const useAuth = () => {
   // 4. Inscription avec email et mot de passe
   const signUp = async (email: string, password: string, options?: { firstName?: string }) => {
     try {
-      // URL de callback (localhost + production)
-      const redirectTo = `${window.location.origin}/auth/callback`;
-      
       console.log('Signing up user:', email);
-      console.log('Redirect URL:', redirectTo);
       console.log('Supabase URL:', import.meta.env.VITE_SUPABASE_URL);
       console.log('Environment:', import.meta.env.MODE);
       
@@ -113,7 +109,8 @@ export const useAuth = () => {
         email,
         password,
         options: {
-          emailRedirectTo: redirectTo,
+          // Désactiver temporairement la confirmation par email
+          // emailRedirectTo: redirectTo,
           data: {
             firstName: options?.firstName,
             source: 'nirava_app',
@@ -126,14 +123,14 @@ export const useAuth = () => {
       
       console.log('Sign up successful:', data);
       console.log('User created:', data.user?.email);
-      console.log('Email confirmation required:', !data.user?.email_confirmed_at);
+      console.log('User confirmed:', !!data.user?.email_confirmed_at);
       console.log('Session created:', !!data.session);
       
-      // Vérifier si l'email de confirmation est requis
-      if (data.user && !data.user.email_confirmed_at && !data.session) {
-        console.log('✅ Email de confirmation requis - email envoyé à:', email);
-      } else if (data.session) {
-        console.log('✅ Inscription directe réussie - pas de confirmation email requise');
+      // Si une session est créée, l'utilisateur est directement connecté
+      if (data.session && data.user) {
+        console.log('✅ Inscription réussie - utilisateur connecté directement');
+      } else if (data.user && !data.user.email_confirmed_at) {
+        console.log('⚠️ Utilisateur créé mais email non confirmé');
       }
       
       return data;
