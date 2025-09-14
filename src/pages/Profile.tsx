@@ -3,6 +3,7 @@ import { User, Award, Flame, Settings, Shield, LogOut, CreditCard, Edit3, Save, 
 import { useAuth } from '../hooks/useAuth';
 import { supabase, Profile, uploadJournalPhoto, deleteJournalPhoto } from '../lib/supabase';
 import { useAudioStore } from '../stores/audioStore';
+import IOSInstallHint from '../components/IOSInstallHint';
 
 const ProfilePage: React.FC = () => {
   const { user, signOut } = useAuth();
