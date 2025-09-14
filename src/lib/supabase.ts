@@ -368,7 +368,6 @@ export const getUserPosts = async () => {
         display_name,
         level,
         photo_url
-        photo_url
       ),
       post_likes (
         id,
