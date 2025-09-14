@@ -158,7 +158,7 @@ const MeditationModal: React.FC<MeditationModalProps> = ({ isOpen, onClose, onSa
     }
   };
 
-  const handleStartMeditation = () => {
+  const startMeditationSession = () => {
     // Remember ambience state
     wasAmbiencePlaying.current = ambienceIsPlaying;
     
@@ -167,20 +167,21 @@ const MeditationModal: React.FC<MeditationModalProps> = ({ isOpen, onClose, onSa
       pauseAmbience();
     }
     
-    // Start meditation with store
-    startMeditation(isFreeMode ? undefined : duration);
+    if (!isFreeMode && meditationState.remaining === null) {
+      startMeditation(duration * 60);
+    } else if (isFreeMode && meditationState.elapsed === 0) {
+      startMeditation();
+    } else {
+      resumeMeditation();
+    }
     playGong(); // Gong de début
   };
 
-  const handlePauseMeditation = () => {
-    if (meditationState.isPaused) {
-      resumeMeditation();
-    } else {
-      pauseMeditation();
-    }
+  const pauseMeditationSession = () => {
+    pauseMeditation();
   };
 
-  const handleReset = () => {
+  const reset = () => {
     // Restore ambience if it was playing
     if (wasAmbiencePlaying.current && currentAmbience && muteAmbience) {
       playAmbience(currentAmbience);
@@ -194,11 +195,11 @@ const MeditationModal: React.FC<MeditationModalProps> = ({ isOpen, onClose, onSa
     if (minutes > 0 && minutes <= 120) {
       setDuration(minutes);
       setCustomDuration('');
-      handleReset();
+      reset();
     }
   };
 
-  const handleStopFreeMeditation = () => {
+  const stopFreeMeditation = () => {
     // Restore ambience if it was playing
     if (wasAmbiencePlaying.current && currentAmbience && muteAmbience) {
       playAmbience(currentAmbience);
@@ -213,6 +214,14 @@ const MeditationModal: React.FC<MeditationModalProps> = ({ isOpen, onClose, onSa
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
     return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+  };
+
+  const getProgress = () => {
+    if (isFreeMode) return 0; // Pas de progression en mode libre
+    if (duration === 0) return 0;
+    const totalSeconds = duration * 60;
+    const elapsed = totalSeconds - (meditationState.remaining || totalSeconds);
+    return (elapsed / totalSeconds) * 100;
   };
 
   if (!isOpen) return null;
@@ -236,7 +245,7 @@ const MeditationModal: React.FC<MeditationModalProps> = ({ isOpen, onClose, onSa
             </button>
           </div>
 
-          {!meditationState.isActive && meditationState.remaining === null && !savedActivity && (
+          {!meditationState.isActive && meditationState.remaining === null && meditationState.elapsed === 0 && (
             <div className="space-y-6">
               {/* Mode de méditation */}
               <div>
@@ -247,7 +256,7 @@ const MeditationModal: React.FC<MeditationModalProps> = ({ isOpen, onClose, onSa
                   <button
                     onClick={() => {
                       setIsFreeMode(false);
-                      handleReset();
+                      reset();
                     }}
                     className={`p-3 rounded-xl border transition-all duration-300 ${
                       !isFreeMode
@@ -261,7 +270,7 @@ const MeditationModal: React.FC<MeditationModalProps> = ({ isOpen, onClose, onSa
                   <button
                     onClick={() => {
                       setIsFreeMode(true);
-                      handleReset();
+                      reset();
                     }}
                     className={`p-3 rounded-xl border transition-all duration-300 ${
                       isFreeMode
@@ -287,7 +296,7 @@ const MeditationModal: React.FC<MeditationModalProps> = ({ isOpen, onClose, onSa
                       key={minutes}
                       onClick={() => {
                         setDuration(minutes);
-                        handleReset();
+                        reset();
                       }}
                       className={`p-3 rounded-xl border transition-all duration-300 ${
                         duration === minutes
@@ -330,7 +339,7 @@ const MeditationModal: React.FC<MeditationModalProps> = ({ isOpen, onClose, onSa
               )}
 
               <button
-                onClick={handleStartMeditation}
+                onClick={startMeditationSession}
                 className="w-full bg-forest text-white py-4 rounded-xl hover:bg-forest/90 transition-colors duration-300 flex items-center justify-center text-lg font-medium"
               >
                 <Play size={20} className="mr-2" />
@@ -365,7 +374,7 @@ const MeditationModal: React.FC<MeditationModalProps> = ({ isOpen, onClose, onSa
             </div>
           )}
 
-          {(meditationState.isActive || meditationState.elapsed > 0) && !savedActivity && (
+          {(meditationState.isActive || meditationState.remaining !== null || meditationState.elapsed > 0) && !meditationState.isCompleted && (
             <div className="text-center space-y-6">
               {/* Timer circulaire */}
               <div className="relative w-48 h-48 mx-auto">
@@ -388,7 +397,7 @@ const MeditationModal: React.FC<MeditationModalProps> = ({ isOpen, onClose, onSa
                     strokeWidth="8"
                     strokeLinecap="round"
                     strokeDasharray={`${2 * Math.PI * 45}`}
-                    strokeDashoffset={`${2 * Math.PI * 45 * (1 - (meditationState.elapsed / (duration * 60)) * 100 / 100)}`}
+                    strokeDashoffset={`${2 * Math.PI * 45 * (1 - getProgress() / 100)}`}
                     className="transition-all duration-1000 ease-linear"
                   />
                   )}
@@ -399,7 +408,7 @@ const MeditationModal: React.FC<MeditationModalProps> = ({ isOpen, onClose, onSa
                       {isFreeMode ? formatTime(meditationState.elapsed) : formatTime(meditationState.remaining || 0)}
                     </div>
                     <div className="text-sm text-stone">
-                      {isFreeMode ? 'Méditation libre' : `${Math.round((meditationState.elapsed / (duration * 60)) * 100)}%`}
+                      {isFreeMode ? 'Méditation libre' : `${Math.round(getProgress())}%`}
                     </div>
                   </div>
                 </div>
@@ -408,23 +417,23 @@ const MeditationModal: React.FC<MeditationModalProps> = ({ isOpen, onClose, onSa
               <div className="flex gap-3 justify-center">
                 {!isFreeMode ? (
                   <button
-                  onClick={handlePauseMeditation}
+                  onClick={meditationState.isActive ? pauseMeditationSession : startMeditationSession}
                   className="bg-forest text-white px-6 py-3 rounded-xl hover:bg-forest/90 transition-colors duration-300 flex items-center"
                 >
-                  {meditationState.isPaused ? <Play size={20} className="mr-2" /> : <Pause size={20} className="mr-2" />}
-                  {meditationState.isPaused ? 'Reprendre' : 'Pause'}
+                  {meditationState.isActive ? <Pause size={20} className="mr-2" /> : <Play size={20} className="mr-2" />}
+                  {meditationState.isActive ? 'Pause' : 'Reprendre'}
                 </button>
                 ) : (
                   <div className="flex gap-3">
                     <button
-                      onClick={handlePauseMeditation}
+                      onClick={meditationState.isActive ? pauseMeditationSession : startMeditationSession}
                       className="bg-forest text-white px-6 py-3 rounded-xl hover:bg-forest/90 transition-colors duration-300 flex items-center"
                     >
-                      {meditationState.isPaused ? <Play size={20} className="mr-2" /> : <Pause size={20} className="mr-2" />}
-                      {meditationState.isPaused ? 'Reprendre' : 'Pause'}
+                      {meditationState.isActive ? <Pause size={20} className="mr-2" /> : <Play size={20} className="mr-2" />}
+                      {meditationState.isActive ? 'Pause' : 'Reprendre'}
                     </button>
                     <button
-                      onClick={handleStopFreeMeditation}
+                      onClick={stopFreeMeditation}
                       className="bg-jade text-white px-6 py-3 rounded-xl hover:bg-jade/90 transition-colors duration-300"
                     >
                       Terminer
@@ -432,7 +441,7 @@ const MeditationModal: React.FC<MeditationModalProps> = ({ isOpen, onClose, onSa
                   </div>
                 )}
                 <button
-                  onClick={handleReset}
+                  onClick={reset}
                   className="bg-stone/20 text-stone px-6 py-3 rounded-xl hover:bg-stone/30 transition-colors duration-300 flex items-center"
                 >
                   <RotateCcw size={20} className="mr-2" />
@@ -442,7 +451,7 @@ const MeditationModal: React.FC<MeditationModalProps> = ({ isOpen, onClose, onSa
             </div>
           )}
 
-          {savedActivity && (
+          {meditationState.isCompleted && (
             <>
             {savedActivity ? (
               // Success state with sharing option
@@ -480,7 +489,7 @@ const MeditationModal: React.FC<MeditationModalProps> = ({ isOpen, onClose, onSa
                     }}
                     className="w-full px-4 py-3 border border-stone/20 text-stone rounded-xl hover:bg-stone/5 transition-colors duration-300"
                   >
-                    Fermer sans partager
+                    Garder privé
                   </button>
                 </div>
               </div>
@@ -492,6 +501,7 @@ const MeditationModal: React.FC<MeditationModalProps> = ({ isOpen, onClose, onSa
                 playAmbience(currentAmbience);
                 return null;
               })()}
+              
               <div className="w-24 h-24 mx-auto bg-forest/10 rounded-full flex items-center justify-center">
                 <Timer className="w-12 h-12 text-forest" />
               </div>
