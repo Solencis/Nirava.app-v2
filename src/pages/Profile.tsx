@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { User, Award, Flame, Settings, Shield, LogOut, CreditCard, Edit3, Save, X, Heart, Timer, BookOpen } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 import { supabase, Profile } from '../lib/supabase';
+import { useAudioStore } from '../stores/audioStore';
 
 const ProfilePage: React.FC = () => {
   const { user, signOut } = useAuth();
