@@ -905,11 +905,21 @@ const Community: React.FC = () => {
           <div className="fixed top-20 left-2 right-2 z-50 bg-white/98 backdrop-blur-md rounded-lg shadow-xl border border-stone/10 p-3 animate-fade-in-up">
             <div className="flex items-center justify-between mb-2">
               <div className="flex items-center">
+                {userProfileData.photo_url ? (
+                  <img
+                    src={userProfileData.photo_url}
+                    alt={`Photo de ${userProfileData.display_name}`}
+                    className="w-8 h-8 rounded-full object-cover border-2 border-white shadow-sm mr-3"
+                  />
+                ) : (
+                  <div className="w-8 h-8 bg-gradient-to-br from-wasabi to-jade rounded-full flex items-center justify-center mr-3 shadow-sm border-2 border-white">
+                    <span className="text-white font-bold text-xs">{userProfileData.level}</span>
+                  </div>
                 )}
                 <div>
                   <h3 className="font-bold text-xs text-ink" style={{ fontFamily: "'Shippori Mincho', serif" }}>
                     {userProfileData.display_name}
-                    className="w-8 h-8 rounded-full object-cover border-2 border-white shadow-sm mr-3"
+                    {showUserProfile === user?.id && (
                       <span className="text-xs text-wasabi ml-1 font-normal">(Toi)</span>
                     )}
                   </h3>
@@ -941,9 +951,6 @@ const Community: React.FC = () => {
 
             {/* Stats compactes */}
             <div className="bg-gradient-to-r from-wasabi/5 to-jade/5 rounded-md p-2 border border-wasabi/10">
-              <div className="flex items-center justify-center mb-1.5">
-                <Award className="w-3 h-3 text-wasabi mr-1" />
-                  <div className="w-8 h-8 bg-gradient-to-br from-wasabi to-jade rounded-full flex items-center justify-center mr-3 shadow-sm border-2 border-white">
                     <span className="text-white font-bold text-xs">{post.profiles?.level || 'N1'}</span>
                   <span className="text-xs text-wasabi/60 ml-1">(Tes stats)</span>
                 )}
