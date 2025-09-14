@@ -294,11 +294,10 @@ export const useAudioStore = create<AudioState & AudioActions>()(
       stopMeditation: () => {
         const state = get();
         if (state.meditationActive) {
-          // Add the actual elapsed time to weekly stats (rounded to nearest minute)
-          const actualMinutes = Math.round(state.meditationElapsed / 60);
-          if (actualMinutes > 0) {
-            state.addMeditationTime(actualMinutes);
-          }
+          // IMPORTANT: Toujours ajouter le temps réel écoulé
+          const actualMinutes = Math.max(1, Math.round(state.meditationElapsed / 60));
+          console.log('🧘 Méditation arrêtée - Temps écoulé:', state.meditationElapsed, 'secondes =', actualMinutes, 'minutes');
+          state.addMeditationTime(actualMinutes);
         }
         
         set({

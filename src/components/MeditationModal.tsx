@@ -205,8 +205,23 @@ const MeditationModal: React.FC<MeditationModalProps> = ({ isOpen, onClose, onSa
       playAmbience(currentAmbience);
     }
     
-    saveMeditationSession();
+    // Sauvegarder la session AVANT d'arrêter (pour avoir les bonnes données)
+    const currentState = getMeditationState();
+    const sessionDuration = Math.max(1, Math.round(currentState.elapsed / 60));
+    console.log('🛑 Arrêt méditation libre - Durée:', sessionDuration, 'minutes');
+    
     stopMeditation();
+    
+    // Créer l'activité après arrêt
+    const session: JournalActivity = {
+      id: `meditation-${Date.now()}`,
+      type: 'meditation',
+      content: `Méditation de ${sessionDuration} minutes`,
+      duration: sessionDuration,
+      created_at: new Date().toISOString()
+    };
+    
+    setSavedActivity(session);
   };
 
   const handleReduceMinutes = () => {

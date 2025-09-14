@@ -37,8 +37,13 @@ const MeditationBubble: React.FC = () => {
   };
 
   const handleStop = () => {
-    playCompletionGong();
+    // Récupérer l'état AVANT d'arrêter
+    const currentState = getMeditationState();
+    const sessionDuration = Math.max(1, Math.round(currentState.elapsed / 60));
+    console.log('🛑 Arrêt méditation depuis bulle - Durée:', sessionDuration, 'minutes');
+    
     stopMeditation();
+    playCompletionGong();
     hapticFeedback();
   };
 
