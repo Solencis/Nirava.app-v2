@@ -100,18 +100,24 @@ const Register: React.FC = () => {
       console.error('Registration error:', error);
       
       // Messages d'erreur plus clairs
-      if (error.message?.includes('already registered')) {
+      if (error.message?.includes('User already registered')) {
         setError('Cette adresse email est déjà utilisée');
+      } else if (error.message?.includes('Email not confirmed')) {
+        setError('Un email de confirmation a déjà été envoyé à cette adresse. Vérifiez votre boîte mail et vos spams.');
+      } else if (error.message?.includes('signup_disabled')) {
+        setError('Les inscriptions sont temporairement désactivées. Contactez l\'administrateur.');
+      } else if (error.message?.includes('email_address_invalid')) {
+        setError('Adresse email invalide. Veuillez vérifier le format.');
       } else if (error.message?.includes('Supabase not configured')) {
         setError('❌ Supabase n\'est pas configuré. Veuillez configurer vos variables d\'environnement Supabase pour utiliser l\'inscription.');
-      } else if (error.message?.includes('invalid email')) {
-        setError('Adresse email invalide');
       } else if (error.message?.includes('weak password')) {
         setError('Mot de passe trop faible. Utilisez au moins 6 caractères');
       } else if (error.message?.includes('rate limit')) {
         setError('Trop de tentatives. Veuillez patienter quelques minutes.');
+      } else if (error.message?.includes('Failed to fetch') || error.message?.includes('Network')) {
+        setError('Problème de connexion réseau. Vérifiez votre connexion internet et réessayez.');
       } else {
-        setError('Erreur lors de la création du compte. Veuillez réessayer.');
+        setError(`Erreur lors de la création du compte: ${error.message || 'Erreur inconnue'}. Veuillez réessayer.`);
       }
     } finally {
       setLoading(false);

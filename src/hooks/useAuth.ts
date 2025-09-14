@@ -106,6 +106,8 @@ export const useAuth = () => {
       
       console.log('Signing up user:', email);
       console.log('Redirect URL:', redirectTo);
+      console.log('Supabase URL:', import.meta.env.VITE_SUPABASE_URL);
+      console.log('Environment:', import.meta.env.MODE);
       
       const { data, error } = await supabase.auth.signUp({
         email,
@@ -125,10 +127,28 @@ export const useAuth = () => {
       console.log('Sign up successful:', data);
       console.log('User created:', data.user?.email);
       console.log('Email confirmation required:', !data.user?.email_confirmed_at);
+      console.log('Session created:', !!data.session);
+      
+      // Vérifier si l'email de confirmation est requis
+      if (data.user && !data.user.email_confirmed_at && !data.session) {
+        console.log('✅ Email de confirmation requis - email envoyé à:', email);
+      } else if (data.session) {
+        console.log('✅ Inscription directe réussie - pas de confirmation email requise');
+      }
       
       return data;
     } catch (error) {
       console.error('Error signing up:', error);
+      
+      // Log détaillé pour diagnostiquer les problèmes d'email
+      if (error instanceof Error) {
+        console.error('Error details:', {
+          message: error.message,
+          name: error.name,
+          stack: error.stack
+        });
+      }
+      
       throw error;
     }
   };
