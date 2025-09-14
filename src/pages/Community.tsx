@@ -372,7 +372,12 @@ const Community: React.FC = () => {
   };
 
   const handleUserClick = async (userId: string) => {
-    if (userId === user?.id) return; // Ne pas ouvrir son propre profil
+    if (userId === user?.id) {
+      // Permettre de voir son propre profil aussi
+      setUserProfileData(profile);
+      setShowUserProfile(userId);
+      return;
+    }
     
     setShowUserProfile(userId);
     await loadUserProfile(userId);
@@ -840,14 +845,14 @@ const Community: React.FC = () => {
       {/* User Profile Bubble */}
       {showUserProfile && userProfileData && (
         <>
-          <div 
+          <div
             className="fixed inset-0 z-40" 
             onClick={() => {
               setShowUserProfile(null);
               setUserProfileData(null);
             }}
           />
-          <div className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-50 bg-white/95 backdrop-blur-md rounded-2xl shadow-2xl border border-stone/10 p-6 w-80 max-w-[90vw]">
+          <div className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-50 bg-white/95 backdrop-blur-md rounded-2xl shadow-2xl border border-stone/10 p-6 w-80 max-w-[90vw] animate-fade-in-up">
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center">
                 <div className="w-12 h-12 bg-gradient-to-br from-wasabi to-jade rounded-full flex items-center justify-center mr-4">
@@ -856,6 +861,9 @@ const Community: React.FC = () => {
                 <div>
                   <h3 className="font-bold text-lg text-ink" style={{ fontFamily: "'Shippori Mincho', serif" }}>
                     {userProfileData.display_name}
+                    {showUserProfile === user?.id && (
+                      <span className="text-xs text-wasabi ml-2 font-normal">(Toi)</span>
+                    )}
                   </h3>
                   <div className="flex items-center text-sm text-stone">
                     <Calendar size={12} className="mr-1" />
@@ -888,10 +896,26 @@ const Community: React.FC = () => {
               <div className="flex items-center mb-3">
                 <Award className="w-4 h-4 text-wasabi mr-2" />
                 <h4 className="font-medium text-ink text-sm">Progression cette semaine</h4>
+                {showUserProfile === user?.id && (
+                  <span className="text-xs text-stone ml-2">(Tes vraies stats)</span>
+                )}
               </div>
               
               {(() => {
-                const stats = getUserStats(userProfileData.id);
+                // Utiliser les vraies stats pour l'utilisateur connecté
+                const stats = showUserProfile === user?.id 
+                  ? {
+                      checkins: JSON.parse(localStorage.getItem('checkin-history') || '[]').filter((entry: any) => {
+                        const oneWeekAgo = new Date();
+                        oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+                        return new Date(entry.timestamp || entry.created_at) > oneWeekAgo;
+                      }).length,
+                      journals: JSON.parse(localStorage.getItem('journal-entries') || '[]').length,
+                      meditation: Math.round(JSON.parse(localStorage.getItem('nirava_audio') || '{}').state?.meditationWeekMinutes || 0),
+                      streak: parseInt(localStorage.getItem('current-streak') || '0')
+                    }
+                  : getUserStats(userProfileData.id);
+                
                 return (
                   <div className="grid grid-cols-2 gap-3">
                     <div className="text-center">
@@ -918,7 +942,10 @@ const Community: React.FC = () => {
             {/* Message inspirant */}
             <div className="mt-4 text-center">
               <p className="text-stone text-xs italic">
-                "Chaque âme sur son chemin mérite respect et encouragement" 🌸
+                {showUserProfile === user?.id 
+                  ? "Continue ton beau chemin ! 🌱" 
+                  : "Chaque âme sur son chemin mérite respect et encouragement 🌸"
+                }
               </p>
             </div>
           </div>
