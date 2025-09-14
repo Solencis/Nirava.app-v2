@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { User, Award, Flame, Settings, Shield, LogOut, CreditCard, Edit3, Save, X, Heart, Timer, BookOpen } from 'lucide-react';
+import { User, Award, Flame, Settings, Shield, LogOut, CreditCard, Edit3, Save, X, Heart, Timer, BookOpen, Camera, Check, AlertCircle, Calendar, MapPin, Globe } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
-import { supabase, Profile } from '../lib/supabase';
+import { supabase, Profile, uploadJournalPhoto, deleteJournalPhoto } from '../lib/supabase';
 import { useAudioStore } from '../stores/audioStore';
 
 const ProfilePage: React.FC = () => {
@@ -11,6 +11,8 @@ const ProfilePage: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [uploadingPhoto, setUploadingPhoto] = useState(false);
+  const [photoError, setPhotoError] = useState('');
   const [stats, setStats] = useState({
     checkins: 0,
     journals: 0,
@@ -21,8 +23,17 @@ const ProfilePage: React.FC = () => {
   const [editForm, setEditForm] = useState({
     display_name: '',
     bio: '',
-    share_progress: true
+    photo_url: '',
+    share_progress: true,
+    level: 'N1'
   });
+
+  const levels = [
+    { value: 'N1', label: 'N1 - Découverte', description: 'Premiers pas dans l\'intégration émotionnelle' },
+    { value: 'N2', label: 'N2 - Approfondissement', description: 'Techniques avancées et pratiques régulières' },
+    { value: 'N3', label: 'N3 - Intégration', description: 'Travail de l\'ombre et archétypes' },
+    { value: 'N4', label: 'N4 - Service', description: 'Accompagnement et transmission' }
+  ];
 
   useEffect(() => {
     if (user) {
@@ -31,7 +42,14 @@ const ProfilePage: React.FC = () => {
     }
   }, [user]);
 
-  // Charger le profil utilisateur depuis Supabase
+  // Update meditation stats when store data changes
+  useEffect(() => {
+    setStats(prev => ({
+      ...prev,
+      meditationMinutes: Math.round(meditationWeekMinutes)
+    }));
+  }, [meditationWeekMinutes]);
+
   const loadProfile = async () => {
     if (!user) return;
 
@@ -48,7 +66,9 @@ const ProfilePage: React.FC = () => {
       setEditForm({
         display_name: data.display_name || '',
         bio: data.bio || '',
-        share_progress: data.share_progress
+        photo_url: data.photo_url || '',
+        share_progress: data.share_progress,
+        level: data.level || 'N1'
       });
     } catch (error) {
       console.error('Error loading profile:', error);
@@ -57,7 +77,6 @@ const ProfilePage: React.FC = () => {
     }
   };
 
-  // Charger les statistiques utilisateur depuis localStorage
   const loadUserStats = () => {
     try {
       // Check-ins cette semaine
@@ -77,7 +96,7 @@ const ProfilePage: React.FC = () => {
         new Date(entry.timestamp || entry.created_at) > oneWeekAgo
       ).length;
       
-      // Minutes de méditation cette semaine
+      // Minutes de méditation cette semaine (depuis le store)
       const thisWeekMeditation = Math.round(meditationWeekMinutes);
 
       // Streak de journaux (jours consécutifs)
@@ -85,17 +104,67 @@ const ProfilePage: React.FC = () => {
 
       setStats({
         checkins: thisWeekCheckins,
-        journals: journalEntries.length, // Journaux du soir uniquement
+        journals: journalEntries.length,
         meditationMinutes: thisWeekMeditation,
         currentStreak,
-        dreams: thisWeekDreams // Ajouter les rêves séparément
+        dreams: thisWeekDreams
       });
     } catch (error) {
       console.error('Error loading user stats:', error);
     }
   };
 
-  // Sauvegarder les modifications du profil
+  const handlePhotoUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file || !user) return;
+
+    // Validation
+    if (file.size > 5 * 1024 * 1024) { // 5MB max
+      setPhotoError('La photo ne peut pas dépasser 5MB');
+      return;
+    }
+
+    if (!file.type.startsWith('image/')) {
+      setPhotoError('Veuillez sélectionner une image');
+      return;
+    }
+
+    setUploadingPhoto(true);
+    setPhotoError('');
+
+    try {
+      // Delete old photo if exists
+      if (editForm.photo_url) {
+        await deleteJournalPhoto(editForm.photo_url);
+      }
+
+      // Upload new photo
+      const photoUrl = await uploadJournalPhoto(file);
+      setEditForm(prev => ({ ...prev, photo_url: photoUrl }));
+    } catch (error: any) {
+      console.error('Error uploading photo:', error);
+      if (error.message?.includes('bucket') || error.message?.includes('Bucket') || error.message?.includes('stockage')) {
+        setPhotoError('⚠️ Configuration requise : Le bucket "journal-images" doit être créé dans votre projet Supabase');
+      } else {
+        setPhotoError('Erreur lors de l\'upload. Vérifiez votre configuration Supabase.');
+      }
+    } finally {
+      setUploadingPhoto(false);
+    }
+  };
+
+  const handleRemovePhoto = async () => {
+    if (!editForm.photo_url) return;
+
+    try {
+      await deleteJournalPhoto(editForm.photo_url);
+      setEditForm(prev => ({ ...prev, photo_url: '' }));
+    } catch (error) {
+      console.error('Error deleting photo:', error);
+      setPhotoError('Erreur lors de la suppression');
+    }
+  };
+
   const handleSave = async () => {
     if (!user || !profile) return;
 
@@ -106,7 +175,9 @@ const ProfilePage: React.FC = () => {
         .update({
           display_name: editForm.display_name.trim() || 'Utilisateur',
           bio: editForm.bio.trim(),
-          share_progress: editForm.share_progress
+          photo_url: editForm.photo_url || null,
+          share_progress: editForm.share_progress,
+          level: editForm.level
         })
         .eq('id', user.id);
 
@@ -124,7 +195,6 @@ const ProfilePage: React.FC = () => {
     }
   };
 
-  // Déconnexion avec confirmation
   const handleSignOut = async () => {
     if (confirm('Es-tu sûr(e) de vouloir te déconnecter ?')) {
       try {
@@ -136,7 +206,6 @@ const ProfilePage: React.FC = () => {
     }
   };
 
-  // Obtenir le statut d'abonnement avec couleurs
   const getSubscriptionStatus = () => {
     switch (profile?.subscription_status) {
       case 'active':
@@ -144,8 +213,22 @@ const ProfilePage: React.FC = () => {
       case 'cancelled':
         return { text: 'Annulé', color: 'text-vermilion', bg: 'bg-vermilion/10' };
       default:
-        return { text: 'Aucun', color: 'text-stone', bg: 'bg-stone/10' };
+        return { text: 'Gratuit', color: 'text-stone', bg: 'bg-stone/10' };
     }
+  };
+
+  const getJoinDate = () => {
+    if (!profile?.created_at) return 'Récemment';
+    
+    const joinDate = new Date(profile.created_at);
+    const now = new Date();
+    const diffInDays = Math.floor((now.getTime() - joinDate.getTime()) / (1000 * 60 * 60 * 24));
+    
+    if (diffInDays < 1) return "Aujourd'hui";
+    if (diffInDays < 7) return `Il y a ${diffInDays} jour${diffInDays > 1 ? 's' : ''}`;
+    if (diffInDays < 30) return `Il y a ${Math.floor(diffInDays / 7)} semaine${Math.floor(diffInDays / 7) > 1 ? 's' : ''}`;
+    if (diffInDays < 365) return `Il y a ${Math.floor(diffInDays / 30)} mois`;
+    return `Il y a ${Math.floor(diffInDays / 365)} an${Math.floor(diffInDays / 365) > 1 ? 's' : ''}`;
   };
 
   // États de chargement
@@ -179,246 +262,393 @@ const ProfilePage: React.FC = () => {
   const subscriptionStatus = getSubscriptionStatus();
 
   return (
-    <div className="min-h-screen bg-sand p-4 pb-24">
-      {/* Header */}
-      <div className="text-center mb-8">
-        <div className="w-20 h-20 bg-gradient-to-br from-wasabi to-jade rounded-full flex items-center justify-center mx-auto mb-4">
-          <User size={32} className="text-white" />
-        </div>
-        <h1 
-          className="text-3xl font-bold text-ink mb-2"
-          style={{ fontFamily: "'Shippori Mincho', serif" }}
-        >
-          Mon Profil
-        </h1>
-        <p className="text-stone text-sm">{user?.email}</p>
-      </div>
-
-      {/* Statistiques utilisateur */}
-      <div className="bg-white/90 rounded-2xl p-6 shadow-soft border border-stone/10 mb-6">
-        <h2 className="text-lg font-bold text-ink mb-4" style={{ fontFamily: "'Shippori Mincho', serif" }}>
-          Ma progression
-        </h2>
-        
-        <div className="grid grid-cols-2 gap-4">
-          <div className="text-center p-4 bg-jade/5 rounded-xl border border-jade/10">
-            <Heart className="w-6 h-6 text-jade mx-auto mb-2" />
-            <div className="text-2xl font-bold text-jade mb-1">{stats.checkins}</div>
-            <div className="text-xs text-stone">Check-ins cette semaine</div>
+    <div className="min-h-screen bg-sand">
+      {/* Header avec photo de profil */}
+      <div className="bg-gradient-to-br from-wasabi/10 via-jade/5 to-wasabi/5 p-6 pb-8">
+        <div className="text-center">
+          {/* Photo de profil */}
+          <div className="relative w-24 h-24 mx-auto mb-4">
+            {profile.photo_url ? (
+              <img
+                src={profile.photo_url}
+                alt="Photo de profil"
+                className="w-full h-full rounded-full object-cover border-4 border-white shadow-lg"
+              />
+            ) : (
+              <div className="w-full h-full bg-gradient-to-br from-wasabi to-jade rounded-full flex items-center justify-center border-4 border-white shadow-lg">
+                <User size={32} className="text-white" />
+              </div>
+            )}
+            
+            {/* Badge niveau */}
+            <div className="absolute -bottom-1 -right-1 w-8 h-8 bg-white rounded-full flex items-center justify-center shadow-lg border-2 border-wasabi/20">
+              <span className="text-wasabi font-bold text-xs">{profile.level}</span>
+            </div>
           </div>
           
-          <div className="text-center p-4 bg-vermilion/5 rounded-xl border border-vermilion/10">
-            <BookOpen className="w-6 h-6 text-vermilion mx-auto mb-2" />
-            <div className="text-2xl font-bold text-vermilion mb-1">{stats.journals}</div>
-            <div className="text-xs text-stone">Journaux du soir</div>
-          </div>
-          
-          <div className="text-center p-4 bg-blue-50 rounded-xl border border-blue-100">
-            <Timer className="w-6 h-6 text-blue-600 mx-auto mb-2" />
-            <div className="text-2xl font-bold text-blue-600 mb-1">{stats.dreams}</div>
-            <div className="text-xs text-stone">Rêves capturés</div>
-          </div>
-          
-          <div className="text-center p-4 bg-forest/5 rounded-xl border border-forest/10">
-            <Timer className="w-6 h-6 text-forest mx-auto mb-2" />
-            <div className="text-2xl font-bold text-forest mb-1">{stats.meditationMinutes}</div>
-            <div className="text-xs text-stone">Min méditation/semaine</div>
-          </div>
-        </div>
-        
-        {/* Streak séparé en bas */}
-        <div className="mt-4 text-center p-4 bg-sunset/5 rounded-xl border border-sunset/10">
-          <div className="flex items-center justify-center mb-2">
-            <Flame className="w-6 h-6 text-sunset mx-auto mb-2" />
-            <span className="text-lg font-bold text-sunset ml-2">{stats.currentStreak}</span>
-          </div>
-          <div className="text-sm text-stone">Jours consécutifs de journaling</div>
-        </div>
-      </div>
-
-      {/* Profile Info */}
-      <div className="bg-white/90 rounded-2xl p-6 shadow-soft border border-stone/10 mb-6">
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="text-lg font-bold text-ink" style={{ fontFamily: "'Shippori Mincho', serif" }}>
-            Informations personnelles
-          </h2>
-          <button
-            onClick={() => editing ? setEditing(false) : setEditing(true)}
-            className="text-wasabi hover:text-jade transition-colors duration-300 p-2 rounded-full hover:bg-wasabi/10"
+          <h1 
+            className="text-2xl font-bold text-ink mb-1"
+            style={{ fontFamily: "'Shippori Mincho', serif" }}
           >
-            {editing ? <X size={20} /> : <Edit3 size={20} />}
+            {profile.display_name}
+          </h1>
+          
+          <div className="flex items-center justify-center text-stone text-sm mb-2">
+            <Calendar size={14} className="mr-1" />
+            Membre depuis {getJoinDate()}
+          </div>
+          
+          {profile.bio && (
+            <p className="text-stone text-sm italic max-w-xs mx-auto leading-relaxed">
+              "{profile.bio}"
+            </p>
+          )}
+          
+          <button
+            onClick={() => setEditing(true)}
+            className="mt-4 bg-white/90 text-wasabi px-6 py-2 rounded-full text-sm font-medium hover:bg-white transition-colors duration-300 flex items-center mx-auto shadow-sm"
+          >
+            <Edit3 size={16} className="mr-2" />
+            Modifier le profil
           </button>
         </div>
+      </div>
 
-        {editing ? (
+      <div className="p-4 pb-24 -mt-4">
+        {/* Statistiques utilisateur */}
+        <div className="bg-white/95 backdrop-blur-sm rounded-2xl p-6 shadow-soft border border-stone/10 mb-6">
+          <h2 className="text-lg font-bold text-ink mb-4 flex items-center" style={{ fontFamily: "'Shippori Mincho', serif" }}>
+            <Award className="w-5 h-5 mr-2 text-wasabi" />
+            Ma progression cette semaine
+          </h2>
+          
+          <div className="grid grid-cols-2 gap-3 mb-4">
+            <div className="text-center p-4 bg-jade/5 rounded-xl border border-jade/10">
+              <Heart className="w-6 h-6 text-jade mx-auto mb-2" />
+              <div className="text-2xl font-bold text-jade mb-1">{stats.checkins}</div>
+              <div className="text-xs text-stone">Check-ins</div>
+            </div>
+            
+            <div className="text-center p-4 bg-vermilion/5 rounded-xl border border-vermilion/10">
+              <BookOpen className="w-6 h-6 text-vermilion mx-auto mb-2" />
+              <div className="text-2xl font-bold text-vermilion mb-1">{stats.journals}</div>
+              <div className="text-xs text-stone">Journaux</div>
+            </div>
+            
+            <div className="text-center p-4 bg-blue-50 rounded-xl border border-blue-100">
+              <Timer className="w-6 h-6 text-blue-600 mx-auto mb-2" />
+              <div className="text-2xl font-bold text-blue-600 mb-1">{stats.dreams}</div>
+              <div className="text-xs text-stone">Rêves</div>
+            </div>
+            
+            <div className="text-center p-4 bg-forest/5 rounded-xl border border-forest/10">
+              <Timer className="w-6 h-6 text-forest mx-auto mb-2" />
+              <div className="text-2xl font-bold text-forest mb-1">{stats.meditationMinutes}</div>
+              <div className="text-xs text-stone">Min méditation</div>
+            </div>
+          </div>
+          
+          {/* Streak en bas */}
+          <div className="text-center p-4 bg-gradient-to-r from-sunset/5 to-vermilion/5 rounded-xl border border-sunset/10">
+            <div className="flex items-center justify-center mb-2">
+              <Flame className="w-6 h-6 text-sunset mr-2" />
+              <span className="text-2xl font-bold text-sunset">{stats.currentStreak}</span>
+            </div>
+            <div className="text-sm text-stone">Jours consécutifs de journaling</div>
+          </div>
+        </div>
+
+        {/* Informations du compte */}
+        <div className="bg-white/95 backdrop-blur-sm rounded-2xl p-6 shadow-soft border border-stone/10 mb-6">
+          <h2 className="text-lg font-bold text-ink mb-4" style={{ fontFamily: "'Shippori Mincho', serif" }}>
+            Informations du compte
+          </h2>
+          
           <div className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-ink mb-2">
-                Nom d'affichage
-              </label>
-              <input
-                type="text"
-                value={editForm.display_name}
-                onChange={(e) => setEditForm({ ...editForm, display_name: e.target.value })}
-                placeholder="Ton nom d'affichage"
-                className="w-full px-4 py-3 bg-stone/5 border border-stone/20 rounded-xl focus:border-wasabi focus:ring-2 focus:ring-wasabi/20 transition-all duration-300"
-                maxLength={50}
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-ink mb-2">
-                Bio
-              </label>
-              <textarea
-                value={editForm.bio}
-                onChange={(e) => setEditForm({ ...editForm, bio: e.target.value })}
-                placeholder="Parle-nous de toi..."
-                rows={3}
-                className="w-full px-4 py-3 bg-stone/5 border border-stone/20 rounded-xl focus:border-wasabi focus:ring-2 focus:ring-wasabi/20 transition-all duration-300 resize-none"
-                maxLength={200}
-              />
-              <div className="text-xs text-stone mt-1 text-right">
-                {editForm.bio.length}/200
+            <div className="flex items-center p-4 bg-stone/5 rounded-xl">
+              <Globe className="w-5 h-5 text-stone mr-3" />
+              <div className="flex-1">
+                <div className="font-medium text-ink">Email</div>
+                <div className="text-sm text-stone">{user?.email}</div>
               </div>
             </div>
-
-            <div className="flex items-center justify-between p-4 bg-stone/5 rounded-xl">
-              <div>
-                <div className="font-medium text-ink">Partager ma progression</div>
-                <div className="text-sm text-stone">Visible par les autres membres</div>
-              </div>
-              <label className="relative inline-flex items-center cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={editForm.share_progress}
-                  onChange={(e) => setEditForm({ ...editForm, share_progress: e.target.checked })}
-                  className="sr-only"
-                />
-                <div className={`w-12 h-6 rounded-full transition-colors duration-200 ${
-                  editForm.share_progress ? 'bg-wasabi' : 'bg-stone/30'
-                }`}>
-                  <div className={`w-5 h-5 bg-white rounded-full shadow-sm transition-transform duration-200 mt-0.5 ${
-                    editForm.share_progress ? 'translate-x-6' : 'translate-x-0.5'
-                  }`}></div>
+            
+            <div className="flex items-center p-4 bg-stone/5 rounded-xl">
+              <Shield className="w-5 h-5 text-stone mr-3" />
+              <div className="flex-1">
+                <div className="font-medium text-ink">Compte vérifié</div>
+                <div className="text-sm text-wasabi flex items-center">
+                  <Check size={14} className="mr-1" />
+                  Email confirmé
                 </div>
-              </label>
-            </div>
-
-            <div className="flex gap-3 pt-4">
-              <button
-                onClick={() => setEditing(false)}
-                className="flex-1 px-4 py-3 border border-stone/20 text-stone rounded-xl hover:bg-stone/5 transition-colors duration-300"
-              >
-                Annuler
-              </button>
-              <button
-                onClick={handleSave}
-                disabled={saving}
-                className="flex-1 px-4 py-3 bg-wasabi text-white rounded-xl hover:bg-wasabi/90 transition-colors duration-300 flex items-center justify-center disabled:opacity-50"
-              >
-                {saving ? (
-                  <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                ) : (
-                  <>
-                    <Save size={16} className="mr-2" />
-                    Sauvegarder
-                  </>
-                )}
-              </button>
-            </div>
-          </div>
-        ) : (
-          <div className="space-y-4">
-            <div>
-              <div className="text-sm text-stone mb-1">Nom d'affichage</div>
-              <div className="font-medium text-ink">
-                {profile.display_name || 'Non défini'}
-              </div>
-            </div>
-
-            <div>
-              <div className="text-sm text-stone mb-1">Bio</div>
-              <div className="text-ink">
-                {profile.bio || 'Aucune bio définie'}
-              </div>
-            </div>
-
-            <div>
-              <div className="text-sm text-stone mb-1">Niveau actuel</div>
-              <div className="inline-flex items-center px-3 py-1 bg-wasabi/10 text-wasabi rounded-full text-sm font-medium">
-                {profile.level}
-              </div>
-            </div>
-
-            <div className="flex items-center justify-between p-4 bg-stone/5 rounded-xl">
-              <div>
-                <div className="font-medium text-ink">Partager ma progression</div>
-                <div className="text-sm text-stone">Visible par les autres membres</div>
-              </div>
-              <div className={`px-3 py-1 rounded-full text-sm font-medium ${
-                profile.share_progress 
-                  ? 'bg-wasabi/10 text-wasabi' 
-                  : 'bg-stone/10 text-stone'
-              }`}>
-                {profile.share_progress ? 'Activé' : 'Désactivé'}
               </div>
             </div>
           </div>
-        )}
-      </div>
-
-      {/* Subscription - Préparation pour Stripe */}
-      <div className="bg-white/90 rounded-2xl p-6 shadow-soft border border-stone/10 mb-6">
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-bold text-ink flex items-center" style={{ fontFamily: "'Shippori Mincho', serif" }}>
-            <CreditCard className="w-5 h-5 mr-2" />
-            Abonnement
-          </h2>
         </div>
-        
-        <div className="flex items-center justify-between">
-          <div>
-            <div className="font-medium text-ink">Statut actuel</div>
-            <div className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium mt-1 ${subscriptionStatus.bg} ${subscriptionStatus.color}`}>
-              {subscriptionStatus.text}
-            </div>
+
+        {/* Abonnement */}
+        <div className="bg-white/95 backdrop-blur-sm rounded-2xl p-6 shadow-soft border border-stone/10 mb-6">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-lg font-bold text-ink flex items-center" style={{ fontFamily: "'Shippori Mincho', serif" }}>
+              <CreditCard className="w-5 h-5 mr-2" />
+              Abonnement
+            </h2>
           </div>
           
-          {/* TODO: Intégration Stripe - remplacer par le vrai bouton de gestion */}
+          <div className="flex items-center justify-between">
+            <div>
+              <div className="font-medium text-ink">Statut actuel</div>
+              <div className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium mt-1 ${subscriptionStatus.bg} ${subscriptionStatus.color}`}>
+                {subscriptionStatus.text}
+              </div>
+            </div>
+            
+            <button
+              disabled
+              className="px-4 py-2 bg-stone/10 text-stone rounded-xl text-sm font-medium cursor-not-allowed opacity-50"
+            >
+              Gérer
+            </button>
+          </div>
+          
+          <div className="mt-4 p-3 bg-stone/5 rounded-xl">
+            <p className="text-stone text-sm">
+              💡 La gestion des abonnements sera bientôt disponible.
+            </p>
+          </div>
+        </div>
+
+        {/* Actions */}
+        <div className="space-y-3">
           <button
-            disabled
-            className="px-4 py-2 bg-stone/10 text-stone rounded-xl text-sm font-medium cursor-not-allowed opacity-50"
+            onClick={handleSignOut}
+            className="w-full bg-red-50 border border-red-200 text-red-600 py-4 rounded-xl hover:bg-red-100 transition-colors duration-300 text-sm font-medium flex items-center justify-center min-h-[56px]"
           >
-            Gérer mon abonnement
+            <LogOut size={18} className="mr-2" />
+            Se déconnecter
           </button>
         </div>
-        
-        <div className="mt-4 p-3 bg-stone/5 rounded-xl">
-          <p className="text-stone text-sm">
-            💡 La gestion des abonnements sera bientôt disponible avec Stripe.
+
+        {/* Message inspirant */}
+        <div className="mt-8 bg-gradient-to-br from-wasabi/5 to-jade/5 rounded-2xl p-6 text-center border border-wasabi/10">
+          <p className="text-ink font-medium mb-2" style={{ fontFamily: "'Shippori Mincho', serif" }}>
+            "Connais-toi toi-même"
           </p>
+          <p className="text-stone text-sm">— Socrate</p>
         </div>
       </div>
 
-      {/* Actions */}
-      <div className="space-y-4">
-        <button
-          onClick={handleSignOut}
-          className="w-full bg-red-50 border border-red-200 text-red-600 py-3 rounded-xl hover:bg-red-100 transition-colors duration-300 text-sm font-medium flex items-center justify-center"
-        >
-          <LogOut size={16} className="mr-2" />
-          Se déconnecter
-        </button>
-      </div>
+      {/* Modal d'édition du profil */}
+      {editing && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4 z-50">
+          <div className="bg-white rounded-t-3xl sm:rounded-2xl shadow-2xl w-full sm:max-w-md mx-0 sm:mx-2 max-h-[90vh] overflow-y-auto">
+            <div className="p-6">
+              {/* Header */}
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-xl font-bold text-ink" style={{ fontFamily: "'Shippori Mincho', serif" }}>
+                  Modifier mon profil
+                </h2>
+                <button
+                  onClick={() => {
+                    setEditing(false);
+                    setPhotoError('');
+                  }}
+                  className="w-10 h-10 rounded-full bg-stone/10 flex items-center justify-center text-stone hover:text-vermilion transition-colors duration-300"
+                >
+                  <X size={20} />
+                </button>
+              </div>
 
-      {/* Message inspirant */}
-      <div className="mt-8 bg-gradient-to-br from-wasabi/5 to-jade/5 rounded-2xl p-6 text-center">
-        <p className="text-ink font-medium mb-2" style={{ fontFamily: "'Shippori Mincho', serif" }}>
-          "Connais-toi toi-même"
-        </p>
-        <p className="text-stone text-sm">— Socrate</p>
-      </div>
+              <div className="space-y-6">
+                {/* Photo de profil */}
+                <div className="text-center">
+                  <label className="block text-sm font-medium text-ink mb-3">
+                    Photo de profil
+                  </label>
+                  
+                  <div className="relative w-24 h-24 mx-auto mb-4">
+                    {editForm.photo_url ? (
+                      <img
+                        src={editForm.photo_url}
+                        alt="Photo de profil"
+                        className="w-full h-full rounded-full object-cover border-4 border-wasabi/20 shadow-lg"
+                      />
+                    ) : (
+                      <div className="w-full h-full bg-gradient-to-br from-wasabi/20 to-jade/20 rounded-full flex items-center justify-center border-4 border-wasabi/20 shadow-lg">
+                        <User size={32} className="text-wasabi" />
+                      </div>
+                    )}
+                    
+                    {/* Bouton upload */}
+                    <label className="absolute -bottom-1 -right-1 w-8 h-8 bg-wasabi text-white rounded-full flex items-center justify-center shadow-lg cursor-pointer hover:bg-wasabi/90 transition-colors duration-300">
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={handlePhotoUpload}
+                        className="hidden"
+                        disabled={uploadingPhoto}
+                      />
+                      {uploadingPhoto ? (
+                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                      ) : (
+                        <Camera size={16} />
+                      )}
+                    </label>
+                  </div>
+                  
+                  {editForm.photo_url && (
+                    <button
+                      onClick={handleRemovePhoto}
+                      className="text-red-600 hover:text-red-700 text-sm transition-colors duration-300"
+                    >
+                      Supprimer la photo
+                    </button>
+                  )}
+                  
+                  {photoError && (
+                    <div className="flex items-center justify-center text-red-600 text-sm mt-2">
+                      <AlertCircle size={16} className="mr-2" />
+                      {photoError}
+                    </div>
+                  )}
+                </div>
+
+                {/* Nom d'affichage */}
+                <div>
+                  <label className="block text-sm font-medium text-ink mb-2">
+                    Nom d'affichage
+                  </label>
+                  <input
+                    type="text"
+                    value={editForm.display_name}
+                    onChange={(e) => setEditForm({ ...editForm, display_name: e.target.value })}
+                    placeholder="Ton nom d'affichage"
+                    className="w-full px-4 py-4 bg-stone/5 border border-stone/20 rounded-xl focus:border-wasabi focus:ring-2 focus:ring-wasabi/20 transition-all duration-300 text-base"
+                    maxLength={50}
+                  />
+                  <div className="text-xs text-stone mt-1 text-right">
+                    {editForm.display_name.length}/50
+                  </div>
+                </div>
+
+                {/* Bio */}
+                <div>
+                  <label className="block text-sm font-medium text-ink mb-2">
+                    Bio
+                  </label>
+                  <textarea
+                    value={editForm.bio}
+                    onChange={(e) => setEditForm({ ...editForm, bio: e.target.value })}
+                    placeholder="Parle-nous de ton parcours, tes passions..."
+                    rows={4}
+                    className="w-full px-4 py-4 bg-stone/5 border border-stone/20 rounded-xl focus:border-wasabi focus:ring-2 focus:ring-wasabi/20 transition-all duration-300 resize-none text-base"
+                    maxLength={200}
+                  />
+                  <div className="text-xs text-stone mt-1 text-right">
+                    {editForm.bio.length}/200
+                  </div>
+                </div>
+
+                {/* Niveau */}
+                <div>
+                  <label className="block text-sm font-medium text-ink mb-3">
+                    Niveau actuel
+                  </label>
+                  <div className="space-y-2">
+                    {levels.map(level => (
+                      <label
+                        key={level.value}
+                        className={`flex items-start p-4 rounded-xl border cursor-pointer transition-all duration-300 ${
+                          editForm.level === level.value
+                            ? 'bg-wasabi/10 border-wasabi/30'
+                            : 'bg-stone/5 border-stone/20 hover:border-wasabi/20'
+                        }`}
+                      >
+                        <input
+                          type="radio"
+                          name="level"
+                          value={level.value}
+                          checked={editForm.level === level.value}
+                          onChange={(e) => setEditForm({ ...editForm, level: e.target.value })}
+                          className="sr-only"
+                        />
+                        <div className={`w-6 h-6 rounded-full border-2 mr-3 mt-0.5 flex items-center justify-center transition-colors duration-300 ${
+                          editForm.level === level.value
+                            ? 'bg-wasabi border-wasabi'
+                            : 'border-stone/30'
+                        }`}>
+                          {editForm.level === level.value && (
+                            <div className="w-2 h-2 bg-white rounded-full"></div>
+                          )}
+                        </div>
+                        <div className="flex-1">
+                          <div className="font-medium text-ink">{level.label}</div>
+                          <div className="text-sm text-stone leading-relaxed">{level.description}</div>
+                        </div>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Partage de progression */}
+                <div className="flex items-start p-4 bg-stone/5 rounded-xl">
+                  <div className="flex-1 mr-4">
+                    <div className="font-medium text-ink mb-1">Partager ma progression</div>
+                    <div className="text-sm text-stone leading-relaxed">
+                      Permet aux autres membres de voir tes statistiques dans la communauté
+                    </div>
+                  </div>
+                  <label className="relative inline-flex items-center cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={editForm.share_progress}
+                      onChange={(e) => setEditForm({ ...editForm, share_progress: e.target.checked })}
+                      className="sr-only"
+                    />
+                    <div className={`w-12 h-6 rounded-full transition-colors duration-200 ${
+                      editForm.share_progress ? 'bg-wasabi' : 'bg-stone/30'
+                    }`}>
+                      <div className={`w-5 h-5 bg-white rounded-full shadow-sm transition-transform duration-200 mt-0.5 ${
+                        editForm.share_progress ? 'translate-x-6' : 'translate-x-0.5'
+                      }`}></div>
+                    </div>
+                  </label>
+                </div>
+
+                {/* Actions */}
+                <div className="flex gap-3 pt-4">
+                  <button
+                    onClick={() => {
+                      setEditing(false);
+                      setPhotoError('');
+                    }}
+                    className="flex-1 px-4 py-4 border border-stone/20 text-stone rounded-xl hover:bg-stone/5 transition-colors duration-300 font-medium"
+                  >
+                    Annuler
+                  </button>
+                  <button
+                    onClick={handleSave}
+                    disabled={saving || uploadingPhoto}
+                    className="flex-1 px-4 py-4 bg-wasabi text-white rounded-xl hover:bg-wasabi/90 transition-colors duration-300 flex items-center justify-center disabled:opacity-50 font-medium"
+                  >
+                    {saving ? (
+                      <>
+                        <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
+                        Sauvegarde...
+                      </>
+                    ) : (
+                      <>
+                        <Save size={18} className="mr-2" />
+                        Sauvegarder
+                      </>
+                    )}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

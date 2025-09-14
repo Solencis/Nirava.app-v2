@@ -207,23 +207,23 @@ const School: React.FC = () => {
             <div className="bg-white/90 rounded-2xl shadow-soft border border-stone/10 overflow-hidden">
               <button
                 onClick={() => toggleModule(module.id)}
-                className="w-full p-4 text-left hover:bg-stone/5 transition-colors duration-300"
+                className="w-full p-5 text-left hover:bg-stone/5 transition-colors duration-300 min-h-[80px] flex items-center"
               >
-                <div className="flex items-start">
+                <div className="flex items-center w-full">
                   {/* Indicateur de niveau */}
-                  <div className="w-12 h-12 rounded-full bg-jade/10 flex items-center justify-center mr-4 flex-shrink-0">
-                    <span className="text-jade font-bold text-sm">{module.level}</span>
+                  <div className="w-14 h-14 rounded-full bg-jade/10 flex items-center justify-center mr-4 flex-shrink-0">
+                    <span className="text-jade font-bold text-base">{module.level}</span>
                   </div>
                   
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between mb-2">
-                      <h3 className="font-bold text-ink text-lg leading-tight" style={{ fontFamily: "'Shippori Mincho', serif" }}>
+                      <h3 className="font-bold text-ink text-lg leading-tight pr-2" style={{ fontFamily: "'Shippori Mincho', serif" }}>
                         {module.title}
                       </h3>
                       {getStatusBadge(module.status)}
                     </div>
                     
-                    <p className="text-stone text-sm mb-3 leading-relaxed">
+                    <p className="text-stone text-sm mb-3 leading-relaxed pr-2">
                       {module.summary}
                     </p>
                     
@@ -239,10 +239,12 @@ const School: React.FC = () => {
                             {progress[module.id]}%
                           </span>
                         )}
-                        {expandedModule === module.id ? 
-                          <ChevronUp size={20} className="text-stone" /> : 
-                          <ChevronDown size={20} className="text-stone" />
-                        }
+                        <div className="w-8 h-8 flex items-center justify-center">
+                          {expandedModule === module.id ? 
+                            <ChevronUp size={20} className="text-stone" /> : 
+                            <ChevronDown size={20} className="text-stone" />
+                          }
+                        </div>
                       </div>
                     </div>
                   </div>

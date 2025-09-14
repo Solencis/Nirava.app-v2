@@ -102,7 +102,7 @@ const SoundBubble: React.FC = () => {
     <>
       {/* Bubble positioned top-right */}
       {bubbleVisible && (
-        <div className="fixed top-4 right-4 z-40">
+        <div className="fixed top-4 right-4 z-40" style={{ top: `calc(1rem + env(safe-area-inset-top, 0px))` }}>
         <button
           onClick={handleBubbleTap}
           className={getBubbleClasses()}
@@ -130,13 +130,13 @@ const SoundBubble: React.FC = () => {
 
         {/* Compact Menu */}
         {isMenuOpen && current && (
-          <div className="absolute top-14 right-0 bg-white/95 backdrop-blur-md rounded-xl shadow-2xl border border-stone/10 p-3 w-44 z-50">
+          <div className="absolute top-14 right-0 bg-white/98 backdrop-blur-md rounded-xl shadow-2xl border border-stone/10 p-4 w-48 z-50">
             {/* Header */}
             <div className="flex items-center justify-between mb-3">
               <div className="flex items-center min-w-0">
                 <span className="text-base mr-2">{current.emoji}</span>
                 <div className="min-w-0">
-                  <h3 className="font-medium text-ink text-xs truncate">
+                  <h3 className="font-medium text-ink text-sm truncate">
                     {current.title}
                   </h3>
                   {isPlaying && (
@@ -149,10 +149,10 @@ const SoundBubble: React.FC = () => {
               </div>
               <button
                 onClick={() => setIsMenuOpen(false)}
-                className="w-6 h-6 rounded-full bg-stone/10 flex items-center justify-center text-stone hover:text-ink transition-colors duration-200"
+                className="w-8 h-8 rounded-full bg-stone/10 flex items-center justify-center text-stone hover:text-ink transition-colors duration-200"
                 aria-label="Fermer"
               >
-                <X size={12} />
+                <X size={14} />
               </button>
             </div>
 
@@ -160,9 +160,9 @@ const SoundBubble: React.FC = () => {
             <div className="space-y-2">
               <button
                 onClick={handleNext}
-                className="w-full bg-jade text-white py-2.5 rounded-lg text-xs font-medium hover:bg-jade/90 transition-colors duration-200 flex items-center justify-center"
+                className="w-full bg-jade text-white py-3 rounded-lg text-sm font-medium hover:bg-jade/90 transition-colors duration-200 flex items-center justify-center min-h-[44px]"
               >
-                <SkipForward size={14} className="mr-2" />
+                <SkipForward size={16} className="mr-2" />
                 Changer de musique
               </button>
               
@@ -175,7 +175,7 @@ const SoundBubble: React.FC = () => {
                   }
                   hapticFeedback();
                 }}
-                className={`w-full py-2.5 rounded-lg text-xs font-medium transition-colors duration-200 flex items-center justify-center ${
+                className={`w-full py-3 rounded-lg text-sm font-medium transition-colors duration-200 flex items-center justify-center min-h-[44px] ${
                   isPlaying 
                     ? 'bg-stone/10 text-stone hover:bg-stone/20' 
                     : 'bg-jade/10 text-jade hover:bg-jade/20'
@@ -183,12 +183,12 @@ const SoundBubble: React.FC = () => {
               >
                 {isPlaying ? (
                   <>
-                    <Pause size={14} className="mr-2" />
+                    <Pause size={16} className="mr-2" />
                     Pause
                   </>
                 ) : (
                   <>
-                    <Play size={14} className="mr-2" />
+                    <Play size={16} className="mr-2" />
                     Reprendre
                   </>
                 )}
@@ -199,7 +199,7 @@ const SoundBubble: React.FC = () => {
                   setIsMenuOpen(false);
                   setIsSheetOpen(true);
                 }}
-                className="w-full bg-stone/10 text-stone py-2 rounded-lg text-xs font-medium hover:bg-stone/20 transition-colors duration-200"
+                className="w-full bg-stone/10 text-stone py-3 rounded-lg text-sm font-medium hover:bg-stone/20 transition-colors duration-200 min-h-[44px]"
               >
                 Plus d'options
               </button>
@@ -208,7 +208,7 @@ const SoundBubble: React.FC = () => {
                 onClick={() => {
                   setBubbleVisible(false);
                 }}
-                className="w-full bg-yellow-50 text-yellow-700 py-2 rounded-lg text-xs font-medium hover:bg-yellow-100 transition-colors duration-200"
+                className="w-full bg-yellow-50 text-yellow-700 py-3 rounded-lg text-sm font-medium hover:bg-yellow-100 transition-colors duration-200 min-h-[44px]"
               >
                 Cacher la bulle
               </button>

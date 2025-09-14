@@ -203,19 +203,19 @@ const Journal: React.FC = () => {
       </div>
 
       {/* 5 cartes principales */}
-      <div className="grid grid-cols-2 gap-4 mb-6">
+      <div className="grid grid-cols-2 gap-3 mb-6">
         {/* Check-in émotionnel */}
         <button
           onClick={() => setShowCheckin(true)}
-          className="group bg-white/90 backdrop-blur-sm rounded-2xl p-6 shadow-soft border border-stone/10 text-center transition-all duration-300 hover:scale-105 hover:shadow-lg hover:bg-jade/5 min-h-[160px] flex flex-col justify-center"
+          className="group bg-white/90 backdrop-blur-sm rounded-2xl p-5 shadow-soft border border-stone/10 text-center transition-all duration-300 hover:scale-[1.02] hover:shadow-lg hover:bg-jade/5 min-h-[140px] flex flex-col justify-center active:scale-95"
         >
-          <div className="w-12 h-12 mx-auto mb-3 text-jade group-hover:scale-110 transition-transform duration-300">
-            <Heart size={48} strokeWidth={1.5} />
+          <div className="w-10 h-10 mx-auto mb-3 text-jade group-hover:scale-110 transition-transform duration-300">
+            <Heart size={40} strokeWidth={1.5} />
           </div>
-          <h3 className="font-bold text-ink mb-2" style={{ fontFamily: "'Shippori Mincho', serif" }}>
+          <h3 className="font-bold text-ink mb-1 text-sm" style={{ fontFamily: "'Shippori Mincho', serif" }}>
             Check-in émotionnel
           </h3>
-          <p className="text-xs text-stone mb-2">Comment te sens-tu ?</p>
+          <p className="text-xs text-stone mb-2 leading-tight">Comment te sens-tu ?</p>
           <div className="text-xs text-jade font-medium">
             {stats.checkins} cette semaine
           </div>
@@ -224,15 +224,15 @@ const Journal: React.FC = () => {
         {/* Journal de rêves */}
         <button
           onClick={() => setShowDreamJournal(true)}
-          className="group bg-white/90 backdrop-blur-sm rounded-2xl p-6 shadow-soft border border-stone/10 text-center transition-all duration-300 hover:scale-105 hover:shadow-lg hover:bg-blue-50/50 min-h-[160px] flex flex-col justify-center"
+          className="group bg-white/90 backdrop-blur-sm rounded-2xl p-5 shadow-soft border border-stone/10 text-center transition-all duration-300 hover:scale-[1.02] hover:shadow-lg hover:bg-blue-50/50 min-h-[140px] flex flex-col justify-center active:scale-95"
         >
-          <div className="w-12 h-12 mx-auto mb-3 text-blue-600 group-hover:scale-110 transition-transform duration-300">
-            <Cloud size={48} strokeWidth={1.5} />
+          <div className="w-10 h-10 mx-auto mb-3 text-blue-600 group-hover:scale-110 transition-transform duration-300">
+            <Cloud size={40} strokeWidth={1.5} />
           </div>
-          <h3 className="font-bold text-ink mb-2" style={{ fontFamily: "'Shippori Mincho', serif" }}>
+          <h3 className="font-bold text-ink mb-1 text-sm" style={{ fontFamily: "'Shippori Mincho', serif" }}>
             Journal de rêves
           </h3>
-          <p className="text-xs text-stone mb-2">Capture tes rêves au réveil</p>
+          <p className="text-xs text-stone mb-2 leading-tight">Capture tes rêves</p>
           <div className="text-xs text-blue-600 font-medium">
             {stats.dreams} rêves cette semaine
           </div>
@@ -241,15 +241,15 @@ const Journal: React.FC = () => {
         {/* Journal du soir */}
         <button
           onClick={() => setShowJournal(true)}
-          className="group bg-white/90 backdrop-blur-sm rounded-2xl p-6 shadow-soft border border-stone/10 text-center transition-all duration-300 hover:scale-105 hover:shadow-lg hover:bg-vermilion/5 min-h-[160px] flex flex-col justify-center"
+          className="group bg-white/90 backdrop-blur-sm rounded-2xl p-5 shadow-soft border border-stone/10 text-center transition-all duration-300 hover:scale-[1.02] hover:shadow-lg hover:bg-vermilion/5 min-h-[140px] flex flex-col justify-center active:scale-95"
         >
-          <div className="w-12 h-12 mx-auto mb-3 text-vermilion group-hover:scale-110 transition-transform duration-300">
-            <Moon size={48} strokeWidth={1.5} />
+          <div className="w-10 h-10 mx-auto mb-3 text-vermilion group-hover:scale-110 transition-transform duration-300">
+            <Moon size={40} strokeWidth={1.5} />
           </div>
-          <h3 className="font-bold text-ink mb-2" style={{ fontFamily: "'Shippori Mincho', serif" }}>
+          <h3 className="font-bold text-ink mb-1 text-sm" style={{ fontFamily: "'Shippori Mincho', serif" }}>
             Journal du soir
           </h3>
-          <p className="text-xs text-stone mb-2">Tes réflexions du jour</p>
+          <p className="text-xs text-stone mb-2 leading-tight">Tes réflexions</p>
           <div className="text-xs text-vermilion font-medium">
             {stats.streak} jours consécutifs
           </div>
@@ -258,15 +258,15 @@ const Journal: React.FC = () => {
         {/* Méditation chronométrée */}
         <button
           onClick={() => setShowMeditation(true)}
-          className="group bg-white/90 backdrop-blur-sm rounded-2xl p-6 shadow-soft border border-stone/10 text-center transition-all duration-300 hover:scale-105 hover:shadow-lg hover:bg-forest/5 min-h-[160px] flex flex-col justify-center"
+          className="group bg-white/90 backdrop-blur-sm rounded-2xl p-5 shadow-soft border border-stone/10 text-center transition-all duration-300 hover:scale-[1.02] hover:shadow-lg hover:bg-forest/5 min-h-[140px] flex flex-col justify-center active:scale-95"
         >
-          <div className="w-12 h-12 mx-auto mb-3 text-forest group-hover:scale-110 transition-transform duration-300">
-            <Timer size={48} strokeWidth={1.5} />
+          <div className="w-10 h-10 mx-auto mb-3 text-forest group-hover:scale-110 transition-transform duration-300">
+            <Timer size={40} strokeWidth={1.5} />
           </div>
-          <h3 className="font-bold text-ink mb-2" style={{ fontFamily: "'Shippori Mincho', serif" }}>
+          <h3 className="font-bold text-ink mb-1 text-sm" style={{ fontFamily: "'Shippori Mincho', serif" }}>
             Méditation
           </h3>
-          <p className="text-xs text-stone mb-2">Timer avec gong</p>
+          <p className="text-xs text-stone mb-2 leading-tight">Timer avec gong</p>
           <div className="text-xs text-forest font-medium">
             {stats.meditation} min cette semaine
           </div>
@@ -286,15 +286,15 @@ const Journal: React.FC = () => {
         {/* Pause émotionnelle */}
         <button
           onClick={() => setShowEmergencyPause(true)}
-          className="group bg-white/90 backdrop-blur-sm rounded-2xl p-6 shadow-soft border border-stone/10 text-center transition-all duration-300 hover:scale-105 hover:shadow-lg hover:bg-sunset/5 min-h-[160px] flex flex-col justify-center"
+          className="group bg-white/90 backdrop-blur-sm rounded-2xl p-5 shadow-soft border border-stone/10 text-center transition-all duration-300 hover:scale-[1.02] hover:shadow-lg hover:bg-sunset/5 min-h-[140px] flex flex-col justify-center active:scale-95"
         >
-          <div className="w-12 h-12 mx-auto mb-3 text-sunset group-hover:scale-110 transition-transform duration-300">
-            <Shield size={48} strokeWidth={1.5} />
+          <div className="w-10 h-10 mx-auto mb-3 text-sunset group-hover:scale-110 transition-transform duration-300">
+            <Shield size={40} strokeWidth={1.5} />
           </div>
-          <h3 className="font-bold text-ink mb-2" style={{ fontFamily: "'Shippori Mincho', serif" }}>
+          <h3 className="font-bold text-ink mb-1 text-sm" style={{ fontFamily: "'Shippori Mincho', serif" }}>
             Pause émotionnelle
           </h3>
-          <p className="text-xs text-stone mb-2">Respiration guidée</p>
+          <p className="text-xs text-stone mb-2 leading-tight">Respiration guidée</p>
           <div className="text-xs text-sunset font-medium">
             Toujours disponible
           </div>

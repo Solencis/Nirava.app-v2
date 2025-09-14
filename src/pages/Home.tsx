@@ -138,7 +138,7 @@ const Home: React.FC = () => {
       </section>
       
       {/* Interface son intégrée */}
-      <section className="px-6 pb-8">
+      <section className="px-4 pb-8">
         <div className="bg-white/90 backdrop-blur-sm rounded-2xl p-4 shadow-soft border border-stone/10">
           <div className="flex items-center mb-4">
             <Music className="w-5 h-5 text-jade mr-3" />
@@ -314,7 +314,7 @@ const Home: React.FC = () => {
       </section>
       
       {/* Citation inspirante */}
-      <section className="px-6 pb-8">
+      <section className="px-4 pb-8">
         <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 shadow-soft border border-stone/10 text-center">
           <blockquote 
             className="text-lg text-ink font-medium leading-relaxed mb-4"

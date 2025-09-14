@@ -19,8 +19,8 @@ const MobileNavigation: React.FC = () => {
   };
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 bg-pearl/95 backdrop-blur-md border-t border-stone/20 z-40">
-      <div className="flex justify-around items-center py-2">
+    <nav className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-md border-t border-stone/20 z-40 safe-area-inset-bottom">
+      <div className="flex justify-around items-center py-2 px-2" style={{ paddingBottom: `calc(0.5rem + env(safe-area-inset-bottom, 0px))` }}>
         {navItems.map((item) => {
           const Icon = item.icon;
           const active = isActive(item.path);
@@ -29,16 +29,16 @@ const MobileNavigation: React.FC = () => {
             <Link
               key={item.path}
               to={item.path}
-              className={`flex flex-col items-center py-2 px-3 min-w-[44px] min-h-[44px] justify-center transition-all duration-300 rounded-lg ${
+              className={`flex flex-col items-center py-3 px-4 min-w-[60px] min-h-[60px] justify-center transition-all duration-300 rounded-xl relative ${
                 active 
-                  ? 'text-vermilion bg-vermilion/10' 
-                  : 'text-stone hover:text-vermilion hover:bg-vermilion/5'
+                  ? 'text-wasabi bg-wasabi/10 scale-105' 
+                  : 'text-stone hover:text-wasabi hover:bg-wasabi/5'
               }`}
             >
-              <Icon size={20} className="mb-1" />
-              <span className="text-xs font-medium">{item.label}</span>
+              <Icon size={22} className="mb-1" />
+              <span className="text-xs font-medium leading-tight">{item.label}</span>
               {active && (
-                <div className="absolute bottom-0 w-8 h-1 bg-vermilion rounded-full"></div>
+                <div className="absolute -top-1 left-1/2 transform -translate-x-1/2 w-2 h-2 bg-wasabi rounded-full"></div>
               )}
             </Link>
           );

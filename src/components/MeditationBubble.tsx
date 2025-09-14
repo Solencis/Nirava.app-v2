@@ -58,7 +58,7 @@ const MeditationBubble: React.FC = () => {
   return (
     <>
       {/* Bubble positioned top-left */}
-      <div className="fixed top-4 left-4 z-40">
+      <div className="fixed top-4 left-4 z-40" style={{ top: `calc(1rem + env(safe-area-inset-top, 0px))` }}>
         <button
           onClick={handleBubbleTap}
           className="w-12 h-12 bg-forest text-white rounded-full shadow-lg transition-all duration-200 flex items-center justify-center relative overflow-hidden"
@@ -84,13 +84,13 @@ const MeditationBubble: React.FC = () => {
 
         {/* Compact Menu */}
         {showMenu && (
-          <div className="absolute top-14 left-0 bg-white/95 backdrop-blur-md rounded-xl shadow-2xl border border-stone/10 p-3 w-48 z-50">
+          <div className="absolute top-14 left-0 bg-white/98 backdrop-blur-md rounded-xl shadow-2xl border border-stone/10 p-4 w-52 z-50">
             {/* Header */}
             <div className="flex items-center justify-between mb-3">
               <div className="flex items-center min-w-0">
-                <Timer size={16} className="text-forest mr-2" />
+                <Timer size={18} className="text-forest mr-2" />
                 <div className="min-w-0">
-                  <h3 className="font-medium text-ink text-xs">
+                  <h3 className="font-medium text-ink text-sm">
                     Méditation en cours
                   </h3>
                   <div className="text-xs text-stone">
@@ -109,10 +109,10 @@ const MeditationBubble: React.FC = () => {
               </div>
               <button
                 onClick={() => setShowMenu(false)}
-                className="w-6 h-6 rounded-full bg-stone/10 flex items-center justify-center text-stone hover:text-ink transition-colors duration-200"
+                className="w-8 h-8 rounded-full bg-stone/10 flex items-center justify-center text-stone hover:text-ink transition-colors duration-200"
                 aria-label="Fermer"
               >
-                <X size={12} />
+                <X size={14} />
               </button>
             </div>
 
@@ -135,7 +135,7 @@ const MeditationBubble: React.FC = () => {
             <div className="space-y-2">
               <button
                 onClick={handleTogglePause}
-                className={`w-full py-2.5 rounded-lg text-xs font-medium transition-colors duration-200 flex items-center justify-center ${
+                className={`w-full py-3 rounded-lg text-sm font-medium transition-colors duration-200 flex items-center justify-center min-h-[44px] ${
                   meditationState.isPaused 
                     ? 'bg-forest text-white hover:bg-forest/90' 
                     : 'bg-yellow-50 text-yellow-700 hover:bg-yellow-100'
@@ -143,12 +143,12 @@ const MeditationBubble: React.FC = () => {
               >
                 {meditationState.isPaused ? (
                   <>
-                    <Play size={14} className="mr-2" />
+                    <Play size={16} className="mr-2" />
                     Reprendre
                   </>
                 ) : (
                   <>
-                    <Pause size={14} className="mr-2" />
+                    <Pause size={16} className="mr-2" />
                     Pause
                   </>
                 )}
@@ -156,9 +156,9 @@ const MeditationBubble: React.FC = () => {
 
               <button
                 onClick={handleStop}
-                className="w-full bg-jade text-white py-2.5 rounded-lg text-xs font-medium hover:bg-jade/90 transition-colors duration-200 flex items-center justify-center"
+                className="w-full bg-jade text-white py-3 rounded-lg text-sm font-medium hover:bg-jade/90 transition-colors duration-200 flex items-center justify-center min-h-[44px]"
               >
-                <X size={14} className="mr-2" />
+                <X size={16} className="mr-2" />
                 Terminer maintenant
               </button>
               
@@ -166,7 +166,7 @@ const MeditationBubble: React.FC = () => {
                 onClick={() => {
                   setShowMenu(false);
                 }}
-                className="w-full bg-stone/10 text-stone py-2 rounded-lg text-xs font-medium hover:bg-stone/20 transition-colors duration-200"
+                className="w-full bg-stone/10 text-stone py-3 rounded-lg text-sm font-medium hover:bg-stone/20 transition-colors duration-200 min-h-[44px]"
               >
                 Fermer le menu
               </button>

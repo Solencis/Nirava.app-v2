@@ -79,6 +79,73 @@
   }
 }
 
+/* Mobile optimizations */
+@media (max-width: 640px) {
+  /* Improve touch targets */
+  button, a, input[type="checkbox"], input[type="radio"] {
+    min-height: 44px;
+    min-width: 44px;
+  }
+  
+  /* Prevent zoom on input focus */
+  input, textarea, select {
+    font-size: 16px;
+  }
+  
+  /* Better modal sizing */
+  .modal-container {
+    margin: 0;
+    border-radius: 24px 24px 0 0;
+    max-height: 90vh;
+  }
+  
+  /* Improved spacing for mobile */
+  .mobile-spacing {
+    padding: 1rem;
+  }
+  
+  /* Better text sizing */
+  h1 { font-size: 1.75rem; }
+  h2 { font-size: 1.5rem; }
+  h3 { font-size: 1.25rem; }
+  
+  /* Improved button sizing */
+  .btn-mobile {
+    padding: 1rem 1.5rem;
+    font-size: 1rem;
+    border-radius: 0.75rem;
+  }
+  
+  /* Better card spacing */
+  .card-mobile {
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+  }
+}
+
+/* Enhanced accessibility */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Focus improvements */
+button:focus-visible, 
+a:focus-visible, 
+input:focus-visible, 
+textarea:focus-visible {
+  outline: 2px solid #059669;
+  outline-offset: 2px;
+}
+
+/* Better contrast for accessibility */
+.text-stone {
+  color: #4B5563; /* Improved contrast */
+}
+
 @keyframes fadeInUp {
   from {
     opacity: 0;
