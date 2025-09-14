@@ -375,12 +375,21 @@ export const useAudioStore = create<AudioState & AudioActions>()(
           oscillator1.frequency.setValueAtTime(220, audioContext.currentTime);
           oscillator1.frequency.exponentialRampToValueAtTime(110, audioContext.currentTime + 4);
           
+          oscillator2.frequency.setValueAtTime(330, audioContext.currentTime);
+          oscillator2.frequency.exponentialRampToValueAtTime(165, audioContext.currentTime + 4);
+          
+          oscillator3.frequency.setValueAtTime(440, audioContext.currentTime);
+          oscillator3.frequency.exponentialRampToValueAtTime(220, audioContext.currentTime + 4);
+          
+          // Enveloppe de gain pour un fade out naturel
+          masterGain.gain.setValueAtTime(0.3, audioContext.currentTime);
+          masterGain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 4);
+          
+          oscillator1.start(audioContext.currentTime);
           oscillator1.stop(audioContext.currentTime + 4);
-          oscillator2.start(audioContext.currentTime);
           oscillator2.stop(audioContext.currentTime + 4);
-          oscillator3.start(audioContext.currentTime);
           oscillator3.stop(audioContext.currentTime + 4);
-          get().playCompletionGong();
+        } catch (error) {
           console.error('Error playing completion gong:', error);
         }
       }
