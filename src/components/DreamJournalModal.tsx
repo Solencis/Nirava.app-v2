@@ -91,7 +91,7 @@ const DreamJournalModal: React.FC<DreamJournalModalProps> = ({ isOpen, onClose, 
 
       // Utiliser React Query pour créer le journal
       const journalEntry = await createJournalMutation.mutateAsync({
-        type: 'dream' as any,
+        type: 'dream',
         content: dreamContent,
         image_url: formData.photo_url || undefined,
         metadata: {
@@ -140,10 +140,19 @@ const DreamJournalModal: React.FC<DreamJournalModalProps> = ({ isOpen, onClose, 
       // Créer l'activité pour le partage
       const dreamActivity: JournalActivity = {
         id: journalEntry.id,
-        type: 'dream' as any,
+        type: 'dream',
         content: dreamContent,
         photo_url: formData.photo_url || undefined,
         created_at: journalEntry.created_at
+        metadata: {
+          title: formData.title.trim(),
+          emotions: formData.emotions.trim(),
+          symbols: formData.symbols.trim(),
+          clarity: formData.clarity,
+          lucidity: formData.lucidity,
+          recurring: formData.recurring,
+          nightmare: formData.nightmare
+        }
       };
       
       setSavedActivity(dreamActivity);

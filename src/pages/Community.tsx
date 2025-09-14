@@ -630,11 +630,13 @@ const Community: React.FC = () => {
                         {post.source_type === 'journal' && '🌙'}
                         {post.source_type === 'meditation' && '🧘'}
                         {post.source_type === 'dream' && '☁️'}
+                        {post.source_type === 'dream' && '☁️'}
                       </span>
                       <span className="text-xs font-medium text-jade whitespace-nowrap leading-none">
                         {post.source_type === 'checkin' && 'Check-in'}
                         {post.source_type === 'journal' && 'Journal'}
                         {post.source_type === 'meditation' && 'Méditation'}
+                        {post.source_type === 'dream' && 'Rêve'}
                         {post.source_type === 'dream' && 'Rêve'}
                       </span>
                     </div>
@@ -646,11 +648,22 @@ const Community: React.FC = () => {
                     <span className="text-base mr-2 mt-0.5 flex-shrink-0">{post.emoji}</span>
                   )}
                   <div className="flex-1">
-                    <div className="text-ink leading-relaxed text-sm">
+                    <div className="text-ink leading-relaxed text-sm whitespace-pre-line">
                       {post.content.split('\n').map((paragraph, index) => (
-                        <p key={index} className={paragraph.trim() ? 'mb-1' : 'mb-0.5'}>
-                          {paragraph.trim() || '\u00A0'}
-                        </p>
+                        <span key={index} className={paragraph.trim() ? 'block mb-1' : 'block mb-0.5'}>
+                          {paragraph.includes('**') ? (
+                            // Gérer le formatage markdown simple
+                            paragraph.split('**').map((part, partIndex) => 
+                              partIndex % 2 === 1 ? (
+                                <strong key={partIndex} className="font-semibold">{part}</strong>
+                              ) : (
+                                <span key={partIndex}>{part}</span>
+                              )
+                            )
+                          ) : (
+                            paragraph.trim() || '\u00A0'
+                          )}
+                        </span>
                       ))}
                     </div>
                     

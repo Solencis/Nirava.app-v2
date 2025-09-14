@@ -53,8 +53,42 @@ const ShareToCommunityButton: React.FC<ShareToCommunityButtonProps> = ({
         
         return meditationContent;
       
-      case 'dream':
-        return `Journal de rêves 🌙\n\n${activity.content}`;
+      case 'dream': {
+        let dreamContent = `Journal de rêves ☁️`;
+        
+        // Ajouter le titre si présent
+        const metadata = (activity as any).metadata;
+        if (metadata?.title) {
+          dreamContent += `\n\n**${metadata.title}**`;
+        }
+        
+        // Ajouter le contenu principal
+        if (activity.content) {
+          dreamContent += `\n\n${activity.content}`;
+        }
+        
+        // Ajouter les émotions si présentes
+        if (metadata?.emotions) {
+          dreamContent += `\n\n**Émotions ressenties :** ${metadata.emotions}`;
+        }
+        
+        // Ajouter les symboles si présents
+        if (metadata?.symbols) {
+          dreamContent += `\n\n**Symboles remarqués :** ${metadata.symbols}`;
+        }
+        
+        // Ajouter les caractéristiques spéciales
+        const features = [];
+        if (metadata?.lucidity) features.push('Rêve lucide');
+        if (metadata?.recurring) features.push('Récurrent');
+        if (metadata?.nightmare) features.push('Cauchemar');
+        
+        if (features.length > 0) {
+          dreamContent += `\n\n**Caractéristiques :** ${features.join(', ')}`;
+        }
+        
+        return dreamContent;
+      }
       
       default:
         return activity.content;

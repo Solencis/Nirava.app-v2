@@ -383,13 +383,14 @@ export interface PostLike {
 // Journal activity types
 export interface JournalActivity {
   id: string;
-  type: 'checkin' | 'journal' | 'meditation';
+  type: 'checkin' | 'journal' | 'meditation' | 'dream';
   content: string;
   photo_url?: string;
   duration?: number;
   emotion?: string;
   intensity?: number;
   need?: string;
+  metadata?: any;
   created_at: string;
   shared_to_community?: boolean;
 }
