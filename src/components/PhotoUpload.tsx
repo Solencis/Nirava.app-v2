@@ -58,7 +58,13 @@ const PhotoUpload: React.FC<PhotoUploadProps> = ({
       onPhotoChange(photoUrl);
     } catch (error: any) {
       console.error('Error uploading photo:', error);
-      setError('Erreur lors de l\'upload de la photo');
+      if (error.message?.includes('bucket') || error.message?.includes('Bucket')) {
+        setError('📦 Stockage non configuré - Veuillez créer le bucket "journal-images" dans Supabase');
+      } else if (error.message?.includes('Supabase not configured')) {
+        setError('⚙️ Supabase non configuré - Veuillez configurer votre projet');
+      } else {
+        setError('Erreur lors de l\'upload de la photo');
+      }
     } finally {
       setUploading(false);
       onUploadEnd?.();

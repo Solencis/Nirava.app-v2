@@ -234,6 +234,11 @@ export const createJournal = async (journalData: Omit<JournalEntry, 'id' | 'user
 export const uploadJournalPhoto = async (file: File): Promise<string> => {
   const user = await requireAuth();
   
+  // Check if Supabase is properly configured
+  if (!isSupabaseConfigured) {
+    throw new Error('Supabase storage not configured. Please set up your Supabase project first.');
+  }
+
   // Nom de fichier unique par utilisateur
   const fileExt = file.name.split('.').pop();
   const fileName = `${user.id}/${crypto.randomUUID()}.${fileExt}`;
@@ -246,19 +251,34 @@ export const uploadJournalPhoto = async (file: File): Promise<string> => {
       upsert: false
     });
 
-  if (error) throw error;
+  if (error) {
+    if (error.message?.includes('Bucket not found')) {
+      throw new Error('Le stockage de photos n\'est pas configuré. Veuillez créer le bucket "journal-images" dans votre projet Supabase.');
+    }
+    throw error;
+  }
   
   // URL signée sécurisée (expire dans 1 an)
   const { data: { signedUrl }, error: urlError } = await supabase.storage
     .from('journal-images')
     .createSignedUrl(fileName, 31536000); // 1 an
 
-  if (urlError) throw urlError;
+  if (urlError) {
+    if (urlError.message?.includes('Bucket not found')) {
+      throw new Error('Le stockage de photos n\'est pas configuré. Veuillez créer le bucket "journal-images" dans votre projet Supabase.');
+    }
+    throw urlError;
+  }
   
   return signedUrl;
 };
 
 export const deleteJournalPhoto = async (photoUrl: string): Promise<void> => {
+  // Check if Supabase is properly configured
+  if (!isSupabaseConfigured) {
+    throw new Error('Supabase storage not configured. Please set up your Supabase project first.');
+  }
+
   // Extraire le nom de fichier de l'URL signée
   const urlParts = photoUrl.split('/');
   const fileName = urlParts[urlParts.length - 1].split('?')[0];
@@ -267,7 +287,12 @@ export const deleteJournalPhoto = async (photoUrl: string): Promise<void> => {
     .from('journal-images')
     .remove([fileName]);
 
-  if (error) throw error;
+  if (error) {
+    if (error.message?.includes('Bucket not found')) {
+      throw new Error('Le stockage de photos n\'est pas configuré. Veuillez créer le bucket "journal-images" dans votre projet Supabase.');
+    }
+    throw error;
+  }
 };
 
 // Progress functions
