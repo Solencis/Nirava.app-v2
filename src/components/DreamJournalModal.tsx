@@ -92,7 +92,7 @@ const DreamJournalModal: React.FC<DreamJournalModalProps> = ({ isOpen, onClose, 
       // Utiliser React Query pour créer le journal
       const journalEntry = await createJournalMutation.mutateAsync({
         type: 'dream',
-        content: dreamContent,
+        content: formData.content.trim(), // Contenu brut sans formatage
         image_url: formData.photo_url || undefined,
         metadata: {
           title: formData.title.trim(),
@@ -141,7 +141,7 @@ const DreamJournalModal: React.FC<DreamJournalModalProps> = ({ isOpen, onClose, 
       const dreamActivity: JournalActivity = {
         id: journalEntry.id,
         type: 'dream',
-        content: dreamContent,
+        content: formData.content.trim(), // Contenu brut pour éviter les doublons
         photo_url: formData.photo_url || undefined,
         created_at: journalEntry.created_at,
         metadata: {

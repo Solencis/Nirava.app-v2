@@ -64,7 +64,16 @@ const ShareToCommunityButton: React.FC<ShareToCommunityButtonProps> = ({
         
         // Ajouter le contenu principal
         if (activity.content) {
-          dreamContent += `\n\n${activity.content}`;
+          // Éviter le doublon - ne pas ajouter le contenu s'il contient déjà les métadonnées
+          const cleanContent = activity.content
+            .replace(/\*\*.*?\*\*/g, '') // Supprimer les titres en gras
+            .replace(/💭 \*\*Émotions ressenties :\*\* .*/g, '') // Supprimer les émotions
+            .replace(/🔮 \*\*Symboles remarqués :\*\* .*/g, '') // Supprimer les symboles
+            .trim();
+          
+          if (cleanContent) {
+            dreamContent += `\n\n${cleanContent}`;
+          }
         }
         
         // Ajouter les émotions si présentes

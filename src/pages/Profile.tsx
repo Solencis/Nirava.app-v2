@@ -68,6 +68,12 @@ const ProfilePage: React.FC = () => {
       // Journaux écrits (total)
       const journalEntries = JSON.parse(localStorage.getItem('journal-entries') || '[]');
       
+      // Rêves cette semaine
+      const dreamEntries = JSON.parse(localStorage.getItem('dream-entries') || '[]');
+      const thisWeekDreams = dreamEntries.filter((entry: any) => 
+        new Date(entry.timestamp || entry.created_at) > oneWeekAgo
+      ).length;
+      
       // Minutes de méditation cette semaine
       const audioStore = JSON.parse(localStorage.getItem('nirava_audio') || '{}');
       const thisWeekMeditation = audioStore.state?.meditationWeekMinutes || 0;
@@ -77,7 +83,7 @@ const ProfilePage: React.FC = () => {
 
       setStats({
         checkins: thisWeekCheckins,
-        journals: journalEntries.length,
+        journals: journalEntries.length + thisWeekDreams, // Inclure les rêves dans le total
         meditationMinutes: Math.round(thisWeekMeditation),
         currentStreak
       });
