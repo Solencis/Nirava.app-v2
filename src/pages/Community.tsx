@@ -612,23 +612,23 @@ const Community: React.FC = () => {
               {/* Header du post */}
               <div className="flex items-center justify-between mb-2">
                 <div className="flex items-center">
-                  {post.profiles.photo_url ? (
+                  {post.profiles?.photo_url ? (
                     <img
                       src={post.profiles.photo_url}
                       alt={`Photo de ${post.profiles.display_name}`}
-                      className="w-8 h-8 rounded-full object-cover border border-stone/20 mr-3 shadow-sm"
+                      className="w-8 h-8 rounded-full object-cover border-2 border-white shadow-sm mr-3"
                     />
                   ) : (
-                    <div className="w-8 h-8 bg-gradient-to-br from-wasabi to-jade rounded-full flex items-center justify-center mr-3 shadow-sm">
-                      <span className="text-white font-bold text-xs">{post.profiles.level}</span>
+                    <div className="w-8 h-8 bg-gradient-to-br from-wasabi to-jade rounded-full flex items-center justify-center mr-3 shadow-sm border-2 border-white">
+                      <span className="text-white font-bold text-xs">{post.profiles?.level || 'N1'}</span>
                     </div>
                   )}
                   <button
                     onClick={() => handleUserClick(post.user_id)}
                     className="text-left hover:bg-stone/5 rounded-lg p-2 -m-2 transition-all duration-200 active:scale-95"
                   >
-                    <div className="font-semibold text-sm text-gray-700">{post.profiles.display_name}</div>
-                    <div className="text-xs text-stone">{post.profiles.level}</div>
+                    <div className="font-semibold text-sm text-gray-700">{post.profiles?.display_name || 'Utilisateur'}</div>
+                    <div className="text-xs text-stone">{post.profiles?.level || 'N1'}</div>
                   </button>
                 </div>
                 <div className="text-xs text-stone/60">
