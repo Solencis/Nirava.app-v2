@@ -233,6 +233,8 @@ const CheckinModal: React.FC<CheckinModalProps> = ({ isOpen, onClose, onSave }) 
               <PhotoUpload
                 onPhotoChange={(photoUrl) => setFormData({...formData, photo_url: photoUrl || ''})}
                 currentPhoto={formData.photo_url || null}
+                onUploadStart={() => setSaving(true)}
+                onUploadEnd={() => setSaving(false)}
               />
             </div>
             

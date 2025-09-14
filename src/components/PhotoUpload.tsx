@@ -7,9 +7,17 @@ interface PhotoUploadProps {
   onPhotoChange: (photoUrl: string | null) => void;
   currentPhoto?: string | null;
   className?: string;
+  onUploadStart?: () => void;
+  onUploadEnd?: () => void;
 }
 
-const PhotoUpload: React.FC<PhotoUploadProps> = ({ onPhotoChange, currentPhoto, className = '' }) => {
+const PhotoUpload: React.FC<PhotoUploadProps> = ({ 
+  onPhotoChange, 
+  currentPhoto, 
+  className = '',
+  onUploadStart,
+  onUploadEnd
+}) => {
   const { user } = useAuth();
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState('');
@@ -32,6 +40,7 @@ const PhotoUpload: React.FC<PhotoUploadProps> = ({ onPhotoChange, currentPhoto, 
 
     setUploading(true);
     setError('');
+    onUploadStart?.();
 
     try {
       // Delete old photo if exists
@@ -47,6 +56,7 @@ const PhotoUpload: React.FC<PhotoUploadProps> = ({ onPhotoChange, currentPhoto, 
       setError('Erreur lors de l\'upload de la photo');
     } finally {
       setUploading(false);
+      onUploadEnd?.();
       // Reset file input
       if (fileInputRef.current) {
         fileInputRef.current.value = '';

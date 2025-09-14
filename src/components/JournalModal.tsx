@@ -45,6 +45,9 @@ const JournalModal: React.FC<JournalModalProps> = ({ isOpen, onClose, onSave }) 
       return;
     }
 
+    // Ne pas soumettre si on est en train d'uploader une photo
+    if (saving) return;
+
     setSaving(true);
     
     try {
@@ -237,6 +240,8 @@ const JournalModal: React.FC<JournalModalProps> = ({ isOpen, onClose, onSave }) 
               <PhotoUpload
                 onPhotoChange={(url) => setPhotoUrl(url || '')}
                 currentPhoto={photoUrl || null}
+                onUploadStart={() => setSaving(true)}
+                onUploadEnd={() => setSaving(false)}
               />
             </div>
             
@@ -254,7 +259,10 @@ const JournalModal: React.FC<JournalModalProps> = ({ isOpen, onClose, onSave }) 
                 className="flex-1 px-4 py-3 bg-vermilion text-white rounded-xl hover:bg-vermilion/90 transition-colors duration-300 flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {saving ? (
-                  <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                  <>
+                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
+                    Upload...
+                  </>
                 ) : (
                   <>
                     <Save size={16} className="mr-2" />

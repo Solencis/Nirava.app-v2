@@ -242,13 +242,17 @@ const Community: React.FC = () => {
             user_id: user.id
           });
 
-        if (error && error.code !== '23505') {
-          // Ignore duplicate key violations (user already liked this post)
+        if (error) {
+          // Ignore duplicate key violations only
+          if (error.code === '23505') {
+            console.log('User already liked this post, ignoring duplicate');
+            return;
+          }
           throw error;
         }
       }
       
-      // Reload posts to reflect the change
+      // Mise à jour immédiate des posts
       await loadPosts();
     } catch (error) {
       console.error('Error toggling like:', error);
@@ -558,21 +562,63 @@ const Community: React.FC = () => {
               
               {/* Contenu */}
               <div className="mb-3">
-                <div className="flex items-start">
+                <div className="flex items-start mb-3">
                   {/* Badge source */}
                   {post.source_type && (
-                    <div className="flex items-center mr-3 mt-1">
-                      <span className="text-lg">
+                    <div className="bg-gradient-to-r from-jade/10 to-wasabi/5 border border-jade/20 rounded-full px-3 py-1 mr-3 mt-1 flex items-center">
+                      <span className="text-base mr-2">
                         {post.source_type === 'checkin' && '🌱'}
                         {post.source_type === 'journal' && '🌙'}
                         {post.source_type === 'meditation' && '🧘'}
                       </span>
+                      <span className="text-xs font-medium text-jade">
+                        {post.source_type === 'checkin' && 'Check-in'}
+                        {post.source_type === 'journal' && 'Journal'}
+                        {post.source_type === 'meditation' && 'Méditation'}
+                      </span>
                     </div>
                   )}
+                </div>
+                
+                <div className="flex items-start">
                   {post.emoji && (
                     <span className="text-xl mr-2 mt-0.5">{post.emoji}</span>
                   )}
-                  <p className="text-ink leading-relaxed flex-1">{post.content}</p>
+                  <div className="flex-1">
+                    <p className="text-ink leading-relaxed">{post.content}</p>
+                    
+                    {/* Métadonnées pour les posts partagés */}
+                    {post.metadata && (
+                      <div className="mt-3 p-3 bg-stone/5 rounded-xl border border-stone/10">
+                        <div className="flex flex-wrap gap-3 text-xs">
+                          {post.metadata.emotion && (
+                            <div className="flex items-center">
+                              <span className="text-jade font-medium mr-1">Émotion:</span>
+                              <span className="text-stone">{post.metadata.emotion}</span>
+                            </div>
+                          )}
+                          {post.metadata.intensity && (
+                            <div className="flex items-center">
+                              <span className="text-vermilion font-medium mr-1">Intensité:</span>
+                              <span className="text-stone">{post.metadata.intensity}/10</span>
+                            </div>
+                          )}
+                          {post.metadata.need && (
+                            <div className="flex items-center">
+                              <span className="text-forest font-medium mr-1">Besoin:</span>
+                              <span className="text-stone">{post.metadata.need}</span>
+                            </div>
+                          )}
+                          {post.metadata.duration && (
+                            <div className="flex items-center">
+                              <span className="text-sunset font-medium mr-1">Durée:</span>
+                              <span className="text-stone">{post.metadata.duration} min</span>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    )}
+                  </div>
                 </div>
                 
                 {/* Image */}
@@ -581,7 +627,7 @@ const Community: React.FC = () => {
                     <img 
                       src={post.image_url} 
                       alt="Photo partagée" 
-                      className="w-full max-w-xs h-48 object-cover rounded-xl border border-stone/10"
+                      className="w-full max-w-sm h-48 object-cover rounded-xl border border-stone/10 shadow-sm"
                     />
                   </div>
                 )}

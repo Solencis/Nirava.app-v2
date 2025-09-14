@@ -31,6 +31,8 @@ const HistoryModal: React.FC<HistoryModalProps> = ({ isOpen, onClose, onStatsUpd
   const [journals, setJournals] = useState<HistoryEntry[]>([]);
   const [trash, setTrash] = useState<HistoryEntry[]>([]);
   const [loading, setLoading] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [itemToDelete, setItemToDelete] = useState<string | null>(null);
 
   useEffect(() => {
     if (isOpen) {
@@ -184,19 +186,27 @@ const HistoryModal: React.FC<HistoryModalProps> = ({ isOpen, onClose, onStatsUpd
   };
 
   const permanentDelete = (entryId: string) => {
-    if (confirm('⚠️ Supprimer définitivement cette entrée ?\n\nCette action est irréversible.')) {
-      console.log('🔥 Permanently deleting:', entryId);
-      
-      const currentTrash = JSON.parse(localStorage.getItem('journal-trash') || '[]');
-      console.log('🗑️ Trash before deletion:', currentTrash.length);
-      
-      const updatedTrash = currentTrash.filter((t: any) => t.id !== entryId);
-      console.log('🗑️ Trash after deletion:', updatedTrash.length);
-      
-      setTrash(updatedTrash);
-      localStorage.setItem('journal-trash', JSON.stringify(updatedTrash));
-      console.log('✅ Trash updated in localStorage');
-    }
+    setItemToDelete(entryId);
+    setShowDeleteModal(true);
+  };
+
+  const confirmPermanentDelete = () => {
+    if (!itemToDelete) return;
+    
+    console.log('🔥 Permanently deleting:', itemToDelete);
+    
+    const currentTrash = JSON.parse(localStorage.getItem('journal-trash') || '[]');
+    console.log('🗑️ Trash before deletion:', currentTrash.length);
+    
+    const updatedTrash = currentTrash.filter((t: any) => t.id !== itemToDelete);
+    console.log('🗑️ Trash after deletion:', updatedTrash.length);
+    
+    setTrash(updatedTrash);
+    localStorage.setItem('journal-trash', JSON.stringify(updatedTrash));
+    console.log('✅ Trash updated in localStorage');
+    
+    setShowDeleteModal(false);
+    setItemToDelete(null);
   };
 
   const formatDate = (dateString: string) => {
@@ -429,6 +439,50 @@ const HistoryModal: React.FC<HistoryModalProps> = ({ isOpen, onClose, onStatsUpd
               </>
             )}
           </div>
+
+          {/* Modal de confirmation de suppression définitive */}
+          {showDeleteModal && (
+            <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+              <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm mx-2">
+                <div className="p-6">
+                  <div className="flex items-center mb-4">
+                    <div className="w-12 h-12 bg-red-50 rounded-full flex items-center justify-center mr-4">
+                      <Trash2 className="w-6 h-6 text-red-600" />
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-bold text-ink" style={{ fontFamily: "'Shippori Mincho', serif" }}>
+                        Suppression définitive
+                      </h3>
+                      <p className="text-stone text-sm">Cette action est irréversible</p>
+                    </div>
+                  </div>
+                  
+                  <p className="text-stone mb-6 leading-relaxed">
+                    ⚠️ Es-tu sûr(e) de vouloir supprimer définitivement cette entrée ? 
+                    Elle sera complètement effacée et ne pourra plus être récupérée.
+                  </p>
+                  
+                  <div className="flex gap-3">
+                    <button
+                      onClick={() => {
+                        setShowDeleteModal(false);
+                        setItemToDelete(null);
+                      }}
+                      className="flex-1 px-4 py-3 border border-stone/20 text-stone rounded-xl hover:bg-stone/5 transition-colors duration-300"
+                    >
+                      Annuler
+                    </button>
+                    <button
+                      onClick={confirmPermanentDelete}
+                      className="flex-1 px-4 py-3 bg-red-600 text-white rounded-xl hover:bg-red-700 transition-colors duration-300"
+                    >
+                      Supprimer définitivement
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>
