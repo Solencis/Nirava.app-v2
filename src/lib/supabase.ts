@@ -1,11 +1,20 @@
 import { createClient } from '@supabase/supabase-js';
 
 // Configuration Supabase
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL!;
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY!;
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
-if (!supabaseUrl || !supabaseAnonKey) {
-  throw new Error('Missing Supabase environment variables. Check VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY in your environment.');
+if (!supabaseUrl || !supabaseAnonKey || 
+    supabaseUrl === 'https://your-project-ref.supabase.co' || 
+    supabaseAnonKey === 'your-anon-key-here') {
+  console.error('❌ Supabase not configured properly');
+  console.error('Please update your .env file with actual Supabase credentials:');
+  console.error('1. Go to https://supabase.com/dashboard');
+  console.error('2. Select your project');
+  console.error('3. Go to Settings > API');
+  console.error('4. Copy your Project URL and anon key to .env file');
+  console.error('5. Restart your development server');
+  throw new Error('❌ Missing or invalid Supabase environment variables. Please check your .env file and restart the server.');
 }
 
 // Client Supabase avec ANON KEY uniquement (jamais service role en frontend)
