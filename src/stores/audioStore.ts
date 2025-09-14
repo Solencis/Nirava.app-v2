@@ -214,16 +214,6 @@ export const useAudioStore = create<AudioState & AudioActions>()(
           const totalElapsed = Math.floor((now - state.meditationStartTime - state.meditationTotalPauseTime) / 1000);
           const newElapsed = Math.max(0, totalElapsed);
           
-          // Add meditation time every 10 seconds for more responsive tracking
-          const previousTenSeconds = Math.floor(state.meditationElapsed / 10);
-          const currentTenSeconds = Math.floor(newElapsed / 10);
-          
-          if (currentTenSeconds > previousTenSeconds) {
-            const secondsToAdd = (currentTenSeconds - previousTenSeconds) * 10;
-            const minutesToAdd = secondsToAdd / 60;
-            state.addMeditationTime(minutesToAdd);
-          }
-          
           set({ meditationElapsed: newElapsed });
           
           // Auto-stop if target duration reached
@@ -294,10 +284,15 @@ export const useAudioStore = create<AudioState & AudioActions>()(
       stopMeditation: () => {
         const state = get();
         if (state.meditationActive) {
-          // IMPORTANT: Toujours ajouter le temps réel écoulé
-          const actualMinutes = Math.max(1, Math.round(state.meditationElapsed / 60));
+          // IMPORTANT: Ajouter seulement le temps réellement écoulé (minimum 1 minute si > 30 secondes)
+          const actualMinutes = state.meditationElapsed >= 30 
+            ? Math.max(1, Math.round(state.meditationElapsed / 60))
+            : 0;
           console.log('🧘 Méditation arrêtée - Temps écoulé:', state.meditationElapsed, 'secondes =', actualMinutes, 'minutes');
-          state.addMeditationTime(actualMinutes);
+          
+          if (actualMinutes > 0) {
+            state.addMeditationTime(actualMinutes);
+          }
         }
         
         set({
