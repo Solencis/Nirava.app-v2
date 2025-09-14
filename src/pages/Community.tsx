@@ -585,7 +585,13 @@ const Community: React.FC = () => {
                     <span className="text-xl mr-2 mt-0.5">{post.emoji}</span>
                   )}
                   <div className="flex-1">
-                    <p className="text-ink leading-relaxed">{post.content}</p>
+                    <div className="text-ink leading-relaxed">
+                      {post.content.split('\n').map((paragraph, index) => (
+                        <p key={index} className={paragraph.trim() ? 'mb-2' : 'mb-1'}>
+                          {paragraph.trim() || '\u00A0'}
+                        </p>
+                      ))}
+                    </div>
                     
                     {/* Métadonnées pour les posts partagés */}
                     {post.metadata && (

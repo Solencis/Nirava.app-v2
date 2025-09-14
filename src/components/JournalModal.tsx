@@ -20,6 +20,7 @@ const JournalModal: React.FC<JournalModalProps> = ({ isOpen, onClose, onSave }) 
   const [photoUrl, setPhotoUrl] = useState<string>('');
   const [savedActivity, setSavedActivity] = useState<JournalActivity | null>(null);
   const [saving, setSaving] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
 
   const emojis = ['😊', '😌', '🤔', '😔', '😴', '🌙', '✨', '🌸', '💚', '🙏'];
   
@@ -38,8 +39,8 @@ const JournalModal: React.FC<JournalModalProps> = ({ isOpen, onClose, onSave }) 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Ne pas soumettre si on est en train d'uploader une photo
-    if (saving) return;
+    // Ne pas soumettre si on est en train d'uploader une photo ou si déjà en train de sauvegarder
+    if (saving || isUploading || createJournalMutation.isPending) return;
     
     if (!content.trim()) return;
     
@@ -242,8 +243,8 @@ const JournalModal: React.FC<JournalModalProps> = ({ isOpen, onClose, onSave }) 
               <PhotoUpload
                 onPhotoChange={(url) => setPhotoUrl(url || '')}
                 currentPhoto={photoUrl || null}
-                onUploadStart={() => setSaving(true)}
-                onUploadEnd={() => setSaving(false)}
+                onUploadStart={() => setIsUploading(true)}
+                onUploadEnd={() => setIsUploading(false)}
               />
             </div>
             
@@ -257,13 +258,13 @@ const JournalModal: React.FC<JournalModalProps> = ({ isOpen, onClose, onSave }) 
               </button>
               <button
                 type="submit"
-                disabled={!content.trim() || saving}
+                disabled={!content.trim() || saving || isUploading || createJournalMutation.isPending}
                 className="flex-1 px-4 py-3 bg-vermilion text-white rounded-xl hover:bg-vermilion/90 transition-colors duration-300 flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {saving ? (
+                {(saving || isUploading || createJournalMutation.isPending) ? (
                   <>
                     <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
-                    Upload...
+                    {isUploading ? 'Upload...' : 'Sauvegarde...'}
                   </>
                 ) : (
                   <>

@@ -22,14 +22,38 @@ const ShareToCommunityButton: React.FC<ShareToCommunityButtonProps> = ({
   const generatePostContent = (activity: JournalActivity): string => {
     switch (activity.type) {
       case 'checkin':
-        return `J'ai fait un check-in émotionnel 🌱 aujourd'hui. ${activity.emotion ? `Voici ce que j'ai ressenti : ${activity.emotion}` : ''} ${activity.content ? `\n\n${activity.content}` : ''}`.trim();
+        let checkinContent = `J'ai fait un check-in émotionnel 🌱 aujourd'hui.`;
+        
+        if (activity.emotion) {
+          checkinContent += `\n\n💭 Émotion ressentie : ${activity.emotion}`;
+        }
+        
+        if (activity.intensity) {
+          checkinContent += `\n🌡️ Intensité : ${activity.intensity}/10`;
+        }
+        
+        if (activity.need) {
+          checkinContent += `\n🎯 Besoin identifié : ${activity.need}`;
+        }
+        
+        if (activity.content) {
+          checkinContent += `\n\n📝 Notes :\n${activity.content}`;
+        }
+        
+        return checkinContent;
       
       case 'journal':
-        return `Réflexion du soir 🌙 :\n\n${activity.content}`;
+        return `Réflexion du soir 🌙\n\n${activity.content}`;
       
       case 'meditation':
         const duration = activity.duration || 0;
-        return `J'ai médité 🧘 pendant ${duration} minutes aujourd'hui. ${activity.content ? `\n\n${activity.content}` : ''}`.trim();
+        let meditationContent = `Méditation 🧘\n\n⏱️ Durée : ${duration} minutes`;
+        
+        if (activity.content && activity.content !== `Méditation de ${duration} minutes`) {
+          meditationContent += `\n\n📝 Réflexions :\n${activity.content}`;
+        }
+        
+        return meditationContent;
       
       default:
         return activity.content;

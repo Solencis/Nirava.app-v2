@@ -25,14 +25,15 @@ const CheckinModal: React.FC<CheckinModalProps> = ({ isOpen, onClose, onSave }) 
   });
   const [savedActivity, setSavedActivity] = useState<JournalActivity | null>(null);
   const [saving, setSaving] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
 
   if (!isOpen) return null;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Ne pas soumettre si on est en train d'uploader une photo
-    if (saving) return;
+    // Ne pas soumettre si on est en train d'uploader une photo ou si déjà en train de sauvegarder
+    if (saving || isUploading || createCheckinMutation.isPending) return;
     
     if (!user) {
       console.error('User not authenticated');
@@ -236,8 +237,8 @@ const CheckinModal: React.FC<CheckinModalProps> = ({ isOpen, onClose, onSave }) 
               <PhotoUpload
                 onPhotoChange={(photoUrl) => setFormData({...formData, photo_url: photoUrl || ''})}
                 currentPhoto={formData.photo_url || null}
-                onUploadStart={() => setSaving(true)}
-                onUploadEnd={() => setSaving(false)}
+                onUploadStart={() => setIsUploading(true)}
+                onUploadEnd={() => setIsUploading(false)}
               />
             </div>
             
@@ -251,11 +252,14 @@ const CheckinModal: React.FC<CheckinModalProps> = ({ isOpen, onClose, onSave }) 
               </button>
               <button
                 type="submit"
-                disabled={saving}
+                disabled={saving || isUploading || createCheckinMutation.isPending}
                 className="flex-1 px-4 py-3 bg-jade text-white rounded-xl hover:bg-jade/90 transition-colors duration-300 flex items-center justify-center"
               >
-                {saving ? (
-                  <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                {(saving || isUploading || createCheckinMutation.isPending) ? (
+                  <>
+                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
+                    {isUploading ? 'Upload...' : 'Sauvegarde...'}
+                  </>
                 ) : (
                   <>
                     <Save size={16} className="mr-2" />
