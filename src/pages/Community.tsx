@@ -726,27 +726,36 @@ const Community: React.FC = () => {
                                 <div className="w-6 h-6 bg-wasabi/20 rounded-full flex items-center justify-center mr-2">
                                   <span className="text-wasabi font-bold text-xs">{comment.profiles.level}</span>
                                 </div>
-                                <span className="font-semibold text-xs text-gray-700">{comment.profiles.display_name}</span>
-                                <span className="text-xs text-stone ml-2">{getRelativeTime(comment.created_at)}</span>
-                              </div>
+                          <div className="bg-white/60 rounded-lg p-2 border border-vermilion/10">
+                            <div className="text-vermilion font-semibold mb-1">🌡️ Intensité</div>
+                            <div className="text-stone font-bold">{post.metadata.intensity}/10</div>
                               <p className="text-sm text-ink leading-relaxed ml-8">{comment.content}</p>
                             </div>
-                            
-                            {user && comment.user_id === user.id && (
-                              <button
-                                onClick={() => handleDeleteComment(comment.id)}
-                                className="text-stone hover:text-red-600 transition-colors duration-300 ml-2"
-                                title="Supprimer mon commentaire"
+                  <div className="text-ink leading-relaxed">
+                          <div className="bg-white/60 rounded-lg p-2 border border-forest/10 col-span-2">
+                            <div className="text-forest font-semibold mb-1">🌱 Besoin identifié</div>
+                            <div className="text-stone capitalize">{post.metadata.need}</div>
+                      </p>
+                    ))}
+                  </div>
+                          <div className="bg-white/60 rounded-lg p-2 border border-sunset/10 col-span-2">
+                            <div className="text-sunset font-semibold mb-1">⏱️ Durée de méditation</div>
+                            <div className="text-stone font-bold">{post.metadata.duration} minutes</div>
+                    <div className="mt-4 p-4 bg-gradient-to-r from-stone/5 to-stone/10 rounded-xl border border-stone/10">
+                      <h4 className="text-xs font-semibold text-stone/80 mb-3 uppercase tracking-wide">
+                        Détails du partage
+                      </h4>
+                      <div className="grid grid-cols-2 gap-3 text-xs">
                               >
-                                <Trash2 size={14} />
-                              </button>
-                            )}
+                          <div className="bg-white/60 rounded-lg p-2 border border-jade/10">
+                            <div className="text-jade font-semibold mb-1">💚 Émotion</div>
+                            <div className="text-stone capitalize">{post.metadata.emotion}</div>
                           </div>
-                        </div>
+                <div className="mt-4">
                       ))
                     ) : (
                       <p className="text-stone text-sm text-center py-4">Aucun commentaire pour le moment</p>
-                    )}
+                    className="w-full max-w-sm h-48 object-cover rounded-xl border border-stone/10 shadow-lg hover:shadow-xl transition-shadow duration-300"
                   </div>
                 </div>
               )}

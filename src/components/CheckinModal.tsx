@@ -31,12 +31,15 @@ const CheckinModal: React.FC<CheckinModalProps> = ({ isOpen, onClose, onSave }) 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
+    // Ne pas soumettre si on est en train d'uploader une photo
+    if (saving) return;
+    
     if (!user) {
       console.error('User not authenticated');
       return;
     }
 
-    setSaving(true);
+    // Ne pas changer setSaving ici car il est géré par l'upload de photo
     
     try {
       // Utiliser React Query pour créer le check-in
