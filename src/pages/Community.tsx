@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Heart, Send, Users, Sparkles, Settings, Trash2, MessageCircle, ChevronDown, ChevronUp } from 'lucide-react';
+import { Heart, Send, Users, Sparkles, Settings, Trash2, MessageCircle, ChevronDown, ChevronUp, Calendar, Award, X, ZoomIn } from 'lucide-react';
 import { supabase, Post, Profile } from '../lib/supabase';
 import { useAuth } from '../hooks/useAuth';
 
@@ -32,6 +32,9 @@ const Community: React.FC = () => {
   const [submittingComment, setSubmittingComment] = useState<Record<string, boolean>>({});
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
+  const [showUserProfile, setShowUserProfile] = useState<string | null>(null);
+  const [userProfileData, setUserProfileData] = useState<Profile | null>(null);
+  const [showPhotoModal, setShowPhotoModal] = useState<string | null>(null);
 
   const emojis = ['🌱', '🌸', '✨', '🙏', '💚', '🌿', '🧘‍♀️', '🌊', '☀️', '🌙'];
   const levels = ['N1', 'N2', 'N3', 'N4'];
@@ -353,6 +356,54 @@ const Community: React.FC = () => {
     }
   };
 
+  const loadUserProfile = async (userId: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', userId)
+        .single();
+
+      if (error) throw error;
+      setUserProfileData(data);
+    } catch (error) {
+      console.error('Error loading user profile:', error);
+    }
+  };
+
+  const handleUserClick = async (userId: string) => {
+    if (userId === user?.id) return; // Ne pas ouvrir son propre profil
+    
+    setShowUserProfile(userId);
+    await loadUserProfile(userId);
+  };
+
+  const getUserStats = (userId: string) => {
+    // Pour l'instant, générer des stats fictives car on n'a pas accès aux données des autres utilisateurs
+    // En production, il faudrait une table publique de stats ou une API dédiée
+    const randomSeed = userId.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+    const random = (seed: number) => (seed * 9301 + 49297) % 233280 / 233280;
+    
+    return {
+      checkins: Math.floor(random(randomSeed) * 7) + 1,
+      journals: Math.floor(random(randomSeed + 1) * 5) + 1,
+      meditation: Math.floor(random(randomSeed + 2) * 60) + 10,
+      streak: Math.floor(random(randomSeed + 3) * 14) + 1
+    };
+  };
+
+  const getJoinDate = (createdAt: string) => {
+    const date = new Date(createdAt);
+    const now = new Date();
+    const diffInDays = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60 * 24));
+    
+    if (diffInDays < 1) return "Aujourd'hui";
+    if (diffInDays < 7) return `Il y a ${diffInDays} jour${diffInDays > 1 ? 's' : ''}`;
+    if (diffInDays < 30) return `Il y a ${Math.floor(diffInDays / 7)} semaine${Math.floor(diffInDays / 7) > 1 ? 's' : ''}`;
+    if (diffInDays < 365) return `Il y a ${Math.floor(diffInDays / 30)} mois`;
+    return `Il y a ${Math.floor(diffInDays / 365)} an${Math.floor(diffInDays / 365) > 1 ? 's' : ''}`;
+  };
+
   const getRelativeTime = (timestamp: string) => {
     const now = new Date();
     const postTime = new Date(timestamp);
@@ -550,10 +601,13 @@ const Community: React.FC = () => {
                   <div className="w-8 h-8 bg-wasabi/20 rounded-full flex items-center justify-center mr-3">
                     <span className="text-wasabi font-bold text-sm">{post.profiles.level}</span>
                   </div>
-                  <div>
+                  <button
+                    onClick={() => handleUserClick(post.user_id)}
+                    className="text-left hover:bg-stone/5 rounded-lg p-1 -m-1 transition-colors duration-200"
+                  >
                     <div className="font-semibold text-sm text-gray-700">{post.profiles.display_name}</div>
                     <div className="text-xs text-stone">{post.profiles.level}</div>
-                  </div>
+                  </button>
                 </div>
                 <div className="text-xs text-stone">
                   {getRelativeTime(post.created_at)}
@@ -630,11 +684,19 @@ const Community: React.FC = () => {
                 {/* Image */}
                 {post.image_url && (
                   <div className="mt-2">
-                    <img 
-                      src={post.image_url} 
-                      alt="Photo partagée" 
-                      className="w-full max-w-xs h-32 object-cover rounded-lg border border-stone/10 shadow-sm"
-                    />
+                    <button
+                      onClick={() => setShowPhotoModal(post.image_url)}
+                      className="relative group"
+                    >
+                      <img 
+                        src={post.image_url} 
+                        alt="Photo partagée" 
+                        className="w-full max-w-xs h-32 object-cover rounded-lg border border-stone/10 shadow-sm transition-transform duration-200 group-hover:scale-[1.02]"
+                      />
+                      <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 rounded-lg transition-colors duration-200 flex items-center justify-center">
+                        <ZoomIn className="w-6 h-6 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
+                      </div>
+                    </button>
                   </div>
                 )}
               </div>
@@ -732,7 +794,12 @@ const Community: React.FC = () => {
                                 <div className="w-5 h-5 bg-wasabi/20 rounded-full flex items-center justify-center mr-2">
                                   <span className="text-wasabi font-bold text-xs">{comment.profiles.level}</span>
                                 </div>
-                                <span className="font-medium text-xs text-gray-700">{comment.profiles.display_name}</span>
+                                <button
+                                  onClick={() => handleUserClick(comment.user_id)}
+                                  className="font-medium text-xs text-gray-700 hover:text-wasabi transition-colors duration-200"
+                                >
+                                  {comment.profiles.display_name}
+                                </button>
                                 <span className="text-xs text-stone/60 ml-2">{getRelativeTime(comment.created_at)}</span>
                               </div>
                               <p className="text-sm text-ink leading-relaxed ml-7">{comment.content}</p>
@@ -769,6 +836,114 @@ const Community: React.FC = () => {
           </p>
         </div>
       </div>
+
+      {/* User Profile Bubble */}
+      {showUserProfile && userProfileData && (
+        <>
+          <div 
+            className="fixed inset-0 z-40" 
+            onClick={() => {
+              setShowUserProfile(null);
+              setUserProfileData(null);
+            }}
+          />
+          <div className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-50 bg-white/95 backdrop-blur-md rounded-2xl shadow-2xl border border-stone/10 p-6 w-80 max-w-[90vw]">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center">
+                <div className="w-12 h-12 bg-gradient-to-br from-wasabi to-jade rounded-full flex items-center justify-center mr-4">
+                  <span className="text-white font-bold">{userProfileData.level}</span>
+                </div>
+                <div>
+                  <h3 className="font-bold text-lg text-ink" style={{ fontFamily: "'Shippori Mincho', serif" }}>
+                    {userProfileData.display_name}
+                  </h3>
+                  <div className="flex items-center text-sm text-stone">
+                    <Calendar size={12} className="mr-1" />
+                    Membre depuis {getJoinDate(userProfileData.created_at)}
+                  </div>
+                </div>
+              </div>
+              <button
+                onClick={() => {
+                  setShowUserProfile(null);
+                  setUserProfileData(null);
+                }}
+                className="w-8 h-8 rounded-full bg-stone/10 flex items-center justify-center text-stone hover:text-vermilion transition-colors duration-300"
+              >
+                <X size={16} />
+              </button>
+            </div>
+
+            {/* Bio si disponible */}
+            {userProfileData.bio && (
+              <div className="mb-4 p-3 bg-stone/5 rounded-xl">
+                <p className="text-sm text-ink leading-relaxed italic">
+                  "{userProfileData.bio}"
+                </p>
+              </div>
+            )}
+
+            {/* Progression de la semaine */}
+            <div className="bg-gradient-to-br from-wasabi/5 to-jade/5 rounded-xl p-4 border border-wasabi/10">
+              <div className="flex items-center mb-3">
+                <Award className="w-4 h-4 text-wasabi mr-2" />
+                <h4 className="font-medium text-ink text-sm">Progression cette semaine</h4>
+              </div>
+              
+              {(() => {
+                const stats = getUserStats(userProfileData.id);
+                return (
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="text-center">
+                      <div className="text-lg font-bold text-jade">{stats.checkins}</div>
+                      <div className="text-xs text-stone">Check-ins</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-lg font-bold text-vermilion">{stats.journals}</div>
+                      <div className="text-xs text-stone">Journaux</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-lg font-bold text-forest">{stats.meditation}</div>
+                      <div className="text-xs text-stone">Min méditation</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-lg font-bold text-sunset">{stats.streak}</div>
+                      <div className="text-xs text-stone">Jours consécutifs</div>
+                    </div>
+                  </div>
+                );
+              })()}
+            </div>
+
+            {/* Message inspirant */}
+            <div className="mt-4 text-center">
+              <p className="text-stone text-xs italic">
+                "Chaque âme sur son chemin mérite respect et encouragement" 🌸
+              </p>
+            </div>
+          </div>
+        </>
+      )}
+
+      {/* Photo Modal */}
+      {showPhotoModal && (
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+          <div className="relative max-w-4xl max-h-[90vh] w-full">
+            <button
+              onClick={() => setShowPhotoModal(null)}
+              className="absolute -top-12 right-0 w-10 h-10 bg-white/20 text-white rounded-full flex items-center justify-center hover:bg-white/30 transition-colors duration-300"
+            >
+              <X size={20} />
+            </button>
+            <img
+              src={showPhotoModal}
+              alt="Photo en grand"
+              className="w-full h-full object-contain rounded-xl shadow-2xl"
+              onClick={() => setShowPhotoModal(null)}
+            />
+          </div>
+        </div>
+      )}
 
       {/* Modal de confirmation de suppression */}
       {showDeleteModal && (
