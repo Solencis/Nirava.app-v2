@@ -85,9 +85,12 @@ const Journal: React.FC = () => {
         new Date(entry.timestamp || entry.created_at) > oneWeekAgo
       ).length;
 
-      // Journaux du soir uniquement (exclure les rêves et méditations)
+      // Journaux du soir uniquement - filtrage strict
       const journalEntries = JSON.parse(localStorage.getItem('journal-entries') || '[]')
-        .filter((entry: any) => entry.type === 'journal' || (!entry.type && entry.content)); // Journaux du soir seulement
+        .filter((entry: any) => {
+          // Seuls les journaux du soir explicites
+          return entry.type === 'journal' && entry.content && !entry.title && !entry.emotions && !entry.symbols;
+        });
       
       // Méditation cette semaine (depuis le store audio)
       const audioStore = JSON.parse(localStorage.getItem('nirava_audio') || '{}');
@@ -104,7 +107,7 @@ const Journal: React.FC = () => {
 
       setStats({
         checkins: thisWeekCheckins,
-        journals: journalEntries.length, // Maintenant seulement les journaux du soir
+        journals: journalEntries.length, // Seulement les vrais journaux du soir
         meditation: Math.round(thisWeekMeditation),
         streak: currentStreak,
         dreams: thisWeekDreams

@@ -19,6 +19,14 @@ interface AudioState {
   lastStartAt?: number | null;
   currentWeek: string;
   soundEnabled: boolean;
+  // Meditation timer state
+  meditationActive: boolean;
+  meditationStartTime?: number | null;
+  meditationDuration?: number | null; // Target duration in minutes (null = free mode)
+  meditationElapsed: number; // Elapsed seconds
+  meditationPaused: boolean;
+  meditationPauseTime?: number | null;
+  meditationTotalPauseTime: number; // Total pause time in ms
 }
 
 interface AudioActions {
@@ -32,6 +40,20 @@ interface AudioActions {
   tick: () => void;
   addMeditationTime: (minutes: number) => void;
   setSoundEnabled: (enabled: boolean) => void;
+  // Meditation timer actions
+  startMeditation: (durationMinutes?: number) => void;
+  pauseMeditation: () => void;
+  resumeMeditation: () => void;
+  stopMeditation: () => void;
+  resetMeditation: () => void;
+  getMeditationState: () => {
+    isActive: boolean;
+    elapsed: number;
+    remaining: number | null;
+    isPaused: boolean;
+    progress: number;
+  };
+  reduceMeditationTime: (minutes: number) => void;
 }
 
 const getCurrentWeek = () => {
@@ -94,6 +116,14 @@ export const useAudioStore = create<AudioState & AudioActions>()(
       lastStartAt: null,
       currentWeek: getCurrentWeek(),
       soundEnabled: true,
+      // Meditation timer state
+      meditationActive: false,
+      meditationStartTime: null,
+      meditationDuration: null,
+      meditationElapsed: 0,
+      meditationPaused: false,
+      meditationPauseTime: null,
+      meditationTotalPauseTime: 0,
 
       // Actions
       play: (ambience: Ambience) => {
@@ -178,6 +208,28 @@ export const useAudioStore = create<AudioState & AudioActions>()(
         if (state.autoStopAt && now >= state.autoStopAt) {
           state.stop();
         }
+        
+        // Update meditation timer if active and not paused
+        if (state.meditationActive && !state.meditationPaused && state.meditationStartTime) {
+          const totalElapsed = Math.floor((now - state.meditationStartTime - state.meditationTotalPauseTime) / 1000);
+          const newElapsed = Math.max(0, totalElapsed);
+          
+          // Add meditation time every minute (60 seconds)
+          const previousMinutes = Math.floor(state.meditationElapsed / 60);
+          const currentMinutes = Math.floor(newElapsed / 60);
+          
+          if (currentMinutes > previousMinutes) {
+            const minutesToAdd = currentMinutes - previousMinutes;
+            state.addMeditationTime(minutesToAdd);
+          }
+          
+          set({ meditationElapsed: newElapsed });
+          
+          // Auto-stop if target duration reached
+          if (state.meditationDuration && newElapsed >= state.meditationDuration * 60) {
+            state.stopMeditation();
+          }
+        }
       },
 
       addMeditationTime: (minutes: number) => {
@@ -198,6 +250,102 @@ export const useAudioStore = create<AudioState & AudioActions>()(
 
       setSoundEnabled: (enabled: boolean) => {
         set({ soundEnabled: enabled });
+      },
+
+      // Meditation timer actions
+      startMeditation: (durationMinutes?: number) => {
+        const now = Date.now();
+        set({
+          meditationActive: true,
+          meditationStartTime: now,
+          meditationDuration: durationMinutes || null,
+          meditationElapsed: 0,
+          meditationPaused: false,
+          meditationPauseTime: null,
+          meditationTotalPauseTime: 0
+        });
+      },
+
+      pauseMeditation: () => {
+        const state = get();
+        if (state.meditationActive && !state.meditationPaused) {
+          set({
+            meditationPaused: true,
+            meditationPauseTime: Date.now()
+          });
+        }
+      },
+
+      resumeMeditation: () => {
+        const state = get();
+        if (state.meditationActive && state.meditationPaused && state.meditationPauseTime) {
+          const pauseDuration = Date.now() - state.meditationPauseTime;
+          set({
+            meditationPaused: false,
+            meditationPauseTime: null,
+            meditationTotalPauseTime: state.meditationTotalPauseTime + pauseDuration
+          });
+        }
+      },
+
+      stopMeditation: () => {
+        const state = get();
+        if (state.meditationActive) {
+          // Add any remaining partial minute
+          const finalMinutes = Math.ceil(state.meditationElapsed / 60);
+          const alreadyAdded = Math.floor(state.meditationElapsed / 60);
+          const remainingToAdd = finalMinutes - alreadyAdded;
+          
+          if (remainingToAdd > 0) {
+            state.addMeditationTime(remainingToAdd);
+          }
+        }
+        
+        set({
+          meditationActive: false,
+          meditationStartTime: null,
+          meditationDuration: null,
+          meditationElapsed: 0,
+          meditationPaused: false,
+          meditationPauseTime: null,
+          meditationTotalPauseTime: 0
+        });
+      },
+
+      resetMeditation: () => {
+        set({
+          meditationActive: false,
+          meditationStartTime: null,
+          meditationDuration: null,
+          meditationElapsed: 0,
+          meditationPaused: false,
+          meditationPauseTime: null,
+          meditationTotalPauseTime: 0
+        });
+      },
+
+      getMeditationState: () => {
+        const state = get();
+        const remaining = state.meditationDuration 
+          ? Math.max(0, state.meditationDuration * 60 - state.meditationElapsed)
+          : null;
+        const progress = state.meditationDuration 
+          ? Math.min(100, (state.meditationElapsed / (state.meditationDuration * 60)) * 100)
+          : 0;
+        
+        return {
+          isActive: state.meditationActive,
+          elapsed: state.meditationElapsed,
+          remaining,
+          isPaused: state.meditationPaused,
+          progress
+        };
+      },
+
+      reduceMeditationTime: (minutes: number) => {
+        const state = get();
+        const newMinutes = Math.max(0, state.meditationWeekMinutes - minutes);
+        set({ meditationWeekMinutes: newMinutes });
       }
     }),
     {
@@ -208,7 +356,15 @@ export const useAudioStore = create<AudioState & AudioActions>()(
         loop: state.loop,
         meditationWeekMinutes: state.meditationWeekMinutes,
         currentWeek: state.currentWeek,
-        soundEnabled: state.soundEnabled
+        soundEnabled: state.soundEnabled,
+        // Persist meditation timer state
+        meditationActive: state.meditationActive,
+        meditationStartTime: state.meditationStartTime,
+        meditationDuration: state.meditationDuration,
+        meditationElapsed: state.meditationElapsed,
+        meditationPaused: state.meditationPaused,
+        meditationPauseTime: state.meditationPauseTime,
+        meditationTotalPauseTime: state.meditationTotalPauseTime
       })
     }
   )

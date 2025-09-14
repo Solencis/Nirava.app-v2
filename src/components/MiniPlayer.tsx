@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Play, Pause, Volume2, VolumeX, X } from 'lucide-react';
+import { Play, Pause, Volume2, VolumeX, X, Timer } from 'lucide-react';
 import { useAudioStore } from '../stores/audioStore';
 
 const MiniPlayer: React.FC = () => {
@@ -10,11 +10,15 @@ const MiniPlayer: React.FC = () => {
     autoStopAt,
     toggle,
     setVolume,
-    stop
+    stop,
+    getMeditationState
   } = useAudioStore();
 
   const [timeLeft, setTimeLeft] = useState<string>('');
   const [showVolumeSlider, setShowVolumeSlider] = useState(false);
+  
+  // Get meditation state
+  const meditationState = getMeditationState();
 
   useEffect(() => {
     if (!autoStopAt) {
@@ -37,6 +41,57 @@ const MiniPlayer: React.FC = () => {
   }, [autoStopAt]);
 
   if (!current) return null;
+
+  // Show meditation timer if active
+  if (meditationState.isActive) {
+    const formatTime = (seconds: number) => {
+      const mins = Math.floor(seconds / 60);
+      const secs = seconds % 60;
+      return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+    };
+
+    return (
+      <div className="fixed bottom-20 left-4 right-4 bg-forest/95 backdrop-blur-md rounded-2xl shadow-2xl border border-forest/20 p-4 z-30">
+        <div className="flex items-center space-x-3">
+          <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center">
+            <Timer size={20} className="text-white" />
+          </div>
+          
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center mb-1">
+              <h4 className="font-medium text-white text-sm">Méditation en cours</h4>
+              {meditationState.isPaused && (
+                <span className="ml-2 text-yellow-300 text-xs">⏸️ Pause</span>
+              )}
+            </div>
+            <div className="flex items-center justify-between">
+              <div className="text-white/80 text-xs">
+                {formatTime(meditationState.elapsed)}
+                {meditationState.remaining !== null && (
+                  <span> / {formatTime(meditationState.remaining + meditationState.elapsed)}</span>
+                )}
+              </div>
+              {meditationState.remaining !== null && (
+                <div className="text-white/60 text-xs">
+                  {Math.round(meditationState.progress)}%
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+        
+        {/* Progress bar for guided meditation */}
+        {meditationState.remaining !== null && (
+          <div className="mt-3 w-full bg-white/20 rounded-full h-1">
+            <div 
+              className="bg-white h-1 rounded-full transition-all duration-1000"
+              style={{ width: `${meditationState.progress}%` }}
+            ></div>
+          </div>
+        )}
+      </div>
+    );
+  }
 
   return (
     <div className="fixed bottom-20 left-4 right-4 bg-white/95 backdrop-blur-md rounded-2xl shadow-2xl border border-stone/10 p-4 z-30">

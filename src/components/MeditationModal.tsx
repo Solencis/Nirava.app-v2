@@ -15,58 +15,39 @@ interface MeditationModalProps {
 const MeditationModal: React.FC<MeditationModalProps> = ({ isOpen, onClose, onSave }) => {
   const { user } = useAuth();
   const createJournalMutation = useCreateJournal();
-  const { current: currentAmbience, isPlaying: ambienceIsPlaying, pause: pauseAmbience, play: playAmbience } = useAudioStore();
-  const [duration, setDuration] = useState(5); // minutes
-  const [timeLeft, setTimeLeft] = useState(0); // seconds
-  const [isRunning, setIsRunning] = useState(false);
-  const [isCompleted, setIsCompleted] = useState(false);
+  const { 
+    current: currentAmbience, 
+    isPlaying: ambienceIsPlaying, 
+    pause: pauseAmbience, 
+    play: playAmbience,
+    startMeditation,
+    pauseMeditation,
+    resumeMeditation,
+    stopMeditation,
+    resetMeditation,
+    getMeditationState
+  } = useAudioStore();
+  
+  const [duration, setDuration] = useState(5);
   const [customDuration, setCustomDuration] = useState('');
   const [isFreeMode, setIsFreeMode] = useState(false);
-  const [elapsedTime, setElapsedTime] = useState(0); // pour le mode libre
   const [muteAmbience, setMuteAmbience] = useState(false);
-  const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const wasAmbiencePlaying = useRef(false);
   const [savedActivity, setSavedActivity] = useState<JournalActivity | null>(null);
+  
+  // Get current meditation state
+  const meditationState = getMeditationState();
 
   const presetDurations = [5, 10, 15, 20];
 
+  // Check if meditation completed
   useEffect(() => {
-    if (isRunning && !isFreeMode && timeLeft > 0) {
-      intervalRef.current = setInterval(() => {
-        setTimeLeft((prev) => {
-          if (prev <= 1) {
-            setIsRunning(false);
-            setIsCompleted(true);
-            playGong();
-            saveMeditationSession();
-            return 0;
-          }
-          return prev - 1;
-        });
-      }, 1000);
-    } else if (isRunning && isFreeMode) {
-      intervalRef.current = setInterval(() => {
-        setElapsedTime((prev) => prev + 1);
-      }, 1000);
-    } else {
-      if (intervalRef.current) {
-        clearInterval(intervalRef.current);
-        intervalRef.current = null;
-      }
+    if (meditationState.isActive && !isFreeMode && meditationState.remaining !== null && meditationState.remaining <= 0) {
+      // Meditation completed
+      playGong();
+      saveMeditationSession();
+      stopMeditation();
     }
-
-    return () => {
-      if (intervalRef.current) {
-        clearInterval(intervalRef.current);
-      }
-    };
-  }, [isRunning, timeLeft, isFreeMode]);
-
-  useEffect(() => {
-    if (!isOpen) {
-      reset();
-    }
-  }, [isOpen]);
 
   const playGong = () => {
     // Son de gong amélioré - plus audible et réaliste
@@ -127,8 +108,7 @@ const MeditationModal: React.FC<MeditationModalProps> = ({ isOpen, onClose, onSa
       return;
     }
 
-    const { addMeditationTime } = useAudioStore.getState();
-    const sessionDuration = isFreeMode ? Math.round(elapsedTime / 60) : duration;
+    const sessionDuration = Math.ceil(meditationState.elapsed / 60);
     
     try {
       // Utiliser React Query pour créer l'entrée journal
@@ -168,20 +148,16 @@ const MeditationModal: React.FC<MeditationModalProps> = ({ isOpen, onClose, onSa
         created_at: journalEntry.created_at
       };
       
-      // Add meditation time to weekly stats
-      addMeditationTime(sessionDuration);
-      
       // Sauvegarder l'activité pour le partage
       setSavedActivity(session);
       
       onSave();
     } catch (error) {
       console.error('Error saving meditation session:', error);
-      // TODO: Afficher un message d'erreur à l'utilisateur
     }
   };
 
-  const startMeditation = () => {
+  const handleStartMeditation = () => {
     // Remember ambience state
     wasAmbiencePlaying.current = ambienceIsPlaying;
     
@@ -190,30 +166,26 @@ const MeditationModal: React.FC<MeditationModalProps> = ({ isOpen, onClose, onSa
       pauseAmbience();
     }
     
-    if (!isFreeMode && timeLeft === 0) {
-      setTimeLeft(duration * 60);
-    } else if (isFreeMode && elapsedTime === 0) {
-      setElapsedTime(0);
-    }
-    setIsRunning(true);
-    setIsCompleted(false);
+    // Start meditation with store
+    startMeditation(isFreeMode ? undefined : duration);
     playGong(); // Gong de début
   };
 
-  const pauseMeditation = () => {
-    setIsRunning(false);
+  const handlePauseMeditation = () => {
+    if (meditationState.isPaused) {
+      resumeMeditation();
+    } else {
+      pauseMeditation();
+    }
   };
 
-  const reset = () => {
+  const handleReset = () => {
     // Restore ambience if it was playing
     if (wasAmbiencePlaying.current && currentAmbience && muteAmbience) {
       playAmbience(currentAmbience);
     }
     
-    setIsRunning(false);
-    setTimeLeft(0);
-    setElapsedTime(0);
-    setIsCompleted(false);
+    resetMeditation();
   };
 
   const setCustomTime = () => {
@@ -221,32 +193,25 @@ const MeditationModal: React.FC<MeditationModalProps> = ({ isOpen, onClose, onSa
     if (minutes > 0 && minutes <= 120) {
       setDuration(minutes);
       setCustomDuration('');
-      reset();
+      handleReset();
     }
   };
 
-  const stopFreeMeditation = () => {
+  const handleStopFreeMeditation = () => {
     // Restore ambience if it was playing
     if (wasAmbiencePlaying.current && currentAmbience && muteAmbience) {
       playAmbience(currentAmbience);
     }
     
-    setIsRunning(false);
-    setIsCompleted(true);
     playGong();
     saveMeditationSession();
+    stopMeditation();
   };
 
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
     return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
-  };
-
-  const getProgress = () => {
-    if (isFreeMode) return 0; // Pas de progression en mode libre
-    if (duration === 0) return 0;
-    return ((duration * 60 - timeLeft) / (duration * 60)) * 100;
   };
 
   if (!isOpen) return null;
@@ -263,7 +228,7 @@ const MeditationModal: React.FC<MeditationModalProps> = ({ isOpen, onClose, onSa
               </h2>
             </div>
             <button
-              onClick={onClose}
+              onClick={handleStartMeditation}
               className="w-10 h-10 rounded-full bg-stone/10 flex items-center justify-center text-stone hover:text-vermilion transition-colors duration-300"
             >
               <X size={20} />
@@ -399,7 +364,7 @@ const MeditationModal: React.FC<MeditationModalProps> = ({ isOpen, onClose, onSa
             </div>
           )}
 
-          {(isRunning || timeLeft > 0 || elapsedTime > 0) && !isCompleted && (
+          {meditationState.isActive && !savedActivity && (
             <div className="text-center space-y-6">
               {/* Timer circulaire */}
               <div className="relative w-48 h-48 mx-auto">
@@ -422,7 +387,7 @@ const MeditationModal: React.FC<MeditationModalProps> = ({ isOpen, onClose, onSa
                     strokeWidth="8"
                     strokeLinecap="round"
                     strokeDasharray={`${2 * Math.PI * 45}`}
-                    strokeDashoffset={`${2 * Math.PI * 45 * (1 - getProgress() / 100)}`}
+                    strokeDashoffset={`${2 * Math.PI * 45 * (1 - meditationState.progress / 100)}`}
                     className="transition-all duration-1000 ease-linear"
                   />
                   )}
@@ -430,10 +395,13 @@ const MeditationModal: React.FC<MeditationModalProps> = ({ isOpen, onClose, onSa
                 <div className="absolute inset-0 flex items-center justify-center">
                   <div className="text-center">
                     <div className="text-3xl font-bold text-ink mb-1">
-                      {isFreeMode ? formatTime(elapsedTime) : formatTime(timeLeft)}
+                      {isFreeMode ? formatTime(meditationState.elapsed) : formatTime(meditationState.remaining || 0)}
                     </div>
                     <div className="text-sm text-stone">
-                      {isFreeMode ? 'Méditation libre' : `${Math.round(getProgress())}%`}
+                      {isFreeMode ? 'Méditation libre' : `${Math.round(meditationState.progress)}%`}
+                      {meditationState.isPaused && (
+                        <div className="text-yellow-600 text-xs mt-1">⏸️ En pause</div>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -442,23 +410,23 @@ const MeditationModal: React.FC<MeditationModalProps> = ({ isOpen, onClose, onSa
               <div className="flex gap-3 justify-center">
                 {!isFreeMode ? (
                   <button
-                  onClick={isRunning ? pauseMeditation : startMeditation}
+                  onClick={handlePauseMeditation}
                   className="bg-forest text-white px-6 py-3 rounded-xl hover:bg-forest/90 transition-colors duration-300 flex items-center"
                 >
-                  {isRunning ? <Pause size={20} className="mr-2" /> : <Play size={20} className="mr-2" />}
-                  {isRunning ? 'Pause' : 'Reprendre'}
+                  {meditationState.isPaused ? <Play size={20} className="mr-2" /> : <Pause size={20} className="mr-2" />}
+                  {meditationState.isPaused ? 'Reprendre' : 'Pause'}
                 </button>
                 ) : (
                   <div className="flex gap-3">
                     <button
-                      onClick={isRunning ? pauseMeditation : startMeditation}
+                      onClick={handlePauseMeditation}
                       className="bg-forest text-white px-6 py-3 rounded-xl hover:bg-forest/90 transition-colors duration-300 flex items-center"
                     >
-                      {isRunning ? <Pause size={20} className="mr-2" /> : <Play size={20} className="mr-2" />}
-                      {isRunning ? 'Pause' : 'Reprendre'}
+                      {meditationState.isPaused ? <Play size={20} className="mr-2" /> : <Pause size={20} className="mr-2" />}
+                      {meditationState.isPaused ? 'Reprendre' : 'Pause'}
                     </button>
                     <button
-                      onClick={stopFreeMeditation}
+                      onClick={handleStopFreeMeditation}
                       className="bg-jade text-white px-6 py-3 rounded-xl hover:bg-jade/90 transition-colors duration-300"
                     >
                       Terminer
@@ -466,9 +434,9 @@ const MeditationModal: React.FC<MeditationModalProps> = ({ isOpen, onClose, onSa
                   </div>
                 )}
                 <button
-                  onClick={reset}
+                  onClick={handleReset}
                   className="bg-stone/20 text-stone px-6 py-3 rounded-xl hover:bg-stone/30 transition-colors duration-300 flex items-center"
-                >
+                    handleReset();
                   <RotateCcw size={20} className="mr-2" />
                   Reset
                 </button>
@@ -476,57 +444,10 @@ const MeditationModal: React.FC<MeditationModalProps> = ({ isOpen, onClose, onSa
             </div>
           )}
 
-          {isCompleted && (
+          {savedActivity && (
             <>
-            {savedActivity ? (
-              // Success state with sharing option
-              <div className="text-center space-y-6">
-                <div className="w-24 h-24 mx-auto bg-forest/10 rounded-full flex items-center justify-center">
-                  <Timer className="w-12 h-12 text-forest" />
-                </div>
-                <div>
-                  <h3 className="text-xl font-bold text-ink mb-2" style={{ fontFamily: "'Shippori Mincho', serif" }}>
-                    Méditation terminée !
-                  </h3>
-                  <p className="text-stone mb-4">
-                    Tu as médité {savedActivity.duration} minutes. Bravo pour ce moment de présence.
-                  </p>
-                  <p className="text-stone text-sm mb-6">
-                    Veux-tu partager cette session avec la communauté ?
-                  </p>
-                </div>
-                
-                <div className="space-y-4">
-                  <ShareToCommunityButton 
-                    activity={savedActivity}
-                    onShared={() => {
-                      setTimeout(() => {
-                        setSavedActivity(null);
-                        onClose();
-                      }, 1500);
-                    }}
-                  />
-                  
-                  <button
-                    onClick={() => {
-                      setSavedActivity(null);
-                      onClose();
-                    }}
-                    className="w-full px-4 py-3 border border-stone/20 text-stone rounded-xl hover:bg-stone/5 transition-colors duration-300"
-                  >
-                    Garder privé
-                  </button>
-                </div>
-              </div>
-            ) : (
-              // Default completion state
+            {/* Success state with sharing option */}
             <div className="text-center space-y-6">
-              {/* Restore ambience */}
-              {wasAmbiencePlaying.current && currentAmbience && muteAmbience && (() => {
-                playAmbience(currentAmbience);
-                return null;
-              })()}
-              
               <div className="w-24 h-24 mx-auto bg-forest/10 rounded-full flex items-center justify-center">
                 <Timer className="w-12 h-12 text-forest" />
               </div>
@@ -534,18 +455,36 @@ const MeditationModal: React.FC<MeditationModalProps> = ({ isOpen, onClose, onSa
                 <h3 className="text-xl font-bold text-ink mb-2" style={{ fontFamily: "'Shippori Mincho', serif" }}>
                   Méditation terminée !
                 </h3>
-                <p className="text-stone">
-                  Tu as médité {isFreeMode ? Math.round(elapsedTime / 60) : duration} minutes. Bravo pour ce moment de présence.
+                <p className="text-stone mb-4">
+                  Tu as médité {savedActivity.duration} minutes. Bravo pour ce moment de présence.
+                </p>
+                <p className="text-stone text-sm mb-6">
+                  Veux-tu partager cette session avec la communauté ?
                 </p>
               </div>
-              <button
-                onClick={onClose}
-                className="w-full bg-forest text-white py-3 rounded-xl hover:bg-forest/90 transition-colors duration-300"
-              >
-                Fermer
-              </button>
+              
+              <div className="space-y-4">
+                <ShareToCommunityButton 
+                  activity={savedActivity}
+                  onShared={() => {
+                    setTimeout(() => {
+                      setSavedActivity(null);
+                      onClose();
+                    }, 1500);
+                  }}
+                />
+                
+                <button
+                  onClick={() => {
+                    setSavedActivity(null);
+                    onClose();
+                  }}
+                  className="w-full px-4 py-3 border border-stone/20 text-stone rounded-xl hover:bg-stone/5 transition-colors duration-300"
+                >
+                  Garder privé
+                </button>
+              </div>
             </div>
-            )}
             </>
           )}
         </div>
