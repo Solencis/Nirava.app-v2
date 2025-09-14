@@ -951,10 +951,12 @@ const Community: React.FC = () => {
 
             {/* Stats compactes */}
             <div className="bg-gradient-to-r from-wasabi/5 to-jade/5 rounded-md p-2 border border-wasabi/10">
-                    <span className="text-white font-bold text-xs">{post.profiles?.level || 'N1'}</span>
-                  <span className="text-xs text-wasabi/60 ml-1">(Tes stats)</span>
-                )}
-              </div>
+                <div className="text-center mb-2">
+                  <span className="text-xs font-medium text-wasabi">Niveau {userProfileData.level}</span>
+                  {showUserProfile === user?.id && (
+                    <span className="text-xs text-wasabi/60 ml-1">(Tes stats)</span>
+                  )}
+                </div>
               
               {(() => {
                 // Utiliser les vraies stats pour l'utilisateur connecté
