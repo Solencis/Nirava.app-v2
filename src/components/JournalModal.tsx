@@ -39,19 +39,24 @@ const JournalModal: React.FC<JournalModalProps> = ({ isOpen, onClose, onSave }) 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Ne pas soumettre si on est en train d'uploader une photo ou si déjà en train de sauvegarder
-    if (saving || isUploading || createJournalMutation.isPending) return;
+    // Vérifications pour empêcher la soumission prématurée
+    if (saving || isUploading || createJournalMutation.isPending) {
+      console.log('Submission blocked - saving:', saving, 'uploading:', isUploading, 'pending:', createJournalMutation.isPending);
+      return;
+    }
     
-    if (!content.trim()) return;
+    // Validation du contenu requis
+    if (!content.trim()) {
+      console.log('Submission blocked - no content');
+      return;
+    }
     
     if (!user) {
       console.error('User not authenticated');
       return;
     }
 
-    // Utiliser un état séparé pour la soumission
-    const isSubmitting = createJournalMutation.isPending;
-    if (isSubmitting) return;
+    setSaving(true);
     
     try {
       // Utiliser React Query pour créer le journal

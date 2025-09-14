@@ -25,32 +25,32 @@ const ShareToCommunityButton: React.FC<ShareToCommunityButtonProps> = ({
         let checkinContent = `J'ai fait un check-in émotionnel 🌱 aujourd'hui.`;
         
         if (activity.emotion) {
-          checkinContent += `\n\n💭 Émotion ressentie : ${activity.emotion}`;
+          checkinContent += `\n\n💭 Émotion ressentie :\n${activity.emotion}`;
         }
         
         if (activity.intensity) {
-          checkinContent += `\n🌡️ Intensité : ${activity.intensity}/10`;
+          checkinContent += `\n\n🌡️ Intensité :\n${activity.intensity}/10`;
         }
         
         if (activity.need) {
-          checkinContent += `\n🎯 Besoin identifié : ${activity.need}`;
+          checkinContent += `\n\n🎯 Besoin identifié :\n${activity.need}`;
         }
         
         if (activity.content) {
-          checkinContent += `\n\n📝 Notes :\n${activity.content}`;
+          checkinContent += `\n\n📝 Mes notes :\n${activity.content}`;
         }
         
         return checkinContent;
       
       case 'journal':
-        return `Réflexion du soir 🌙\n\n${activity.content}`;
+        return `Réflexion du soir 🌙\n\n📖 Mes pensées :\n${activity.content}`;
       
       case 'meditation':
         const duration = activity.duration || 0;
-        let meditationContent = `Méditation 🧘\n\n⏱️ Durée : ${duration} minutes`;
+        let meditationContent = `Méditation 🧘\n\n⏱️ Durée :\n${duration} minutes`;
         
         if (activity.content && activity.content !== `Méditation de ${duration} minutes`) {
-          meditationContent += `\n\n📝 Réflexions :\n${activity.content}`;
+          meditationContent += `\n\n📝 Mes réflexions :\n${activity.content}`;
         }
         
         return meditationContent;

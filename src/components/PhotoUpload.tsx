@@ -27,6 +27,8 @@ const PhotoUpload: React.FC<PhotoUploadProps> = ({
     const file = event.target.files?.[0];
     if (!file || !user) return;
 
+    console.log('Photo upload started');
+
     // Validation
     if (file.size > 5 * 1024 * 1024) { // 5MB max
       setError('La photo ne peut pas dépasser 5MB');
@@ -41,6 +43,8 @@ const PhotoUpload: React.FC<PhotoUploadProps> = ({
     setUploading(true);
     setError('');
     onUploadStart?.();
+    
+    console.log('Upload start callback called');
 
     try {
       // Delete old photo if exists
@@ -50,6 +54,7 @@ const PhotoUpload: React.FC<PhotoUploadProps> = ({
 
       // Upload new photo - user_id automatiquement récupéré via getUser()
       const photoUrl = await uploadJournalPhoto(file);
+      console.log('Photo uploaded successfully:', photoUrl);
       onPhotoChange(photoUrl);
     } catch (error: any) {
       console.error('Error uploading photo:', error);
@@ -57,6 +62,7 @@ const PhotoUpload: React.FC<PhotoUploadProps> = ({
     } finally {
       setUploading(false);
       onUploadEnd?.();
+      console.log('Upload end callback called');
       // Reset file input
       if (fileInputRef.current) {
         fileInputRef.current.value = '';

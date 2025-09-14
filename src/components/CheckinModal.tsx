@@ -32,15 +32,24 @@ const CheckinModal: React.FC<CheckinModalProps> = ({ isOpen, onClose, onSave }) 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Ne pas soumettre si on est en train d'uploader une photo ou si déjà en train de sauvegarder
-    if (saving || isUploading || createCheckinMutation.isPending) return;
+    // Vérifications pour empêcher la soumission prématurée
+    if (saving || isUploading || createCheckinMutation.isPending) {
+      console.log('Submission blocked - saving:', saving, 'uploading:', isUploading, 'pending:', createCheckinMutation.isPending);
+      return;
+    }
+    
+    // Validation des champs requis
+    if (!formData.emotion.trim()) {
+      console.log('Submission blocked - no emotion');
+      return;
+    }
     
     if (!user) {
       console.error('User not authenticated');
       return;
     }
 
-    // Ne pas changer setSaving ici car il est géré par l'upload de photo
+    setSaving(true);
     
     try {
       // Utiliser React Query pour créer le check-in
