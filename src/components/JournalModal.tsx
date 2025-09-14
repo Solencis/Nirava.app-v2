@@ -38,6 +38,7 @@ const JournalModal: React.FC<JournalModalProps> = ({ isOpen, onClose, onSave }) 
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    e.stopPropagation();
     
     // Vérifications pour empêcher la soumission prématurée
     if (saving || isUploading || createJournalMutation.isPending) {
