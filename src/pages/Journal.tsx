@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Heart, Moon, Timer, Shield, Plus, Calendar, Flame, CheckCircle, History, Cloud, Sparkles, Award, Target, Zap, TrendingUp, Star } from 'lucide-react';
+import { Heart, Moon, Timer, Shield, Plus, Calendar, Flame, CheckCircle, History, Cloud, Sparkles, Award, Target, Zap, TrendingUp, Star, Users } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import CheckinModal from '../components/CheckinModal';
 import JournalModal from '../components/JournalModal';
