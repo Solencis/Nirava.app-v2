@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { X, Heart, Moon, Trash2, RotateCcw, Calendar, AlertTriangle } from 'lucide-react';
 import { useCheckins } from '../hooks/useCheckins';
 import { useJournals } from '../hooks/useJournals';
+import { useAuth } from '../hooks/useAuth';
 import { LoadingSkeleton, HistoryLoadingSkeleton } from './LoadingSkeleton';
 
 interface HistoryEntry {
@@ -24,6 +25,7 @@ interface HistoryModalProps {
 }
 
 const HistoryModal: React.FC<HistoryModalProps> = ({ isOpen, onClose, onStatsUpdate }) => {
+  const { user } = useAuth();
   const [activeTab, setActiveTab] = useState<'checkins' | 'journals' | 'trash'>('checkins');
   const [checkins, setCheckins] = useState<HistoryEntry[]>([]);
   const [journals, setJournals] = useState<HistoryEntry[]>([]);
@@ -34,9 +36,9 @@ const HistoryModal: React.FC<HistoryModalProps> = ({ isOpen, onClose, onStatsUpd
     if (isOpen) {
       // Nettoyer le check-in buggé AVANT de charger les données
       cleanBuggyCheckin();
-      loadData();
+      loadData(user);
     }
-  }, [isOpen]);
+  }, [isOpen, user]);
 
   const cleanBuggyCheckin = () => {
     console.log('🧹 Début du nettoyage du check-in buggé...');
@@ -78,22 +80,21 @@ const HistoryModal: React.FC<HistoryModalProps> = ({ isOpen, onClose, onStatsUpd
     console.log('🧹 Nettoyage terminé');
   };
 
-  const loadData = () => {
+  const loadData = (currentUser: any) => {
     setLoading(true);
     try {
       // Charger depuis localStorage et filtrer par utilisateur connecté si disponible
-      const { user } = useAuth.getState ? useAuth.getState() : { user: null };
       
       let checkinHistory = JSON.parse(localStorage.getItem('checkin-history') || '[]');
       let journalEntries = JSON.parse(localStorage.getItem('journal-entries') || '[]');
       
       // Filtrer par utilisateur si connecté (pour éviter de voir les données d'autres utilisateurs)
-      if (user?.id) {
+      if (currentUser?.id) {
         checkinHistory = checkinHistory.filter((entry: any) => 
-          !entry.user_id || entry.user_id === user.id
+          !entry.user_id || entry.user_id === currentUser.id
         );
         journalEntries = journalEntries.filter((entry: any) => 
-          !entry.user_id || entry.user_id === user.id
+          !entry.user_id || entry.user_id === currentUser.id
         );
       }
       
@@ -107,7 +108,7 @@ const HistoryModal: React.FC<HistoryModalProps> = ({ isOpen, onClose, onStatsUpd
         checkins: checkinHistory.length,
         journals: journalEntries.length,
         trash: trashEntries.length,
-        userId: user?.id
+        userId: currentUser?.id
       });
     } catch (error) {
       console.error('Error loading history data:', error);
