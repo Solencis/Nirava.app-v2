@@ -154,10 +154,9 @@ const HistoryModal: React.FC<HistoryModalProps> = ({ isOpen, onClose, onStatsUpd
     } else {
       const currentJournals = JSON.parse(localStorage.getItem('journal-entries') || '[]');
       const updatedJournals = [restoredEntry, ...currentJournals];
-      console.log('✅ Checkin restored, total:', updatedCheckins.length);
+      console.log('✅ Journal restored, total:', updatedJournals.length);
       setJournals(updatedJournals);
       localStorage.setItem('journal-entries', JSON.stringify(updatedJournals));
-      console.log('✅ Journal restored, total:', updatedJournals.length);
     }
 
     onStatsUpdate();
