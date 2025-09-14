@@ -179,6 +179,31 @@
     from { box-shadow: 0 0 20px rgba(139, 169, 142, 0.2); }
     to { box-shadow: 0 0 30px rgba(139, 169, 142, 0.4); }
   }
+   
+   /* Enhanced button feedback */
+   .btn-addictive {
+     transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+     transform-origin: center;
+   }
+   
+   .btn-addictive:active {
+     transform: scale(0.96);
+     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+   }
+   
+   /* Progress bar animations */
+   .progress-bar {
+     transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+   }
+   
+   .progress-bar.animate {
+     animation: progress-fill 1s ease-out;
+   }
+   
+   @keyframes progress-fill {
+     0% { width: 0%; }
+     100% { width: var(--target-width); }
+   }
 }
 
 /* Enhanced accessibility */

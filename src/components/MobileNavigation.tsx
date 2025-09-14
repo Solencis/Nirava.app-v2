@@ -4,6 +4,10 @@ import { Home, GraduationCap, BookOpen, Users, User } from 'lucide-react';
 
 const MobileNavigation: React.FC = () => {
   const location = useLocation();
+  const [lastTap, setLastTap] = React.useState(0);
+
+const MobileNavigation: React.FC = () => {
+  const location = useLocation();
   const [lastTap, setLastTap] = useState(0);
   
   // Haptic feedback for navigation

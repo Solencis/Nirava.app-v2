@@ -849,6 +849,17 @@ const Community: React.FC = () => {
                                     <span className="text-wasabi font-bold text-xs">{comment.profiles.level}</span>
                                   </div>
                                 )}
+                                {comment.profiles.photo_url ? (
+                                  <img
+                                    src={comment.profiles.photo_url}
+                                    alt={`Photo de ${comment.profiles.display_name}`}
+                                    className="w-5 h-5 rounded-full object-cover border border-stone/20 mr-2"
+                                  />
+                                ) : (
+                                  <div className="w-5 h-5 bg-wasabi/20 rounded-full flex items-center justify-center mr-2">
+                                    <span className="text-wasabi font-bold text-xs">{comment.profiles.level}</span>
+                                  </div>
+                                )}
                                 <button
                                   onClick={() => handleUserClick(comment.user_id)}
                                   className="font-medium text-sm text-gray-700 hover:text-wasabi transition-colors duration-200 active:scale-95"
@@ -858,18 +869,6 @@ const Community: React.FC = () => {
                                 <span className="text-xs text-stone/60 ml-2">{comment.profiles.level}</span>
                               </div>
                               <p className="text-sm text-ink leading-relaxed ml-7">{comment.content}</p>
-                              {comment.profiles.photo_url ? (
-                                <img
-                                  src={comment.profiles.photo_url}
-                                  alt={`Photo de ${comment.profiles.display_name}`}
-                                  className="w-5 h-5 rounded-full object-cover border border-stone/20 mr-1.5"
-                                />
-                              ) : (
-                                <div className="w-5 h-5 bg-wasabi/20 rounded-full flex items-center justify-center mr-1.5">
-                                  <span className="text-wasabi font-bold text-xs">{comment.profiles.level}</span>
-                                </div>
-                              )}
-                              <p className="text-xs text-ink leading-relaxed ml-5.5">{comment.content}</p>
                             </div>
                             {user && comment.user_id === user.id && (
                               <button
@@ -919,9 +918,23 @@ const Community: React.FC = () => {
               <div className="flex items-center">
                 {userProfileData.photo_url ? (
                   <img
-                    src={userProfileData.photo_url}
-                    alt={`Photo de ${userProfileData.display_name}`}
-                    className="w-10 h-10 rounded-full object-cover border-2 border-wasabi/20 mr-3 shadow-lg"
+                    src={post.profiles.photo_url}
+                {post.profiles.photo_url ? (
+                    className="w-8 h-8 rounded-full object-cover border border-stone/20 mr-2"
+                  />
+                ) : (
+                  <div className="w-8 h-8 bg-wasabi/10 rounded-full flex items-center justify-center mr-2">
+                    <User size={14} className="text-wasabi" />
+                  </div>
+                )}
+                <button
+                  onClick={() => handleUserClick(post.user_id)}
+                  className="text-left hover:bg-stone/5 rounded-md p-1 -m-1 transition-colors duration-200"
+                >
+                  <div className="font-semibold text-xs text-gray-700">{post.profiles.display_name}</div>
+                  <div className="text-xs text-stone">{post.profiles.level}</div>
+                </button>
+              </div>
                   />
                 ) : (
                   <div className="w-10 h-10 bg-gradient-to-br from-wasabi to-jade rounded-full flex items-center justify-center mr-3 shadow-lg">
