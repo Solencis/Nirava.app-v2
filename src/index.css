@@ -296,6 +296,200 @@
     animation: shimmer 2s ease-in-out infinite;
   }
 
+  /* Nouvelles animations pour le Journal */
+  @keyframes float-gentle {
+    0%, 100% {
+      transform: translateY(0px) rotate(0deg);
+      opacity: 0.6;
+    }
+    50% {
+      transform: translateY(-8px) rotate(2deg);
+      opacity: 1;
+    }
+  }
+
+  .animate-float-gentle {
+    animation: float-gentle 4s ease-in-out infinite;
+  }
+
+  @keyframes glow-pulse {
+    0%, 100% {
+      box-shadow: 0 0 10px rgba(139, 169, 142, 0.3);
+      opacity: 0.8;
+    }
+    50% {
+      box-shadow: 0 0 25px rgba(139, 169, 142, 0.6), 0 0 35px rgba(139, 169, 142, 0.4);
+      opacity: 1;
+    }
+  }
+
+  .animate-glow-pulse {
+    animation: glow-pulse 3s ease-in-out infinite;
+  }
+
+  @keyframes tick {
+    0%, 100% { transform: rotate(0deg); }
+    25% { transform: rotate(5deg); }
+    75% { transform: rotate(-5deg); }
+  }
+
+  .animate-tick {
+    animation: tick 2s ease-in-out infinite;
+  }
+
+  @keyframes count-up {
+    0% {
+      transform: scale(0.8);
+      opacity: 0;
+    }
+    50% {
+      transform: scale(1.1);
+    }
+    100% {
+      transform: scale(1);
+      opacity: 1;
+    }
+  }
+
+  .animate-count-up {
+    animation: count-up 0.8s ease-out;
+  }
+
+  @keyframes fill-bar {
+    0% { width: 0%; }
+    100% { width: var(--target-width); }
+  }
+
+  .animate-fill-bar {
+    animation: fill-bar 1.2s ease-out;
+  }
+
+  @keyframes pulse-text {
+    0%, 100% { opacity: 0.8; }
+    50% { opacity: 1; }
+  }
+
+  .animate-pulse-text {
+    animation: pulse-text 3s ease-in-out infinite;
+  }
+
+  @keyframes flame-dance {
+    0%, 100% {
+      transform: scale(1) rotate(0deg);
+    }
+    25% {
+      transform: scale(1.05) rotate(2deg);
+    }
+    75% {
+      transform: scale(0.95) rotate(-2deg);
+    }
+  }
+
+  .animate-flame-dance {
+    animation: flame-dance 2s ease-in-out infinite;
+  }
+
+  @keyframes breathe-urgent {
+    0%, 100% {
+      transform: scale(1);
+      opacity: 0.9;
+    }
+    50% {
+      transform: scale(1.08);
+      opacity: 1;
+    }
+  }
+
+  .animate-breathe-urgent {
+    animation: breathe-urgent 2s ease-in-out infinite;
+  }
+
+  @keyframes pulse-emergency {
+    0%, 100% {
+      opacity: 0.1;
+    }
+    50% {
+      opacity: 0.3;
+    }
+  }
+
+  .animate-pulse-emergency {
+    animation: pulse-emergency 1.5s ease-in-out infinite;
+  }
+
+  @keyframes wave {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
+  }
+
+  .animate-wave {
+    animation: wave 2s ease-in-out infinite;
+  }
+
+  @keyframes twinkle {
+    0%, 100% {
+      opacity: 0.3;
+      transform: scale(1);
+    }
+    50% {
+      opacity: 1;
+      transform: scale(1.2);
+    }
+  }
+
+  .animate-twinkle {
+    animation: twinkle 2s ease-in-out infinite;
+  }
+
+  @keyframes rotate-gentle {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+
+  .animate-rotate-gentle {
+    animation: rotate-gentle 8s linear infinite;
+  }
+
+  @keyframes bounce-gentle {
+    0%, 100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-4px);
+    }
+  }
+
+  .animate-bounce-gentle {
+    animation: bounce-gentle 2s ease-in-out infinite;
+  }
+
+  @keyframes shimmer-slow {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
+  }
+
+  .animate-shimmer-slow {
+    animation: shimmer-slow 3s ease-in-out infinite;
+  }
+
+  @keyframes pulse-slow {
+    0%, 100% { opacity: 0.1; }
+    50% { opacity: 0.2; }
+  }
+
+  .animate-pulse-slow {
+    animation: pulse-slow 4s ease-in-out infinite;
+  }
+
+  @keyframes spin-slow {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+
+  .animate-spin-slow {
+    animation: spin-slow 20s linear infinite;
+  }
+
   /* Enhanced breathe animation */
   @keyframes breathe-enhanced {
     0%, 100% {
