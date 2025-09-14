@@ -91,7 +91,7 @@ const DreamJournalModal: React.FC<DreamJournalModalProps> = ({ isOpen, onClose, 
 
       // Utiliser React Query pour créer le journal
       const journalEntry = await createJournalMutation.mutateAsync({
-        type: 'dream',
+        type: 'dream' as any,
         content: dreamContent,
         image_url: formData.photo_url || undefined,
         metadata: {
