@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Share2, Users, AlertTriangle, CheckCircle, Heart, MessageCircle } from 'lucide-react';
+import { Share2, Users, AlertTriangle, CheckCircle, Heart, MessageCircle, Timer, Eye, Zap, Brain } from 'lucide-react';
 import { supabase, JournalActivity, createPost } from '../lib/supabase';
 import { useAuth } from '../hooks/useAuth';
 
@@ -114,6 +114,132 @@ const ShareToCommunityButton: React.FC<ShareToCommunityButtonProps> = ({
     }
   };
 
+  // Fonction pour rendre le contenu avec formatage markdown
+  const renderFormattedContent = (content: string) => {
+    const lines = content.split('\n').slice(0, 4); // Max 4 lignes
+    const truncatedContent = lines.join('\n');
+    const shouldTruncate = content.length > 200 || content.split('\n').length > 4;
+    
+    return (
+      <div className="space-y-1">
+        {lines.map((line, index) => (
+          <div key={index} className="leading-relaxed">
+            {line.includes('**') ? (
+              // Gérer le formatage markdown
+              line.split('**').map((part, partIndex) => 
+                partIndex % 2 === 1 ? (
+                  <strong key={partIndex} className="font-semibold text-ink">{part}</strong>
+                ) : (
+                  <span key={partIndex}>{part}</span>
+                )
+              )
+            ) : (
+              line.trim() || '\u00A0'
+            )}
+          </div>
+        ))}
+        {shouldTruncate && (
+          <div className="text-stone/60 text-xs italic">... (aperçu tronqué)</div>
+        )}
+      </div>
+    );
+  };
+
+  // Fonction pour obtenir le badge d'activité
+  const getActivityBadge = (activity: JournalActivity) => {
+    const badges = {
+      checkin: { text: 'Check-in', color: 'bg-jade/10 text-jade border-jade/20' },
+      journal: { text: 'Journal', color: 'bg-vermilion/10 text-vermilion border-vermilion/20' },
+      meditation: { text: 'Méditation', color: 'bg-forest/10 text-forest border-forest/20' },
+      dream: { text: 'Rêve', color: 'bg-blue-100 text-blue-700 border-blue-200' }
+    };
+    
+    const badge = badges[activity.type] || badges.journal;
+    
+    return (
+      <span className={`px-2 py-0.5 rounded-full text-xs font-medium border ${badge.color}`}>
+        {badge.text}
+      </span>
+    );
+  };
+
+  // Fonction pour obtenir les badges de métadonnées
+  const getMetadataBadges = (activity: JournalActivity) => {
+    const badges = [];
+    
+    if (activity.type === 'checkin') {
+      if (activity.emotion) {
+        badges.push(
+          <span key="emotion" className="bg-jade/10 text-jade px-2 py-0.5 rounded-full text-xs font-medium border border-jade/20 flex items-center">
+            💭 {activity.emotion}
+          </span>
+        );
+      }
+      if (activity.intensity) {
+        const intensityColor = activity.intensity <= 3 ? 'jade' : activity.intensity <= 6 ? 'yellow-600' : activity.intensity <= 8 ? 'vermilion' : 'red-600';
+        badges.push(
+          <span key="intensity" className={`bg-${intensityColor}/10 text-${intensityColor} px-2 py-0.5 rounded-full text-xs font-medium border border-${intensityColor}/20 flex items-center`}>
+            🌡️ {activity.intensity}/10
+          </span>
+        );
+      }
+      if (activity.need) {
+        badges.push(
+          <span key="need" className="bg-forest/10 text-forest px-2 py-0.5 rounded-full text-xs font-medium border border-forest/20 flex items-center">
+            🎯 {activity.need}
+          </span>
+        );
+      }
+    }
+    
+    if (activity.type === 'meditation' && activity.duration) {
+      badges.push(
+        <span key="duration" className="bg-forest/10 text-forest px-2 py-0.5 rounded-full text-xs font-medium border border-forest/20 flex items-center">
+          <Timer size={10} className="mr-1" />
+          {activity.duration} min
+        </span>
+      );
+    }
+    
+    if (activity.type === 'dream' && activity.metadata) {
+      const { lucidity, recurring, nightmare, clarity } = activity.metadata;
+      
+      if (lucidity) {
+        badges.push(
+          <span key="lucid" className="bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full text-xs font-medium border border-blue-200 flex items-center">
+            <Eye size={10} className="mr-1" />
+            Lucide
+          </span>
+        );
+      }
+      if (recurring) {
+        badges.push(
+          <span key="recurring" className="bg-purple-100 text-purple-700 px-2 py-0.5 rounded-full text-xs font-medium border border-purple-200 flex items-center">
+            <Zap size={10} className="mr-1" />
+            Récurrent
+          </span>
+        );
+      }
+      if (nightmare) {
+        badges.push(
+          <span key="nightmare" className="bg-red-100 text-red-700 px-2 py-0.5 rounded-full text-xs font-medium border border-red-200">
+            Cauchemar
+          </span>
+        );
+      }
+      if (clarity && clarity >= 7) {
+        badges.push(
+          <span key="clarity" className="bg-blue-50 text-blue-600 px-2 py-0.5 rounded-full text-xs font-medium border border-blue-100 flex items-center">
+            <Brain size={10} className="mr-1" />
+            Très clair
+          </span>
+        );
+      }
+    }
+    
+    return badges;
+  };
+
   const handleShare = async () => {
     if (!user || sharing || shared) return;
 
@@ -209,24 +335,55 @@ const ShareToCommunityButton: React.FC<ShareToCommunityButtonProps> = ({
                 <p className="text-stone text-sm mb-2">
                   <strong>Aperçu du post :</strong>
                 </p>
-                <div className="bg-white rounded-lg p-3 border border-stone/10">
+                <div className="bg-white rounded-lg p-3 border border-stone/10 max-h-48 overflow-y-auto">
                   <div className="flex items-center mb-2">
                     <span className="text-lg mr-2">{getSourceEmoji(activity.type)}</span>
-                    <span className="text-sm text-stone">Ton activité</span>
+                    <div className="flex-1">
+                      <div className="flex items-center">
+                        <span className="text-sm text-stone mr-2">Ton activité</span>
+                        {getActivityBadge(activity)}
+                      </div>
+                    </div>
                   </div>
-                  <p className="text-ink text-sm leading-relaxed">
-                    {generatePostContent(activity).substring(0, 100)}
-                    {generatePostContent(activity).length > 100 ? '...' : ''}
-                  </p>
+                  
+                  {/* Contenu formaté avec markdown */}
+                  <div className="text-ink text-sm leading-relaxed space-y-2">
+                    {renderFormattedContent(generatePostContent(activity))}
+                  </div>
+                  
+                  {/* Métadonnées visuelles */}
+                  {activity.type !== 'journal' && getMetadataBadges(activity).length > 0 && (
+                    <div className="mt-3 pt-2 border-t border-stone/10">
+                      <div className="flex flex-wrap gap-1">
+                        {getMetadataBadges(activity)}
+                      </div>
+                    </div>
+                  )}
+                  
                   {activity.photo_url && (
-                    <div className="mt-2">
+                    <div className="mt-3 pt-2 border-t border-stone/10">
                       <img 
                         src={activity.photo_url} 
                         alt="Photo" 
-                        className="w-16 h-16 object-cover rounded-lg"
+                        className="w-20 h-20 object-cover rounded-lg border border-stone/10"
                       />
                     </div>
                   )}
+                  
+                  {/* Footer simulé */}
+                  <div className="mt-3 pt-2 border-t border-stone/10 flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="flex items-center text-stone/60">
+                        <Heart size={12} className="mr-1" />
+                        <span className="text-xs">0</span>
+                      </div>
+                      <div className="flex items-center text-stone/60">
+                        <MessageCircle size={12} className="mr-1" />
+                        <span className="text-xs">0</span>
+                      </div>
+                    </div>
+                    <span className="text-xs text-stone/40">À l'instant</span>
+                  </div>
                 </div>
               </div>
 
