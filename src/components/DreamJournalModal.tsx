@@ -143,7 +143,7 @@ const DreamJournalModal: React.FC<DreamJournalModalProps> = ({ isOpen, onClose, 
         type: 'dream',
         content: dreamContent,
         photo_url: formData.photo_url || undefined,
-        created_at: journalEntry.created_at
+        created_at: journalEntry.created_at,
         metadata: {
           title: formData.title.trim(),
           emotions: formData.emotions.trim(),
