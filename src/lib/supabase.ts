@@ -133,8 +133,10 @@ export interface Post {
   profiles: Profile;
   post_likes: PostLike[];
   post_comments: PostComment[];
+  comments: PostComment[];
   likes_count: number;
   is_liked_by_user: boolean;
+  comments_count: number;
 }
 
 export interface PostComment {
@@ -364,8 +366,7 @@ export const getUserPosts = async () => {
       profiles (
         id,
         display_name,
-        level,
-        photo_url
+        level
       ),
       post_likes (
         id,

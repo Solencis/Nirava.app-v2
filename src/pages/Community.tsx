@@ -530,17 +530,6 @@ const Community: React.FC = () => {
               <div className="w-7 h-7 bg-wasabi/20 rounded-full flex items-center justify-center mr-2">
                 <span className="text-wasabi font-bold text-xs">{profile.level}</span>
               </div>
-              {profile.photo_url ? (
-                <img
-                  src={profile.photo_url}
-                  alt={`Photo de ${profile.display_name}`}
-                  className="w-8 h-8 rounded-full object-cover border border-stone/20 mr-2"
-                />
-              ) : (
-                <div className="w-8 h-8 bg-wasabi/10 rounded-full flex items-center justify-center mr-2">
-                  <User size={14} className="text-wasabi" />
-                </div>
-              )}
               <div>
                 <div className="font-semibold text-xs text-gray-700">{profile.display_name}</div>
                 <div className="text-xs text-stone">{profile.level}</div>
@@ -820,25 +809,14 @@ const Community: React.FC = () => {
                           <div className="flex items-start justify-between">
                             <div className="flex-1">
                               <div className="flex items-center mb-1">
-                                {comment.profiles.photo_url ? (
-                                  <img
-                                    src={comment.profiles.photo_url}
-                                    alt={`Photo de ${comment.profiles.display_name}`}
-                                    className="w-5 h-5 rounded-full object-cover border border-stone/20 mr-1.5"
-                                  />
-                                ) : (
-                                  <div className="w-5 h-5 bg-wasabi/20 rounded-full flex items-center justify-center mr-1.5">
-                                    <span className="text-wasabi font-bold text-xs">{comment.profiles.level}</span>
-                                  </div>
-                                )}
+                                <div className="w-4 h-4 bg-wasabi/20 rounded-full flex items-center justify-center mr-1.5">
+                                  <span className="text-wasabi font-bold text-xs">{comment.profiles.level}</span>
+                                </div>
                                 <button
                                   onClick={() => handleUserClick(comment.user_id)}
                                   className="font-medium text-xs text-gray-700 hover:text-wasabi transition-colors duration-200"
                                 >
                                   {comment.profiles.display_name}
-                                </button>
-                              </div>
-                              <p className="text-xs text-ink leading-relaxed ml-6.5">{comment.content}</p>
                               {comment.profiles.photo_url ? (
                                 <img
                                   src={comment.profiles.photo_url}
@@ -898,37 +876,23 @@ const Community: React.FC = () => {
           <div className="fixed top-20 left-2 right-2 z-50 bg-white/98 backdrop-blur-md rounded-lg shadow-xl border border-stone/10 p-3 animate-fade-in-up">
             <div className="flex items-center justify-between mb-2">
               <div className="flex items-center">
-                {userProfileData.photo_url ? (
-                  <img
-                    src={userProfileData.photo_url}
-                    alt={`Photo de ${userProfileData.display_name}`}
-                    className="w-10 h-10 rounded-full object-cover border border-stone/20 mr-3"
-                  />
-                ) : (
-                  <div className="w-10 h-10 bg-wasabi/20 rounded-full flex items-center justify-center mr-3">
-                    <User size={16} className="text-wasabi" />
-                  </div>
-                )}
                 {post.profiles.photo_url ? (
                   <img
                     src={post.profiles.photo_url}
-                {post.profiles.photo_url ? (
-                  <img
-                    src={post.profiles.photo_url}
-                    alt={`Photo de ${post.profiles.display_name}`}
-                    className="w-8 h-8 rounded-full object-cover border border-stone/20 mr-2"
-                  />
-                ) : (
-                  <div className="w-8 h-8 bg-wasabi/10 rounded-full flex items-center justify-center mr-2">
-                    <User size={14} className="text-wasabi" />
-                  </div>
-                )}
                     alt={`Photo de ${post.profiles.display_name}`}
                     className="w-8 h-8 rounded-full object-cover border border-stone/20 mr-2"
                   />
                 ) : (
                   <div className="w-8 h-8 bg-wasabi/20 rounded-full flex items-center justify-center mr-2">
-                    <span className="text-wasabi font-bold text-xs">{post.profiles.level}</span>
+                {userProfileData.photo_url ? (
+                  <img
+                    src={userProfileData.photo_url}
+                    alt={`Photo de ${userProfileData.display_name}`}
+                    className="w-8 h-8 rounded-full object-cover border-2 border-white shadow-sm mr-2"
+                  />
+                ) : (
+                  <div className="w-8 h-8 bg-gradient-to-br from-wasabi to-jade rounded-full flex items-center justify-center mr-2">
+                    <span className="text-white font-bold text-xs">{userProfileData.level}</span>
                   </div>
                 )}
                 <div>
