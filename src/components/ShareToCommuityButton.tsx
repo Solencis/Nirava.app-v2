@@ -22,35 +22,33 @@ const ShareToCommunityButton: React.FC<ShareToCommunityButtonProps> = ({
   const generatePostContent = (activity: JournalActivity): string => {
     switch (activity.type) {
       case 'checkin':
-        let checkinContent = `J'ai fait un check-in émotionnel 🌱 aujourd'hui.`;
+        let checkinContent = `Check-in émotionnel du jour 🌱`;
         
-        if (activity.emotion) {
-          checkinContent += `\n\n💭 Émotion ressentie :\n${activity.emotion}`;
-        }
-        
-        if (activity.intensity) {
-          checkinContent += `\n\n🌡️ Intensité :\n${activity.intensity}/10`;
+        if (activity.emotion && activity.intensity) {
+          checkinContent += `\n\nJe ressens de la ${activity.emotion.toLowerCase()} (${activity.intensity}/10)`;
+        } else if (activity.emotion) {
+          checkinContent += `\n\nJe ressens de la ${activity.emotion.toLowerCase()}`;
         }
         
         if (activity.need) {
-          checkinContent += `\n\n🎯 Besoin identifié :\n${activity.need}`;
+          checkinContent += `\nJ'ai besoin de ${activity.need.toLowerCase()}`;
         }
         
         if (activity.content) {
-          checkinContent += `\n\n📝 Mes notes :\n${activity.content}`;
+          checkinContent += `\n\n${activity.content}`;
         }
         
         return checkinContent;
       
       case 'journal':
-        return `Réflexion du soir 🌙\n\n📖 Mes pensées :\n${activity.content}`;
+        return `Réflexions du soir 🌙\n\n${activity.content}`;
       
       case 'meditation':
         const duration = activity.duration || 0;
-        let meditationContent = `Méditation 🧘\n\n⏱️ Durée :\n${duration} minutes`;
+        let meditationContent = `Méditation de ${duration} minutes 🧘`;
         
         if (activity.content && activity.content !== `Méditation de ${duration} minutes`) {
-          meditationContent += `\n\n📝 Mes réflexions :\n${activity.content}`;
+          meditationContent += `\n\n${activity.content}`;
         }
         
         return meditationContent;

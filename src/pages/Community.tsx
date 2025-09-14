@@ -565,13 +565,13 @@ const Community: React.FC = () => {
                 <div className="flex items-start mb-3">
                   {/* Badge source */}
                   {post.source_type && (
-                    <div className="bg-gradient-to-r from-jade/10 to-wasabi/5 border border-jade/20 rounded-full px-3 py-1 mr-3 mt-1 flex items-center">
+                    <div className="bg-gradient-to-r from-jade/10 to-wasabi/5 border border-jade/20 rounded-full px-2 py-1 mr-2 flex items-center flex-shrink-0">
                       <span className="text-base mr-2">
                         {post.source_type === 'checkin' && '🌱'}
                         {post.source_type === 'journal' && '🌙'}
                         {post.source_type === 'meditation' && '🧘'}
                       </span>
-                      <span className="text-xs font-medium text-jade">
+                      <span className="text-xs font-medium text-jade whitespace-nowrap">
                         {post.source_type === 'checkin' && 'Check-in'}
                         {post.source_type === 'journal' && 'Journal'}
                         {post.source_type === 'meditation' && 'Méditation'}
@@ -582,12 +582,12 @@ const Community: React.FC = () => {
                 
                 <div className="flex items-start">
                   {post.emoji && (
-                    <span className="text-xl mr-2 mt-0.5">{post.emoji}</span>
+                    <span className="text-lg mr-2 mt-0.5 flex-shrink-0">{post.emoji}</span>
                   )}
                   <div className="flex-1">
-                    <div className="text-ink leading-relaxed">
+                    <div className="text-ink leading-relaxed text-sm">
                       {post.content.split('\n').map((paragraph, index) => (
-                        <p key={index} className={paragraph.trim() ? 'mb-2' : 'mb-1'}>
+                        <p key={index} className={paragraph.trim() ? 'mb-1.5' : 'mb-0.5'}>
                           {paragraph.trim() || '\u00A0'}
                         </p>
                       ))}
@@ -595,30 +595,30 @@ const Community: React.FC = () => {
                     
                     {/* Métadonnées pour les posts partagés */}
                     {post.metadata && (
-                      <div className="mt-3 p-3 bg-stone/5 rounded-xl border border-stone/10">
-                        <div className="flex flex-wrap gap-3 text-xs">
+                      <div className="mt-2 p-2 bg-stone/5 rounded-lg border border-stone/10">
+                        <div className="flex flex-wrap gap-2 text-xs">
                           {post.metadata.emotion && (
-                            <div className="flex items-center">
-                              <span className="text-jade font-medium mr-1">Émotion:</span>
-                              <span className="text-stone">{post.metadata.emotion}</span>
+                            <div className="flex items-center bg-jade/10 px-2 py-1 rounded-full">
+                              <span className="text-jade font-medium mr-1">💭</span>
+                              <span className="text-jade text-xs">{post.metadata.emotion}</span>
                             </div>
                           )}
                           {post.metadata.intensity && (
-                            <div className="flex items-center">
-                              <span className="text-vermilion font-medium mr-1">Intensité:</span>
-                              <span className="text-stone">{post.metadata.intensity}/10</span>
+                            <div className="flex items-center bg-vermilion/10 px-2 py-1 rounded-full">
+                              <span className="text-vermilion font-medium mr-1">🌡️</span>
+                              <span className="text-vermilion text-xs">{post.metadata.intensity}/10</span>
                             </div>
                           )}
                           {post.metadata.need && (
-                            <div className="flex items-center">
-                              <span className="text-forest font-medium mr-1">Besoin:</span>
-                              <span className="text-stone">{post.metadata.need}</span>
+                            <div className="flex items-center bg-forest/10 px-2 py-1 rounded-full">
+                              <span className="text-forest font-medium mr-1">🎯</span>
+                              <span className="text-forest text-xs">{post.metadata.need}</span>
                             </div>
                           )}
                           {post.metadata.duration && (
-                            <div className="flex items-center">
-                              <span className="text-sunset font-medium mr-1">Durée:</span>
-                              <span className="text-stone">{post.metadata.duration} min</span>
+                            <div className="flex items-center bg-sunset/10 px-2 py-1 rounded-full">
+                              <span className="text-sunset font-medium mr-1">⏱️</span>
+                              <span className="text-sunset text-xs">{post.metadata.duration} min</span>
                             </div>
                           )}
                         </div>
@@ -629,11 +629,11 @@ const Community: React.FC = () => {
                 
                 {/* Image */}
                 {post.image_url && (
-                  <div className="mt-3">
+                  <div className="mt-2">
                     <img 
                       src={post.image_url} 
                       alt="Photo partagée" 
-                      className="w-full max-w-sm h-48 object-cover rounded-xl border border-stone/10 shadow-sm"
+                      className="w-full max-w-xs h-32 object-cover rounded-lg border border-stone/10 shadow-sm"
                     />
                   </div>
                 )}
@@ -644,59 +644,59 @@ const Community: React.FC = () => {
                 <div className="flex items-center gap-2">
                   <button
                     onClick={() => toggleLike(post.id, post.is_liked_by_user)}
-                    className={`flex items-center px-3 py-2 rounded-full text-sm transition-all duration-300 ${
+                    className={`flex items-center px-2 py-1.5 rounded-full text-xs transition-all duration-300 ${
                       post.is_liked_by_user
                         ? 'bg-red-50 text-red-600' 
                         : 'hover:bg-stone/10 text-stone'
                     }`}
                   >
                     <Heart 
-                      size={16} 
+                      size={14} 
                       className={`mr-1 ${post.is_liked_by_user ? 'fill-current' : ''}`} 
                     />
-                    {post.likes_count > 0 && <span>{post.likes_count}</span>}
+                    {post.likes_count > 0 && <span className="font-medium">{post.likes_count}</span>}
                   </button>
                   
                   <button
                     onClick={() => toggleComments(post.id)}
-                    className="flex items-center px-3 py-2 rounded-full text-sm hover:bg-stone/10 text-stone transition-all duration-300"
+                    className="flex items-center px-2 py-1.5 rounded-full text-xs hover:bg-stone/10 text-stone transition-all duration-300"
                   >
-                    <MessageCircle size={16} className="mr-1" />
-                    {post.comments_count > 0 && <span>{post.comments_count}</span>}
+                    <MessageCircle size={14} className="mr-1" />
+                    {post.comments_count > 0 && <span className="font-medium">{post.comments_count}</span>}
                     {expandedComments.has(post.id) ? 
-                      <ChevronUp size={14} className="ml-1" /> : 
-                      <ChevronDown size={14} className="ml-1" />
+                      <ChevronUp size={12} className="ml-1" /> : 
+                      <ChevronDown size={12} className="ml-1" />
                     }
                   </button>
                   
                   {user && post.user_id === user.id && (
                     <button
                       onClick={() => handleDeleteClick(post.id)}
-                      className="text-stone hover:text-red-600 transition-colors duration-300 px-2 py-1 rounded-full hover:bg-red-50"
+                      className="text-stone hover:text-red-600 transition-colors duration-300 p-1.5 rounded-full hover:bg-red-50"
                       title="Supprimer mon message"
                     >
-                      <Trash2 size={16} />
+                      <Trash2 size={14} />
                     </button>
                   )}
                 </div>
                 
-                <div className="text-xs text-stone/60">
+                <div className="text-xs text-stone/50">
                   {user && post.user_id === user.id ? 'Mon message' : 'Communauté'}
                 </div>
               </div>
               
               {/* Section commentaires */}
               {expandedComments.has(post.id) && (
-                <div className="mt-4 pt-4 border-t border-stone/10">
+                <div className="mt-3 pt-3 border-t border-stone/10">
                   {/* Formulaire d'ajout de commentaire */}
-                  <div className="mb-4">
+                  <div className="mb-3">
                     <div className="flex gap-2">
                       <input
                         type="text"
                         value={newComment[post.id] || ''}
                         onChange={(e) => setNewComment(prev => ({ ...prev, [post.id]: e.target.value }))}
                         placeholder="Ajouter un commentaire..."
-                        className="flex-1 px-3 py-2 bg-stone/5 border border-stone/20 rounded-xl focus:border-wasabi focus:ring-2 focus:ring-wasabi/20 transition-all duration-300 text-sm"
+                        className="flex-1 px-3 py-2 bg-stone/5 border border-stone/20 rounded-lg focus:border-wasabi focus:ring-1 focus:ring-wasabi/20 transition-all duration-300 text-sm"
                         maxLength={200}
                         onKeyPress={(e) => {
                           if (e.key === 'Enter' && !e.shiftKey) {
@@ -708,49 +708,49 @@ const Community: React.FC = () => {
                       <button
                         onClick={() => addComment(post.id)}
                         disabled={!newComment[post.id]?.trim() || submittingComment[post.id]}
-                        className="bg-wasabi text-white px-4 py-2 rounded-xl text-sm font-medium hover:bg-wasabi/90 transition-colors duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
+                        className="bg-wasabi text-white px-3 py-2 rounded-lg text-sm font-medium hover:bg-wasabi/90 transition-colors duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
                       >
                         {submittingComment[post.id] ? (
-                          <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                          <div className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
                         ) : (
-                          <Send size={14} />
+                          <Send size={12} />
                         )}
                       </button>
                     </div>
                   </div>
                   
                   {/* Liste des commentaires */}
-                  <div className="space-y-3">
+                  <div className="space-y-2">
                     {post.comments && post.comments.length > 0 ? (
                       post.comments
                         .sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime())
                         .map(comment => (
-                        <div key={comment.id} className="bg-stone/5 rounded-xl p-3">
+                        <div key={comment.id} className="bg-stone/5 rounded-lg p-2.5">
                           <div className="flex items-start justify-between">
                             <div className="flex-1">
-                              <div className="flex items-center mb-1">
-                                <div className="w-6 h-6 bg-wasabi/20 rounded-full flex items-center justify-center mr-2">
+                              <div className="flex items-center mb-0.5">
+                                <div className="w-5 h-5 bg-wasabi/20 rounded-full flex items-center justify-center mr-2">
                                   <span className="text-wasabi font-bold text-xs">{comment.profiles.level}</span>
                                 </div>
-                                <span className="font-semibold text-xs text-gray-700">{comment.profiles.display_name}</span>
-                                <span className="text-xs text-stone ml-2">{getRelativeTime(comment.created_at)}</span>
+                                <span className="font-medium text-xs text-gray-700">{comment.profiles.display_name}</span>
+                                <span className="text-xs text-stone/60 ml-2">{getRelativeTime(comment.created_at)}</span>
                               </div>
-                              <p className="text-sm text-ink leading-relaxed ml-8">{comment.content}</p>
+                              <p className="text-sm text-ink leading-relaxed ml-7">{comment.content}</p>
                             </div>
                             {user && comment.user_id === user.id && (
                               <button
                                 onClick={() => handleDeleteComment(comment.id)}
-                                className="text-stone hover:text-red-600 transition-colors duration-300 ml-2"
+                                className="text-stone/60 hover:text-red-600 transition-colors duration-300 ml-2 p-1"
                                 title="Supprimer mon commentaire"
                               >
-                                <Trash2 size={14} />
+                                <Trash2 size={12} />
                               </button>
                             )}
                           </div>
                         </div>
                       ))
                     ) : (
-                      <p className="text-stone text-sm text-center py-4">Aucun commentaire pour le moment</p>
+                      <p className="text-stone/60 text-xs text-center py-3">Aucun commentaire pour le moment</p>
                     )}
                   </div>
                 </div>
