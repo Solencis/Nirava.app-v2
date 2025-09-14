@@ -296,7 +296,7 @@ const CheckinModal: React.FC<CheckinModalProps> = ({ isOpen, onClose, onSave }) 
             </p>
             <AudioPlayer 
               title="Méditation de centrage"
-              audioSrc="/audios/n1-audio-meditation.mp3"
+              audioSrc="/audios/n1-check-in.mp3"
               className="mb-0"
             />
           </div>
