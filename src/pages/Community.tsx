@@ -195,7 +195,15 @@ const Community: React.FC = () => {
             user_id: user.id
           });
 
-        if (error) throw error;
+        if (error) {
+          // If it's a unique constraint violation, the like already exists
+          // This can happen due to race conditions or UI state inconsistencies
+          if (error.code === '23505') {
+            // Ignore the error - the desired state (post being liked) is already achieved
+            return;
+          }
+          throw error;
+        }
       }
     } catch (error) {
       console.error('Error toggling like:', error);
