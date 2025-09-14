@@ -54,7 +54,9 @@ const Login: React.FC = () => {
 
     try {
       await signInWithPassword(trimmedEmail, formData.password);
-      // La redirection sera gérée par useAuth
+      // Redirection manuelle après connexion réussie
+      const from = (location.state as any)?.from?.pathname || '/profile';
+      window.location.href = from;
     } catch (error: any) {
       console.error('Login error:', error);
       

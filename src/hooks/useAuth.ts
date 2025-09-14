@@ -37,8 +37,8 @@ export const useAuth = () => {
           console.log('User signed in, creating/updating profile...');
           await createOrUpdateProfile(session.user);
           
-          // Rediriger vers le profil après connexion réussie
-          window.location.href = '/profile';
+          // Ne pas rediriger automatiquement - laisser le composant gérer la redirection
+          console.log('User signed in successfully');
         } else if (event === 'SIGNED_OUT') {
           // Utilisateur déconnecté : nettoyer les données locales
           localStorage.removeItem('user-profile');
