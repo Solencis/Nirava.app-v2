@@ -87,7 +87,15 @@ const GlobalAudioController: React.FC = () => {
 
   // Handle audio errors
   const handleError = (e: React.SyntheticEvent<HTMLAudioElement, Event>) => {
-    console.error('❌ Audio error for', current?.title, ':', e.currentTarget.error);
+    const error = e.currentTarget.error;
+    console.error('❌ Audio error for', current?.title, ':', error?.message || 'Unknown error');
+    
+    // If audio file is missing or corrupted, stop playback and clear current track
+    if (error?.code === MediaError.MEDIA_ERR_SRC_NOT_SUPPORTED || 
+        error?.code === MediaError.MEDIA_ERR_DECODE) {
+      console.warn('Audio file not found or corrupted, stopping playback');
+      stop();
+    }
   };
 
   // Handle when audio can play

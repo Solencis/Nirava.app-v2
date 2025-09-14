@@ -47,35 +47,35 @@ export const AMBIENCES: Ambience[] = [
   {
     key: 'wave',
     title: 'Vagues',
-    src: '/sounds/wave.mp3',
+    src: '/sounds/ocean-waves.mp3',
     description: 'Rythme lent et régulier de l\'océan.',
     emoji: '🌊'
   },
   {
     key: 'forest',
     title: 'Forêt',
-    src: '/sounds/forest.mp3',
+    src: '/sounds/forest-birds.mp3',
     description: 'Oiseaux et souffle du vent, nature paisible.',
     emoji: '🌲'
   },
   {
     key: 'mantra',
     title: 'Mantra',
-    src: '/sounds/mantra.mp3',
+    src: '/sounds/om-chanting.mp3',
     description: 'Chant doux et enveloppant.',
     emoji: '🕉️'
   },
   {
     key: 'hz432', 
     title: '432Hz',
-    src: '/sounds/432hz.mp3',
+    src: '/sounds/healing-frequency.mp3',
     description: 'Fréquence apaisante pour relâcher les tensions.',
     emoji: '🎵'
   },
   {
     key: 'relax',
     title: 'Relaxation',
-    src: '/sounds/relaxation.mp3',
+    src: '/sounds/ambient-calm.mp3',
     description: 'Texture ambient pour détente profonde.',
     emoji: '🫧'
   }
