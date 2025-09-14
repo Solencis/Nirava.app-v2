@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Share2, Users, AlertTriangle, CheckCircle } from 'lucide-react';
+import { Share2, Users, AlertTriangle, CheckCircle, Heart, MessageCircle } from 'lucide-react';
 import { supabase, JournalActivity, createPost } from '../lib/supabase';
 import { useAuth } from '../hooks/useAuth';
 
