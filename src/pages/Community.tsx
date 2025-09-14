@@ -629,11 +629,13 @@ const Community: React.FC = () => {
                         {post.source_type === 'checkin' && '🌱'}
                         {post.source_type === 'journal' && '🌙'}
                         {post.source_type === 'meditation' && '🧘'}
+                        {post.source_type === 'dream' && '☁️'}
                       </span>
                       <span className="text-xs font-medium text-jade whitespace-nowrap leading-none">
                         {post.source_type === 'checkin' && 'Check-in'}
                         {post.source_type === 'journal' && 'Journal'}
                         {post.source_type === 'meditation' && 'Méditation'}
+                        {post.source_type === 'dream' && 'Rêve'}
                       </span>
                     </div>
                   )}

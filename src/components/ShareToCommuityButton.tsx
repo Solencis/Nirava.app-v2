@@ -53,6 +53,9 @@ const ShareToCommunityButton: React.FC<ShareToCommunityButtonProps> = ({
         
         return meditationContent;
       
+      case 'dream':
+        return `Journal de rêves 🌙\n\n${activity.content}`;
+      
       default:
         return activity.content;
     }
@@ -63,6 +66,7 @@ const ShareToCommunityButton: React.FC<ShareToCommunityButtonProps> = ({
       case 'checkin': return '🌱';
       case 'journal': return '🌙';
       case 'meditation': return '🧘';
+      case 'dream': return '☁️';
       default: return '✨';
     }
   };

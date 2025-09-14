@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { Heart, Moon, Timer, Shield, Plus, Calendar, Flame, CheckCircle, History } from 'lucide-react';
+import { Heart, Moon, Timer, Shield, Plus, Calendar, Flame, CheckCircle, History, Cloud } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import CheckinModal from '../components/CheckinModal';
 import JournalModal from '../components/JournalModal';
 import MeditationModal from '../components/MeditationModal';
 import EmergencyPause from '../components/EmergencyPause';
 import HistoryModal from '../components/HistoryModal';
+import DreamJournalModal from '../components/DreamJournalModal';
 import { useAuth } from '../hooks/useAuth';
 
 interface JournalStats {
@@ -13,6 +14,7 @@ interface JournalStats {
   journals: number;
   meditation: number;
   streak: number;
+  dreams: number;
 }
 
 const Journal: React.FC = () => {
@@ -21,7 +23,8 @@ const Journal: React.FC = () => {
     checkins: 0,
     journals: 0,
     meditation: 0,
-    streak: 0
+    streak: 0,
+    dreams: 0
   });
   
   const [showCheckin, setShowCheckin] = useState(false);
@@ -29,6 +32,7 @@ const Journal: React.FC = () => {
   const [showMeditation, setShowMeditation] = useState(false);
   const [showEmergencyPause, setShowEmergencyPause] = useState(false);
   const [showHistory, setShowHistory] = useState(false);
+  const [showDreamJournal, setShowDreamJournal] = useState(false);
   const [loading, setLoading] = useState(true);
 
   const motivationalMessages = [
@@ -91,11 +95,18 @@ const Journal: React.FC = () => {
       // Streak de journaux
       const currentStreak = parseInt(localStorage.getItem('current-streak') || '0');
 
+      // Rêves cette semaine
+      const dreamEntries = JSON.parse(localStorage.getItem('dream-entries') || '[]');
+      const thisWeekDreams = dreamEntries.filter((entry: any) => 
+        new Date(entry.timestamp || entry.created_at) > oneWeekAgo
+      ).length;
+
       setStats({
         checkins: thisWeekCheckins,
         journals: journalEntries.length,
         meditation: Math.round(thisWeekMeditation),
-        streak: currentStreak
+        streak: currentStreak,
+        dreams: thisWeekDreams
       });
     } catch (error) {
       console.error('Error loading local stats:', error);
@@ -133,10 +144,10 @@ const Journal: React.FC = () => {
       {/* Progression récapitulative */}
       <div className="bg-white/90 backdrop-blur-sm rounded-2xl p-6 shadow-soft border border-stone/10 mb-8">
         <h2 className="text-lg font-bold text-ink mb-4" style={{ fontFamily: "'Shippori Mincho', serif" }}>
-          Ta pratique cette semaine
+          Ton parcours cette semaine
         </h2>
         
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-2 gap-3">
           <div className="text-center">
             <div className="text-2xl font-bold text-jade mb-1">{stats.checkins}</div>
             <div className="text-xs text-stone">Check-ins</div>
@@ -150,13 +161,21 @@ const Journal: React.FC = () => {
             <div className="text-xs text-stone">Min méditation</div>
           </div>
           <div className="text-center">
-            <div className="text-2xl font-bold text-sunset mb-1">{stats.streak}</div>
-            <div className="text-xs text-stone">Jours consécutifs</div>
+            <div className="text-2xl font-bold text-blue-600 mb-1">{stats.dreams}</div>
+            <div className="text-xs text-stone">Rêves notés</div>
+          </div>
+        </div>
+        
+        {/* Streak en bas */}
+        <div className="mt-4 pt-3 border-t border-stone/10 text-center">
+          <div className="flex items-center justify-center">
+            <Flame className="w-4 h-4 text-sunset mr-2" />
+            <span className="text-sm font-medium text-ink">{stats.streak} jours consécutifs</span>
           </div>
         </div>
       </div>
 
-      {/* 4 cartes principales */}
+      {/* 5 cartes principales */}
       <div className="grid grid-cols-2 gap-4 mb-6">
         {/* Check-in émotionnel */}
         <button
@@ -172,6 +191,23 @@ const Journal: React.FC = () => {
           <p className="text-xs text-stone mb-2">Comment te sens-tu ?</p>
           <div className="text-xs text-jade font-medium">
             {stats.checkins} cette semaine
+          </div>
+        </button>
+
+        {/* Journal de rêves */}
+        <button
+          onClick={() => setShowDreamJournal(true)}
+          className="group bg-white/90 backdrop-blur-sm rounded-2xl p-6 shadow-soft border border-stone/10 text-center transition-all duration-300 hover:scale-105 hover:shadow-lg hover:bg-blue-50/50 min-h-[160px] flex flex-col justify-center"
+        >
+          <div className="w-12 h-12 mx-auto mb-3 text-blue-600 group-hover:scale-110 transition-transform duration-300">
+            <Cloud size={48} strokeWidth={1.5} />
+          </div>
+          <h3 className="font-bold text-ink mb-2" style={{ fontFamily: "'Shippori Mincho', serif" }}>
+            Journal de rêves
+          </h3>
+          <p className="text-xs text-stone mb-2">Capture tes rêves au réveil</p>
+          <div className="text-xs text-blue-600 font-medium">
+            {stats.dreams} rêves cette semaine
           </div>
         </button>
 
@@ -281,6 +317,12 @@ const Journal: React.FC = () => {
         isOpen={showHistory}
         onClose={() => setShowHistory(false)}
         onStatsUpdate={refreshStats}
+      />
+      
+      <DreamJournalModal 
+        isOpen={showDreamJournal}
+        onClose={() => setShowDreamJournal(false)}
+        onSave={refreshStats}
       />
     </div>
   );
