@@ -44,11 +44,9 @@ const MeditationModal: React.FC<MeditationModalProps> = ({ isOpen, onClose, onSa
   useEffect(() => {
     if (meditationState.isActive && !isFreeMode && meditationState.remaining !== null && meditationState.remaining <= 0) {
       // Meditation completed
-      playGong();
       saveMeditationSession();
-      stopMeditation();
     }
-  }, [meditationState.isActive, isFreeMode, meditationState.remaining]);
+  }, [meditationState.remaining, isFreeMode]);
 
   const playGong = () => {
     // Son de gong amélioré - plus audible et réaliste
@@ -204,7 +202,6 @@ const MeditationModal: React.FC<MeditationModalProps> = ({ isOpen, onClose, onSa
       playAmbience(currentAmbience);
     }
     
-    playGong();
     saveMeditationSession();
     stopMeditation();
   };

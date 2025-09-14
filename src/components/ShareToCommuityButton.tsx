@@ -116,30 +116,55 @@ const ShareToCommunityButton: React.FC<ShareToCommunityButtonProps> = ({
 
   // Fonction pour rendre le contenu avec formatage markdown
   const renderFormattedContent = (content: string) => {
-    const lines = content.split('\n').slice(0, 4); // Max 4 lignes
-    const truncatedContent = lines.join('\n');
-    const shouldTruncate = content.length > 200 || content.split('\n').length > 4;
+    // Traitement spécial pour les rêves avec formatage markdown
+    const allLines = content.split('\n');
+    const maxLines = 4;
+    const maxChars = 200;
+    
+    let displayLines = [];
+    let charCount = 0;
+    let shouldTruncate = false;
+    
+    for (let i = 0; i < allLines.length && displayLines.length < maxLines; i++) {
+      const line = allLines[i];
+      if (charCount + line.length > maxChars) {
+        shouldTruncate = true;
+        break;
+      }
+      displayLines.push(line);
+      charCount += line.length;
+    }
+    
+    if (allLines.length > maxLines) {
+      shouldTruncate = true;
+    }
     
     return (
-      <div className="space-y-1">
-        {lines.map((line, index) => (
-          <div key={index} className="leading-relaxed">
+      <div className="space-y-1 max-h-48 overflow-hidden">
+        {displayLines.map((line, index) => (
+          <div key={index} className="leading-relaxed text-sm">
             {line.includes('**') ? (
-              // Gérer le formatage markdown
-              line.split('**').map((part, partIndex) => 
+              // Gérer le formatage markdown pour les textes en gras
+              <div className="break-words">
+                {line.split('**').map((part, partIndex) => 
                 partIndex % 2 === 1 ? (
-                  <strong key={partIndex} className="font-semibold text-ink">{part}</strong>
+                  <strong key={partIndex} className="font-bold text-ink">{part}</strong>
                 ) : (
-                  <span key={partIndex}>{part}</span>
+                  <span key={partIndex} className="text-ink">{part}</span>
                 )
-              )
+                )}
+              </div>
             ) : (
-              line.trim() || '\u00A0'
+              <div className="text-ink break-words">
+                {line.trim() || '\u00A0'}
+              </div>
             )}
           </div>
         ))}
         {shouldTruncate && (
-          <div className="text-stone/60 text-xs italic">... (aperçu tronqué)</div>
+          <div className="text-stone/60 text-xs italic mt-2 border-t border-stone/10 pt-1">
+            ... (aperçu tronqué pour le partage)
+          </div>
         )}
       </div>
     );

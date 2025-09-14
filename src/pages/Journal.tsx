@@ -88,8 +88,14 @@ const Journal: React.FC = () => {
       // Journaux du soir uniquement - filtrage strict
       const journalEntries = JSON.parse(localStorage.getItem('journal-entries') || '[]')
         .filter((entry: any) => {
-          // Seuls les journaux du soir explicites
-          return entry.type === 'journal' && entry.content && !entry.title && !entry.emotions && !entry.symbols;
+          // Seuls les journaux du soir explicites (pas de rêves, pas de méditation)
+          return entry.type === 'journal' && 
+                 entry.content && 
+                 !entry.title && 
+                 !entry.emotions && 
+                 !entry.symbols &&
+                 !entry.duration && // Exclure les méditations
+                 (!entry.metadata || (!entry.metadata.title && !entry.metadata.emotions && !entry.metadata.symbols));
         });
       
       // Méditation cette semaine (depuis le store audio)

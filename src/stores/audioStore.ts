@@ -214,12 +214,13 @@ export const useAudioStore = create<AudioState & AudioActions>()(
           const totalElapsed = Math.floor((now - state.meditationStartTime - state.meditationTotalPauseTime) / 1000);
           const newElapsed = Math.max(0, totalElapsed);
           
-          // Add meditation time every minute (60 seconds)
-          const previousMinutes = Math.floor(state.meditationElapsed / 60);
-          const currentMinutes = Math.floor(newElapsed / 60);
+          // Add meditation time every 10 seconds for more responsive tracking
+          const previousTenSeconds = Math.floor(state.meditationElapsed / 10);
+          const currentTenSeconds = Math.floor(newElapsed / 10);
           
-          if (currentMinutes > previousMinutes) {
-            const minutesToAdd = currentMinutes - previousMinutes;
+          if (currentTenSeconds > previousTenSeconds) {
+            const secondsToAdd = (currentTenSeconds - previousTenSeconds) * 10;
+            const minutesToAdd = secondsToAdd / 60;
             state.addMeditationTime(minutesToAdd);
           }
           
@@ -227,6 +228,8 @@ export const useAudioStore = create<AudioState & AudioActions>()(
           
           // Auto-stop if target duration reached
           if (state.meditationDuration && newElapsed >= state.meditationDuration * 60) {
+            // Play completion gong
+            state.playCompletionGong();
             state.stopMeditation();
           }
         }
@@ -346,6 +349,63 @@ export const useAudioStore = create<AudioState & AudioActions>()(
         const state = get();
         const newMinutes = Math.max(0, state.meditationWeekMinutes - minutes);
         set({ meditationWeekMinutes: newMinutes });
+      },
+
+      playCompletionGong: () => {
+        // Son de gong de fin - audible même si modal fermé
+        try {
+          const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+          
+          // Créer plusieurs oscillateurs pour un son riche
+          const oscillator1 = audioContext.createOscillator();
+          const oscillator2 = audioContext.createOscillator();
+          const oscillator3 = audioContext.createOscillator();
+          const gainNode = audioContext.createGain();
+          const gainNode2 = audioContext.createGain();
+          const gainNode3 = audioContext.createGain();
+          const masterGain = audioContext.createGain();
+          
+          // Connecter les oscillateurs
+          oscillator1.connect(gainNode);
+          oscillator2.connect(gainNode2);
+          oscillator3.connect(gainNode3);
+          gainNode.connect(masterGain);
+          gainNode2.connect(masterGain);
+          gainNode3.connect(masterGain);
+          masterGain.connect(audioContext.destination);
+          
+          // Fréquences harmoniques pour un son de gong réaliste
+          oscillator1.frequency.setValueAtTime(220, audioContext.currentTime);
+          oscillator1.frequency.exponentialRampToValueAtTime(110, audioContext.currentTime + 4);
+          
+          oscillator2.frequency.setValueAtTime(330, audioContext.currentTime);
+          oscillator2.frequency.exponentialRampToValueAtTime(165, audioContext.currentTime + 4);
+          
+          oscillator3.frequency.setValueAtTime(440, audioContext.currentTime);
+          oscillator3.frequency.exponentialRampToValueAtTime(220, audioContext.currentTime + 4);
+          
+          // Volume élevé et décroissance lente
+          masterGain.gain.setValueAtTime(0.7, audioContext.currentTime);
+          masterGain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 4);
+          
+          gainNode.gain.setValueAtTime(0.5, audioContext.currentTime);
+          gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 4);
+          
+          gainNode2.gain.setValueAtTime(0.4, audioContext.currentTime);
+          gainNode2.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 4);
+          
+          gainNode3.gain.setValueAtTime(0.3, audioContext.currentTime);
+          gainNode3.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 4);
+          
+          oscillator1.start(audioContext.currentTime);
+          oscillator1.stop(audioContext.currentTime + 4);
+          oscillator2.start(audioContext.currentTime);
+          oscillator2.stop(audioContext.currentTime + 4);
+          oscillator3.start(audioContext.currentTime);
+          oscillator3.stop(audioContext.currentTime + 4);
+        } catch (error) {
+          console.error('Error playing completion gong:', error);
+        }
       }
     }),
     {
