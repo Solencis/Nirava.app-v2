@@ -817,9 +817,17 @@ const Community: React.FC = () => {
                                   className="font-medium text-xs text-gray-700 hover:text-wasabi transition-colors duration-200"
                                 >
                                   {comment.profiles.display_name}
-                                </button>
-                                <span className="text-xs text-stone/50 ml-1">{getRelativeTime(comment.created_at)}</span>
-                              </div>
+                              {comment.profiles.photo_url ? (
+                                <img
+                                  src={comment.profiles.photo_url}
+                                  alt={`Photo de ${comment.profiles.display_name}`}
+                                  className="w-5 h-5 rounded-full object-cover border border-stone/20 mr-1.5"
+                                />
+                              ) : (
+                                <div className="w-5 h-5 bg-wasabi/20 rounded-full flex items-center justify-center mr-1.5">
+                                  <span className="text-wasabi font-bold text-xs">{comment.profiles.level}</span>
+                                </div>
+                              )}
                               <p className="text-xs text-ink leading-relaxed ml-5.5">{comment.content}</p>
                             </div>
                             {user && comment.user_id === user.id && (
@@ -868,9 +876,17 @@ const Community: React.FC = () => {
           <div className="fixed top-20 left-2 right-2 z-50 bg-white/98 backdrop-blur-md rounded-lg shadow-xl border border-stone/10 p-3 animate-fade-in-up">
             <div className="flex items-center justify-between mb-2">
               <div className="flex items-center">
-                <div className="w-6 h-6 bg-gradient-to-br from-wasabi to-jade rounded-full flex items-center justify-center mr-2">
-                  <span className="text-white font-bold text-xs">{userProfileData.level}</span>
-                </div>
+                {post.profiles.photo_url ? (
+                  <img
+                    src={post.profiles.photo_url}
+                    alt={`Photo de ${post.profiles.display_name}`}
+                    className="w-8 h-8 rounded-full object-cover border border-stone/20 mr-2"
+                  />
+                ) : (
+                  <div className="w-8 h-8 bg-wasabi/20 rounded-full flex items-center justify-center mr-2">
+                    <span className="text-wasabi font-bold text-xs">{post.profiles.level}</span>
+                  </div>
+                )}
                 <div>
                   <h3 className="font-bold text-xs text-ink" style={{ fontFamily: "'Shippori Mincho', serif" }}>
                     {userProfileData.display_name}
