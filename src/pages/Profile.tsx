@@ -13,7 +13,8 @@ const ProfilePage: React.FC = () => {
     checkins: 0,
     journals: 0,
     meditationMinutes: 0,
-    currentStreak: 0
+    currentStreak: 0,
+    dreams: 0
   });
   const [editForm, setEditForm] = useState({
     display_name: '',
@@ -66,7 +67,7 @@ const ProfilePage: React.FC = () => {
       ).length;
 
       // Journaux écrits (total)
-      const journalEntries = JSON.parse(localStorage.getItem('journal-entries') || '[]');
+      const journalEntries = JSON.parse(localStorage.getItem('journal-entries') || '[]').filter((entry: any) => entry.type !== 'dream');
       
       // Rêves cette semaine
       const dreamEntries = JSON.parse(localStorage.getItem('dream-entries') || '[]');
@@ -83,9 +84,10 @@ const ProfilePage: React.FC = () => {
 
       setStats({
         checkins: thisWeekCheckins,
-        journals: journalEntries.length + thisWeekDreams, // Inclure les rêves dans le total
+        journals: journalEntries.length, // Journaux du soir uniquement
         meditationMinutes: Math.round(thisWeekMeditation),
-        currentStreak
+        currentStreak,
+        dreams: thisWeekDreams // Ajouter les rêves séparément
       });
     } catch (error) {
       console.error('Error loading user stats:', error);
@@ -207,7 +209,13 @@ const ProfilePage: React.FC = () => {
           <div className="text-center p-4 bg-vermilion/5 rounded-xl border border-vermilion/10">
             <BookOpen className="w-6 h-6 text-vermilion mx-auto mb-2" />
             <div className="text-2xl font-bold text-vermilion mb-1">{stats.journals}</div>
-            <div className="text-xs text-stone">Journaux écrits</div>
+            <div className="text-xs text-stone">Journaux du soir</div>
+          </div>
+          
+          <div className="text-center p-4 bg-blue-50 rounded-xl border border-blue-100">
+            <Timer className="w-6 h-6 text-blue-600 mx-auto mb-2" />
+            <div className="text-2xl font-bold text-blue-600 mb-1">{stats.dreams}</div>
+            <div className="text-xs text-stone">Rêves capturés</div>
           </div>
           
           <div className="text-center p-4 bg-forest/5 rounded-xl border border-forest/10">
@@ -215,12 +223,15 @@ const ProfilePage: React.FC = () => {
             <div className="text-2xl font-bold text-forest mb-1">{stats.meditationMinutes}</div>
             <div className="text-xs text-stone">Min méditation/semaine</div>
           </div>
-          
-          <div className="text-center p-4 bg-sunset/5 rounded-xl border border-sunset/10">
+        </div>
+        
+        {/* Streak séparé en bas */}
+        <div className="mt-4 text-center p-4 bg-sunset/5 rounded-xl border border-sunset/10">
+          <div className="flex items-center justify-center mb-2">
             <Flame className="w-6 h-6 text-sunset mx-auto mb-2" />
-            <div className="text-2xl font-bold text-sunset mb-1">{stats.currentStreak}</div>
-            <div className="text-xs text-stone">Jours consécutifs</div>
+            <span className="text-lg font-bold text-sunset ml-2">{stats.currentStreak}</span>
           </div>
+          <div className="text-sm text-stone">Jours consécutifs de journaling</div>
         </div>
       </div>
 

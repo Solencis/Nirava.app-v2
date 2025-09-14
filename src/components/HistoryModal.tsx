@@ -93,7 +93,7 @@ const HistoryModal: React.FC<HistoryModalProps> = ({ isOpen, onClose, onStatsUpd
       // Charger depuis localStorage et filtrer par utilisateur connecté si disponible
       
       let checkinHistory = JSON.parse(localStorage.getItem('checkin-history') || '[]');
-      let journalEntries = JSON.parse(localStorage.getItem('journal-entries') || '[]');
+      let journalEntries = JSON.parse(localStorage.getItem('journal-entries') || '[]').filter((entry: any) => entry.type !== 'dream');
       let dreamEntries = JSON.parse(localStorage.getItem('dream-entries') || '[]');
       
       // Filtrer par utilisateur si connecté (pour éviter de voir les données d'autres utilisateurs)

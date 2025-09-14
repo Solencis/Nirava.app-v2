@@ -130,11 +130,6 @@ const DreamJournalModal: React.FC<DreamJournalModalProps> = ({ isOpen, onClose, 
       const limitedHistory = dreamHistory.slice(0, 100);
       localStorage.setItem('dream-entries', JSON.stringify(limitedHistory));
       
-      // Aussi ajouter aux journaux généraux pour compatibilité
-      const journalHistory = JSON.parse(localStorage.getItem('journal-entries') || '[]');
-      journalHistory.unshift(localDream);
-      localStorage.setItem('journal-entries', JSON.stringify(journalHistory.slice(0, 100)));
-      
       console.log('✅ Rêve sauvegardé dans Supabase et historique local:', journalEntry.id);
       
       // Créer l'activité pour le partage
