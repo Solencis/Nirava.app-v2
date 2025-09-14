@@ -41,24 +41,18 @@ const CheckinModal: React.FC<CheckinModalProps> = ({ isOpen, onClose, onSave }) 
     try {
       // Utiliser React Query pour créer le check-in
       const journalEntry = await createCheckinMutation.mutateAsync({
-        type: 'checkin',
-        content: formData.note,
+        notes: formData.note,
         emotion: formData.emotion,
         intensity: formData.intensity,
         need: formData.need,
-        image_url: formData.photo_url || undefined,
-        metadata: {
-          emotion: formData.emotion,
-          intensity: formData.intensity,
-          need: formData.need
-        }
+        image_url: formData.photo_url || undefined
       });
 
       // Créer l'activité pour le partage
       const checkin: JournalActivity = {
         id: journalEntry.id,
         type: 'checkin',
-        content: formData.note,
+        content: journalEntry.notes || '',
         emotion: formData.emotion,
         intensity: formData.intensity,
         need: formData.need,
