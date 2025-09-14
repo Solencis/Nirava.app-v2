@@ -685,6 +685,9 @@ const Home: React.FC = () => {
           </p>
         </div>
       </section>
+      
+      {/* iOS Install Hint */}
+      <IOSInstallHint />
     </div>
   );
 };

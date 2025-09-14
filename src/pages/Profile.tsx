@@ -437,6 +437,9 @@ const ProfilePage: React.FC = () => {
           <p className="text-stone text-sm">— Socrate</p>
         </div>
       </div>
+      
+      {/* iOS Install Hint */}
+      <IOSInstallHint />
 
       {/* Modal d'édition du profil */}
       {editing && (
