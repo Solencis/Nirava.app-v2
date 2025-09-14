@@ -52,41 +52,25 @@ const Journal: React.FC = () => {
   const [currentMessage, setCurrentMessage] = useState('');
 
   useEffect(() => {
-    if (isReady()) {
-      loadStats();
-    } else {
-      // Fallback vers localStorage si pas encore connecté
-      loadLocalStats();
-    }
+    loadStats();
     
     // Message motivationnel aléatoire
     const randomMessage = motivationalMessages[Math.floor(Math.random() * motivationalMessages.length)];
     setCurrentMessage(randomMessage);
   }, [user]);
 
-  // Update meditation stats when Supabase data changes
+  // Update meditation stats when store data changes
   useEffect(() => {
-    if (supabaseMeditationMinutes !== undefined) {
-      setStats(prev => ({
-        ...prev,
-        meditation: supabaseMeditationMinutes
-      }));
-    } else {
-      // Fallback to store data if Supabase not available
-      setStats(prev => ({
-        ...prev,
-        meditation: Math.round(meditationWeekMinutes)
-      }));
-    }
-  }, [supabaseMeditationMinutes, meditationWeekMinutes]);
+    setStats(prev => ({
+      ...prev,
+      meditation: Math.round(meditationWeekMinutes)
+    }));
+  }, [meditationWeekMinutes]);
 
   const loadStats = async () => {
-    if (!isReady()) return;
-
     try {
       setLoading(true);
       
-      // Pour l'instant, utiliser localStorage jusqu'à ce que React Query soit stable
       loadLocalStats();
     } catch (error) {
       console.error('Error loading journal stats:', error);
@@ -121,15 +105,7 @@ const Journal: React.FC = () => {
         });
       
       // Méditation cette semaine (depuis le store audio)
-      let thisWeekMeditation = 0;
-      
-      if (isReady()) {
-        // Utiliser les données Supabase si connecté
-        thisWeekMeditation = supabaseMeditationMinutes || 0;
-      } else {
-        // Fallback localStorage si pas connecté
-        thisWeekMeditation = Math.round(meditationWeekMinutes);
-      }
+      const thisWeekMeditation = Math.round(meditationWeekMinutes);
 
       // Streak de journaux
       const currentStreak = parseInt(localStorage.getItem('current-streak') || '0');
@@ -143,7 +119,7 @@ const Journal: React.FC = () => {
       setStats({
         checkins: thisWeekCheckins,
         journals: journalEntries.length, // Seulement les vrais journaux du soir
-        meditation: Math.round(thisWeekMeditation),
+        meditation: thisWeekMeditation,
         streak: currentStreak,
         dreams: thisWeekDreams
       });
@@ -153,14 +129,9 @@ const Journal: React.FC = () => {
   };
 
   const refreshStats = () => {
-    if (isReady()) {
-      loadStats();
-      refetchMeditationStats();
-    } else {
-      loadLocalStats();
-    }
+    loadLocalStats();
     
-    // Force update with current store data
+    // Force immediate update with current store data
     setStats(prev => ({
       ...prev,
       meditation: Math.round(meditationWeekMinutes)

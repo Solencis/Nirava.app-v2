@@ -5,6 +5,7 @@ import { supabase, Profile } from '../lib/supabase';
 
 const ProfilePage: React.FC = () => {
   const { user, signOut } = useAuth();
+  const { meditationWeekMinutes } = useAudioStore();
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState(false);
@@ -76,8 +77,7 @@ const ProfilePage: React.FC = () => {
       ).length;
       
       // Minutes de méditation cette semaine
-      const audioStore = JSON.parse(localStorage.getItem('nirava_audio') || '{}');
-      const thisWeekMeditation = audioStore.state?.meditationWeekMinutes || 0;
+      const thisWeekMeditation = Math.round(meditationWeekMinutes);
 
       // Streak de journaux (jours consécutifs)
       const currentStreak = parseInt(localStorage.getItem('current-streak') || '0');
@@ -85,7 +85,7 @@ const ProfilePage: React.FC = () => {
       setStats({
         checkins: thisWeekCheckins,
         journals: journalEntries.length, // Journaux du soir uniquement
-        meditationMinutes: Math.round(thisWeekMeditation),
+        meditationMinutes: thisWeekMeditation,
         currentStreak,
         dreams: thisWeekDreams // Ajouter les rêves séparément
       });
