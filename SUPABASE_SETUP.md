@@ -68,6 +68,37 @@ CREATE POLICY "Users can delete own journals" ON journals
   FOR DELETE USING (auth.uid() = user_id);
 ```
 
+### 4. Table `meditation_sessions`
+```sql
+CREATE TABLE meditation_sessions (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL,
+  duration_minutes INTEGER NOT NULL DEFAULT 0,
+  type TEXT DEFAULT 'free',
+  completed BOOLEAN DEFAULT false,
+  created_at TIMESTAMPTZ DEFAULT now() NOT NULL
+);
+
+-- Index pour performance
+CREATE INDEX idx_meditation_sessions_user_created ON meditation_sessions(user_id, created_at DESC);
+
+-- RLS
+ALTER TABLE meditation_sessions ENABLE ROW LEVEL SECURITY;
+
+-- Policies RLS
+CREATE POLICY "Users can read own meditation sessions" ON meditation_sessions
+  FOR SELECT USING (auth.uid() = user_id);
+
+CREATE POLICY "Users can insert own meditation sessions" ON meditation_sessions
+  FOR INSERT WITH CHECK (auth.uid() = user_id);
+
+CREATE POLICY "Users can update own meditation sessions" ON meditation_sessions
+  FOR UPDATE USING (auth.uid() = user_id);
+
+CREATE POLICY "Users can delete own meditation sessions" ON meditation_sessions
+  FOR DELETE USING (auth.uid() = user_id);
+```
+
 ### 3. Table `post_comments`
 ```sql
 CREATE TABLE post_comments (
