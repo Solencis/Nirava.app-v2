@@ -22,7 +22,7 @@ interface JournalStats {
 const Journal: React.FC = () => {
   const { user, isReady } = useAuth();
   const { data: supabaseMeditationMinutes, refetch: refetchMeditationStats } = useMeditationWeeklyStats();
-  const { reduceMeditationTime } = useAudioStore();
+  const { reduceMeditationTime, meditationWeekMinutes } = useAudioStore();
   const [stats, setStats] = useState<JournalStats>({
     checkins: 0,
     journals: 0,
@@ -71,8 +71,14 @@ const Journal: React.FC = () => {
         ...prev,
         meditation: supabaseMeditationMinutes
       }));
+    } else {
+      // Fallback to store data if Supabase not available
+      setStats(prev => ({
+        ...prev,
+        meditation: Math.round(meditationWeekMinutes)
+      }));
     }
-  }, [supabaseMeditationMinutes]);
+  }, [supabaseMeditationMinutes, meditationWeekMinutes]);
 
   const loadStats = async () => {
     if (!isReady()) return;
@@ -122,8 +128,7 @@ const Journal: React.FC = () => {
         thisWeekMeditation = supabaseMeditationMinutes || 0;
       } else {
         // Fallback localStorage si pas connecté
-        const audioStore = JSON.parse(localStorage.getItem('nirava_audio') || '{}');
-        thisWeekMeditation = audioStore.state?.meditationWeekMinutes || 0;
+        thisWeekMeditation = Math.round(meditationWeekMinutes);
       }
 
       // Streak de journaux
@@ -154,6 +159,12 @@ const Journal: React.FC = () => {
     } else {
       loadLocalStats();
     }
+    
+    // Force update with current store data
+    setStats(prev => ({
+      ...prev,
+      meditation: Math.round(meditationWeekMinutes)
+    }));
   };
 
   const handleReduceMinutes = () => {
