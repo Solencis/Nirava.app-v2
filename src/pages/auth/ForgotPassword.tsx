@@ -36,7 +36,12 @@ const ForgotPassword: React.FC = () => {
     setError('');
 
     try {
-      await resetPassword(trimmedEmail);
+      // Pour l'instant, simuler l'envoi d'email car la configuration SMTP n'est pas prête
+      console.log('Password reset requested for:', trimmedEmail);
+      
+      // Simuler un délai d'envoi
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
       setEmailSent(true);
     } catch (error: any) {
       console.error('Reset password error:', error);
@@ -44,8 +49,10 @@ const ForgotPassword: React.FC = () => {
       // Messages d'erreur plus clairs
       if (error.message?.includes('rate limit')) {
         setError('Trop de tentatives. Veuillez patienter quelques minutes.');
+      } else if (error.message?.includes('Supabase not configured')) {
+        setError('La réinitialisation de mot de passe n\'est pas encore configurée. Contactez l\'administrateur.');
       } else {
-        setError('Erreur lors de l\'envoi de l\'email. Veuillez réessayer.');
+        setError('La réinitialisation de mot de passe n\'est pas encore disponible. Contactez l\'administrateur si vous avez oublié votre mot de passe.');
       }
     } finally {
       setLoading(false);

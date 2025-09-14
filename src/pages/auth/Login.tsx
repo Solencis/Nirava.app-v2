@@ -54,9 +54,7 @@ const Login: React.FC = () => {
 
     try {
       await signInWithPassword(trimmedEmail, formData.password);
-      // Redirection manuelle après connexion réussie
-      const from = (location.state as any)?.from?.pathname || '/profile';
-      window.location.href = from;
+      console.log('Login successful, user should be redirected by Navigate component');
     } catch (error: any) {
       console.error('Login error:', error);
       

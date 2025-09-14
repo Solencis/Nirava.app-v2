@@ -96,16 +96,10 @@ const Register: React.FC = () => {
         firstName: formData.firstName.trim() || undefined
       });
       
-      // Si l'inscription réussit, rediriger vers le profil ou afficher un message de succès
       console.log('Registration successful, checking if user is logged in...');
       
-      // Attendre un peu pour que l'état d'authentification se mette à jour
-      setTimeout(() => {
-        // Si l'utilisateur n'est pas automatiquement connecté, afficher le message d'email
-        if (!user) {
-          setEmailSent(true);
-        }
-      }, 1000);
+      // Afficher le message de succès
+      setEmailSent(true);
       
     } catch (error: any) {
       console.error('Registration error:', error);

@@ -36,18 +36,15 @@ export const useAuth = () => {
           // Utilisateur connecté : créer/mettre à jour le profil
           console.log('User signed in, creating/updating profile...');
           await createOrUpdateProfile(session.user);
-          
-          // Ne pas rediriger automatiquement - laisser le composant gérer la redirection
           console.log('User signed in successfully');
         } else if (event === 'SIGNED_OUT') {
           // Utilisateur déconnecté : nettoyer les données locales
           localStorage.removeItem('user-profile');
           // Vider le cache React Query
           queryClient.clear();
-          window.location.href = '/';
+          console.log('User signed out, cache cleared');
         } else if (event === 'PASSWORD_RECOVERY') {
-          // Redirection vers la page de mise à jour du mot de passe
-          window.location.href = '/auth/update-password';
+          console.log('Password recovery initiated');
         }
       }
     );
