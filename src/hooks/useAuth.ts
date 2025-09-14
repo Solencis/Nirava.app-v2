@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { User, Session } from '@supabase/supabase-js';
-import { supabase } from '../lib/supabase';
+import { supabase, signInWithPassword as supabaseSignInWithPassword } from '../lib/supabase';
 import { useAuthStore } from '../stores/authStore';
 import { queryClient } from '../providers/QueryProvider';
 
@@ -139,7 +139,7 @@ export const useAuth = () => {
       console.log('Signing in user:', email);
       
       // Utilise la fonction sécurisée de lib/supabase
-      const data = await signInWithPassword(email, password);
+      const data = await supabaseSignInWithPassword(email, password);
       
       console.log('Sign in successful');
       return data;
