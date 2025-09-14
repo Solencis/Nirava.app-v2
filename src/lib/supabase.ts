@@ -80,6 +80,7 @@ export interface CheckinEntry {
 export interface JournalEntry {
   id: string;
   user_id: string;
+  type: string;
   content: string;
   image_url?: string;
   metadata?: any;

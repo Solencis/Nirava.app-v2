@@ -50,6 +50,7 @@ const JournalModal: React.FC<JournalModalProps> = ({ isOpen, onClose, onSave }) 
     try {
       // Utiliser React Query pour créer le journal
       const journalEntry = await createJournalMutation.mutateAsync({
+        type: 'journal',
         content: content.trim(),
         image_url: photoUrl || undefined,
         metadata: {

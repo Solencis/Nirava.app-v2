@@ -133,6 +133,7 @@ const MeditationModal: React.FC<MeditationModalProps> = ({ isOpen, onClose, onSa
     try {
       // Utiliser React Query pour créer l'entrée journal
       const journalEntry = await createJournalMutation.mutateAsync({
+        type: 'meditation',
         content: `Méditation de ${sessionDuration} minutes`,
         metadata: {
           duration_minutes: sessionDuration,
