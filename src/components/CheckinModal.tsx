@@ -48,6 +48,28 @@ const CheckinModal: React.FC<CheckinModalProps> = ({ isOpen, onClose, onSave }) 
         image_url: formData.photo_url || undefined
       });
 
+      // Sauvegarder aussi dans l'historique local pour compatibilité
+      const localCheckin = {
+        id: journalEntry.id,
+        type: 'checkin' as const,
+        emotion: formData.emotion,
+        intensity: formData.intensity,
+        need: formData.need,
+        note: formData.note,
+        photo_url: formData.photo_url || undefined,
+        timestamp: journalEntry.created_at,
+        date: new Date(journalEntry.created_at).toLocaleDateString('fr-FR'),
+        user_id: user.id
+      };
+      
+      // Ajouter à l'historique local des check-ins
+      const checkinHistory = JSON.parse(localStorage.getItem('checkin-history') || '[]');
+      checkinHistory.unshift(localCheckin);
+      // Garder seulement les 100 derniers pour éviter de surcharger le localStorage
+      const limitedHistory = checkinHistory.slice(0, 100);
+      localStorage.setItem('checkin-history', JSON.stringify(limitedHistory));
+      
+      console.log('✅ Check-in sauvegardé dans Supabase et historique local:', journalEntry.id);
       // Créer l'activité pour le partage
       const checkin: JournalActivity = {
         id: journalEntry.id,

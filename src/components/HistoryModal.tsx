@@ -81,14 +81,34 @@ const HistoryModal: React.FC<HistoryModalProps> = ({ isOpen, onClose, onStatsUpd
   const loadData = () => {
     setLoading(true);
     try {
-      // Charger depuis localStorage pour éviter les blocages React Query
-      const checkinHistory = JSON.parse(localStorage.getItem('checkin-history') || '[]');
-      const journalEntries = JSON.parse(localStorage.getItem('journal-entries') || '[]');
+      // Charger depuis localStorage et filtrer par utilisateur connecté si disponible
+      const { user } = useAuth.getState ? useAuth.getState() : { user: null };
+      
+      let checkinHistory = JSON.parse(localStorage.getItem('checkin-history') || '[]');
+      let journalEntries = JSON.parse(localStorage.getItem('journal-entries') || '[]');
+      
+      // Filtrer par utilisateur si connecté (pour éviter de voir les données d'autres utilisateurs)
+      if (user?.id) {
+        checkinHistory = checkinHistory.filter((entry: any) => 
+          !entry.user_id || entry.user_id === user.id
+        );
+        journalEntries = journalEntries.filter((entry: any) => 
+          !entry.user_id || entry.user_id === user.id
+        );
+      }
+      
       const trashEntries = JSON.parse(localStorage.getItem('journal-trash') || '[]');
       
       setCheckins(checkinHistory);
       setJournals(journalEntries);
       setTrash(trashEntries);
+      
+      console.log('📊 Historique chargé:', {
+        checkins: checkinHistory.length,
+        journals: journalEntries.length,
+        trash: trashEntries.length,
+        userId: user?.id
+      });
     } catch (error) {
       console.error('Error loading history data:', error);
     } finally {
