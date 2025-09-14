@@ -3,6 +3,17 @@ import { Link, Navigate, useLocation } from 'react-router-dom';
 import { Mail, ArrowLeft, CheckCircle, User, Lock, Eye, EyeOff } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 
+// Check if Supabase is configured
+const isSupabaseConfigured = () => {
+  const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+  const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+  
+  return supabaseUrl && 
+    supabaseAnonKey && 
+    supabaseUrl !== 'https://your-project-ref.supabase.co' && 
+    supabaseAnonKey !== 'your-anon-key-here';
+};
+
 const Register: React.FC = () => {
   const { user, signUp, signInWithGoogle } = useAuth();
   const [formData, setFormData] = useState({
@@ -39,6 +50,12 @@ const Register: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Check if Supabase is configured before attempting registration
+    if (!isSupabaseConfigured()) {
+      setError('❌ Supabase n\'est pas configuré. Veuillez configurer vos variables d\'environnement Supabase pour utiliser l\'inscription.');
+      return;
+    }
     
     // Validation côté client
     if (!formData.email.trim()) {
@@ -85,6 +102,8 @@ const Register: React.FC = () => {
       // Messages d'erreur plus clairs
       if (error.message?.includes('already registered')) {
         setError('Cette adresse email est déjà utilisée');
+      } else if (error.message?.includes('Supabase not configured')) {
+        setError('❌ Supabase n\'est pas configuré. Veuillez configurer vos variables d\'environnement Supabase pour utiliser l\'inscription.');
       } else if (error.message?.includes('invalid email')) {
         setError('Adresse email invalide');
       } else if (error.message?.includes('weak password')) {
@@ -102,6 +121,13 @@ const Register: React.FC = () => {
   const handleGoogleSignIn = async () => {
     setGoogleLoading(true);
     setError('');
+    
+    // Check if Supabase is configured before attempting Google sign in
+    if (!isSupabaseConfigured()) {
+      setError('❌ Supabase n\'est pas configuré. Veuillez configurer vos variables d\'environnement Supabase pour utiliser la connexion Google.');
+      setGoogleLoading(false);
+      return;
+    }
 
     try {
       await signInWithGoogle();
@@ -316,7 +342,7 @@ const Register: React.FC = () => {
 
           <button
             type="submit"
-            disabled={loading || !consent}
+            disabled={loading || !consent || !isSupabaseConfigured()}
             className="w-full bg-wasabi text-white py-4 rounded-xl font-medium hover:bg-wasabi/90 transition-colors duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center min-h-[56px]"
           >
             {loading ? (
@@ -328,6 +354,14 @@ const Register: React.FC = () => {
               </>
             )}
           </button>
+
+          {!isSupabaseConfigured() && (
+            <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-3">
+              <p className="text-yellow-800 text-sm text-center">
+                ⚠️ Configuration Supabase requise pour l'inscription
+              </p>
+            </div>
+          )}
 
           {/* Divider */}
           <div className="relative my-6">
@@ -343,7 +377,7 @@ const Register: React.FC = () => {
           <button
             type="button"
             onClick={handleGoogleSignIn}
-            disabled={googleLoading || loading}
+            disabled={googleLoading || loading || !isSupabaseConfigured()}
             className="w-full bg-white border border-stone/20 text-ink py-4 rounded-xl font-medium hover:bg-stone/5 transition-colors duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center min-h-[56px]"
           >
             {googleLoading ? (
