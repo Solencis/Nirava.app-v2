@@ -45,13 +45,6 @@ const getCurrentWeek = () => {
 
 export const AMBIENCES: Ambience[] = [
   {
-    key: 'wave',
-    title: 'Vagues',
-    src: '/sounds/ocean-waves.mp3',
-    description: 'Rythme lent et régulier de l\'océan.',
-    emoji: '🌊'
-  },
-  {
     key: 'forest',
     title: 'Forêt',
     src: '/sounds/forest-birds.mp3',
@@ -78,6 +71,13 @@ export const AMBIENCES: Ambience[] = [
     src: '/sounds/ambient-calm.mp3',
     description: 'Texture ambient pour détente profonde.',
     emoji: '🫧'
+  },
+  {
+    key: 'silence',
+    title: 'Silence',
+    src: 'data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhBSuBzvLZiTYIG2m98OScTgwOUarm7blmGgU7k9n1unEiBC13yO/eizEIHWq+8+OWT',
+    description: 'Silence paisible pour la méditation.',
+    emoji: '🤫'
   }
 ];
 

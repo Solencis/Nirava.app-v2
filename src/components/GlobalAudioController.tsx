@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from 'react';
-import { useAudioStore } from '../stores/audioStore';
+import { useAudioStore, AMBIENCES } from '../stores/audioStore';
 
 const GlobalAudioController: React.FC = () => {
   const audioRef = useRef<HTMLAudioElement>(null);
@@ -88,13 +88,22 @@ const GlobalAudioController: React.FC = () => {
   // Handle audio errors
   const handleError = (e: React.SyntheticEvent<HTMLAudioElement, Event>) => {
     const error = e.currentTarget.error;
-    console.error('❌ Audio error for', current?.title, ':', error?.message || 'Unknown error');
+    console.warn('⚠️ Audio file unavailable for', current?.title, '- switching to silence mode');
     
-    // If audio file is missing or corrupted, stop playback and clear current track
+    // If audio file is missing or corrupted, switch to silence mode instead of stopping
     if (error?.code === MediaError.MEDIA_ERR_SRC_NOT_SUPPORTED || 
-        error?.code === MediaError.MEDIA_ERR_DECODE) {
-      console.warn('Audio file not found or corrupted, stopping playback');
-      stop();
+        error?.code === MediaError.MEDIA_ERR_DECODE ||
+        error?.code === MediaError.MEDIA_ERR_NETWORK) {
+      
+      const { current: currentTrack } = useAudioStore.getState();
+      if (currentTrack && currentTrack.key !== 'silence') {
+        console.log('🔇 Switching to silence mode due to audio error');
+        // Switch to silence track
+        const silenceTrack = AMBIENCES.find(a => a.key === 'silence');
+        if (silenceTrack) {
+          useAudioStore.getState().play(silenceTrack);
+        }
+      }
     }
   };
 
