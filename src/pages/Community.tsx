@@ -156,7 +156,7 @@ const Community: React.FC = () => {
       const { error } = await supabase
         .from('posts')
         .insert({
-          author_id: user.id,
+          user_id: user.id,
           content: newPost.trim(),
           emoji: selectedEmoji || null
         });
@@ -190,12 +190,13 @@ const Community: React.FC = () => {
         // Add like
         const { error } = await supabase
           .from('post_likes')
-          .insert([{
+          .insert({
             post_id: postId,
             user_id: user.id
-          }], { ignoreDuplicates: true });
+          });
 
-        if (error) {
+        if (error && error.code !== '23505') {
+          // Ignore duplicate key violations (user already liked this post)
           throw error;
         }
       }
@@ -212,7 +213,7 @@ const Community: React.FC = () => {
         .from('posts')
         .delete()
         .eq('id', postId)
-        .eq('user_id', user.id); // Ensure only author can delete
+        .eq('user_id', user.id);
 
       if (error) throw error;
     } catch (error) {
@@ -476,7 +477,7 @@ const Community: React.FC = () => {
                     {post.likes_count > 0 && <span>{post.likes_count}</span>}
                   </button>
                   
-                  {user && post.author_id === user.id && (
+                  {user && post.user_id === user.id && (
                     <button
                       onClick={() => deletePost(post.id)}
                       className="text-stone hover:text-red-600 transition-colors duration-300 px-2 py-1 rounded-full hover:bg-red-50"
@@ -488,7 +489,7 @@ const Community: React.FC = () => {
                 </div>
                 
                 <div className="text-xs text-stone/60">
-                  {user && post.author_id === user.id ? 'Mon message' : 'Communauté'}
+                  {user && post.user_id === user.id ? 'Mon message' : 'Communauté'}
                 </div>
               </div>
             </div>
