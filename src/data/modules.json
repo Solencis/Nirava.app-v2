@@ -1,0 +1,154 @@
+[
+  {
+    "id": "emotions-101",
+    "level": "N1",
+    "title": "Alphabétisation émotionnelle",
+    "duration": "45–60 min",
+    "summary": "Nommer ce que je ressens, estimer l'intensité, identifier un besoin.",
+    "slug": "emotions-101"
+  },
+  {
+    "id": "breath-4-techniques",
+    "level": "N2", 
+    "title": "Respiration consciente — 4 techniques",
+    "duration": "60–75 min",
+    "summary": "Cohérence 6:6, Box, 4-7-8, expiration allongée — quand et comment les utiliser.",
+    "slug": "breath-4-techniques"
+  },
+  {
+    "id": "shadow-work-jung",
+    "level": "N3",
+    "title": "Travail de l'Ombre (Jung)",
+    "duration": "60–90 min", 
+    "summary": "Comprendre Persona/Ombre, repérer projections, premiers pas d'intégration.",
+    "slug": "shadow-work-jung"
+  },
+  {
+    "id": "body-awareness",
+    "level": "N1",
+    "title": "Conscience corporelle de base",
+    "duration": "30–45 min",
+    "summary": "Scanner corporel, tensions, signaux du corps.",
+    "slug": "body-awareness"
+  },
+  {
+    "id": "boundaries-basics",
+    "level": "N1", 
+    "title": "Limites saines",
+    "duration": "45 min",
+    "summary": "Reconnaître ses limites, dire non avec bienveillance.",
+    "slug": "boundaries-basics"
+  },
+  {
+    "id": "stress-regulation",
+    "level": "N1",
+    "title": "Régulation du stress",
+    "duration": "40 min",
+    "summary": "Outils simples pour apaiser le système nerveux.",
+    "slug": "stress-regulation"
+  },
+  {
+    "id": "yoga-1-basics",
+    "level": "N2",
+    "title": "Yoga 1 : Bases accessibles",
+    "duration": "45–60 min",
+    "summary": "Postures douces, respiration fluide, pratique non-compétitive.",
+    "slug": "yoga-1-basics"
+  },
+  {
+    "id": "yoga-2-daily",
+    "level": "N2",
+    "title": "Yoga 2 : Intégration quotidienne",
+    "duration": "20–30 min",
+    "summary": "Séquences matin/soir, ritualisation, pratique durable.",
+    "slug": "yoga-2-daily"
+  },
+  {
+    "id": "energy-hygiene",
+    "level": "N2",
+    "title": "Hygiène énergétique",
+    "duration": "30–45 min",
+    "summary": "Ancrage, centrage, protection douce — 3 gestes simples au quotidien.",
+    "slug": "energy-hygiene"
+  },
+  {
+    "id": "somatic-experiencing",
+    "level": "N2",
+    "title": "Expérience somatique",
+    "duration": "75 min",
+    "summary": "Libérer les traumatismes stockés dans le corps.",
+    "slug": "somatic-experiencing"
+  },
+  {
+    "id": "inner-child-work",
+    "level": "N2",
+    "title": "Travail de l'enfant intérieur",
+    "duration": "90 min",
+    "summary": "Guérir les blessures d'enfance avec compassion.",
+    "slug": "inner-child-work"
+  },
+  {
+    "id": "energy-circulation",
+    "level": "N2",
+    "title": "Circulation énergétique",
+    "duration": "60 min",
+    "summary": "Débloquer et harmoniser les flux d'énergie.",
+    "slug": "energy-circulation"
+  },
+  {
+    "id": "circles-rituals",
+    "level": "N3",
+    "title": "Cercles & rituels personnels",
+    "duration": "60–75 min",
+    "summary": "Créer un cadre sacré simple, sécurisant et authentique.",
+    "slug": "circles-rituals"
+  },
+  {
+    "id": "archetypes-exploration",
+    "level": "N3",
+    "title": "Exploration des archétypes",
+    "duration": "90 min",
+    "summary": "Découvrir les figures universelles qui nous habitent.",
+    "slug": "archetypes-exploration"
+  },
+  {
+    "id": "dreams-symbols",
+    "level": "N3",
+    "title": "Rêves et symbolique",
+    "duration": "75 min",
+    "summary": "Décoder les messages de l'inconscient.",
+    "slug": "dreams-symbols"
+  },
+  {
+    "id": "sacred-masculine-feminine",
+    "level": "N3",
+    "title": "Masculin/Féminin sacré",
+    "duration": "90 min",
+    "summary": "Équilibrer les polarités intérieures.",
+    "slug": "sacred-masculine-feminine"
+  },
+  {
+    "id": "service-integration",
+    "level": "N4",
+    "title": "Intégration et service",
+    "duration": "120 min",
+    "summary": "Mettre ses dons au service du collectif.",
+    "slug": "service-integration"
+  },
+  {
+    "id": "spiritual-mentorship",
+    "level": "N4",
+    "title": "Mentorat spirituel",
+    "duration": "90 min",
+    "summary": "Accompagner d'autres sur le chemin.",
+    "slug": "spiritual-mentorship"
+  },
+  {
+    "id": "wisdom-traditions",
+    "level": "N4",
+    "title": "Traditions de sagesse",
+    "duration": "75 min",
+    "summary": "Puiser dans les enseignements ancestraux.",
+    "slug": "wisdom-traditions"
+  }
+]

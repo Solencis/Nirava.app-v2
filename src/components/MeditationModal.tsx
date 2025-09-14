@@ -1,0 +1,540 @@
+import React, { useState, useEffect, useRef } from 'react';
+import { X, Timer, Play, Pause, RotateCcw, Volume2, VolumeX } from 'lucide-react';
+import { useAudioStore } from '../stores/audioStore';
+import ShareToCommunityButton from './ShareToCommuityButton';
+import { JournalActivity } from '../lib/supabase';
+import { useAuth } from '../hooks/useAuth';
+import { useCreateJournal } from '../hooks/useJournals';
+
+interface MeditationModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  onSave: () => void;
+}
+
+const MeditationModal: React.FC<MeditationModalProps> = ({ isOpen, onClose, onSave }) => {
+  const { user } = useAuth();
+  const createJournalMutation = useCreateJournal();
+  const { current: currentAmbience, isPlaying: ambienceIsPlaying, pause: pauseAmbience, play: playAmbience } = useAudioStore();
+  const [duration, setDuration] = useState(5); // minutes
+  const [timeLeft, setTimeLeft] = useState(0); // seconds
+  const [isRunning, setIsRunning] = useState(false);
+  const [isCompleted, setIsCompleted] = useState(false);
+  const [customDuration, setCustomDuration] = useState('');
+  const [isFreeMode, setIsFreeMode] = useState(false);
+  const [elapsedTime, setElapsedTime] = useState(0); // pour le mode libre
+  const [muteAmbience, setMuteAmbience] = useState(false);
+  const intervalRef = useRef<NodeJS.Timeout | null>(null);
+  const wasAmbiencePlaying = useRef(false);
+  const [savedActivity, setSavedActivity] = useState<JournalActivity | null>(null);
+
+  const presetDurations = [5, 10, 15, 20];
+
+  useEffect(() => {
+    if (isRunning && !isFreeMode && timeLeft > 0) {
+      intervalRef.current = setInterval(() => {
+        setTimeLeft((prev) => {
+          if (prev <= 1) {
+            setIsRunning(false);
+            setIsCompleted(true);
+            playGong();
+            saveMeditationSession();
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+    } else if (isRunning && isFreeMode) {
+      intervalRef.current = setInterval(() => {
+        setElapsedTime((prev) => prev + 1);
+      }, 1000);
+    } else {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+        intervalRef.current = null;
+      }
+    }
+
+    return () => {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+      }
+    };
+  }, [isRunning, timeLeft, isFreeMode]);
+
+  useEffect(() => {
+    if (!isOpen) {
+      reset();
+    }
+  }, [isOpen]);
+
+  const playGong = () => {
+    // Son de gong amélioré - plus audible et réaliste
+    const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+    
+    // Créer plusieurs oscillateurs pour un son plus riche
+    const oscillator1 = audioContext.createOscillator();
+    const oscillator2 = audioContext.createOscillator();
+    const oscillator3 = audioContext.createOscillator();
+    const gainNode = audioContext.createGain();
+    const gainNode2 = audioContext.createGain();
+    const gainNode3 = audioContext.createGain();
+    const masterGain = audioContext.createGain();
+    
+    // Connecter les oscillateurs
+    oscillator1.connect(gainNode);
+    oscillator2.connect(gainNode2);
+    oscillator3.connect(gainNode3);
+    gainNode.connect(masterGain);
+    gainNode2.connect(masterGain);
+    gainNode3.connect(masterGain);
+    masterGain.connect(audioContext.destination);
+    
+    // Fréquences harmoniques pour un son de gong plus réaliste
+    oscillator1.frequency.setValueAtTime(220, audioContext.currentTime);
+    oscillator1.frequency.exponentialRampToValueAtTime(110, audioContext.currentTime + 3);
+    
+    oscillator2.frequency.setValueAtTime(330, audioContext.currentTime);
+    oscillator2.frequency.exponentialRampToValueAtTime(165, audioContext.currentTime + 3);
+    
+    oscillator3.frequency.setValueAtTime(440, audioContext.currentTime);
+    oscillator3.frequency.exponentialRampToValueAtTime(220, audioContext.currentTime + 3);
+    
+    // Volume plus élevé et décroissance plus lente
+    masterGain.gain.setValueAtTime(0.6, audioContext.currentTime);
+    masterGain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 3);
+    
+    gainNode.gain.setValueAtTime(0.4, audioContext.currentTime);
+    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 3);
+    
+    gainNode2.gain.setValueAtTime(0.3, audioContext.currentTime);
+    gainNode2.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 3);
+    
+    gainNode3.gain.setValueAtTime(0.2, audioContext.currentTime);
+    gainNode3.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 3);
+    
+    oscillator1.start(audioContext.currentTime);
+    oscillator1.stop(audioContext.currentTime + 3);
+    oscillator2.start(audioContext.currentTime);
+    oscillator2.stop(audioContext.currentTime + 3);
+    oscillator3.start(audioContext.currentTime);
+    oscillator3.stop(audioContext.currentTime + 3);
+  };
+
+  const saveMeditationSession = async () => {
+    if (!user) {
+      console.error('User not authenticated');
+      return;
+    }
+
+    const { addMeditationTime } = useAudioStore.getState();
+    const sessionDuration = isFreeMode ? Math.round(elapsedTime / 60) : duration;
+    
+    try {
+      // Utiliser React Query pour créer l'entrée journal
+      const journalEntry = await createJournalMutation.mutateAsync({
+        type: 'meditation',
+        content: `Méditation de ${sessionDuration} minutes`,
+        duration: sessionDuration,
+        metadata: {
+          duration: sessionDuration,
+          mode: isFreeMode ? 'libre' : 'guidée'
+        }
+      });
+
+      // Créer l'activité pour le partage
+      const session: JournalActivity = {
+        id: journalEntry.id,
+        type: 'meditation',
+        content: `Méditation de ${sessionDuration} minutes`,
+        duration: sessionDuration,
+        created_at: journalEntry.created_at
+      };
+      
+      // Add meditation time to weekly stats
+      addMeditationTime(sessionDuration);
+      
+      // Sauvegarder l'activité pour le partage
+      setSavedActivity(session);
+      
+      onSave();
+    } catch (error) {
+      console.error('Error saving meditation session:', error);
+      // TODO: Afficher un message d'erreur à l'utilisateur
+    }
+  };
+
+  const startMeditation = () => {
+    // Remember ambience state
+    wasAmbiencePlaying.current = ambienceIsPlaying;
+    
+    // Mute ambience if requested
+    if (muteAmbience && currentAmbience && ambienceIsPlaying) {
+      pauseAmbience();
+    }
+    
+    if (!isFreeMode && timeLeft === 0) {
+      setTimeLeft(duration * 60);
+    } else if (isFreeMode && elapsedTime === 0) {
+      setElapsedTime(0);
+    }
+    setIsRunning(true);
+    setIsCompleted(false);
+    playGong(); // Gong de début
+  };
+
+  const pauseMeditation = () => {
+    setIsRunning(false);
+  };
+
+  const reset = () => {
+    // Restore ambience if it was playing
+    if (wasAmbiencePlaying.current && currentAmbience && muteAmbience) {
+      playAmbience(currentAmbience);
+    }
+    
+    setIsRunning(false);
+    setTimeLeft(0);
+    setElapsedTime(0);
+    setIsCompleted(false);
+  };
+
+  const setCustomTime = () => {
+    const minutes = parseInt(customDuration);
+    if (minutes > 0 && minutes <= 120) {
+      setDuration(minutes);
+      setCustomDuration('');
+      reset();
+    }
+  };
+
+  const stopFreeMeditation = () => {
+    // Restore ambience if it was playing
+    if (wasAmbiencePlaying.current && currentAmbience && muteAmbience) {
+      playAmbience(currentAmbience);
+    }
+    
+    setIsRunning(false);
+    setIsCompleted(true);
+    playGong();
+    saveMeditationSession();
+  };
+
+  const formatTime = (seconds: number) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+  };
+
+  const getProgress = () => {
+    if (isFreeMode) return 0; // Pas de progression en mode libre
+    if (duration === 0) return 0;
+    return ((duration * 60 - timeLeft) / (duration * 60)) * 100;
+  };
+
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-2 z-50">
+      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm mx-2 max-h-[90vh] overflow-y-auto">
+        <div className="p-6">
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center">
+              <Timer className="w-6 h-6 text-forest mr-3" />
+              <h2 className="text-xl font-bold text-ink" style={{ fontFamily: "'Shippori Mincho', serif" }}>
+                Méditation
+              </h2>
+            </div>
+            <button
+              onClick={onClose}
+              className="w-10 h-10 rounded-full bg-stone/10 flex items-center justify-center text-stone hover:text-vermilion transition-colors duration-300"
+            >
+              <X size={20} />
+            </button>
+          </div>
+
+          {!isRunning && timeLeft === 0 && !isCompleted && (
+            <div className="space-y-6">
+              {/* Mode de méditation */}
+              <div>
+                <label className="block text-sm font-medium text-ink mb-3">
+                  Mode de méditation
+                </label>
+                <div className="grid grid-cols-2 gap-3">
+                  <button
+                    onClick={() => {
+                      setIsFreeMode(false);
+                      reset();
+                    }}
+                    className={`p-3 rounded-xl border transition-all duration-300 ${
+                      !isFreeMode
+                        ? 'bg-forest text-white border-forest'
+                        : 'bg-stone/5 border-stone/20 hover:border-forest'
+                    }`}
+                  >
+                    <div className="text-sm font-medium">Guidée</div>
+                    <div className="text-xs opacity-80">Durée fixe</div>
+                  </button>
+                  <button
+                    onClick={() => {
+                      setIsFreeMode(true);
+                      reset();
+                    }}
+                    className={`p-3 rounded-xl border transition-all duration-300 ${
+                      isFreeMode
+                        ? 'bg-forest text-white border-forest'
+                        : 'bg-stone/5 border-stone/20 hover:border-forest'
+                    }`}
+                  >
+                    <div className="text-sm font-medium">Libre</div>
+                    <div className="text-xs opacity-80">Minuteur ouvert</div>
+                  </button>
+                </div>
+              </div>
+
+              {/* Durées prédéfinies */}
+              {!isFreeMode && (
+                <div>
+                <label className="block text-sm font-medium text-ink mb-3">
+                  Choisir une durée
+                </label>
+                <div className="grid grid-cols-2 gap-3">
+                  {presetDurations.map((minutes) => (
+                    <button
+                      key={minutes}
+                      onClick={() => {
+                        setDuration(minutes);
+                        reset();
+                      }}
+                      className={`p-3 rounded-xl border transition-all duration-300 ${
+                        duration === minutes
+                          ? 'bg-forest text-white border-forest'
+                          : 'bg-stone/5 border-stone/20 hover:border-forest'
+                      }`}
+                    >
+                      {minutes} min
+                    </button>
+                  ))}
+                </div>
+                </div>
+              )}
+
+              {/* Durée personnalisée */}
+              {!isFreeMode && (
+                <div>
+                <label className="block text-sm font-medium text-ink mb-2">
+                  Durée personnalisée
+                </label>
+                <div className="flex gap-2">
+                  <input
+                    type="number"
+                    value={customDuration}
+                    onChange={(e) => setCustomDuration(e.target.value)}
+                    placeholder="Minutes"
+                    min="1"
+                    max="120"
+                    className="flex-1 px-3 py-2 bg-stone/5 border border-stone/20 rounded-xl focus:border-forest focus:ring-2 focus:ring-forest/20 transition-all duration-300"
+                  />
+                  <button
+                    onClick={setCustomTime}
+                    disabled={!customDuration}
+                    className="px-4 py-2 bg-forest text-white rounded-xl hover:bg-forest/90 transition-colors duration-300 disabled:opacity-50"
+                  >
+                    OK
+                  </button>
+                </div>
+                </div>
+              )}
+
+              <button
+                onClick={startMeditation}
+                className="w-full bg-forest text-white py-4 rounded-xl hover:bg-forest/90 transition-colors duration-300 flex items-center justify-center text-lg font-medium"
+              >
+                <Play size={20} className="mr-2" />
+                {isFreeMode ? 'Commencer (libre)' : `Commencer (${duration} min)`}
+              </button>
+              
+              {/* Ambience control */}
+              {currentAmbience && (
+                <div className="mt-4 p-4 bg-stone/5 rounded-xl border border-stone/10">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center">
+                      <span className="text-lg mr-2">{currentAmbience.emoji}</span>
+                      <div>
+                        <div className="text-sm font-medium text-ink">{currentAmbience.title} en cours</div>
+                        <div className="text-xs text-stone">Ambiance sonore active</div>
+                      </div>
+                    </div>
+                    <button
+                      onClick={() => setMuteAmbience(!muteAmbience)}
+                      className={`flex items-center px-3 py-2 rounded-lg text-sm transition-colors duration-300 min-h-[44px] ${
+                        muteAmbience 
+                          ? 'bg-vermilion/10 text-vermilion border border-vermilion/20' 
+                          : 'bg-jade/10 text-jade border border-jade/20'
+                      }`}
+                    >
+                      {muteAmbience ? <VolumeX size={16} className="mr-1" /> : <Volume2 size={16} className="mr-1" />}
+                      {muteAmbience ? 'Coupée' : 'Active'}
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
+          {(isRunning || timeLeft > 0 || elapsedTime > 0) && !isCompleted && (
+            <div className="text-center space-y-6">
+              {/* Timer circulaire */}
+              <div className="relative w-48 h-48 mx-auto">
+                <svg className="w-full h-full transform -rotate-90" viewBox="0 0 100 100">
+                  <circle
+                    cx="50"
+                    cy="50"
+                    r="45"
+                    fill="none"
+                    stroke="#e5e7eb"
+                    strokeWidth="8"
+                  />
+                  {!isFreeMode && (
+                    <circle
+                    cx="50"
+                    cy="50"
+                    r="45"
+                    fill="none"
+                    stroke="#047857"
+                    strokeWidth="8"
+                    strokeLinecap="round"
+                    strokeDasharray={`${2 * Math.PI * 45}`}
+                    strokeDashoffset={`${2 * Math.PI * 45 * (1 - getProgress() / 100)}`}
+                    className="transition-all duration-1000 ease-linear"
+                  />
+                  )}
+                </svg>
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <div className="text-center">
+                    <div className="text-3xl font-bold text-ink mb-1">
+                      {isFreeMode ? formatTime(elapsedTime) : formatTime(timeLeft)}
+                    </div>
+                    <div className="text-sm text-stone">
+                      {isFreeMode ? 'Méditation libre' : `${Math.round(getProgress())}%`}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex gap-3 justify-center">
+                {!isFreeMode ? (
+                  <button
+                  onClick={isRunning ? pauseMeditation : startMeditation}
+                  className="bg-forest text-white px-6 py-3 rounded-xl hover:bg-forest/90 transition-colors duration-300 flex items-center"
+                >
+                  {isRunning ? <Pause size={20} className="mr-2" /> : <Play size={20} className="mr-2" />}
+                  {isRunning ? 'Pause' : 'Reprendre'}
+                </button>
+                ) : (
+                  <div className="flex gap-3">
+                    <button
+                      onClick={isRunning ? pauseMeditation : startMeditation}
+                      className="bg-forest text-white px-6 py-3 rounded-xl hover:bg-forest/90 transition-colors duration-300 flex items-center"
+                    >
+                      {isRunning ? <Pause size={20} className="mr-2" /> : <Play size={20} className="mr-2" />}
+                      {isRunning ? 'Pause' : 'Reprendre'}
+                    </button>
+                    <button
+                      onClick={stopFreeMeditation}
+                      className="bg-jade text-white px-6 py-3 rounded-xl hover:bg-jade/90 transition-colors duration-300"
+                    >
+                      Terminer
+                    </button>
+                  </div>
+                )}
+                <button
+                  onClick={reset}
+                  className="bg-stone/20 text-stone px-6 py-3 rounded-xl hover:bg-stone/30 transition-colors duration-300 flex items-center"
+                >
+                  <RotateCcw size={20} className="mr-2" />
+                  Reset
+                </button>
+              </div>
+            </div>
+          )}
+
+          {isCompleted && (
+            <>
+            {savedActivity ? (
+              // Success state with sharing option
+              <div className="text-center space-y-6">
+                <div className="w-24 h-24 mx-auto bg-forest/10 rounded-full flex items-center justify-center">
+                  <Timer className="w-12 h-12 text-forest" />
+                </div>
+                <div>
+                  <h3 className="text-xl font-bold text-ink mb-2" style={{ fontFamily: "'Shippori Mincho', serif" }}>
+                    Méditation terminée !
+                  </h3>
+                  <p className="text-stone mb-4">
+                    Tu as médité {savedActivity.duration} minutes. Bravo pour ce moment de présence.
+                  </p>
+                  <p className="text-stone text-sm mb-6">
+                    Veux-tu partager cette session avec la communauté ?
+                  </p>
+                </div>
+                
+                <div className="space-y-4">
+                  <ShareToCommunityButton 
+                    activity={savedActivity}
+                    onShared={() => {
+                      setTimeout(() => {
+                        setSavedActivity(null);
+                        onClose();
+                      }, 1500);
+                    }}
+                  />
+                  
+                  <button
+                    onClick={() => {
+                      setSavedActivity(null);
+                      onClose();
+                    }}
+                    className="w-full px-4 py-3 border border-stone/20 text-stone rounded-xl hover:bg-stone/5 transition-colors duration-300"
+                  >
+                    Garder privé
+                  </button>
+                </div>
+              </div>
+            ) : (
+              // Default completion state
+            <div className="text-center space-y-6">
+              {/* Restore ambience */}
+              {wasAmbiencePlaying.current && currentAmbience && muteAmbience && (() => {
+                playAmbience(currentAmbience);
+                return null;
+              })()}
+              
+              <div className="w-24 h-24 mx-auto bg-forest/10 rounded-full flex items-center justify-center">
+                <Timer className="w-12 h-12 text-forest" />
+              </div>
+              <div>
+                <h3 className="text-xl font-bold text-ink mb-2" style={{ fontFamily: "'Shippori Mincho', serif" }}>
+                  Méditation terminée !
+                </h3>
+                <p className="text-stone">
+                  Tu as médité {isFreeMode ? Math.round(elapsedTime / 60) : duration} minutes. Bravo pour ce moment de présence.
+                </p>
+              </div>
+              <button
+                onClick={onClose}
+                className="w-full bg-forest text-white py-3 rounded-xl hover:bg-forest/90 transition-colors duration-300"
+              >
+                Fermer
+              </button>
+            </div>
+            )}
+            </>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default MeditationModal;
