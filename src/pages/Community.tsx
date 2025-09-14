@@ -1,7 +1,20 @@
 import React, { useState, useEffect } from 'react';
-import { Heart, Send, Users, Sparkles, Settings, Trash2 } from 'lucide-react';
+import { Heart, Send, Users, Sparkles, Settings, Trash2, MessageCircle, ChevronDown, ChevronUp } from 'lucide-react';
 import { supabase, Post, Profile } from '../lib/supabase';
 import { useAuth } from '../hooks/useAuth';
+
+interface Comment {
+  id: string;
+  post_id: string;
+  user_id: string;
+  content: string;
+  created_at: string;
+  profiles: {
+    id: string;
+    display_name: string;
+    level: string;
+  };
+}
 
 const Community: React.FC = () => {
   const { user, loading: authLoading } = useAuth();
@@ -12,6 +25,11 @@ const Community: React.FC = () => {
   const [showSettings, setShowSettings] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [postToDelete, setPostToDelete] = useState<string | null>(null);
+  const [showCommentModal, setShowCommentModal] = useState(false);
+  const [commentToDelete, setCommentToDelete] = useState<string | null>(null);
+  const [expandedComments, setExpandedComments] = useState<Set<string>>(new Set());
+  const [newComment, setNewComment] = useState<Record<string, string>>({});
+  const [submittingComment, setSubmittingComment] = useState<Record<string, boolean>>({});
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
 
@@ -78,6 +96,17 @@ const Community: React.FC = () => {
           post_likes (
             id,
             user_id
+          ),
+          post_comments (
+            id,
+            content,
+            created_at,
+            user_id,
+            profiles (
+              id,
+              display_name,
+              level
+            )
           )
         `)
         .order('created_at', { ascending: false });
@@ -88,7 +117,9 @@ const Community: React.FC = () => {
       const transformedPosts = data?.map(post => ({
         ...post,
         likes_count: post.post_likes?.length || 0,
-        is_liked_by_user: user ? post.post_likes?.some(like => like.user_id === user.id) || false : false
+        is_liked_by_user: user ? post.post_likes?.some(like => like.user_id === user.id) || false : false,
+        comments: post.post_comments || [],
+        comments_count: post.post_comments?.length || 0
       })) || [];
 
       setPosts(transformedPosts);
@@ -122,6 +153,17 @@ const Community: React.FC = () => {
         },
         () => {
           loadPosts(); // Reload posts when likes change
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'post_comments'
+        },
+        () => {
+          loadPosts(); // Reload posts when comments change
         }
       )
       .subscribe();
@@ -205,9 +247,79 @@ const Community: React.FC = () => {
           throw error;
         }
       }
+      
+      // Reload posts to reflect the change
+      await loadPosts();
     } catch (error) {
       console.error('Error toggling like:', error);
     }
+  };
+
+  const addComment = async (postId: string) => {
+    const content = newComment[postId]?.trim();
+    if (!content || !user || submittingComment[postId]) return;
+
+    setSubmittingComment(prev => ({ ...prev, [postId]: true }));
+    try {
+      const { error } = await supabase
+        .from('post_comments')
+        .insert({
+          post_id: postId,
+          user_id: user.id,
+          content: content
+        });
+
+      if (error) throw error;
+
+      // Clear comment input
+      setNewComment(prev => ({ ...prev, [postId]: '' }));
+      
+      // Reload posts to show new comment
+      await loadPosts();
+    } catch (error) {
+      console.error('Error adding comment:', error);
+    } finally {
+      setSubmittingComment(prev => ({ ...prev, [postId]: false }));
+    }
+  };
+
+  const handleDeleteComment = (commentId: string) => {
+    setCommentToDelete(commentId);
+    setShowCommentModal(true);
+  };
+
+  const confirmDeleteComment = async () => {
+    if (!user || !commentToDelete) return;
+
+    try {
+      const { error } = await supabase
+        .from('post_comments')
+        .delete()
+        .eq('id', commentToDelete)
+        .eq('user_id', user.id);
+
+      if (error) throw error;
+      
+      // Reload posts to reflect the deletion
+      await loadPosts();
+    } catch (error) {
+      console.error('Error deleting comment:', error);
+    } finally {
+      setShowCommentModal(false);
+      setCommentToDelete(null);
+    }
+  };
+
+  const toggleComments = (postId: string) => {
+    setExpandedComments(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(postId)) {
+        newSet.delete(postId);
+      } else {
+        newSet.add(postId);
+      }
+      return newSet;
+    });
   };
 
   const handleDeleteClick = (postId: string) => {
@@ -493,6 +605,18 @@ const Community: React.FC = () => {
                     {post.likes_count > 0 && <span>{post.likes_count}</span>}
                   </button>
                   
+                  <button
+                    onClick={() => toggleComments(post.id)}
+                    className="flex items-center px-3 py-2 rounded-full text-sm hover:bg-stone/10 text-stone transition-all duration-300"
+                  >
+                    <MessageCircle size={16} className="mr-1" />
+                    {post.comments_count > 0 && <span>{post.comments_count}</span>}
+                    {expandedComments.has(post.id) ? 
+                      <ChevronUp size={14} className="ml-1" /> : 
+                      <ChevronDown size={14} className="ml-1" />
+                    }
+                  </button>
+                  
                   {user && post.user_id === user.id && (
                     <button
                       onClick={() => handleDeleteClick(post.id)}
@@ -508,6 +632,78 @@ const Community: React.FC = () => {
                   {user && post.user_id === user.id ? 'Mon message' : 'Communauté'}
                 </div>
               </div>
+              
+              {/* Section commentaires */}
+              {expandedComments.has(post.id) && (
+                <div className="mt-4 pt-4 border-t border-stone/10">
+                  {/* Formulaire d'ajout de commentaire */}
+                  <div className="mb-4">
+                    <div className="flex gap-2">
+                      <input
+                        type="text"
+                        value={newComment[post.id] || ''}
+                        onChange={(e) => setNewComment(prev => ({ ...prev, [post.id]: e.target.value }))}
+                        placeholder="Ajouter un commentaire..."
+                        className="flex-1 px-3 py-2 bg-stone/5 border border-stone/20 rounded-xl focus:border-wasabi focus:ring-2 focus:ring-wasabi/20 transition-all duration-300 text-sm"
+                        maxLength={200}
+                        onKeyPress={(e) => {
+                          if (e.key === 'Enter' && !e.shiftKey) {
+                            e.preventDefault();
+                            addComment(post.id);
+                          }
+                        }}
+                      />
+                      <button
+                        onClick={() => addComment(post.id)}
+                        disabled={!newComment[post.id]?.trim() || submittingComment[post.id]}
+                        className="bg-wasabi text-white px-4 py-2 rounded-xl text-sm font-medium hover:bg-wasabi/90 transition-colors duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
+                      >
+                        {submittingComment[post.id] ? (
+                          <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                        ) : (
+                          <Send size={14} />
+                        )}
+                      </button>
+                    </div>
+                  </div>
+                  
+                  {/* Liste des commentaires */}
+                  <div className="space-y-3">
+                    {post.comments && post.comments.length > 0 ? (
+                      post.comments
+                        .sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime())
+                        .map(comment => (
+                        <div key={comment.id} className="bg-stone/5 rounded-xl p-3">
+                          <div className="flex items-start justify-between">
+                            <div className="flex-1">
+                              <div className="flex items-center mb-1">
+                                <div className="w-6 h-6 bg-wasabi/20 rounded-full flex items-center justify-center mr-2">
+                                  <span className="text-wasabi font-bold text-xs">{comment.profiles.level}</span>
+                                </div>
+                                <span className="font-semibold text-xs text-gray-700">{comment.profiles.display_name}</span>
+                                <span className="text-xs text-stone ml-2">{getRelativeTime(comment.created_at)}</span>
+                              </div>
+                              <p className="text-sm text-ink leading-relaxed ml-8">{comment.content}</p>
+                            </div>
+                            
+                            {user && comment.user_id === user.id && (
+                              <button
+                                onClick={() => handleDeleteComment(comment.id)}
+                                className="text-stone hover:text-red-600 transition-colors duration-300 ml-2"
+                                title="Supprimer mon commentaire"
+                              >
+                                <Trash2 size={14} />
+                              </button>
+                            )}
+                          </div>
+                        </div>
+                      ))
+                    ) : (
+                      <p className="text-stone text-sm text-center py-4">Aucun commentaire pour le moment</p>
+                    )}
+                  </div>
+                </div>
+              )}
             </div>
           ))
         )}
@@ -556,6 +752,49 @@ const Community: React.FC = () => {
                 </button>
                 <button
                   onClick={confirmDeletePost}
+                  className="flex-1 px-4 py-3 bg-red-600 text-white rounded-xl hover:bg-red-700 transition-colors duration-300"
+                >
+                  Supprimer
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de confirmation de suppression de commentaire */}
+      {showCommentModal && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm mx-2">
+            <div className="p-6">
+              <div className="flex items-center mb-4">
+                <div className="w-12 h-12 bg-red-50 rounded-full flex items-center justify-center mr-4">
+                  <MessageCircle className="w-6 h-6 text-red-600" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-bold text-ink" style={{ fontFamily: "'Shippori Mincho', serif" }}>
+                    Supprimer le commentaire
+                  </h3>
+                  <p className="text-stone text-sm">Cette action est irréversible</p>
+                </div>
+              </div>
+              
+              <p className="text-stone mb-6 leading-relaxed">
+                Es-tu sûr(e) de vouloir supprimer ce commentaire ? Il sera définitivement retiré.
+              </p>
+              
+              <div className="flex gap-3">
+                <button
+                  onClick={() => {
+                    setShowCommentModal(false);
+                    setCommentToDelete(null);
+                  }}
+                  className="flex-1 px-4 py-3 border border-stone/20 text-stone rounded-xl hover:bg-stone/5 transition-colors duration-300"
+                >
+                  Annuler
+                </button>
+                <button
+                  onClick={confirmDeleteComment}
                   className="flex-1 px-4 py-3 bg-red-600 text-white rounded-xl hover:bg-red-700 transition-colors duration-300"
                 >
                   Supprimer
