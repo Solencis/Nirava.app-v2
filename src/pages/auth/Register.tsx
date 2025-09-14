@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, Navigate, useLocation } from 'react-router-dom';
-import { Mail, ArrowLeft, CheckCircle, User, Lock, Eye, EyeOff } from 'lucide-react';
+import { ArrowLeft, CheckCircle, User, Lock, Eye, EyeOff } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 
 // Check if Supabase is configured
@@ -15,7 +15,7 @@ const isSupabaseConfigured = () => {
 };
 
 const Register: React.FC = () => {
-  const { user, signUp, signInWithGoogle } = useAuth();
+  const { user, signUp } = useAuth();
   const [formData, setFormData] = useState({
     firstName: '',
     email: '',
@@ -26,7 +26,6 @@ const Register: React.FC = () => {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [consent, setConsent] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [googleLoading, setGoogleLoading] = useState(false);
   const [emailSent, setEmailSent] = useState(false);
   const [error, setError] = useState('');
   const location = useLocation();
@@ -126,27 +125,6 @@ const Register: React.FC = () => {
       }
     } finally {
       setLoading(false);
-    }
-  };
-
-  const handleGoogleSignIn = async () => {
-    setGoogleLoading(true);
-    setError('');
-    
-    // Check if Supabase is configured before attempting Google sign in
-    if (!isSupabaseConfigured()) {
-      setError('❌ Supabase n\'est pas configuré. Veuillez configurer vos variables d\'environnement Supabase pour utiliser la connexion Google.');
-      setGoogleLoading(false);
-      return;
-    }
-
-    try {
-      await signInWithGoogle();
-    } catch (error: any) {
-      console.error('Google sign in error:', error);
-      setError('Erreur lors de la connexion avec Google');
-    } finally {
-      setGoogleLoading(false);
     }
   };
 

@@ -364,7 +364,8 @@ export const getUserPosts = async () => {
       profiles (
         id,
         display_name,
-        level
+        level,
+        photo_url
       ),
       post_likes (
         id,

@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import { Link, Navigate, useLocation } from 'react-router-dom';
-import { Mail, ArrowLeft, CheckCircle, Lock, Eye, EyeOff } from 'lucide-react';
+import { ArrowLeft, Lock, Eye, EyeOff } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 
 const Login: React.FC = () => {
-  const { user, signInWithPassword, signInWithGoogle } = useAuth();
+  const { user, signInWithPassword } = useAuth();
   const [formData, setFormData] = useState({
     email: '',
     password: ''
@@ -12,7 +12,6 @@ const Login: React.FC = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(true);
   const [loading, setLoading] = useState(false);
-  const [googleLoading, setGoogleLoading] = useState(false);
   const [error, setError] = useState('');
   const location = useLocation();
 
@@ -70,20 +69,6 @@ const Login: React.FC = () => {
       }
     } finally {
       setLoading(false);
-    }
-  };
-
-  const handleGoogleSignIn = async () => {
-    setGoogleLoading(true);
-    setError('');
-
-    try {
-      await signInWithGoogle();
-    } catch (error: any) {
-      console.error('Google sign in error:', error);
-      setError('Erreur lors de la connexion avec Google');
-    } finally {
-      setGoogleLoading(false);
     }
   };
 
