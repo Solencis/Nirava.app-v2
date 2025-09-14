@@ -14,12 +14,7 @@ if (!supabaseUrl || !supabaseAnonKey ||
     supabaseUrl === 'https://your-project-ref.supabase.co' || 
     supabaseAnonKey === 'your-anon-key-here') {
   console.warn('❌ Supabase not configured properly');
-  console.warn('Please update your .env file with actual Supabase credentials:');
-  console.warn('1. Go to https://supabase.com/dashboard');
-  console.warn('2. Select your project');
-  console.warn('3. Go to Settings > API');
-  console.warn('4. Copy your Project URL and anon key to .env file');
-  console.warn('5. Restart your development server');
+  console.warn('App will work in offline mode with localStorage only');
 }
 
 // Create a mock client for development when Supabase is not configured

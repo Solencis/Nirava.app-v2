@@ -54,6 +54,15 @@ export const useAuth = () => {
 
   // 3. Créer ou mettre à jour le profil utilisateur dans Supabase
   const createOrUpdateProfile = async (user: User) => {
+    // Check if Supabase is properly configured
+    if (!import.meta.env.VITE_SUPABASE_URL || 
+        !import.meta.env.VITE_SUPABASE_ANON_KEY ||
+        import.meta.env.VITE_SUPABASE_URL === 'https://your-project-ref.supabase.co' ||
+        import.meta.env.VITE_SUPABASE_ANON_KEY === 'your-anon-key-here') {
+      console.warn('Supabase not configured, skipping profile creation');
+      return;
+    }
+
     try {
       // Vérifier si le profil existe déjà
       const { data: existingProfile, error: fetchError } = await supabase
@@ -92,6 +101,11 @@ export const useAuth = () => {
       }
     } catch (error) {
       console.error('Error in createOrUpdateProfile:', error);
+      
+      // Don't throw the error to prevent app crash
+      if (error instanceof Error && error.message.includes('Failed to fetch')) {
+        console.warn('Supabase connection failed, continuing without profile sync');
+      }
     }
   };
 

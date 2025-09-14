@@ -16,10 +16,16 @@ export const useMeditationSessions = () => {
       const data = await getMeditationSessions(50);
       return data || [];
     },
-    enabled: isReady(),
+    enabled: isReady() && import.meta.env.VITE_SUPABASE_URL && import.meta.env.VITE_SUPABASE_URL !== 'https://your-project-ref.supabase.co',
     staleTime: 5 * 60 * 1000, // 5 minutes
     gcTime: 30 * 60 * 1000, // 30 minutes
-    retry: false,
+    retry: (failureCount, error: any) => {
+      // Don't retry on configuration errors
+      if (error?.message?.includes('Failed to fetch') || error?.message?.includes('Supabase not configured')) {
+        return false;
+      }
+      return failureCount < 1;
+    },
   });
 };
 
@@ -59,9 +65,15 @@ export const useMeditationWeeklyStats = () => {
       const totalMinutes = await getMeditationWeeklyStats();
       return totalMinutes;
     },
-    enabled: isReady(),
+    enabled: isReady() && import.meta.env.VITE_SUPABASE_URL && import.meta.env.VITE_SUPABASE_URL !== 'https://your-project-ref.supabase.co',
     staleTime: 2 * 60 * 1000, // 2 minutes
     gcTime: 10 * 60 * 1000, // 10 minutes
-    retry: false,
+    retry: (failureCount, error: any) => {
+      // Don't retry on configuration errors
+      if (error?.message?.includes('Failed to fetch') || error?.message?.includes('Supabase not configured')) {
+        return false;
+      }
+      return failureCount < 1;
+    },
   });
 };
