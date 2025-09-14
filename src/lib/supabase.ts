@@ -110,6 +110,16 @@ export interface Profile {
   updated_at: string;
 }
 
+export interface MeditationSession {
+  id: string;
+  user_id: string;
+  duration_minutes: number;
+  mode: 'guided' | 'free';
+  completed: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
 export interface Post {
   id: string;
   user_id: string;
@@ -394,3 +404,53 @@ export interface JournalActivity {
   created_at: string;
   shared_to_community?: boolean;
 }
+
+// Meditation sessions functions
+export const createMeditationSession = async (sessionData: Omit<MeditationSession, 'id' | 'user_id' | 'created_at' | 'updated_at'>) => {
+  const user = await requireAuth();
+  
+  const { data, error } = await supabase
+    .from('meditation_sessions')
+    .insert({
+      ...sessionData,
+      user_id: user.id
+    })
+    .select()
+    .single();
+
+  if (error) throw error;
+  return data;
+};
+
+export const getMeditationSessions = async (limit = 50) => {
+  const user = await requireAuth();
+  
+  const { data, error } = await supabase
+    .from('meditation_sessions')
+    .select('*')
+    .eq('user_id', user.id)
+    .order('created_at', { ascending: false })
+    .limit(limit);
+
+  if (error) throw error;
+  return data;
+};
+
+export const getMeditationWeeklyStats = async () => {
+  const user = await requireAuth();
+  
+  // Get sessions from the last 7 days
+  const oneWeekAgo = new Date();
+  oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+  
+  const { data, error } = await supabase
+    .from('meditation_sessions')
+    .select('duration_minutes')
+    .eq('user_id', user.id)
+    .gte('created_at', oneWeekAgo.toISOString());
+
+  if (error) throw error;
+  
+  const totalMinutes = data?.reduce((sum, session) => sum + session.duration_minutes, 0) || 0;
+  return totalMinutes;
+};

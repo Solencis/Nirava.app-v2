@@ -8,6 +8,8 @@ import EmergencyPause from '../components/EmergencyPause';
 import HistoryModal from '../components/HistoryModal';
 import DreamJournalModal from '../components/DreamJournalModal';
 import { useAuth } from '../hooks/useAuth';
+import { useMeditationWeeklyStats } from '../hooks/useMeditation';
+import { useAudioStore } from '../stores/audioStore';
 
 interface JournalStats {
   checkins: number;
@@ -19,6 +21,8 @@ interface JournalStats {
 
 const Journal: React.FC = () => {
   const { user, isReady } = useAuth();
+  const { data: supabaseMeditationMinutes, refetch: refetchMeditationStats } = useMeditationWeeklyStats();
+  const { reduceMeditationTime } = useAudioStore();
   const [stats, setStats] = useState<JournalStats>({
     checkins: 0,
     journals: 0,
@@ -34,6 +38,8 @@ const Journal: React.FC = () => {
   const [showHistory, setShowHistory] = useState(false);
   const [showDreamJournal, setShowDreamJournal] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [showReduceModal, setShowReduceModal] = useState(false);
+  const [minutesToReduce, setMinutesToReduce] = useState('');
 
   const motivationalMessages = [
     "Chaque geste compte 🌱",
@@ -57,6 +63,16 @@ const Journal: React.FC = () => {
     const randomMessage = motivationalMessages[Math.floor(Math.random() * motivationalMessages.length)];
     setCurrentMessage(randomMessage);
   }, [user]);
+
+  // Update meditation stats when Supabase data changes
+  useEffect(() => {
+    if (supabaseMeditationMinutes !== undefined) {
+      setStats(prev => ({
+        ...prev,
+        meditation: supabaseMeditationMinutes
+      }));
+    }
+  }, [supabaseMeditationMinutes]);
 
   const loadStats = async () => {
     if (!isReady()) return;
@@ -99,8 +115,16 @@ const Journal: React.FC = () => {
         });
       
       // Méditation cette semaine (depuis le store audio)
-      const audioStore = JSON.parse(localStorage.getItem('nirava_audio') || '{}');
-      const thisWeekMeditation = audioStore.state?.meditationWeekMinutes || 0;
+      let thisWeekMeditation = 0;
+      
+      if (isReady()) {
+        // Utiliser les données Supabase si connecté
+        thisWeekMeditation = supabaseMeditationMinutes || 0;
+      } else {
+        // Fallback localStorage si pas connecté
+        const audioStore = JSON.parse(localStorage.getItem('nirava_audio') || '{}');
+        thisWeekMeditation = audioStore.state?.meditationWeekMinutes || 0;
+      }
 
       // Streak de journaux
       const currentStreak = parseInt(localStorage.getItem('current-streak') || '0');
@@ -126,8 +150,19 @@ const Journal: React.FC = () => {
   const refreshStats = () => {
     if (isReady()) {
       loadStats();
+      refetchMeditationStats();
     } else {
       loadLocalStats();
+    }
+  };
+
+  const handleReduceMinutes = () => {
+    const minutes = parseInt(minutesToReduce);
+    if (minutes > 0) {
+      reduceMeditationTime(minutes);
+      setShowReduceModal(false);
+      setMinutesToReduce('');
+      refreshStats();
     }
   };
 
@@ -258,12 +293,7 @@ const Journal: React.FC = () => {
           <button
             onClick={(e) => {
               e.stopPropagation();
-              const minutesToReduce = prompt('Combien de minutes veux-tu retirer ? (en cas d\'erreur)');
-              if (minutesToReduce && !isNaN(Number(minutesToReduce))) {
-                const { reduceMeditationTime } = useAudioStore.getState();
-                reduceMeditationTime(Number(minutesToReduce));
-                refreshStats();
-              }
+              setShowReduceModal(true);
             }}
             className="mt-2 text-xs text-stone/60 hover:text-vermilion transition-colors duration-300 underline"
           >
@@ -350,6 +380,58 @@ const Journal: React.FC = () => {
         onClose={() => setShowDreamJournal(false)}
         onSave={refreshStats}
       />
+      
+      {/* Reduce minutes modal */}
+      {showReduceModal && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-xs mx-2">
+            <div className="p-6">
+              <h3 className="text-lg font-bold text-ink mb-4" style={{ fontFamily: "'Shippori Mincho', serif" }}>
+                Corriger les minutes
+              </h3>
+              
+              <p className="text-stone text-sm mb-4 leading-relaxed">
+                Combien de minutes veux-tu retirer de ta progression hebdomadaire ?
+              </p>
+              
+              <div className="mb-6">
+                <label className="block text-sm font-medium text-ink mb-2">
+                  Minutes à retirer
+                </label>
+                <input
+                  type="number"
+                  value={minutesToReduce}
+                  onChange={(e) => setMinutesToReduce(e.target.value)}
+                  placeholder="Ex: 5"
+                  min="1"
+                  max="120"
+                  className="w-full px-4 py-3 bg-stone/5 border border-stone/20 rounded-xl focus:border-vermilion focus:ring-2 focus:ring-vermilion/20 transition-all duration-300"
+                  autoFocus
+                />
+              </div>
+              
+              <div className="flex gap-3">
+                <button
+                  onClick={() => {
+                    setShowReduceModal(false);
+                    setMinutesToReduce('');
+                  }}
+                  className="flex-1 px-4 py-3 border border-stone/20 text-stone rounded-xl hover:bg-stone/5 transition-colors duration-300"
+                >
+                  Annuler
+                </button>
+                <button
+                  onClick={handleReduceMinutes}
+                  disabled={!minutesToReduce || parseInt(minutesToReduce) <= 0}
+                  className="flex-1 px-4 py-3 bg-vermilion text-white rounded-xl hover:bg-vermilion/90 transition-colors duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  Retirer
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

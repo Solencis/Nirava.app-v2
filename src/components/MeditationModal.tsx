@@ -34,6 +34,8 @@ const MeditationModal: React.FC<MeditationModalProps> = ({ isOpen, onClose, onSa
   const [muteAmbience, setMuteAmbience] = useState(false);
   const wasAmbiencePlaying = useRef(false);
   const [savedActivity, setSavedActivity] = useState<JournalActivity | null>(null);
+  const [showReduceModal, setShowReduceModal] = useState(false);
+  const [minutesToReduce, setMinutesToReduce] = useState('');
   
   // Get current meditation state
   const meditationState = getMeditationState();
@@ -203,15 +205,19 @@ const MeditationModal: React.FC<MeditationModalProps> = ({ isOpen, onClose, onSa
       playAmbience(currentAmbience);
     }
     
-    // Add actual elapsed time before stopping
-    const actualMinutes = Math.round(meditationState.elapsed / 60);
-    if (actualMinutes > 0) {
-      const { addMeditationTime } = useAudioStore.getState();
-      addMeditationTime(actualMinutes);
-    }
-    
     saveMeditationSession();
     stopMeditation();
+  };
+
+  const handleReduceMinutes = () => {
+    const minutes = parseInt(minutesToReduce);
+    if (minutes > 0) {
+      const { reduceMeditationTime } = useAudioStore.getState();
+      reduceMeditationTime(minutes);
+      setShowReduceModal(false);
+      setMinutesToReduce('');
+      onSave(); // Refresh stats
+    }
   };
 
   const formatTime = (seconds: number) => {
@@ -370,6 +376,58 @@ const MeditationModal: React.FC<MeditationModalProps> = ({ isOpen, onClose, onSa
             </div>
           )}
 
+          {/* Reduce minutes modal */}
+          {showReduceModal && (
+            <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+              <div className="bg-white rounded-2xl shadow-2xl w-full max-w-xs mx-2">
+                <div className="p-6">
+                  <h3 className="text-lg font-bold text-ink mb-4" style={{ fontFamily: "'Shippori Mincho', serif" }}>
+                    Corriger les minutes
+                  </h3>
+                  
+                  <p className="text-stone text-sm mb-4 leading-relaxed">
+                    Combien de minutes veux-tu retirer de ta progression hebdomadaire ?
+                  </p>
+                  
+                  <div className="mb-6">
+                    <label className="block text-sm font-medium text-ink mb-2">
+                      Minutes à retirer
+                    </label>
+                    <input
+                      type="number"
+                      value={minutesToReduce}
+                      onChange={(e) => setMinutesToReduce(e.target.value)}
+                      placeholder="Ex: 5"
+                      min="1"
+                      max="120"
+                      className="w-full px-4 py-3 bg-stone/5 border border-stone/20 rounded-xl focus:border-vermilion focus:ring-2 focus:ring-vermilion/20 transition-all duration-300"
+                      autoFocus
+                    />
+                  </div>
+                  
+                  <div className="flex gap-3">
+                    <button
+                      onClick={() => {
+                        setShowReduceModal(false);
+                        setMinutesToReduce('');
+                      }}
+                      className="flex-1 px-4 py-3 border border-stone/20 text-stone rounded-xl hover:bg-stone/5 transition-colors duration-300"
+                    >
+                      Annuler
+                    </button>
+                    <button
+                      onClick={handleReduceMinutes}
+                      disabled={!minutesToReduce || parseInt(minutesToReduce) <= 0}
+                      className="flex-1 px-4 py-3 bg-vermilion text-white rounded-xl hover:bg-vermilion/90 transition-colors duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      Retirer
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
           {(meditationState.isActive || meditationState.remaining !== null || meditationState.elapsed > 0) && !savedActivity && (
             <div className="text-center space-y-6">
               {/* Timer circulaire */}
@@ -506,7 +564,7 @@ const MeditationModal: React.FC<MeditationModalProps> = ({ isOpen, onClose, onSa
                   Méditation terminée !
                 </h3>
                 <p className="text-stone">
-                  Tu as médité {isFreeMode ? Math.round(meditationState.elapsed / 60) : duration} minutes. Bravo pour ce moment de présence.
+                  Tu as médité {Math.round(meditationState.elapsed / 60)} minutes. Bravo pour ce moment de présence.
                 </p>
               </div>
               <button

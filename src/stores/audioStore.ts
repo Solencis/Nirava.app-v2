@@ -294,7 +294,7 @@ export const useAudioStore = create<AudioState & AudioActions>()(
       stopMeditation: () => {
         const state = get();
         if (state.meditationActive) {
-          // Add the actual elapsed time (rounded to nearest minute)
+          // Add the actual elapsed time to weekly stats (rounded to nearest minute)
           const actualMinutes = Math.round(state.meditationElapsed / 60);
           if (actualMinutes > 0) {
             state.addMeditationTime(actualMinutes);
@@ -375,22 +375,12 @@ export const useAudioStore = create<AudioState & AudioActions>()(
           oscillator1.frequency.setValueAtTime(220, audioContext.currentTime);
           oscillator1.frequency.exponentialRampToValueAtTime(110, audioContext.currentTime + 4);
           
-          oscillator2.frequency.setValueAtTime(330, audioContext.currentTime);
-          oscillator2.frequency.exponentialRampToValueAtTime(165, audioContext.currentTime + 4);
-          
-          oscillator3.frequency.setValueAtTime(440, audioContext.currentTime);
-          oscillator3.frequency.exponentialRampToValueAtTime(220, audioContext.currentTime + 4);
-          
-          // Volume élevé et décroissance lente
-          masterGain.gain.setValueAtTime(0.7, audioContext.currentTime);
-          masterGain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 4);
-          
           oscillator1.stop(audioContext.currentTime + 4);
           oscillator2.start(audioContext.currentTime);
           oscillator2.stop(audioContext.currentTime + 4);
           oscillator3.start(audioContext.currentTime);
           oscillator3.stop(audioContext.currentTime + 4);
-        } catch (error) {
+          get().playCompletionGong();
           console.error('Error playing completion gong:', error);
         }
       }
