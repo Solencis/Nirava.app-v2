@@ -10,6 +10,8 @@ const Community: React.FC = () => {
   const [selectedEmoji, setSelectedEmoji] = useState('');
   const [profile, setProfile] = useState<Profile | null>(null);
   const [showSettings, setShowSettings] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [postToDelete, setPostToDelete] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
 
@@ -166,6 +168,9 @@ const Community: React.FC = () => {
       // Reset form
       setNewPost('');
       setSelectedEmoji('');
+      
+      // Reload posts immediately to show the new post
+      await loadPosts();
     } catch (error) {
       console.error('Error publishing post:', error);
     } finally {
@@ -205,19 +210,30 @@ const Community: React.FC = () => {
     }
   };
 
-  const deletePost = async (postId: string) => {
-    if (!user || !confirm('Supprimer ce message ?')) return;
+  const handleDeleteClick = (postId: string) => {
+    setPostToDelete(postId);
+    setShowDeleteModal(true);
+  };
+
+  const confirmDeletePost = async () => {
+    if (!user || !postToDelete) return;
 
     try {
       const { error } = await supabase
         .from('posts')
         .delete()
-        .eq('id', postId)
+        .eq('id', postToDelete)
         .eq('user_id', user.id);
 
       if (error) throw error;
+      
+      // Reload posts immediately to reflect the deletion
+      await loadPosts();
     } catch (error) {
       console.error('Error deleting post:', error);
+    } finally {
+      setShowDeleteModal(false);
+      setPostToDelete(null);
     }
   };
 
@@ -479,7 +495,7 @@ const Community: React.FC = () => {
                   
                   {user && post.user_id === user.id && (
                     <button
-                      onClick={() => deletePost(post.id)}
+                      onClick={() => handleDeleteClick(post.id)}
                       className="text-stone hover:text-red-600 transition-colors duration-300 px-2 py-1 rounded-full hover:bg-red-50"
                       title="Supprimer mon message"
                     >
@@ -506,6 +522,49 @@ const Community: React.FC = () => {
           </p>
         </div>
       </div>
+
+      {/* Modal de confirmation de suppression */}
+      {showDeleteModal && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm mx-2">
+            <div className="p-6">
+              <div className="flex items-center mb-4">
+                <div className="w-12 h-12 bg-red-50 rounded-full flex items-center justify-center mr-4">
+                  <Trash2 className="w-6 h-6 text-red-600" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-bold text-ink" style={{ fontFamily: "'Shippori Mincho', serif" }}>
+                    Supprimer le message
+                  </h3>
+                  <p className="text-stone text-sm">Cette action est irréversible</p>
+                </div>
+              </div>
+              
+              <p className="text-stone mb-6 leading-relaxed">
+                Es-tu sûr(e) de vouloir supprimer ce message ? Il sera définitivement retiré de la communauté.
+              </p>
+              
+              <div className="flex gap-3">
+                <button
+                  onClick={() => {
+                    setShowDeleteModal(false);
+                    setPostToDelete(null);
+                  }}
+                  className="flex-1 px-4 py-3 border border-stone/20 text-stone rounded-xl hover:bg-stone/5 transition-colors duration-300"
+                >
+                  Annuler
+                </button>
+                <button
+                  onClick={confirmDeletePost}
+                  className="flex-1 px-4 py-3 bg-red-600 text-white rounded-xl hover:bg-red-700 transition-colors duration-300"
+                >
+                  Supprimer
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
