@@ -6,10 +6,6 @@ const MobileNavigation: React.FC = () => {
   const location = useLocation();
   const [lastTap, setLastTap] = React.useState(0);
 
-const MobileNavigation: React.FC = () => {
-  const location = useLocation();
-  const [lastTap, setLastTap] = useState(0);
-  
   // Haptic feedback for navigation
   const hapticFeedback = () => {
     if ('vibrate' in navigator) {
