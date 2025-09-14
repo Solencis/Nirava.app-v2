@@ -190,18 +190,12 @@ const Community: React.FC = () => {
         // Add like
         const { error } = await supabase
           .from('post_likes')
-          .insert({
+          .insert([{
             post_id: postId,
             user_id: user.id
-          });
+          }], { ignoreDuplicates: true });
 
         if (error) {
-          // If it's a unique constraint violation, the like already exists
-          // This can happen due to race conditions or UI state inconsistencies
-          if (error.code === '23505') {
-            // Ignore the error - the desired state (post being liked) is already achieved
-            return;
-          }
           throw error;
         }
       }
