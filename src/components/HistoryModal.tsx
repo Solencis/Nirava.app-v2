@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X, Heart, Moon, Trash2, RotateCcw, Calendar, AlertTriangle } from 'lucide-react';
+import { X, Heart, Moon, Trash2, RotateCcw, Calendar, AlertTriangle, Cloud, Eye, Zap } from 'lucide-react';
 import { useCheckins } from '../hooks/useCheckins';
 import { useJournals } from '../hooks/useJournals';
 import { useAuth } from '../hooks/useAuth';
@@ -7,7 +7,7 @@ import { LoadingSkeleton, HistoryLoadingSkeleton } from './LoadingSkeleton';
 
 interface HistoryEntry {
   id: string;
-  type: 'checkin' | 'journal';
+  type: 'checkin' | 'journal' | 'dream';
   timestamp: string;
   date: string;
   emotion?: string;
@@ -16,6 +16,10 @@ interface HistoryEntry {
   note?: string;
   content?: string;
   emoji?: string;
+  title?: string;
+  lucidity?: boolean;
+  recurring?: boolean;
+  nightmare?: boolean;
 }
 
 interface HistoryModalProps {
@@ -89,6 +93,11 @@ const HistoryModal: React.FC<HistoryModalProps> = ({ isOpen, onClose, onStatsUpd
       
       let checkinHistory = JSON.parse(localStorage.getItem('checkin-history') || '[]');
       let journalEntries = JSON.parse(localStorage.getItem('journal-entries') || '[]');
+      
+      // Charger aussi les rêves
+      const dreamEntries = JSON.parse(localStorage.getItem('dream-entries') || '[]');
+      // Ajouter les rêves aux journaux pour l'affichage unifié
+      journalEntries = [...journalEntries, ...dreamEntries];
       
       // Filtrer par utilisateur si connecté (pour éviter de voir les données d'autres utilisateurs)
       if (currentUser?.id) {
@@ -349,17 +358,46 @@ const HistoryModal: React.FC<HistoryModalProps> = ({ isOpen, onClose, onStatsUpd
                             {journal.emoji && (
                               <span className="text-lg mr-2">{journal.emoji}</span>
                             )}
+                            {journal.type === 'dream' && (
+                              <Cloud size={16} className="text-blue-600 mr-2" />
+                            )}
                             <div className="text-xs text-stone">
                               <Calendar size={12} className="inline mr-1" />
                               {formatDate(journal.timestamp)}
                             </div>
                           </div>
+                          {journal.type === 'dream' && journal.title && (
+                            <div className="text-sm font-medium text-blue-700 mb-1">
+                              {journal.title}
+                            </div>
+                          )}
                           <div className="text-sm text-ink leading-relaxed">
                             {journal.content && journal.content.length > 150
                               ? `${journal.content.substring(0, 150)}...`
                               : journal.content
                             }
                           </div>
+                          {journal.type === 'dream' && (
+                            <div className="mt-1 flex flex-wrap gap-1">
+                              {journal.lucidity && (
+                                <span className="bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full text-xs flex items-center">
+                                  <Eye size={10} className="mr-1" />
+                                  Lucide
+                                </span>
+                              )}
+                              {journal.recurring && (
+                                <span className="bg-purple-100 text-purple-700 px-2 py-0.5 rounded-full text-xs flex items-center">
+                                  <Zap size={10} className="mr-1" />
+                                  Récurrent
+                                </span>
+                              )}
+                              {journal.nightmare && (
+                                <span className="bg-red-100 text-red-700 px-2 py-0.5 rounded-full text-xs">
+                                  Cauchemar
+                                </span>
+                              )}
+                            </div>
+                          )}
                         </div>
                         <button
                           onClick={() => moveToTrash(journal)}
