@@ -121,6 +121,64 @@
     padding: 1.5rem;
     margin-bottom: 1rem;
   }
+  
+  /* Addictive micro-interactions */
+  .card-hover {
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  
+  .card-hover:active {
+    transform: scale(0.98);
+  }
+  
+  /* Smooth haptic-like feedback */
+  .haptic-feedback {
+    transition: transform 0.1s ease-out;
+  }
+  
+  .haptic-feedback:active {
+    transform: scale(0.95);
+  }
+  
+  /* Better scroll momentum */
+  .smooth-scroll {
+    -webkit-overflow-scrolling: touch;
+    scroll-behavior: smooth;
+  }
+  
+  /* Improved focus states for mobile */
+  input:focus, textarea:focus, button:focus {
+    transform: scale(1.02);
+    box-shadow: 0 0 0 3px rgba(139, 169, 142, 0.2);
+  }
+  
+  /* Pull-to-refresh indicator space */
+  .ptr-space {
+    padding-top: env(safe-area-inset-top, 20px);
+  }
+  
+  /* Better loading states */
+  .loading-shimmer {
+    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+  }
+  
+  @keyframes shimmer {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+  }
+  
+  /* Addictive progress animations */
+  .progress-glow {
+    box-shadow: 0 0 20px rgba(139, 169, 142, 0.3);
+    animation: glow-pulse 2s ease-in-out infinite alternate;
+  }
+  
+  @keyframes glow-pulse {
+    from { box-shadow: 0 0 20px rgba(139, 169, 142, 0.2); }
+    to { box-shadow: 0 0 30px rgba(139, 169, 142, 0.4); }
+  }
 }
 
 /* Enhanced accessibility */

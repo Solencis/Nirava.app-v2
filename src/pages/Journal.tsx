@@ -207,7 +207,7 @@ const Journal: React.FC = () => {
         {/* Check-in émotionnel */}
         <button
           onClick={() => setShowCheckin(true)}
-          className="group bg-white/90 backdrop-blur-sm rounded-2xl p-5 shadow-soft border border-stone/10 text-center transition-all duration-300 hover:scale-[1.02] hover:shadow-lg hover:bg-jade/5 min-h-[140px] flex flex-col justify-center active:scale-95"
+          className="group bg-white/90 backdrop-blur-sm rounded-2xl p-5 shadow-soft border border-stone/10 text-center transition-all duration-200 hover:scale-[1.02] hover:shadow-lg hover:bg-jade/5 min-h-[140px] flex flex-col justify-center active:scale-95 haptic-feedback"
         >
           <div className="w-10 h-10 mx-auto mb-3 text-jade group-hover:scale-110 transition-transform duration-300">
             <Heart size={40} strokeWidth={1.5} />
@@ -219,12 +219,17 @@ const Journal: React.FC = () => {
           <div className="text-xs text-jade font-medium">
             {stats.checkins} cette semaine
           </div>
+          {stats.checkins > 0 && (
+            <div className="mt-1 w-full bg-jade/20 h-1 rounded-full">
+              <div className="bg-jade h-1 rounded-full" style={{ width: `${Math.min(100, (stats.checkins / 7) * 100)}%` }}></div>
+            </div>
+          )}
         </button>
 
         {/* Journal de rêves */}
         <button
           onClick={() => setShowDreamJournal(true)}
-          className="group bg-white/90 backdrop-blur-sm rounded-2xl p-5 shadow-soft border border-stone/10 text-center transition-all duration-300 hover:scale-[1.02] hover:shadow-lg hover:bg-blue-50/50 min-h-[140px] flex flex-col justify-center active:scale-95"
+          className="group bg-white/90 backdrop-blur-sm rounded-2xl p-5 shadow-soft border border-stone/10 text-center transition-all duration-200 hover:scale-[1.02] hover:shadow-lg hover:bg-blue-50/50 min-h-[140px] flex flex-col justify-center active:scale-95 haptic-feedback"
         >
           <div className="w-10 h-10 mx-auto mb-3 text-blue-600 group-hover:scale-110 transition-transform duration-300">
             <Cloud size={40} strokeWidth={1.5} />
@@ -236,12 +241,17 @@ const Journal: React.FC = () => {
           <div className="text-xs text-blue-600 font-medium">
             {stats.dreams} rêves cette semaine
           </div>
+          {stats.dreams > 0 && (
+            <div className="mt-1 w-full bg-blue-200 h-1 rounded-full">
+              <div className="bg-blue-600 h-1 rounded-full" style={{ width: `${Math.min(100, (stats.dreams / 7) * 100)}%` }}></div>
+            </div>
+          )}
         </button>
 
         {/* Journal du soir */}
         <button
           onClick={() => setShowJournal(true)}
-          className="group bg-white/90 backdrop-blur-sm rounded-2xl p-5 shadow-soft border border-stone/10 text-center transition-all duration-300 hover:scale-[1.02] hover:shadow-lg hover:bg-vermilion/5 min-h-[140px] flex flex-col justify-center active:scale-95"
+          className="group bg-white/90 backdrop-blur-sm rounded-2xl p-5 shadow-soft border border-stone/10 text-center transition-all duration-200 hover:scale-[1.02] hover:shadow-lg hover:bg-vermilion/5 min-h-[140px] flex flex-col justify-center active:scale-95 haptic-feedback"
         >
           <div className="w-10 h-10 mx-auto mb-3 text-vermilion group-hover:scale-110 transition-transform duration-300">
             <Moon size={40} strokeWidth={1.5} />
@@ -253,12 +263,17 @@ const Journal: React.FC = () => {
           <div className="text-xs text-vermilion font-medium">
             {stats.streak} jours consécutifs
           </div>
+          {stats.streak > 0 && (
+            <div className="mt-1 w-full bg-vermilion/20 h-1 rounded-full">
+              <div className="bg-vermilion h-1 rounded-full" style={{ width: `${Math.min(100, (stats.streak / 30) * 100)}%` }}></div>
+            </div>
+          )}
         </button>
 
         {/* Méditation chronométrée */}
         <button
           onClick={() => setShowMeditation(true)}
-          className="group bg-white/90 backdrop-blur-sm rounded-2xl p-5 shadow-soft border border-stone/10 text-center transition-all duration-300 hover:scale-[1.02] hover:shadow-lg hover:bg-forest/5 min-h-[140px] flex flex-col justify-center active:scale-95"
+          className="group bg-white/90 backdrop-blur-sm rounded-2xl p-5 shadow-soft border border-stone/10 text-center transition-all duration-200 hover:scale-[1.02] hover:shadow-lg hover:bg-forest/5 min-h-[140px] flex flex-col justify-center active:scale-95 haptic-feedback"
         >
           <div className="w-10 h-10 mx-auto mb-3 text-forest group-hover:scale-110 transition-transform duration-300">
             <Timer size={40} strokeWidth={1.5} />
@@ -270,6 +285,11 @@ const Journal: React.FC = () => {
           <div className="text-xs text-forest font-medium">
             {stats.meditation} min cette semaine
           </div>
+          {stats.meditation > 0 && (
+            <div className="mt-1 w-full bg-forest/20 h-1 rounded-full">
+              <div className="bg-forest h-1 rounded-full" style={{ width: `${Math.min(100, (stats.meditation / 120) * 100)}%` }}></div>
+            </div>
+          )}
           
           {/* Option pour réduire les minutes en cas d'erreur */}
           <button
@@ -286,7 +306,7 @@ const Journal: React.FC = () => {
         {/* Pause émotionnelle */}
         <button
           onClick={() => setShowEmergencyPause(true)}
-          className="group bg-white/90 backdrop-blur-sm rounded-2xl p-5 shadow-soft border border-stone/10 text-center transition-all duration-300 hover:scale-[1.02] hover:shadow-lg hover:bg-sunset/5 min-h-[140px] flex flex-col justify-center active:scale-95"
+          className="group bg-white/90 backdrop-blur-sm rounded-2xl p-5 shadow-soft border border-stone/10 text-center transition-all duration-200 hover:scale-[1.02] hover:shadow-lg hover:bg-sunset/5 min-h-[140px] flex flex-col justify-center active:scale-95 haptic-feedback"
         >
           <div className="w-10 h-10 mx-auto mb-3 text-sunset group-hover:scale-110 transition-transform duration-300">
             <Shield size={40} strokeWidth={1.5} />
@@ -298,6 +318,9 @@ const Journal: React.FC = () => {
           <div className="text-xs text-sunset font-medium">
             Toujours disponible
           </div>
+          <div className="mt-1 w-full bg-gradient-to-r from-sunset/20 to-vermilion/20 h-1 rounded-full">
+            <div className="bg-gradient-to-r from-sunset to-vermilion h-1 rounded-full animate-pulse"></div>
+          </div>
         </button>
       </div>
 
@@ -305,7 +328,7 @@ const Journal: React.FC = () => {
       <div className="mb-6">
         <button
           onClick={() => setShowHistory(true)}
-          className="w-full bg-white/90 backdrop-blur-sm rounded-2xl p-4 shadow-soft border border-stone/10 text-center transition-all duration-300 hover:scale-[1.02] hover:shadow-lg hover:bg-stone/5 flex items-center justify-center"
+          className="w-full bg-white/90 backdrop-blur-sm rounded-2xl p-4 shadow-soft border border-stone/10 text-center transition-all duration-200 hover:scale-[1.02] hover:shadow-lg hover:bg-stone/5 flex items-center justify-center active:scale-98 haptic-feedback"
         >
           <History className="w-5 h-5 text-stone mr-3" />
           <div>

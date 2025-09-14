@@ -524,12 +524,20 @@ const Community: React.FC = () => {
 
       {/* Composer */}
       {profile && (
-        <div className="bg-white/90 rounded-xl p-3 shadow-soft border border-stone/10 mb-4">
+        <div className="bg-white/95 backdrop-blur-sm rounded-2xl p-4 shadow-soft border border-stone/10 mb-4 sticky top-0 z-10">
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center">
-              <div className="w-7 h-7 bg-wasabi/20 rounded-full flex items-center justify-center mr-2">
-                <span className="text-wasabi font-bold text-xs">{profile.level}</span>
-              </div>
+              {profile.photo_url ? (
+                <img
+                  src={profile.photo_url}
+                  alt="Ma photo"
+                  className="w-8 h-8 rounded-full object-cover border-2 border-wasabi/20 mr-3 shadow-sm"
+                />
+              ) : (
+                <div className="w-8 h-8 bg-gradient-to-br from-wasabi to-jade rounded-full flex items-center justify-center mr-3 shadow-sm">
+                  <span className="text-white font-bold text-xs">{profile.level}</span>
+                </div>
+              )}
               <div>
                 <div className="font-semibold text-xs text-gray-700">{profile.display_name}</div>
                 <div className="text-xs text-stone">{profile.level}</div>
@@ -547,9 +555,10 @@ const Community: React.FC = () => {
             value={newPost}
             onChange={(e) => setNewPost(e.target.value)}
             placeholder="Partage tes réflexions, ressentis ou découvertes du jour..."
-            rows={2}
+            rows={3}
             maxLength={280}
-            className="w-full px-3 py-2 bg-stone/5 border border-stone/20 rounded-lg focus:border-wasabi focus:ring-1 focus:ring-wasabi/20 transition-all duration-300 resize-none text-sm"
+            className="w-full px-4 py-3 bg-stone/5 border border-stone/20 rounded-xl focus:border-wasabi focus:ring-2 focus:ring-wasabi/20 transition-all duration-300 resize-none text-sm leading-relaxed"
+            style={{ fontSize: '16px' }} // Prevent zoom on iOS
           />
           
           <div className="flex items-center justify-between mt-3">
@@ -560,10 +569,10 @@ const Community: React.FC = () => {
                   <button
                     key={emoji}
                     onClick={() => setSelectedEmoji(selectedEmoji === emoji ? '' : emoji)}
-                    className={`w-6 h-6 rounded-full text-sm transition-all duration-300 ${
+                    className={`w-8 h-8 rounded-full text-sm transition-all duration-200 active:scale-90 ${
                       selectedEmoji === emoji 
-                        ? 'bg-wasabi/20 scale-110' 
-                        : 'hover:bg-stone/10'
+                        ? 'bg-wasabi/20 scale-110 shadow-md' 
+                        : 'hover:bg-stone/10 hover:scale-105'
                     }`}
                   >
                     {emoji}
@@ -579,9 +588,9 @@ const Community: React.FC = () => {
               <button
                 onClick={publishPost}
                 disabled={!newPost.trim() || submitting}
-                className="bg-wasabi text-white px-3 py-1.5 rounded-full text-xs font-medium hover:bg-wasabi/90 transition-colors duration-300 flex items-center disabled:opacity-50 disabled:cursor-not-allowed"
+                className="bg-wasabi text-white px-4 py-2 rounded-full text-sm font-medium hover:bg-wasabi/90 transition-all duration-200 flex items-center disabled:opacity-50 disabled:cursor-not-allowed active:scale-95 shadow-lg hover:shadow-wasabi/30"
               >
-                <Send size={12} className="mr-1" />
+                <Send size={14} className="mr-2" />
                 {submitting ? 'Publication...' : 'Publier'}
               </button>
             </div>
@@ -599,18 +608,26 @@ const Community: React.FC = () => {
           </div>
         ) : (
           posts.map(post => (
-            <div key={post.id} className="bg-white rounded-xl shadow-sm p-3 border border-stone/10">
+            <div key={post.id} className="bg-white/95 backdrop-blur-sm rounded-2xl shadow-soft p-4 border border-stone/10 mb-3 transition-all duration-200 hover:shadow-lg">
               {/* Header du post */}
               <div className="flex items-center justify-between mb-2">
                 <div className="flex items-center">
-                  <div className="w-7 h-7 bg-wasabi/20 rounded-full flex items-center justify-center mr-2">
-                    <span className="text-wasabi font-bold text-xs">{post.profiles.level}</span>
-                  </div>
+                  {post.profiles.photo_url ? (
+                    <img
+                      src={post.profiles.photo_url}
+                      alt={`Photo de ${post.profiles.display_name}`}
+                      className="w-8 h-8 rounded-full object-cover border border-stone/20 mr-3 shadow-sm"
+                    />
+                  ) : (
+                    <div className="w-8 h-8 bg-gradient-to-br from-wasabi to-jade rounded-full flex items-center justify-center mr-3 shadow-sm">
+                      <span className="text-white font-bold text-xs">{post.profiles.level}</span>
+                    </div>
+                  )}
                   <button
                     onClick={() => handleUserClick(post.user_id)}
-                    className="text-left hover:bg-stone/5 rounded-md p-1 -m-1 transition-colors duration-200"
+                    className="text-left hover:bg-stone/5 rounded-lg p-2 -m-2 transition-all duration-200 active:scale-95"
                   >
-                    <div className="font-semibold text-xs text-gray-700">{post.profiles.display_name}</div>
+                    <div className="font-semibold text-sm text-gray-700">{post.profiles.display_name}</div>
                     <div className="text-xs text-stone">{post.profiles.level}</div>
                   </button>
                 </div>
@@ -724,38 +741,38 @@ const Community: React.FC = () => {
                 <div className="flex items-center gap-1">
                   <button
                     onClick={() => toggleLike(post.id, post.is_liked_by_user)}
-                    className={`flex items-center px-2 py-1 rounded-full text-xs transition-all duration-300 min-h-[32px] ${
+                    className={`flex items-center px-3 py-2 rounded-full text-sm transition-all duration-200 min-h-[44px] active:scale-90 ${
                       post.is_liked_by_user
-                        ? 'bg-red-50 text-red-600' 
-                        : 'hover:bg-stone/10 text-stone'
+                        ? 'bg-red-50 text-red-600 shadow-sm' 
+                        : 'hover:bg-stone/10 text-stone hover:scale-105'
                     }`}
                   >
                     <Heart 
-                      size={12} 
+                      size={16} 
                       className={`mr-1 ${post.is_liked_by_user ? 'fill-current' : ''}`} 
                     />
-                    {post.likes_count > 0 && <span className="font-medium text-xs">{post.likes_count}</span>}
+                    {post.likes_count > 0 && <span className="font-medium text-sm">{post.likes_count}</span>}
                   </button>
                   
                   <button
                     onClick={() => toggleComments(post.id)}
-                    className="flex items-center px-2 py-1 rounded-full text-xs hover:bg-stone/10 text-stone transition-all duration-300 min-h-[32px]"
+                    className="flex items-center px-3 py-2 rounded-full text-sm hover:bg-stone/10 text-stone transition-all duration-200 min-h-[44px] hover:scale-105 active:scale-90"
                   >
-                    <MessageCircle size={12} className="mr-1" />
-                    {post.comments_count > 0 && <span className="font-medium text-xs">{post.comments_count}</span>}
+                    <MessageCircle size={16} className="mr-1" />
+                    {post.comments_count > 0 && <span className="font-medium text-sm">{post.comments_count}</span>}
                     {expandedComments.has(post.id) ? 
-                      <ChevronUp size={10} className="ml-1" /> : 
-                      <ChevronDown size={10} className="ml-1" />
+                      <ChevronUp size={14} className="ml-1" /> : 
+                      <ChevronDown size={14} className="ml-1" />
                     }
                   </button>
                   
                   {user && post.user_id === user.id && (
                     <button
                       onClick={() => handleDeleteClick(post.id)}
-                      className="text-stone hover:text-red-600 transition-colors duration-300 p-1 rounded-full hover:bg-red-50 min-h-[32px] min-w-[32px] flex items-center justify-center"
+                      className="text-stone hover:text-red-600 transition-all duration-200 p-2 rounded-full hover:bg-red-50 min-h-[44px] min-w-[44px] flex items-center justify-center active:scale-90"
                       title="Supprimer mon message"
                     >
-                      <Trash2 size={12} />
+                      <Trash2 size={16} />
                     </button>
                   )}
                 </div>
@@ -771,13 +788,25 @@ const Community: React.FC = () => {
                   {/* Formulaire d'ajout de commentaire */}
                   <div className="mb-2">
                     <div className="flex gap-1">
+                      {profile.photo_url ? (
+                        <img
+                          src={profile.photo_url}
+                          alt="Ma photo"
+                          className="w-6 h-6 rounded-full object-cover border border-stone/20 mt-1 flex-shrink-0"
+                        />
+                      ) : (
+                        <div className="w-6 h-6 bg-wasabi/20 rounded-full flex items-center justify-center mt-1 flex-shrink-0">
+                          <span className="text-wasabi font-bold text-xs">{profile.level}</span>
+                        </div>
+                      )}
                       <input
                         type="text"
                         value={newComment[post.id] || ''}
                         onChange={(e) => setNewComment(prev => ({ ...prev, [post.id]: e.target.value }))}
                         placeholder="Ajouter un commentaire..."
-                        className="flex-1 px-2 py-1.5 bg-stone/5 border border-stone/20 rounded-lg focus:border-wasabi focus:ring-1 focus:ring-wasabi/20 transition-all duration-300 text-xs"
+                        className="flex-1 px-3 py-2 bg-stone/5 border border-stone/20 rounded-xl focus:border-wasabi focus:ring-2 focus:ring-wasabi/20 transition-all duration-300 text-sm"
                         maxLength={200}
+                        style={{ fontSize: '16px' }} // Prevent zoom on iOS
                         onKeyPress={(e) => {
                           if (e.key === 'Enter' && !e.shiftKey) {
                             e.preventDefault();
@@ -788,12 +817,12 @@ const Community: React.FC = () => {
                       <button
                         onClick={() => addComment(post.id)}
                         disabled={!newComment[post.id]?.trim() || submittingComment[post.id]}
-                        className="bg-wasabi text-white px-2 py-1.5 rounded-lg text-xs font-medium hover:bg-wasabi/90 transition-colors duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center min-h-[32px]"
+                        className="bg-wasabi text-white px-3 py-2 rounded-xl text-sm font-medium hover:bg-wasabi/90 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center min-h-[44px] active:scale-95 shadow-lg hover:shadow-wasabi/30"
                       >
                         {submittingComment[post.id] ? (
-                          <div className="w-2.5 h-2.5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                          <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
                         ) : (
-                          <Send size={10} />
+                          <Send size={14} />
                         )}
                       </button>
                     </div>
@@ -805,18 +834,30 @@ const Community: React.FC = () => {
                       post.comments
                         .sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime())
                         .map(comment => (
-                        <div key={comment.id} className="bg-stone/5 rounded-lg p-2">
+                        <div key={comment.id} className="bg-stone/5 rounded-xl p-3 transition-all duration-200 hover:bg-stone/10">
                           <div className="flex items-start justify-between">
                             <div className="flex-1">
                               <div className="flex items-center mb-1">
-                                <div className="w-4 h-4 bg-wasabi/20 rounded-full flex items-center justify-center mr-1.5">
-                                  <span className="text-wasabi font-bold text-xs">{comment.profiles.level}</span>
-                                </div>
+                                {comment.profiles.photo_url ? (
+                                  <img
+                                    src={comment.profiles.photo_url}
+                                    alt={`Photo de ${comment.profiles.display_name}`}
+                                    className="w-5 h-5 rounded-full object-cover border border-stone/20 mr-2"
+                                  />
+                                ) : (
+                                  <div className="w-5 h-5 bg-wasabi/20 rounded-full flex items-center justify-center mr-2">
+                                    <span className="text-wasabi font-bold text-xs">{comment.profiles.level}</span>
+                                  </div>
+                                )}
                                 <button
                                   onClick={() => handleUserClick(comment.user_id)}
-                                  className="font-medium text-xs text-gray-700 hover:text-wasabi transition-colors duration-200"
+                                  className="font-medium text-sm text-gray-700 hover:text-wasabi transition-colors duration-200 active:scale-95"
                                 >
                                   {comment.profiles.display_name}
+                                </button>
+                                <span className="text-xs text-stone/60 ml-2">{comment.profiles.level}</span>
+                              </div>
+                              <p className="text-sm text-ink leading-relaxed ml-7">{comment.content}</p>
                               {comment.profiles.photo_url ? (
                                 <img
                                   src={comment.profiles.photo_url}
@@ -833,17 +874,17 @@ const Community: React.FC = () => {
                             {user && comment.user_id === user.id && (
                               <button
                                 onClick={() => handleDeleteComment(comment.id)}
-                                className="text-stone/60 hover:text-red-600 transition-colors duration-300 ml-1 p-0.5 min-h-[24px] min-w-[24px] flex items-center justify-center"
+                                className="text-stone/60 hover:text-red-600 transition-all duration-200 ml-2 p-1 min-h-[32px] min-w-[32px] flex items-center justify-center rounded-full hover:bg-red-50 active:scale-90"
                                 title="Supprimer mon commentaire"
                               >
-                                <Trash2 size={10} />
+                                <Trash2 size={14} />
                               </button>
                             )}
                           </div>
                         </div>
                       ))
                     ) : (
-                      <p className="text-stone/60 text-xs text-center py-2">Aucun commentaire</p>
+                      <p className="text-stone/60 text-sm text-center py-3">Aucun commentaire</p>
                     )}
                   </div>
                 </div>
@@ -873,37 +914,29 @@ const Community: React.FC = () => {
               setUserProfileData(null);
             }}
           />
-          <div className="fixed top-20 left-2 right-2 z-50 bg-white/98 backdrop-blur-md rounded-lg shadow-xl border border-stone/10 p-3 animate-fade-in-up">
+          <div className="fixed top-20 left-4 right-4 z-50 bg-white/98 backdrop-blur-md rounded-2xl shadow-2xl border border-stone/10 p-4 animate-fade-in-up">
             <div className="flex items-center justify-between mb-2">
               <div className="flex items-center">
-                {post.profiles.photo_url ? (
-                  <img
-                    src={post.profiles.photo_url}
-                    alt={`Photo de ${post.profiles.display_name}`}
-                    className="w-8 h-8 rounded-full object-cover border border-stone/20 mr-2"
-                  />
-                ) : (
-                  <div className="w-8 h-8 bg-wasabi/20 rounded-full flex items-center justify-center mr-2">
                 {userProfileData.photo_url ? (
                   <img
                     src={userProfileData.photo_url}
                     alt={`Photo de ${userProfileData.display_name}`}
-                    className="w-8 h-8 rounded-full object-cover border-2 border-white shadow-sm mr-2"
+                    className="w-10 h-10 rounded-full object-cover border-2 border-wasabi/20 mr-3 shadow-lg"
                   />
                 ) : (
-                  <div className="w-8 h-8 bg-gradient-to-br from-wasabi to-jade rounded-full flex items-center justify-center mr-2">
+                  <div className="w-10 h-10 bg-gradient-to-br from-wasabi to-jade rounded-full flex items-center justify-center mr-3 shadow-lg">
                     <span className="text-white font-bold text-xs">{userProfileData.level}</span>
                   </div>
                 )}
                 <div>
-                  <h3 className="font-bold text-xs text-ink" style={{ fontFamily: "'Shippori Mincho', serif" }}>
+                  <h3 className="font-bold text-sm text-ink" style={{ fontFamily: "'Shippori Mincho', serif" }}>
                     {userProfileData.display_name}
                     {showUserProfile === user?.id && (
-                      <span className="text-xs text-wasabi ml-1 font-normal">(Toi)</span>
+                      <span className="text-sm text-wasabi ml-2 font-normal">(Toi)</span>
                     )}
                   </h3>
-                  <div className="flex items-center text-xs text-stone/70">
-                    <Calendar size={8} className="mr-1" />
+                  <div className="flex items-center text-sm text-stone/70">
+                    <Calendar size={12} className="mr-1" />
                     Membre depuis {getJoinDate(userProfileData.created_at)}
                   </div>
                 </div>
@@ -913,28 +946,28 @@ const Community: React.FC = () => {
                   setShowUserProfile(null);
                   setUserProfileData(null);
                 }}
-                className="w-5 h-5 rounded-full bg-stone/10 flex items-center justify-center text-stone hover:text-vermilion transition-colors duration-300 flex-shrink-0"
+                className="w-8 h-8 rounded-full bg-stone/10 flex items-center justify-center text-stone hover:text-vermilion transition-all duration-200 flex-shrink-0 active:scale-90"
               >
-                <X size={10} />
+                <X size={16} />
               </button>
             </div>
 
             {/* Bio si disponible */}
             {userProfileData.bio && (
-              <div className="mb-2 p-2 bg-stone/5 rounded-md">
-                <p className="text-xs text-ink leading-tight italic">
+              <div className="mb-3 p-3 bg-stone/5 rounded-xl">
+                <p className="text-sm text-ink leading-relaxed italic">
                   "{userProfileData.bio}"
                 </p>
               </div>
             )}
 
             {/* Stats compactes */}
-            <div className="bg-gradient-to-r from-wasabi/5 to-jade/5 rounded-md p-2 border border-wasabi/10">
+            <div className="bg-gradient-to-r from-wasabi/5 to-jade/5 rounded-xl p-3 border border-wasabi/10">
               <div className="flex items-center justify-center mb-1.5">
-                <Award className="w-3 h-3 text-wasabi mr-1" />
-                <h4 className="font-medium text-ink text-xs">Cette semaine</h4>
+                <Award className="w-4 h-4 text-wasabi mr-2" />
+                <h4 className="font-medium text-ink text-sm">Cette semaine</h4>
                 {showUserProfile === user?.id && (
-                  <span className="text-xs text-wasabi/60 ml-1">(Tes stats)</span>
+                  <span className="text-sm text-wasabi/60 ml-2">(Tes stats)</span>
                 )}
               </div>
               
@@ -954,22 +987,22 @@ const Community: React.FC = () => {
                   : getUserStats(userProfileData.id);
                 
                 return (
-                  <div className="grid grid-cols-4 gap-1">
+                  <div className="grid grid-cols-4 gap-2">
                     <div className="text-center">
-                      <div className="text-base font-bold text-jade">{stats.checkins}</div>
-                      <div className="text-xs text-stone leading-none">Check</div>
+                      <div className="text-lg font-bold text-jade">{stats.checkins}</div>
+                      <div className="text-xs text-stone leading-tight">Check</div>
                     </div>
                     <div className="text-center">
-                      <div className="text-base font-bold text-vermilion">{stats.journals}</div>
-                      <div className="text-xs text-stone leading-none">Journal</div>
+                      <div className="text-lg font-bold text-vermilion">{stats.journals}</div>
+                      <div className="text-xs text-stone leading-tight">Journal</div>
                     </div>
                     <div className="text-center">
-                      <div className="text-base font-bold text-forest">{stats.meditation}</div>
-                      <div className="text-xs text-stone leading-none">Médita</div>
+                      <div className="text-lg font-bold text-forest">{stats.meditation}</div>
+                      <div className="text-xs text-stone leading-tight">Médita</div>
                     </div>
                     <div className="text-center">
-                      <div className="text-base font-bold text-sunset">{stats.streak}</div>
-                      <div className="text-xs text-stone leading-none">Série</div>
+                      <div className="text-lg font-bold text-sunset">{stats.streak}</div>
+                      <div className="text-xs text-stone leading-tight">Série</div>
                     </div>
                   </div>
                 );
@@ -978,7 +1011,7 @@ const Community: React.FC = () => {
 
             {/* Message inspirant compact */}
             <div className="mt-2 text-center">
-              <p className="text-stone/70 text-xs italic leading-tight">
+              <p className="text-stone/70 text-sm italic leading-relaxed">
                 {showUserProfile === user?.id 
                   ? "Continue ! 🌱" 
                   : "Beau parcours ! 🌸"
@@ -992,26 +1025,26 @@ const Community: React.FC = () => {
       {/* Photo Modal */}
       {showPhotoModal && (
         <div 
-          className="fixed inset-0 bg-black/95 backdrop-blur-sm flex items-center justify-center z-50"
+          className="fixed inset-0 bg-black/95 backdrop-blur-sm flex items-center justify-center z-50 p-4"
           onClick={() => setShowPhotoModal(null)}
         >
-          <div className="relative w-full h-full flex items-center justify-center p-4">
+          <div className="relative w-full h-full flex items-center justify-center">
             <button
               onClick={() => setShowPhotoModal(null)}
-              className="absolute top-4 right-4 w-10 h-10 bg-black/50 text-white rounded-full flex items-center justify-center hover:bg-black/70 transition-colors duration-300 z-10 backdrop-blur-sm"
+              className="absolute top-4 right-4 w-12 h-12 bg-black/50 text-white rounded-full flex items-center justify-center hover:bg-black/70 transition-all duration-200 z-10 backdrop-blur-sm active:scale-90"
             >
-              <X size={18} />
+              <X size={20} />
             </button>
             
             {/* Indicateur de fermeture */}
-            <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 bg-black/50 text-white px-3 py-1 rounded-full text-xs backdrop-blur-sm">
+            <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 bg-black/50 text-white px-4 py-2 rounded-full text-sm backdrop-blur-sm">
               Touche pour fermer
             </div>
             
             <img
               src={showPhotoModal}
               alt="Photo en grand"
-              className="max-w-full max-h-full object-contain rounded-lg shadow-2xl"
+              className="max-w-full max-h-full object-contain rounded-2xl shadow-2xl"
               onClick={(e) => e.stopPropagation()}
             />
           </div>
