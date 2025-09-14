@@ -253,6 +253,22 @@ const Journal: React.FC = () => {
           <div className="text-xs text-forest font-medium">
             {stats.meditation} min cette semaine
           </div>
+          
+          {/* Option pour réduire les minutes en cas d'erreur */}
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              const minutesToReduce = prompt('Combien de minutes veux-tu retirer ? (en cas d\'erreur)');
+              if (minutesToReduce && !isNaN(Number(minutesToReduce))) {
+                const { reduceMeditationTime } = useAudioStore.getState();
+                reduceMeditationTime(Number(minutesToReduce));
+                refreshStats();
+              }
+            }}
+            className="mt-2 text-xs text-stone/60 hover:text-vermilion transition-colors duration-300 underline"
+          >
+            Corriger les minutes
+          </button>
         </button>
 
         {/* Pause émotionnelle */}
