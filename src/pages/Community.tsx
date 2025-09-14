@@ -849,17 +849,6 @@ const Community: React.FC = () => {
                                     <span className="text-wasabi font-bold text-xs">{comment.profiles.level}</span>
                                   </div>
                                 )}
-                                {comment.profiles.photo_url ? (
-                                  <img
-                                    src={comment.profiles.photo_url}
-                                    alt={`Photo de ${comment.profiles.display_name}`}
-                                    className="w-5 h-5 rounded-full object-cover border border-stone/20 mr-2"
-                                  />
-                                ) : (
-                                  <div className="w-5 h-5 bg-wasabi/20 rounded-full flex items-center justify-center mr-2">
-                                    <span className="text-wasabi font-bold text-xs">{comment.profiles.level}</span>
-                                  </div>
-                                )}
                                 <button
                                   onClick={() => handleUserClick(comment.user_id)}
                                   className="font-medium text-sm text-gray-700 hover:text-wasabi transition-colors duration-200 active:scale-95"
@@ -913,43 +902,29 @@ const Community: React.FC = () => {
               setUserProfileData(null);
             }}
           />
-          <div className="fixed top-20 left-4 right-4 z-50 bg-white/98 backdrop-blur-md rounded-2xl shadow-2xl border border-stone/10 p-4 animate-fade-in-up">
+          <div className="fixed top-20 left-2 right-2 z-50 bg-white/98 backdrop-blur-md rounded-lg shadow-xl border border-stone/10 p-3 animate-fade-in-up">
             <div className="flex items-center justify-between mb-2">
               <div className="flex items-center">
                 {userProfileData.photo_url ? (
                   <img
-                    src={post.profiles.photo_url}
-                {post.profiles.photo_url ? (
-                    className="w-8 h-8 rounded-full object-cover border border-stone/20 mr-2"
+                    src={userProfileData.photo_url}
+                    alt={`Photo de ${userProfileData.display_name}`}
+                    className="w-8 h-8 rounded-full object-cover border-2 border-white shadow-sm mr-2"
                   />
                 ) : (
-                  <div className="w-8 h-8 bg-wasabi/10 rounded-full flex items-center justify-center mr-2">
-                    <User size={14} className="text-wasabi" />
-                  </div>
-                )}
-                <button
-                  onClick={() => handleUserClick(post.user_id)}
-                  className="text-left hover:bg-stone/5 rounded-md p-1 -m-1 transition-colors duration-200"
-                >
-                  <div className="font-semibold text-xs text-gray-700">{post.profiles.display_name}</div>
-                  <div className="text-xs text-stone">{post.profiles.level}</div>
-                </button>
-              </div>
-                  />
-                ) : (
-                  <div className="w-10 h-10 bg-gradient-to-br from-wasabi to-jade rounded-full flex items-center justify-center mr-3 shadow-lg">
+                  <div className="w-8 h-8 bg-gradient-to-br from-wasabi to-jade rounded-full flex items-center justify-center mr-2">
                     <span className="text-white font-bold text-xs">{userProfileData.level}</span>
                   </div>
                 )}
                 <div>
-                  <h3 className="font-bold text-sm text-ink" style={{ fontFamily: "'Shippori Mincho', serif" }}>
+                  <h3 className="font-bold text-xs text-ink" style={{ fontFamily: "'Shippori Mincho', serif" }}>
                     {userProfileData.display_name}
                     {showUserProfile === user?.id && (
-                      <span className="text-sm text-wasabi ml-2 font-normal">(Toi)</span>
+                      <span className="text-xs text-wasabi ml-1 font-normal">(Toi)</span>
                     )}
                   </h3>
-                  <div className="flex items-center text-sm text-stone/70">
-                    <Calendar size={12} className="mr-1" />
+                  <div className="flex items-center text-xs text-stone/70">
+                    <Calendar size={8} className="mr-1" />
                     Membre depuis {getJoinDate(userProfileData.created_at)}
                   </div>
                 </div>
@@ -959,28 +934,28 @@ const Community: React.FC = () => {
                   setShowUserProfile(null);
                   setUserProfileData(null);
                 }}
-                className="w-8 h-8 rounded-full bg-stone/10 flex items-center justify-center text-stone hover:text-vermilion transition-all duration-200 flex-shrink-0 active:scale-90"
+                className="w-5 h-5 rounded-full bg-stone/10 flex items-center justify-center text-stone hover:text-vermilion transition-colors duration-300 flex-shrink-0"
               >
-                <X size={16} />
+                <X size={10} />
               </button>
             </div>
 
             {/* Bio si disponible */}
             {userProfileData.bio && (
-              <div className="mb-3 p-3 bg-stone/5 rounded-xl">
-                <p className="text-sm text-ink leading-relaxed italic">
+              <div className="mb-2 p-2 bg-stone/5 rounded-md">
+                <p className="text-xs text-ink leading-tight italic">
                   "{userProfileData.bio}"
                 </p>
               </div>
             )}
 
             {/* Stats compactes */}
-            <div className="bg-gradient-to-r from-wasabi/5 to-jade/5 rounded-xl p-3 border border-wasabi/10">
+            <div className="bg-gradient-to-r from-wasabi/5 to-jade/5 rounded-md p-2 border border-wasabi/10">
               <div className="flex items-center justify-center mb-1.5">
-                <Award className="w-4 h-4 text-wasabi mr-2" />
-                <h4 className="font-medium text-ink text-sm">Cette semaine</h4>
+                <Award className="w-3 h-3 text-wasabi mr-1" />
+                <h4 className="font-medium text-ink text-xs">Cette semaine</h4>
                 {showUserProfile === user?.id && (
-                  <span className="text-sm text-wasabi/60 ml-2">(Tes stats)</span>
+                  <span className="text-xs text-wasabi/60 ml-1">(Tes stats)</span>
                 )}
               </div>
               
@@ -1000,22 +975,22 @@ const Community: React.FC = () => {
                   : getUserStats(userProfileData.id);
                 
                 return (
-                  <div className="grid grid-cols-4 gap-2">
+                  <div className="grid grid-cols-4 gap-1">
                     <div className="text-center">
-                      <div className="text-lg font-bold text-jade">{stats.checkins}</div>
-                      <div className="text-xs text-stone leading-tight">Check</div>
+                      <div className="text-base font-bold text-jade">{stats.checkins}</div>
+                      <div className="text-xs text-stone leading-none">Check</div>
                     </div>
                     <div className="text-center">
-                      <div className="text-lg font-bold text-vermilion">{stats.journals}</div>
-                      <div className="text-xs text-stone leading-tight">Journal</div>
+                      <div className="text-base font-bold text-vermilion">{stats.journals}</div>
+                      <div className="text-xs text-stone leading-none">Journal</div>
                     </div>
                     <div className="text-center">
-                      <div className="text-lg font-bold text-forest">{stats.meditation}</div>
-                      <div className="text-xs text-stone leading-tight">Médita</div>
+                      <div className="text-base font-bold text-forest">{stats.meditation}</div>
+                      <div className="text-xs text-stone leading-none">Médita</div>
                     </div>
                     <div className="text-center">
-                      <div className="text-lg font-bold text-sunset">{stats.streak}</div>
-                      <div className="text-xs text-stone leading-tight">Série</div>
+                      <div className="text-base font-bold text-sunset">{stats.streak}</div>
+                      <div className="text-xs text-stone leading-none">Série</div>
                     </div>
                   </div>
                 );
@@ -1024,7 +999,7 @@ const Community: React.FC = () => {
 
             {/* Message inspirant compact */}
             <div className="mt-2 text-center">
-              <p className="text-stone/70 text-sm italic leading-relaxed">
+              <p className="text-stone/70 text-xs italic leading-tight">
                 {showUserProfile === user?.id 
                   ? "Continue ! 🌱" 
                   : "Beau parcours ! 🌸"
@@ -1038,26 +1013,26 @@ const Community: React.FC = () => {
       {/* Photo Modal */}
       {showPhotoModal && (
         <div 
-          className="fixed inset-0 bg-black/95 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+          className="fixed inset-0 bg-black/95 backdrop-blur-sm flex items-center justify-center z-50"
           onClick={() => setShowPhotoModal(null)}
         >
-          <div className="relative w-full h-full flex items-center justify-center">
+          <div className="relative w-full h-full flex items-center justify-center p-4">
             <button
               onClick={() => setShowPhotoModal(null)}
-              className="absolute top-4 right-4 w-12 h-12 bg-black/50 text-white rounded-full flex items-center justify-center hover:bg-black/70 transition-all duration-200 z-10 backdrop-blur-sm active:scale-90"
+              className="absolute top-4 right-4 w-10 h-10 bg-black/50 text-white rounded-full flex items-center justify-center hover:bg-black/70 transition-colors duration-300 z-10 backdrop-blur-sm"
             >
-              <X size={20} />
+              <X size={18} />
             </button>
             
             {/* Indicateur de fermeture */}
-            <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 bg-black/50 text-white px-4 py-2 rounded-full text-sm backdrop-blur-sm">
+            <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 bg-black/50 text-white px-3 py-1 rounded-full text-xs backdrop-blur-sm">
               Touche pour fermer
             </div>
             
             <img
               src={showPhotoModal}
               alt="Photo en grand"
-              className="max-w-full max-h-full object-contain rounded-2xl shadow-2xl"
+              className="max-w-full max-h-full object-contain rounded-lg shadow-2xl"
               onClick={(e) => e.stopPropagation()}
             />
           </div>
