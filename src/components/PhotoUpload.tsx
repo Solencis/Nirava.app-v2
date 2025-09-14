@@ -27,8 +27,6 @@ const PhotoUpload: React.FC<PhotoUploadProps> = ({
     const file = event.target.files?.[0];
     if (!file || !user) return;
 
-    console.log('Photo upload started');
-
     // Validation
     if (file.size > 5 * 1024 * 1024) { // 5MB max
       setError('La photo ne peut pas dépasser 5MB');
@@ -43,8 +41,6 @@ const PhotoUpload: React.FC<PhotoUploadProps> = ({
     setUploading(true);
     setError('');
     onUploadStart?.();
-    
-    console.log('Upload start callback called');
 
     try {
       // Delete old photo if exists
@@ -52,23 +48,19 @@ const PhotoUpload: React.FC<PhotoUploadProps> = ({
         await deleteJournalPhoto(currentPhoto);
       }
 
-      // Upload new photo - user_id automatiquement récupéré via getUser()
+      // Upload new photo
       const photoUrl = await uploadJournalPhoto(file);
-      console.log('Photo uploaded successfully:', photoUrl);
       onPhotoChange(photoUrl);
     } catch (error: any) {
       console.error('Error uploading photo:', error);
-      if (error.message?.includes('bucket') || error.message?.includes('Bucket')) {
-        setError('📦 Stockage non configuré - Veuillez créer le bucket "journal-images" dans Supabase');
-      } else if (error.message?.includes('Supabase not configured')) {
-        setError('⚙️ Supabase non configuré - Veuillez configurer votre projet');
+      if (error.message?.includes('bucket') || error.message?.includes('Bucket') || error.message?.includes('stockage')) {
+        setError('⚠️ Configuration requise : Le bucket "journal-images" doit être créé dans votre projet Supabase (Storage → Create bucket)');
       } else {
-        setError('Erreur lors de l\'upload de la photo');
+        setError('Erreur lors de l\'upload. Vérifiez votre configuration Supabase.');
       }
     } finally {
       setUploading(false);
       onUploadEnd?.();
-      console.log('Upload end callback called');
       // Reset file input
       if (fileInputRef.current) {
         fileInputRef.current.value = '';
