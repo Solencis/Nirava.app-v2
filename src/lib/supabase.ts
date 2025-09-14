@@ -4,6 +4,12 @@ import { createClient } from '@supabase/supabase-js';
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
+// Check if Supabase is configured
+const isSupabaseConfigured = supabaseUrl && 
+  supabaseAnonKey && 
+  supabaseUrl !== 'https://your-project-ref.supabase.co' && 
+  supabaseAnonKey !== 'your-anon-key-here';
+
 if (!supabaseUrl || !supabaseAnonKey || 
     supabaseUrl === 'https://your-project-ref.supabase.co' || 
     supabaseAnonKey === 'your-anon-key-here') {
@@ -14,11 +20,40 @@ if (!supabaseUrl || !supabaseAnonKey ||
   console.error('3. Go to Settings > API');
   console.error('4. Copy your Project URL and anon key to .env file');
   console.error('5. Restart your development server');
-  throw new Error('❌ Missing or invalid Supabase environment variables. Please check your .env file and restart the server.');
 }
 
+// Create a mock client for development when Supabase is not configured
+const createMockSupabaseClient = () => ({
+  auth: {
+    getSession: () => Promise.resolve({ data: { session: null }, error: null }),
+    getUser: () => Promise.resolve({ data: { user: null }, error: null }),
+    signInWithPassword: () => Promise.reject(new Error('Supabase not configured')),
+    signUp: () => Promise.reject(new Error('Supabase not configured')),
+    signOut: () => Promise.resolve({ error: null }),
+    onAuthStateChange: () => ({ data: { subscription: { unsubscribe: () => {} } } }),
+    signInWithOAuth: () => Promise.reject(new Error('Supabase not configured')),
+    resetPasswordForEmail: () => Promise.reject(new Error('Supabase not configured')),
+    updateUser: () => Promise.reject(new Error('Supabase not configured'))
+  },
+  from: () => ({
+    select: () => ({ eq: () => ({ single: () => Promise.reject(new Error('Supabase not configured')) }) }),
+    insert: () => ({ select: () => ({ single: () => Promise.reject(new Error('Supabase not configured')) }) }),
+    update: () => ({ eq: () => Promise.reject(new Error('Supabase not configured')) }),
+    delete: () => ({ eq: () => Promise.reject(new Error('Supabase not configured')) }),
+    upsert: () => ({ select: () => ({ single: () => Promise.reject(new Error('Supabase not configured')) }) })
+  }),
+  storage: {
+    from: () => ({
+      upload: () => Promise.reject(new Error('Supabase not configured')),
+      createSignedUrl: () => Promise.reject(new Error('Supabase not configured')),
+      remove: () => Promise.reject(new Error('Supabase not configured'))
+    })
+  }
+});
+
 // Client Supabase avec ANON KEY uniquement (jamais service role en frontend)
-export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+export const supabase = isSupabaseConfigured 
+  ? createClient(supabaseUrl!, supabaseAnonKey!, {
   auth: {
     persistSession: true,
     autoRefreshToken: true,
@@ -26,7 +61,8 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
     flowType: 'pkce',
     debug: false
   }
-});
+})
+  : createMockSupabaseClient() as any;
 
 // Types
 export interface CheckinEntry {

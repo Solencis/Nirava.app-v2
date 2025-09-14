@@ -145,6 +145,12 @@ export const useAuth = () => {
       return data;
     } catch (error) {
       console.error('Error signing in:', error);
+      
+      // Handle Supabase not configured error
+      if (error instanceof Error && error.message.includes('Supabase not configured')) {
+        throw new Error('❌ Supabase n\'est pas configuré. Veuillez configurer vos variables d\'environnement Supabase pour utiliser l\'authentification.');
+      }
+      
       throw error;
     }
   };
