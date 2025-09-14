@@ -94,7 +94,7 @@ const HistoryModal: React.FC<HistoryModalProps> = ({ isOpen, onClose, onStatsUpd
       
       let checkinHistory = JSON.parse(localStorage.getItem('checkin-history') || '[]');
       let journalEntries = JSON.parse(localStorage.getItem('journal-entries') || '[]');
-      const dreamEntries = JSON.parse(localStorage.getItem('dream-entries') || '[]');
+      let dreamEntries = JSON.parse(localStorage.getItem('dream-entries') || '[]');
       
       // Filtrer par utilisateur si connecté (pour éviter de voir les données d'autres utilisateurs)
       if (currentUser?.id) {
