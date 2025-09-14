@@ -486,7 +486,7 @@ const Community: React.FC = () => {
                 </div>
                 
                 <div className="text-xs text-stone/60">
-                  {user && post.user_id === user.id ? 'Mon message' : 'Communauté'}
+                  {user && post.author_id === user.id ? 'Mon message' : 'Communauté'}
                 </div>
               </div>
             </div>
