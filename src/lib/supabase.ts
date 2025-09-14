@@ -126,8 +126,19 @@ export interface Post {
   updated_at: string;
   profiles: Profile;
   post_likes: PostLike[];
+  post_comments: PostComment[];
   likes_count: number;
   is_liked_by_user: boolean;
+}
+
+export interface PostComment {
+  id: string;
+  post_id: string;
+  user_id: string;
+  content: string;
+  created_at: string;
+  updated_at: string;
+  profiles: Profile;
 }
 
 // IMPORTANT: Toujours utiliser getUser() pour récupérer user_id (RLS requirement)

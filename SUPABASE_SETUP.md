@@ -68,6 +68,38 @@ CREATE POLICY "Users can delete own journals" ON journals
   FOR DELETE USING (auth.uid() = user_id);
 ```
 
+### 3. Table `post_comments`
+```sql
+CREATE TABLE post_comments (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  post_id UUID REFERENCES posts(id) ON DELETE CASCADE NOT NULL,
+  user_id UUID REFERENCES profiles(id) ON DELETE CASCADE NOT NULL,
+  content TEXT NOT NULL,
+  created_at TIMESTAMPTZ DEFAULT now(),
+  updated_at TIMESTAMPTZ DEFAULT now()
+);
+
+-- Index pour performance
+CREATE INDEX idx_post_comments_post_id ON post_comments(post_id);
+CREATE INDEX idx_post_comments_user_id ON post_comments(user_id);
+
+-- RLS
+ALTER TABLE post_comments ENABLE ROW LEVEL SECURITY;
+
+-- Policies RLS
+CREATE POLICY "Users can read all comments" ON post_comments
+  FOR SELECT USING (true);
+
+CREATE POLICY "Users can create comments" ON post_comments
+  FOR INSERT WITH CHECK (auth.uid() = user_id);
+
+CREATE POLICY "Users can update own comments" ON post_comments
+  FOR UPDATE USING (auth.uid() = user_id);
+
+CREATE POLICY "Users can delete own comments" ON post_comments
+  FOR DELETE USING (auth.uid() = user_id);
+```
+
 ## 📸 Storage pour photos
 
 ### 1. Créer le bucket `journal-images`
