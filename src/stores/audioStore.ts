@@ -294,13 +294,10 @@ export const useAudioStore = create<AudioState & AudioActions>()(
       stopMeditation: () => {
         const state = get();
         if (state.meditationActive) {
-          // Add any remaining partial minute
-          const finalMinutes = Math.ceil(state.meditationElapsed / 60);
-          const alreadyAdded = Math.floor(state.meditationElapsed / 60);
-          const remainingToAdd = finalMinutes - alreadyAdded;
-          
-          if (remainingToAdd > 0) {
-            state.addMeditationTime(remainingToAdd);
+          // Add the actual elapsed time (rounded to nearest minute)
+          const actualMinutes = Math.round(state.meditationElapsed / 60);
+          if (actualMinutes > 0) {
+            state.addMeditationTime(actualMinutes);
           }
         }
         
@@ -388,16 +385,6 @@ export const useAudioStore = create<AudioState & AudioActions>()(
           masterGain.gain.setValueAtTime(0.7, audioContext.currentTime);
           masterGain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 4);
           
-          gainNode.gain.setValueAtTime(0.5, audioContext.currentTime);
-          gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 4);
-          
-          gainNode2.gain.setValueAtTime(0.4, audioContext.currentTime);
-          gainNode2.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 4);
-          
-          gainNode3.gain.setValueAtTime(0.3, audioContext.currentTime);
-          gainNode3.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 4);
-          
-          oscillator1.start(audioContext.currentTime);
           oscillator1.stop(audioContext.currentTime + 4);
           oscillator2.start(audioContext.currentTime);
           oscillator2.stop(audioContext.currentTime + 4);

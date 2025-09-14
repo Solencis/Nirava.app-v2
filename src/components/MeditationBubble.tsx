@@ -37,6 +37,13 @@ const MeditationBubble: React.FC = () => {
   };
 
   const handleStop = () => {
+    // Add actual elapsed time before stopping
+    const actualMinutes = Math.round(meditationState.elapsed / 60);
+    if (actualMinutes > 0) {
+      const { addMeditationTime } = useAudioStore.getState();
+      addMeditationTime(actualMinutes);
+    }
+    
     playCompletionGong();
     stopMeditation();
     hapticFeedback();

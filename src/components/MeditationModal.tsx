@@ -107,7 +107,8 @@ const MeditationModal: React.FC<MeditationModalProps> = ({ isOpen, onClose, onSa
       return;
     }
 
-    const sessionDuration = Math.ceil(meditationState.elapsed / 60);
+    // Use actual elapsed time, not target duration
+    const sessionDuration = Math.round(meditationState.elapsed / 60);
     
     try {
       // Utiliser React Query pour créer l'entrée journal
@@ -200,6 +201,13 @@ const MeditationModal: React.FC<MeditationModalProps> = ({ isOpen, onClose, onSa
     // Restore ambience if it was playing
     if (wasAmbiencePlaying.current && currentAmbience && muteAmbience) {
       playAmbience(currentAmbience);
+    }
+    
+    // Add actual elapsed time before stopping
+    const actualMinutes = Math.round(meditationState.elapsed / 60);
+    if (actualMinutes > 0) {
+      const { addMeditationTime } = useAudioStore.getState();
+      addMeditationTime(actualMinutes);
     }
     
     saveMeditationSession();
