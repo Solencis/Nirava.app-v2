@@ -852,21 +852,21 @@ const Community: React.FC = () => {
               setUserProfileData(null);
             }}
           />
-          <div className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-50 bg-white/95 backdrop-blur-md rounded-xl shadow-2xl border border-stone/10 p-4 w-72 max-w-[85vw] animate-fade-in-up">
-            <div className="flex items-center justify-between mb-3">
+          <div className="fixed top-20 left-2 right-2 z-50 bg-white/98 backdrop-blur-md rounded-lg shadow-xl border border-stone/10 p-3 animate-fade-in-up">
+            <div className="flex items-center justify-between mb-2">
               <div className="flex items-center">
-                <div className="w-8 h-8 bg-gradient-to-br from-wasabi to-jade rounded-full flex items-center justify-center mr-2">
+                <div className="w-6 h-6 bg-gradient-to-br from-wasabi to-jade rounded-full flex items-center justify-center mr-2">
                   <span className="text-white font-bold text-xs">{userProfileData.level}</span>
                 </div>
                 <div>
-                  <h3 className="font-bold text-sm text-ink" style={{ fontFamily: "'Shippori Mincho', serif" }}>
+                  <h3 className="font-bold text-xs text-ink" style={{ fontFamily: "'Shippori Mincho', serif" }}>
                     {userProfileData.display_name}
                     {showUserProfile === user?.id && (
                       <span className="text-xs text-wasabi ml-1 font-normal">(Toi)</span>
                     )}
                   </h3>
-                  <div className="flex items-center text-xs text-stone">
-                    <Calendar size={9} className="mr-1" />
+                  <div className="flex items-center text-xs text-stone/70">
+                    <Calendar size={8} className="mr-1" />
                     Membre depuis {getJoinDate(userProfileData.created_at)}
                   </div>
                 </div>
@@ -876,30 +876,28 @@ const Community: React.FC = () => {
                   setShowUserProfile(null);
                   setUserProfileData(null);
                 }}
-                className="w-6 h-6 rounded-full bg-stone/10 flex items-center justify-center text-stone hover:text-vermilion transition-colors duration-300 flex-shrink-0"
+                className="w-5 h-5 rounded-full bg-stone/10 flex items-center justify-center text-stone hover:text-vermilion transition-colors duration-300 flex-shrink-0"
               >
-                <X size={12} />
+                <X size={10} />
               </button>
             </div>
 
             {/* Bio si disponible */}
             {userProfileData.bio && (
-              <div className="mb-2 p-2 bg-stone/5 rounded-lg">
-                <p className="text-xs text-ink leading-snug italic">
+              <div className="mb-2 p-2 bg-stone/5 rounded-md">
+                <p className="text-xs text-ink leading-tight italic">
                   "{userProfileData.bio}"
                 </p>
               </div>
             )}
 
-            {/* Progression de la semaine */}
-            <div className="bg-gradient-to-br from-wasabi/5 to-jade/5 rounded-lg p-2.5 border border-wasabi/10">
-              <div className="flex items-center justify-between mb-2">
-                <div className="flex items-center">
-                  <Award className="w-3 h-3 text-wasabi mr-1" />
-                  <h4 className="font-medium text-ink text-xs">Cette semaine</h4>
-                </div>
+            {/* Stats compactes */}
+            <div className="bg-gradient-to-r from-wasabi/5 to-jade/5 rounded-md p-2 border border-wasabi/10">
+              <div className="flex items-center justify-center mb-1.5">
+                <Award className="w-3 h-3 text-wasabi mr-1" />
+                <h4 className="font-medium text-ink text-xs">Cette semaine</h4>
                 {showUserProfile === user?.id && (
-                  <span className="text-xs text-wasabi/60">(Tes stats)</span>
+                  <span className="text-xs text-wasabi/60 ml-1">(Tes stats)</span>
                 )}
               </div>
               
@@ -919,34 +917,34 @@ const Community: React.FC = () => {
                   : getUserStats(userProfileData.id);
                 
                 return (
-                  <div className="grid grid-cols-4 gap-1.5">
+                  <div className="grid grid-cols-4 gap-1">
                     <div className="text-center">
-                      <div className="text-sm font-bold text-jade">{stats.checkins}</div>
-                      <div className="text-xs text-stone leading-none">Check-ins</div>
+                      <div className="text-base font-bold text-jade">{stats.checkins}</div>
+                      <div className="text-xs text-stone leading-none">Check</div>
                     </div>
                     <div className="text-center">
-                      <div className="text-sm font-bold text-vermilion">{stats.journals}</div>
-                      <div className="text-xs text-stone leading-none">Journaux</div>
+                      <div className="text-base font-bold text-vermilion">{stats.journals}</div>
+                      <div className="text-xs text-stone leading-none">Journal</div>
                     </div>
                     <div className="text-center">
-                      <div className="text-sm font-bold text-forest">{stats.meditation}</div>
-                      <div className="text-xs text-stone leading-none">Méditation</div>
+                      <div className="text-base font-bold text-forest">{stats.meditation}</div>
+                      <div className="text-xs text-stone leading-none">Médita</div>
                     </div>
                     <div className="text-center">
-                      <div className="text-sm font-bold text-sunset">{stats.streak}</div>
-                      <div className="text-xs text-stone leading-none">Streak</div>
+                      <div className="text-base font-bold text-sunset">{stats.streak}</div>
+                      <div className="text-xs text-stone leading-none">Série</div>
                     </div>
                   </div>
                 );
               })()}
             </div>
 
-            {/* Message inspirant */}
+            {/* Message inspirant compact */}
             <div className="mt-2 text-center">
-              <p className="text-stone text-xs italic leading-snug">
+              <p className="text-stone/70 text-xs italic leading-tight">
                 {showUserProfile === user?.id 
-                  ? "Continue ton beau chemin ! 🌱" 
-                  : "Chaque âme sur son chemin mérite respect et encouragement 🌸"
+                  ? "Continue ! 🌱" 
+                  : "Beau parcours ! 🌸"
                 }
               </p>
             </div>
