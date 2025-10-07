@@ -12,6 +12,10 @@ import Community from './pages/Community';
 import Profile from './pages/Profile';
 import ModuleDetail from './pages/ModuleDetail';
 import SoundAmbience from './pages/SoundAmbience';
+import Pricing from './pages/Pricing';
+import About from './pages/About';
+import Contact from './pages/Contact';
+import AdminDashboard from './pages/admin/Dashboard';
 import Login from './pages/auth/Login';
 import Register from './pages/auth/Register';
 import ForgotPassword from './pages/auth/ForgotPassword';
@@ -52,6 +56,14 @@ function App() {
             </ProtectedRoute>
           } />
           <Route path="/sounds" element={<SoundAmbience />} />
+          <Route path="/pricing" element={<Pricing />} />
+          <Route path="/about" element={<About />} />
+          <Route path="/contact" element={<Contact />} />
+          <Route path="/admin" element={
+            <ProtectedRoute>
+              <AdminDashboard />
+            </ProtectedRoute>
+          } />
           <Route path="/auth/login" element={<Login />} />
           <Route path="/auth/register" element={<Register />} />
           <Route path="/auth/forgot" element={<ForgotPassword />} />

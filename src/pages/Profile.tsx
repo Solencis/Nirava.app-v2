@@ -4,6 +4,7 @@ import { useAuth } from '../hooks/useAuth';
 import { supabase, Profile, uploadJournalPhoto, deleteJournalPhoto } from '../lib/supabase';
 import { useAudioStore } from '../stores/audioStore';
 import IOSInstallHint from '../components/IOSInstallHint';
+import Achievements from '../components/Achievements';
 
 const ProfilePage: React.FC = () => {
   const { user, signOut } = useAuth();
@@ -395,7 +396,7 @@ const ProfilePage: React.FC = () => {
               Abonnement
             </h2>
           </div>
-          
+
           <div className="flex items-center justify-between">
             <div>
               <div className="font-medium text-ink">Statut actuel</div>
@@ -403,20 +404,27 @@ const ProfilePage: React.FC = () => {
                 {subscriptionStatus.text}
               </div>
             </div>
-            
-            <button
-              disabled
-              className="px-4 py-2 bg-stone/10 text-stone rounded-xl text-sm font-medium cursor-not-allowed opacity-50"
+
+            <a
+              href="/pricing"
+              className="px-4 py-2 bg-wasabi text-white rounded-xl text-sm font-medium hover:bg-wasabi/90 transition-colors duration-300"
             >
-              Gérer
-            </button>
+              Voir les offres
+            </a>
           </div>
-          
-          <div className="mt-4 p-3 bg-stone/5 rounded-xl">
-            <p className="text-stone text-sm">
-              💡 La gestion des abonnements sera bientôt disponible.
-            </p>
-          </div>
+
+          {profile?.subscription_status !== 'active' && (
+            <div className="mt-4 p-3 bg-gradient-to-r from-emerald-50 to-teal-50 rounded-xl border border-emerald-200">
+              <p className="text-emerald-900 text-sm font-medium">
+                🌟 Débloque tous les modules et fonctionnalités avec un abonnement premium
+              </p>
+            </div>
+          )}
+        </div>
+
+        {/* Achievements Section */}
+        <div className="mb-6">
+          <Achievements />
         </div>
 
         {/* Actions */}
