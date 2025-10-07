@@ -36,15 +36,19 @@ CREATE INDEX IF NOT EXISTS idx_meditation_sessions_user_created ON meditation_se
 ALTER TABLE meditation_sessions ENABLE ROW LEVEL SECURITY;
 
 -- Policies RLS
+DROP POLICY IF EXISTS "Users can read own meditation sessions" ON meditation_sessions;
 CREATE POLICY "Users can read own meditation sessions" ON meditation_sessions
   FOR SELECT USING (auth.uid() = user_id);
 
+DROP POLICY IF EXISTS "Users can insert own meditation sessions" ON meditation_sessions;
 CREATE POLICY "Users can insert own meditation sessions" ON meditation_sessions
   FOR INSERT WITH CHECK (auth.uid() = user_id);
 
+DROP POLICY IF EXISTS "Users can update own meditation sessions" ON meditation_sessions;
 CREATE POLICY "Users can update own meditation sessions" ON meditation_sessions
   FOR UPDATE USING (auth.uid() = user_id);
 
+DROP POLICY IF EXISTS "Users can delete own meditation sessions" ON meditation_sessions;
 CREATE POLICY "Users can delete own meditation sessions" ON meditation_sessions
   FOR DELETE USING (auth.uid() = user_id);
 
