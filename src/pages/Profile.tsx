@@ -98,8 +98,16 @@ const ProfilePage: React.FC = () => {
           photo_url: '',
           share_progress: true,
           level: 'N1',
+          subscription_status: 'none',
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString()
+        });
+        setEditForm({
+          display_name: user.email?.split('@')[0] || 'Utilisateur',
+          bio: '',
+          photo_url: '',
+          share_progress: true,
+          level: 'N1'
         });
         setLoading(false);
         return;
@@ -123,6 +131,7 @@ const ProfilePage: React.FC = () => {
           photo_url: '',
           share_progress: true,
           level: 'N1',
+          subscription_status: 'none',
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString()
         };
@@ -145,10 +154,18 @@ const ProfilePage: React.FC = () => {
         photo_url: '',
         share_progress: true,
         level: 'N1',
+        subscription_status: 'none',
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString()
       };
       setProfile(fallbackProfile);
+      setEditForm({
+        display_name: fallbackProfile.display_name,
+        bio: '',
+        photo_url: '',
+        share_progress: true,
+        level: 'N1'
+      });
     } finally {
       setLoading(false);
     }
