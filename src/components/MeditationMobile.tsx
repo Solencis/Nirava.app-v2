@@ -2,29 +2,39 @@ import React, { useState, useEffect } from 'react';
 import { X, Play, Pause, RotateCcw, Check, Timer as TimerIcon, SkipForward, Minus } from 'lucide-react';
 import { useAudioStore } from '../stores/audioStore';
 import AmbianceControl from './AmbianceControl';
+import { useAuth } from '../hooks/useAuth';
+import { supabase } from '../lib/supabase';
 
 interface MeditationMobileProps {
   onClose: () => void;
 }
 
 const MeditationMobile: React.FC<MeditationMobileProps> = ({ onClose }) => {
+  const { user } = useAuth();
   const {
-    addMeditationTime,
+    startMeditation,
+    pauseMeditation,
+    resumeMeditation,
+    stopMeditation,
+    resetMeditation,
+    getMeditationState,
     reduceMeditationTime,
     current: currentAmbience,
     isPlaying: ambienceIsPlaying,
     pause: pauseAmbience,
     play: playAmbience,
-    playNext
+    playNext,
+    playCompletionGong
   } = useAudioStore();
+
   const [selectedDuration, setSelectedDuration] = useState<number | null>(null);
   const [customMinutes, setCustomMinutes] = useState<string>('');
-  const [isActive, setIsActive] = useState(false);
-  const [isPaused, setIsPaused] = useState(false);
-  const [timeLeft, setTimeLeft] = useState(0);
   const [showSuccess, setShowSuccess] = useState(false);
   const [showReduceModal, setShowReduceModal] = useState(false);
   const [minutesToReduce, setMinutesToReduce] = useState('');
+  const [savedMinutes, setSavedMinutes] = useState(0);
+
+  const meditationState = getMeditationState();
 
   const durations = [
     { minutes: 3, label: '3 min', desc: 'Pause rapide' },
@@ -34,60 +44,136 @@ const MeditationMobile: React.FC<MeditationMobileProps> = ({ onClose }) => {
     { minutes: 20, label: '20 min', desc: 'Profonde' },
   ];
 
-  useEffect(() => {
-    let interval: NodeJS.Timeout;
+  // Gong de début
+  const playStartGong = () => {
+    try {
+      const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
 
-    if (isActive && !isPaused && timeLeft > 0) {
-      interval = setInterval(() => {
-        setTimeLeft((time) => {
-          if (time <= 1) {
-            handleComplete();
-            return 0;
-          }
-          return time - 1;
-        });
-      }, 1000);
+      const oscillator1 = audioContext.createOscillator();
+      const oscillator2 = audioContext.createOscillator();
+      const oscillator3 = audioContext.createOscillator();
+      const gainNode = audioContext.createGain();
+      const gainNode2 = audioContext.createGain();
+      const gainNode3 = audioContext.createGain();
+      const masterGain = audioContext.createGain();
+
+      oscillator1.connect(gainNode);
+      oscillator2.connect(gainNode2);
+      oscillator3.connect(gainNode3);
+      gainNode.connect(masterGain);
+      gainNode2.connect(masterGain);
+      gainNode3.connect(masterGain);
+      masterGain.connect(audioContext.destination);
+
+      // Fréquences pour gong de début (plus aigu)
+      oscillator1.frequency.setValueAtTime(330, audioContext.currentTime);
+      oscillator1.frequency.exponentialRampToValueAtTime(165, audioContext.currentTime + 3);
+
+      oscillator2.frequency.setValueAtTime(440, audioContext.currentTime);
+      oscillator2.frequency.exponentialRampToValueAtTime(220, audioContext.currentTime + 3);
+
+      oscillator3.frequency.setValueAtTime(550, audioContext.currentTime);
+      oscillator3.frequency.exponentialRampToValueAtTime(275, audioContext.currentTime + 3);
+
+      masterGain.gain.setValueAtTime(0.6, audioContext.currentTime);
+      masterGain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 3);
+
+      oscillator1.start(audioContext.currentTime);
+      oscillator1.stop(audioContext.currentTime + 3);
+      oscillator2.start(audioContext.currentTime);
+      oscillator2.stop(audioContext.currentTime + 3);
+      oscillator3.start(audioContext.currentTime);
+      oscillator3.stop(audioContext.currentTime + 3);
+    } catch (error) {
+      console.error('Erreur gong de début:', error);
+    }
+  };
+
+  // Vérifier si la méditation est terminée
+  useEffect(() => {
+    if (meditationState.isActive && !meditationState.isPaused &&
+        meditationState.remaining !== null && meditationState.remaining <= 0) {
+      handleMeditationComplete();
+    }
+  }, [meditationState.remaining]);
+
+  const handleMeditationComplete = async () => {
+    const finalMinutes = Math.round(meditationState.elapsed / 60);
+    setSavedMinutes(finalMinutes);
+
+    // Sauvegarder dans Supabase
+    if (user && finalMinutes > 0) {
+      try {
+        await supabase
+          .from('meditation_sessions')
+          .insert({
+            user_id: user.id,
+            duration_minutes: finalMinutes,
+            completed: true
+          });
+        console.log('✅ Méditation sauvegardée dans Supabase:', finalMinutes, 'minutes');
+      } catch (error) {
+        console.error('Erreur sauvegarde méditation:', error);
+      }
     }
 
-    return () => clearInterval(interval);
-  }, [isActive, isPaused, timeLeft]);
+    stopMeditation();
+    setShowSuccess(true);
+    if ('vibrate' in navigator) navigator.vibrate([100, 50, 100]);
+  };
 
-  const startMeditation = (minutes: number) => {
+  const handleStartMeditation = (minutes: number, isFreeMode: boolean = false) => {
     setSelectedDuration(minutes);
-    setTimeLeft(minutes * 60);
-    setIsActive(true);
-    setIsPaused(false);
+    startMeditation(isFreeMode ? undefined : minutes);
+    playStartGong();
     if ('vibrate' in navigator) navigator.vibrate(50);
   };
 
   const startCustomMeditation = () => {
     const minutes = parseInt(customMinutes);
     if (minutes > 0 && minutes <= 120) {
-      startMeditation(minutes);
+      handleStartMeditation(minutes, false);
     }
   };
 
-
-  const togglePause = () => {
-    setIsPaused(!isPaused);
+  const handleTogglePause = () => {
+    if (meditationState.isPaused) {
+      resumeMeditation();
+    } else {
+      pauseMeditation();
+    }
     if ('vibrate' in navigator) navigator.vibrate(30);
   };
 
-  const reset = () => {
-    if (selectedDuration) {
-      setTimeLeft(selectedDuration * 60);
-      setIsActive(false);
-      setIsPaused(false);
-    }
-  };
+  const handleStop = async () => {
+    const finalMinutes = Math.max(1, Math.round(meditationState.elapsed / 60));
+    setSavedMinutes(finalMinutes);
 
-  const handleComplete = () => {
-    if (selectedDuration) {
-      addMeditationTime(selectedDuration);
+    // Sauvegarder dans Supabase
+    if (user && finalMinutes > 0) {
+      try {
+        await supabase
+          .from('meditation_sessions')
+          .insert({
+            user_id: user.id,
+            duration_minutes: finalMinutes,
+            completed: false
+          });
+        console.log('✅ Méditation arrêtée et sauvegardée:', finalMinutes, 'minutes');
+      } catch (error) {
+        console.error('Erreur sauvegarde méditation:', error);
+      }
     }
-    setIsActive(false);
+
+    stopMeditation();
+    playCompletionGong();
     setShowSuccess(true);
     if ('vibrate' in navigator) navigator.vibrate([100, 50, 100]);
+  };
+
+  const handleReset = () => {
+    resetMeditation();
+    setSelectedDuration(null);
   };
 
   const handleReduceMinutes = () => {
@@ -121,7 +207,9 @@ const MeditationMobile: React.FC<MeditationMobileProps> = ({ onClose }) => {
     return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
 
-  const progress = selectedDuration ? ((selectedDuration * 60 - timeLeft) / (selectedDuration * 60)) * 100 : 0;
+  const progress = meditationState.remaining !== null
+    ? ((meditationState.elapsed / ((meditationState.elapsed + meditationState.remaining) || 1)) * 100)
+    : 0;
 
   if (showSuccess) {
     return (
@@ -135,7 +223,7 @@ const MeditationMobile: React.FC<MeditationMobileProps> = ({ onClose }) => {
             Bravo !
           </h2>
           <p className="text-stone mb-2">
-            Tu as médité pendant {selectedDuration} minutes
+            Tu as médité pendant {savedMinutes} minutes
           </p>
           <p className="text-xs text-stone/60 mb-8">
             Continue à prendre soin de ton esprit
@@ -152,13 +240,13 @@ const MeditationMobile: React.FC<MeditationMobileProps> = ({ onClose }) => {
     );
   }
 
-  if (isActive || selectedDuration) {
+  if (meditationState.isActive) {
     return (
       <div className="fixed inset-0 bg-gradient-to-br from-sand via-pearl to-sand/50 z-50 animate-slide-up flex flex-col">
         {/* Header */}
         <div className="bg-white/80 backdrop-blur-lg border-b border-stone/10 px-4 py-4 flex items-center justify-between shrink-0">
           <button
-            onClick={reset}
+            onClick={handleReset}
             className="text-stone active:scale-95 transition-transform"
           >
             <RotateCcw className="w-5 h-5" />
@@ -214,35 +302,39 @@ const MeditationMobile: React.FC<MeditationMobileProps> = ({ onClose }) => {
                 strokeWidth="8"
                 className="text-stone/10"
               />
-              <circle
-                cx="128"
-                cy="128"
-                r="120"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="8"
-                strokeLinecap="round"
-                className="text-jade transition-all duration-1000"
-                strokeDasharray={`${2 * Math.PI * 120}`}
-                strokeDashoffset={`${2 * Math.PI * 120 * (1 - progress / 100)}`}
-              />
+              {meditationState.remaining !== null && (
+                <circle
+                  cx="128"
+                  cy="128"
+                  r="120"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="8"
+                  strokeLinecap="round"
+                  className="text-jade transition-all duration-1000"
+                  strokeDasharray={`${2 * Math.PI * 120}`}
+                  strokeDashoffset={`${2 * Math.PI * 120 * (1 - progress / 100)}`}
+                />
+              )}
             </svg>
 
             {/* Time */}
             <div className="absolute inset-0 flex items-center justify-center">
               <div className="text-center">
                 <div className="text-6xl font-bold text-ink mb-2" style={{ fontFamily: "'Shippori Mincho', serif" }}>
-                  {formatTime(timeLeft)}
+                  {meditationState.remaining !== null
+                    ? formatTime(meditationState.remaining)
+                    : formatTime(meditationState.elapsed)}
                 </div>
                 <div className="text-sm text-stone">
-                  {isPaused ? 'En pause' : isActive ? 'En cours' : 'Prêt'}
+                  {meditationState.isPaused ? 'En pause' : meditationState.isActive ? 'En cours' : 'Prêt'}
                 </div>
               </div>
             </div>
           </div>
 
           {/* Breathing Guide */}
-          {isActive && !isPaused && (
+          {meditationState.isActive && !meditationState.isPaused && (
             <div className="text-center mb-8 animate-fade-in">
               <div className="text-lg text-ink mb-2 animate-pulse">Respire calmement</div>
               <div className="text-sm text-stone">Inspire... Expire...</div>
@@ -251,28 +343,23 @@ const MeditationMobile: React.FC<MeditationMobileProps> = ({ onClose }) => {
 
           {/* Controls */}
           <div className="flex gap-4">
-            {!isActive ? (
-              <button
-                onClick={() => {
-                  setIsActive(true);
-                  if ('vibrate' in navigator) navigator.vibrate(50);
-                }}
-                className="w-20 h-20 bg-gradient-to-br from-jade to-forest rounded-full flex items-center justify-center text-white shadow-2xl active:scale-95 transition-transform"
-              >
+            <button
+              onClick={handleTogglePause}
+              className="w-20 h-20 bg-gradient-to-br from-jade to-forest rounded-full flex items-center justify-center text-white shadow-2xl active:scale-95 transition-transform"
+            >
+              {meditationState.isPaused ? (
                 <Play className="w-8 h-8 ml-1" />
-              </button>
-            ) : (
-              <button
-                onClick={togglePause}
-                className="w-20 h-20 bg-gradient-to-br from-jade to-forest rounded-full flex items-center justify-center text-white shadow-2xl active:scale-95 transition-transform"
-              >
-                {isPaused ? (
-                  <Play className="w-8 h-8 ml-1" />
-                ) : (
-                  <Pause className="w-8 h-8" />
-                )}
-              </button>
-            )}
+              ) : (
+                <Pause className="w-8 h-8" />
+              )}
+            </button>
+
+            <button
+              onClick={handleStop}
+              className="px-6 py-4 bg-jade text-white rounded-full font-semibold active:scale-95 transition-transform shadow-lg"
+            >
+              Terminer
+            </button>
           </div>
         </div>
       </div>
@@ -323,7 +410,7 @@ const MeditationMobile: React.FC<MeditationMobileProps> = ({ onClose }) => {
                   onChange={(e) => setCustomMinutes(e.target.value)}
                   placeholder="Ex: 25"
                   className="flex-1 px-4 py-3 bg-sand/30 rounded-xl text-ink text-center font-semibold focus:outline-none focus:ring-2 focus:ring-jade/50"
-                  style={{ fontFamily: "'Shippori Mincho', serif" }}
+                  style={{ fontFamily: "'Shippori Mincho', serif", fontSize: '16px' }}
                 />
                 <button
                   onClick={startCustomMeditation}
@@ -347,7 +434,7 @@ const MeditationMobile: React.FC<MeditationMobileProps> = ({ onClose }) => {
             {durations.map((duration) => (
               <button
                 key={duration.minutes}
-                onClick={() => startMeditation(duration.minutes)}
+                onClick={() => handleStartMeditation(duration.minutes, false)}
                 className="w-full bg-white border-2 border-stone/10 rounded-2xl p-6 hover:border-jade/30 active:scale-98 transition-all group"
               >
                 <div className="flex items-center justify-between">

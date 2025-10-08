@@ -12,6 +12,7 @@ import DailyQuests from '../components/DailyQuests';
 import CheckinMobile from '../components/CheckinMobile';
 import JournalMobile from '../components/JournalMobile';
 import MeditationMobile from '../components/MeditationMobile';
+import MeditationBubble from '../components/MeditationBubble';
 import BreathingMobile from '../components/BreathingMobile';
 import InstallCTA from '../components/InstallCTA';
 import IOSInstallHint from '../components/IOSInstallHint';
@@ -286,6 +287,8 @@ const Home: React.FC = () => {
 
       <InstallCTA />
       <IOSInstallHint />
+
+      <MeditationBubble />
 
       {showCheckin && <CheckinMobile onClose={() => setShowCheckin(false)} onSave={async () => {
         await triggerAchievementCheck();
