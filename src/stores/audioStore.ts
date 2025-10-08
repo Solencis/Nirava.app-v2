@@ -40,6 +40,7 @@ interface AudioActions {
   tick: () => void;
   addMeditationTime: (minutes: number) => void;
   setSoundEnabled: (enabled: boolean) => void;
+  playNext: () => void;
   // Meditation timer actions
   startMeditation: (durationMinutes?: number) => void;
   pauseMeditation: () => void;
@@ -243,6 +244,17 @@ export const useAudioStore = create<AudioState & AudioActions>()(
 
       setSoundEnabled: (enabled: boolean) => {
         set({ soundEnabled: enabled });
+      },
+
+      playNext: () => {
+        const state = get();
+        if (!state.current) return;
+
+        const currentIndex = AMBIENCES.findIndex(a => a.key === state.current?.key);
+        const nextIndex = (currentIndex + 1) % AMBIENCES.length;
+        const nextAmbience = AMBIENCES[nextIndex];
+
+        state.play(nextAmbience);
       },
 
       // Meditation timer actions

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X, Play, Pause, RotateCcw, Check, Timer as TimerIcon, Music, Volume2, VolumeX } from 'lucide-react';
+import { X, Play, Pause, RotateCcw, Check, Timer as TimerIcon, SkipForward } from 'lucide-react';
 import { useAudioStore } from '../stores/audioStore';
 
 interface MeditationMobileProps {
@@ -7,14 +7,20 @@ interface MeditationMobileProps {
 }
 
 const MeditationMobile: React.FC<MeditationMobileProps> = ({ onClose }) => {
-  const { addMeditationTime, currentAmbience, ambienceIsPlaying, playAmbience, pauseAmbience } = useAudioStore();
+  const {
+    addMeditationTime,
+    current: currentAmbience,
+    isPlaying: ambienceIsPlaying,
+    play: playAmbience,
+    pause: pauseAmbience,
+    playNext
+  } = useAudioStore();
   const [selectedDuration, setSelectedDuration] = useState<number | null>(null);
   const [customMinutes, setCustomMinutes] = useState<string>('');
   const [isActive, setIsActive] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
   const [timeLeft, setTimeLeft] = useState(0);
   const [showSuccess, setShowSuccess] = useState(false);
-  const [enableMusic, setEnableMusic] = useState(true);
 
   const durations = [
     { minutes: 3, label: '3 min', desc: 'Pause rapide' },
@@ -48,10 +54,6 @@ const MeditationMobile: React.FC<MeditationMobileProps> = ({ onClose }) => {
     setIsActive(true);
     setIsPaused(false);
     if ('vibrate' in navigator) navigator.vibrate(50);
-
-    if (enableMusic && !ambienceIsPlaying && currentAmbience) {
-      playAmbience();
-    }
   };
 
   const startCustomMeditation = () => {
@@ -61,13 +63,17 @@ const MeditationMobile: React.FC<MeditationMobileProps> = ({ onClose }) => {
     }
   };
 
-  const toggleMusic = () => {
-    if (enableMusic && ambienceIsPlaying) {
+  const toggleMusicPlayPause = () => {
+    if (ambienceIsPlaying) {
       pauseAmbience();
-    } else if (!enableMusic && !ambienceIsPlaying && currentAmbience) {
-      playAmbience();
+    } else if (currentAmbience) {
+      playAmbience(currentAmbience);
     }
-    setEnableMusic(!enableMusic);
+  };
+
+  const handleSkipNext = () => {
+    playNext();
+    if ('vibrate' in navigator) navigator.vibrate(30);
   };
 
   const togglePause = () => {
@@ -150,14 +156,22 @@ const MeditationMobile: React.FC<MeditationMobileProps> = ({ onClose }) => {
 
           <div className="flex items-center gap-2">
             <button
-              onClick={toggleMusic}
+              onClick={handleSkipNext}
               className="w-10 h-10 rounded-full bg-stone/10 flex items-center justify-center active:scale-95 transition-transform"
-              title={enableMusic ? 'Désactiver la musique' : 'Activer la musique'}
+              title="Musique suivante"
+              disabled={!currentAmbience}
             >
-              {enableMusic ? (
-                <Volume2 className="w-5 h-5 text-jade" />
+              <SkipForward className="w-5 h-5 text-jade" />
+            </button>
+            <button
+              onClick={toggleMusicPlayPause}
+              className="w-10 h-10 rounded-full bg-stone/10 flex items-center justify-center active:scale-95 transition-transform"
+              title={ambienceIsPlaying ? 'Pause musique' : 'Play musique'}
+            >
+              {ambienceIsPlaying ? (
+                <Pause className="w-5 h-5 text-jade" />
               ) : (
-                <VolumeX className="w-5 h-5 text-stone" />
+                <Play className="w-5 h-5 text-stone ml-0.5" />
               )}
             </button>
             <button
@@ -305,27 +319,45 @@ const MeditationMobile: React.FC<MeditationMobileProps> = ({ onClose }) => {
             </div>
           </div>
 
-          {/* Music Toggle */}
+          {/* Music Controls */}
           <div className="max-w-sm mx-auto mb-8">
-            <button
-              onClick={toggleMusic}
-              className="w-full bg-white rounded-2xl p-4 shadow-lg border border-stone/10 flex items-center justify-between active:scale-[0.98] transition-transform"
-            >
-              <div className="flex items-center gap-3">
-                {enableMusic ? (
-                  <Music className="w-5 h-5 text-jade" />
-                ) : (
-                  <VolumeX className="w-5 h-5 text-stone" />
-                )}
+            <div className="bg-white rounded-2xl p-4 shadow-lg border border-stone/10">
+              <div className="flex items-center justify-between mb-3">
                 <div className="text-left">
                   <div className="font-semibold text-ink text-sm">Musique d'ambiance</div>
-                  <div className="text-xs text-stone">{enableMusic ? 'Activée' : 'Désactivée'}</div>
+                  <div className="text-xs text-stone">
+                    {currentAmbience ? `${currentAmbience.emoji} ${currentAmbience.title}` : 'Aucune sélectionnée'}
+                  </div>
                 </div>
               </div>
-              <div className={`w-12 h-6 rounded-full transition-colors ${enableMusic ? 'bg-jade' : 'bg-stone/20'}`}>
-                <div className={`w-5 h-5 rounded-full bg-white shadow-md transform transition-transform ${enableMusic ? 'translate-x-6' : 'translate-x-0.5'} mt-0.5`} />
+              <div className="flex gap-2">
+                <button
+                  onClick={toggleMusicPlayPause}
+                  className="flex-1 bg-gradient-to-r from-jade to-forest text-white py-3 rounded-xl font-medium active:scale-95 transition-transform shadow flex items-center justify-center gap-2"
+                  disabled={!currentAmbience}
+                >
+                  {ambienceIsPlaying ? (
+                    <>
+                      <Pause className="w-4 h-4" />
+                      <span>Pause</span>
+                    </>
+                  ) : (
+                    <>
+                      <Play className="w-4 h-4 ml-0.5" />
+                      <span>Play</span>
+                    </>
+                  )}
+                </button>
+                <button
+                  onClick={handleSkipNext}
+                  className="px-4 py-3 bg-stone/10 text-ink rounded-xl font-medium active:scale-95 transition-transform flex items-center justify-center"
+                  title="Suivante"
+                  disabled={!currentAmbience}
+                >
+                  <SkipForward className="w-4 h-4" />
+                </button>
               </div>
-            </button>
+            </div>
           </div>
 
           <div className="text-center text-sm text-stone/60 mb-4">Durées recommandées</div>
