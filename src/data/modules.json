@@ -150,5 +150,77 @@
     "duration": "75 min",
     "summary": "Puiser dans les enseignements ancestraux.",
     "slug": "wisdom-traditions"
+  },
+  {
+    "id": "chakra-balancing",
+    "level": "N5",
+    "title": "Équilibrage des chakras",
+    "duration": "90 min",
+    "summary": "Harmoniser les centres énergétiques et libérer les blocages.",
+    "slug": "chakra-balancing"
+  },
+  {
+    "id": "kundalini-awakening",
+    "level": "N5",
+    "title": "Éveil de la Kundalini",
+    "duration": "120 min",
+    "summary": "Éveiller l'énergie vitale avec sagesse et précaution.",
+    "slug": "kundalini-awakening"
+  },
+  {
+    "id": "sound-healing",
+    "level": "N5",
+    "title": "Guérison par le son",
+    "duration": "75 min",
+    "summary": "Utiliser vibrations et fréquences pour rééquilibrer le corps.",
+    "slug": "sound-healing"
+  },
+  {
+    "id": "shamanic-journey",
+    "level": "N6",
+    "title": "Voyage chamanique",
+    "duration": "90 min",
+    "summary": "Explorer les mondes intérieurs avec des pratiques ancestrales.",
+    "slug": "shamanic-journey"
+  },
+  {
+    "id": "plant-medicine",
+    "level": "N6",
+    "title": "Médecine des plantes",
+    "duration": "60 min",
+    "summary": "Se connecter à l'intelligence végétale et ses enseignements.",
+    "slug": "plant-medicine"
+  },
+  {
+    "id": "divination-intuition",
+    "level": "N6",
+    "title": "Divination et intuition",
+    "duration": "75 min",
+    "summary": "Développer la clairvoyance et l'écoute des signes.",
+    "slug": "divination-intuition"
+  },
+  {
+    "id": "non-duality",
+    "level": "N7",
+    "title": "Non-dualité",
+    "duration": "120 min",
+    "summary": "Expérimenter l'unité au-delà de la séparation.",
+    "slug": "non-duality"
+  },
+  {
+    "id": "mystical-union",
+    "level": "N7",
+    "title": "Union mystique",
+    "duration": "90 min",
+    "summary": "Se fondre dans la conscience universelle.",
+    "slug": "mystical-union"
+  },
+  {
+    "id": "embodied-awakening",
+    "level": "N7",
+    "title": "Éveil incarné",
+    "duration": "75 min",
+    "summary": "Vivre l'éveil dans le quotidien avec grâce et présence.",
+    "slug": "embodied-awakening"
   }
 ]
