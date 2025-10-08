@@ -54,32 +54,31 @@ const Journal: React.FC = () => {
   const [lastAction, setLastAction] = useState<string>('');
 
   const motivationalMessages = [
-    "Chaque geste compte 🌱",
-    "Bravo, tu prends soin de toi 💚",
-    "Ta pratique grandit jour après jour ✨",
-    "L'introspection est un cadeau que tu t'offres 🎁",
-    "Chaque moment de présence compte 🌸",
-    "Tu es sur le bon chemin 🌿",
-    "Ton bien-être est une priorité 🙏",
-    "Chaque jour est une nouvelle opportunité 🌅"
+    "Bienvenue dans ton espace sacré",
+    "Chaque geste d'introspection est un acte d'amour",
+    "Ici commence ton voyage quotidien",
+    "Un instant pour toi, un pas vers la clarté",
+    "Ta présence à toi-même est précieuse",
+    "Aujourd'hui, tu choisis de prendre soin de toi",
+    "Dans ce calme, tout devient possible"
   ];
 
   const inspirationalQuotes = [
     {
-      text: "La conscience de soi\nest le début de la sagesse.",
-      author: "Aristote"
+      text: "Dans le silence,\ntu entends\nce que ton cœur\na toujours su.",
+      author: "Sagesse intérieure"
     },
     {
-      text: "Prendre soin de soi\nn'est pas égoïste,\nc'est nécessaire.",
+      text: "Chaque jour,\ntu as le choix\nde revenir\nà toi-même.",
       author: "Nirava"
     },
     {
-      text: "Dans le silence intérieur,\nles réponses émergent.",
+      text: "Tes émotions\nsont des guides,\npas des obstacles.",
+      author: "Nirava"
+    },
+    {
+      text: "La transformation\nse fait\nun petit geste\nà la fois.",
       author: "Sagesse zen"
-    },
-    {
-      text: "Chaque émotion\nest un messager précieux.",
-      author: "Nirava"
     }
   ];
 
@@ -371,13 +370,14 @@ const Journal: React.FC = () => {
               )}
             </button>
             
-            <h1 
-              className="text-4xl font-bold text-ink mb-2 leading-tight"
+            <h1
+              className="text-3xl md:text-4xl font-bold text-ink mb-3 leading-tight"
               style={{ fontFamily: "'Shippori Mincho', serif" }}
             >
-              Mon Journal
+              Ton Tableau de Bord
             </h1>
-            <p className="text-stone text-sm mb-6 animate-pulse-text">{currentMessage}</p>
+            <p className="text-stone text-base mb-2 leading-relaxed italic opacity-90">{currentMessage}</p>
+            <p className="text-stone/70 text-sm mb-6 leading-relaxed">Chaque action est une pierre sur ton chemin vers la sérénité</p>
             
             {/* Stats dashboard premium */}
             <div className="bg-white/95 backdrop-blur-md rounded-3xl p-6 shadow-2xl border border-stone/10 relative overflow-hidden">
@@ -385,12 +385,10 @@ const Journal: React.FC = () => {
               <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-shimmer-slow"></div>
               
               <div className="relative z-10">
-                <div className="flex items-center justify-center mb-4">
-                  <Sparkles className="w-5 h-5 text-jade mr-2 animate-pulse" />
-                  <h2 className="text-lg font-bold text-ink" style={{ fontFamily: "'Shippori Mincho', serif" }}>
-                    Ton parcours cette semaine
+                <div className="flex items-center justify-center mb-6">
+                  <h2 className="text-xl font-bold bg-gradient-to-r from-jade via-forest to-jade bg-clip-text text-transparent" style={{ fontFamily: "'Shippori Mincho', serif" }}>
+                    Ta semaine en un coup d'œil
                   </h2>
-                  <Sparkles className="w-5 h-5 text-jade ml-2 animate-pulse" style={{ animationDelay: '0.5s' }} />
                 </div>
                 
                 {/* Grid stats avec animations */}
@@ -495,7 +493,7 @@ const Journal: React.FC = () => {
                 <h3 className="font-bold text-ink mb-2 text-base" style={{ fontFamily: "'Shippori Mincho', serif" }}>
                   Check-in émotionnel
                 </h3>
-                <p className="text-xs text-stone mb-3 leading-tight">Comment te sens-tu maintenant ?</p>
+                <p className="text-xs text-stone/80 mb-3 leading-relaxed">Prends un instant pour accueillir ce que tu ressens, ici et maintenant</p>
                 <div className="text-sm text-jade font-bold bg-jade/10 px-3 py-1 rounded-full">
                   {stats.checkins} cette semaine
                 </div>
@@ -538,7 +536,7 @@ const Journal: React.FC = () => {
                 <h3 className="font-bold text-ink mb-2 text-base" style={{ fontFamily: "'Shippori Mincho', serif" }}>
                   Journal de rêves
                 </h3>
-                <p className="text-xs text-stone mb-3 leading-tight">Capture tes rêves nocturnes</p>
+                <p className="text-xs text-stone/80 mb-3 leading-relaxed">Tes rêves contiennent des messages. Note-les avant qu'ils ne s'évanouissent</p>
                 <div className="text-sm text-blue-600 font-bold bg-blue-100 px-3 py-1 rounded-full">
                   {stats.dreams} rêves cette semaine
                 </div>
@@ -564,7 +562,7 @@ const Journal: React.FC = () => {
                 <h3 className="font-bold text-ink mb-2 text-base" style={{ fontFamily: "'Shippori Mincho', serif" }}>
                   Journal du soir
                 </h3>
-                <p className="text-xs text-stone mb-3 leading-tight">Tes réflexions quotidiennes</p>
+                <p className="text-xs text-stone/80 mb-3 leading-relaxed">Le rituel qui ancre ta journée. Pose tes mots, libère ton esprit</p>
                 <div className="text-sm text-vermilion font-bold bg-vermilion/10 px-3 py-1 rounded-full">
                   {stats.streak} jours consécutifs
                 </div>
@@ -595,9 +593,9 @@ const Journal: React.FC = () => {
                   <Timer size={28} strokeWidth={1.5} className="text-forest animate-tick" />
                 </div>
                 <h3 className="font-bold text-ink mb-2 text-base" style={{ fontFamily: "'Shippori Mincho', serif" }}>
-                  Méditation
+                  Méditation chronometée
                 </h3>
-                <p className="text-xs text-stone mb-3 leading-tight">Timer avec gong zen</p>
+                <p className="text-xs text-stone/80 mb-3 leading-relaxed">Un espace de silence pour observer ce qui est, sans jugement</p>
                 <div className="text-sm text-forest font-bold bg-forest/10 px-3 py-1 rounded-full">
                   {stats.meditation} min cette semaine
                 </div>
@@ -636,9 +634,9 @@ const Journal: React.FC = () => {
                 </div>
                 <div className="text-left">
                   <h3 className="font-bold text-ink mb-1 text-base" style={{ fontFamily: "'Shippori Mincho', serif" }}>
-                    Exercices de respiration
+                    Respiration guidée
                   </h3>
-                  <p className="text-xs text-stone leading-tight">3 exercices guidés pour te recentrer</p>
+                  <p className="text-xs text-stone/80 leading-relaxed">Reviens à ton souffle. Trois techniques pour t'ancrer dans l'instant</p>
                 </div>
               </div>
             </button>
@@ -656,9 +654,9 @@ const Journal: React.FC = () => {
                 </div>
                 <div className="text-left">
                   <h3 className="font-bold text-ink mb-1 text-base" style={{ fontFamily: "'Shippori Mincho', serif" }}>
-                    Pause émotionnelle
+                    Pause d'urgence
                   </h3>
-                  <p className="text-xs text-stone leading-tight">🆘 3 techniques de recentrage</p>
+                  <p className="text-xs text-stone/80 leading-relaxed">Quand l'émotion déborde, trouve refuge ici. Trois outils de recentrage immédiat</p>
                 </div>
               </div>
             </button>
@@ -777,6 +775,33 @@ const Journal: React.FC = () => {
             </div>
           </div>
 
+          {/* Citation inspirante du jour */}
+          <div className="bg-gradient-to-br from-slate-50 via-white to-slate-100 rounded-3xl p-8 text-center border border-stone/10 relative overflow-hidden shadow-2xl mb-8">
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(134,239,172,0.1),transparent_50%)]"></div>
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_80%,rgba(134,239,172,0.08),transparent_50%)]"></div>
+
+            <div className="relative z-10">
+              <motion.div
+                key={pulseKey}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.8 }}
+              >
+                <div className="w-2 h-2 bg-jade rounded-full mx-auto mb-6 animate-pulse"></div>
+
+                <p className="text-lg md:text-xl text-ink leading-relaxed mb-4 whitespace-pre-line italic" style={{ fontFamily: "'Shippori Mincho', serif" }}>
+                  {inspirationalQuotes[currentQuote].text}
+                </p>
+
+                <p className="text-sm text-stone/70">
+                  — {inspirationalQuotes[currentQuote].author}
+                </p>
+
+                <div className="w-2 h-2 bg-jade rounded-full mx-auto mt-6 animate-pulse" style={{ animationDelay: '0.5s' }}></div>
+              </motion.div>
+            </div>
+          </div>
+
           {/* Message d'encouragement personnalisé */}
           <div className="bg-gradient-to-br from-jade/10 via-wasabi/10 to-jade/5 rounded-3xl p-6 text-center border border-jade/20 relative overflow-hidden">
             <div className="absolute top-2 right-2 opacity-20">
@@ -785,41 +810,39 @@ const Journal: React.FC = () => {
             <div className="absolute bottom-2 left-2 opacity-20">
               <div className="w-6 h-6 bg-vermilion/20 rounded-full animate-pulse" style={{ animationDelay: '1s' }}></div>
             </div>
-            
+
             <div className="relative z-10">
               <div className="w-16 h-16 bg-gradient-to-br from-jade to-forest rounded-full flex items-center justify-center mx-auto mb-4 shadow-2xl animate-breathe-enhanced">
                 <Heart className="w-8 h-8 text-white" />
               </div>
-              
+
               <h3 className="text-xl font-bold text-ink mb-3" style={{ fontFamily: "'Shippori Mincho', serif" }}>
                 {stats.checkins > 0 || stats.journals > 0 || stats.meditation > 0
-                  ? "Tu rayonnes de bien-être !"
-                  : "Prêt(e) pour ton voyage intérieur ?"
+                  ? "Ta pratique grandit"
+                  : "Commence quand tu es prêt(e)"
                 }
               </h3>
-              
+
               <p className="text-stone text-sm leading-relaxed mb-4">
-                {stats.streak > 0 
-                  ? `${stats.streak} jour${stats.streak > 1 ? 's' : ''} de pratique régulière ! Tu développes une belle discipline personnelle 🔥`
-                  : "Chaque petit geste de bienveillance envers toi-même compte. Commence quand tu te sens prêt(e) 🌱"
+                {stats.streak > 0
+                  ? `${stats.streak} jour${stats.streak > 1 ? 's' : ''} de rituel. Ton engagement se transforme en routine, ta routine en transformation.`
+                  : "Il n'y a pas de bonne ou mauvaise façon de commencer. Choisis une action, une seule, et observe ce qui se passe."
                 }
               </p>
-              
+
               {/* Niveau d'engagement visuel */}
               <div className={`bg-gradient-to-r ${engagement.bg} rounded-2xl p-4 border border-jade/20`}>
                 <div className="flex items-center justify-center mb-2">
-                  <Star className="w-5 h-5 text-jade mr-2 animate-twinkle" />
                   <span className={`font-bold text-sm ${engagement.color}`}>
-                    Niveau : {engagement.level}
+                    Niveau d'engagement : {engagement.level}
                   </span>
-                  <Star className="w-5 h-5 text-jade ml-2 animate-twinkle" style={{ animationDelay: '0.5s' }} />
                 </div>
-                
-                <div className="text-xs text-stone">
-                  {engagement.level === 'Expert' && '🎯 Tu maîtrises parfaitement tes pratiques !'}
-                  {engagement.level === 'Avancé' && '🚀 Tu as développé une excellente routine !'}
-                  {engagement.level === 'Régulier' && '⭐ Tu es sur la bonne voie !'}
-                  {engagement.level === 'Débutant' && '🌱 Chaque début est précieux !'}
+
+                <div className="text-xs text-stone/80 leading-relaxed">
+                  {engagement.level === 'Expert' && 'Ton intégration est profonde. Continue à explorer.'}
+                  {engagement.level === 'Avancé' && 'Tu as trouvé ton rythme. La pratique devient naturelle.'}
+                  {engagement.level === 'Régulier' && 'Tu construis une fondation solide, jour après jour.'}
+                  {engagement.level === 'Débutant' && 'Chaque premier pas est un acte de courage.'}
                 </div>
               </div>
             </div>
