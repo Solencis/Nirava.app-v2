@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-import { ChevronRight, ChevronLeft } from 'lucide-react';
+import { ChevronRight, ChevronLeft, Sparkles } from 'lucide-react';
 import OnboardingSlide from '../components/OnboardingSlide';
 import { onboardingSlides } from '../data/onboardingContent';
 import { useOnboarding } from '../hooks/useOnboarding';
@@ -26,6 +26,11 @@ export default function Onboarding() {
     }
   };
 
+  const handleSkip = async () => {
+    await completeOnboarding();
+    navigate('/auth');
+  };
+
   const handleFreeAccess = async () => {
     await completeOnboarding();
     navigate('/auth');
@@ -37,38 +42,68 @@ export default function Onboarding() {
   };
 
   const currentSlideData = onboardingSlides[currentSlide];
+  const currentGradient = currentSlideData.gradient;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-teal-50 to-cyan-50 flex flex-col">
-      <div className="flex-1 flex flex-col items-center justify-center py-12 px-4">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100 flex flex-col relative overflow-hidden">
+      <motion.div
+        key={currentSlide}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 0.15 }}
+        transition={{ duration: 1 }}
+        className={`absolute inset-0 bg-gradient-to-br ${currentGradient} pointer-events-none`}
+      />
+
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(255,255,255,0.8),transparent_50%)] pointer-events-none"></div>
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_80%,rgba(255,255,255,0.6),transparent_50%)] pointer-events-none"></div>
+
+      <div className="flex-1 flex flex-col items-center justify-center py-12 px-4 relative z-10">
         <div className="w-full max-w-4xl">
-          <div className="mb-8">
-            <div className="flex gap-2 justify-center">
-              {onboardingSlides.map((_, index) => (
+          <motion.div
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8 }}
+            className="mb-12"
+          >
+            <div className="flex gap-3 justify-center items-center">
+              {onboardingSlides.map((slide, index) => (
                 <motion.div
                   key={index}
-                  initial={{ scale: 0.8, opacity: 0.5 }}
+                  initial={{ scale: 0.8, opacity: 0.3 }}
                   animate={{
-                    scale: index === currentSlide ? 1 : 0.8,
-                    opacity: index === currentSlide ? 1 : 0.3
+                    scale: index === currentSlide ? 1.2 : 0.8,
+                    opacity: index === currentSlide ? 1 : 0.4
                   }}
-                  className={`h-2 rounded-full transition-all ${
-                    index === currentSlide
-                      ? 'w-12 bg-emerald-600'
-                      : 'w-2 bg-gray-400'
-                  }`}
-                />
+                  transition={{ type: 'spring', stiffness: 300, damping: 20 }}
+                  className="relative"
+                >
+                  <div
+                    className={`h-2.5 rounded-full transition-all duration-500 ${
+                      index === currentSlide
+                        ? `w-16 bg-gradient-to-r ${slide.gradient}`
+                        : 'w-2.5 bg-gray-300'
+                    }`}
+                  />
+                  {index === currentSlide && (
+                    <motion.div
+                      layoutId="activeIndicator"
+                      className={`absolute inset-0 bg-gradient-to-r ${slide.gradient} rounded-full blur-md opacity-50`}
+                    />
+                  )}
+                </motion.div>
               ))}
             </div>
-          </div>
+          </motion.div>
 
           <AnimatePresence mode="wait">
             <OnboardingSlide
               key={currentSlide}
               title={currentSlideData.title}
+              subtitle={currentSlideData.subtitle}
               description={currentSlideData.description}
               icon={currentSlideData.icon}
-              image={currentSlideData.image}
+              gradient={currentSlideData.gradient}
+              textColor={currentSlideData.textColor}
             />
           </AnimatePresence>
 
@@ -76,82 +111,96 @@ export default function Onboarding() {
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.5 }}
-              className="mt-12 flex flex-col sm:flex-row gap-4 justify-center items-center"
+              transition={{ delay: 0.8 }}
+              className="mt-16 flex flex-col gap-4 justify-center items-center max-w-xl mx-auto"
             >
               <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
+                whileHover={{ scale: 1.02, y: -2 }}
+                whileTap={{ scale: 0.98 }}
                 onClick={handleFreeAccess}
-                className="px-8 py-4 bg-white text-emerald-600 rounded-full font-semibold text-lg shadow-lg hover:shadow-xl transition-shadow border-2 border-emerald-600 w-full sm:w-auto"
+                className="group relative px-10 py-5 bg-white text-gray-800 rounded-2xl font-semibold text-lg shadow-2xl hover:shadow-3xl transition-all duration-300 w-full overflow-hidden"
               >
-                Continuer gratuitement
+                <div className="absolute inset-0 bg-gradient-to-r from-emerald-400 to-teal-400 opacity-0 group-hover:opacity-10 transition-opacity duration-300"></div>
+                <div className="relative flex items-center justify-center gap-3">
+                  <Sparkles className="w-5 h-5 text-emerald-600" />
+                  <span>Continuer gratuitement</span>
+                </div>
               </motion.button>
 
               <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
+                whileHover={{ scale: 1.02, y: -2 }}
+                whileTap={{ scale: 0.98 }}
                 onClick={handleFullAccess}
-                className="px-8 py-4 bg-gradient-to-r from-emerald-600 to-teal-600 text-white rounded-full font-semibold text-lg shadow-lg hover:shadow-xl transition-shadow w-full sm:w-auto"
+                className="group relative px-10 py-5 bg-gradient-to-r from-rose-500 via-pink-500 to-fuchsia-500 text-white rounded-2xl font-semibold text-lg shadow-2xl hover:shadow-3xl transition-all duration-300 w-full overflow-hidden"
               >
-                Activer l'accès complet
+                <div className="absolute inset-0 bg-white opacity-0 group-hover:opacity-20 transition-opacity duration-300"></div>
+                <div className="relative flex items-center justify-center gap-3">
+                  <Sparkles className="w-5 h-5" />
+                  <span>Activer l'accès complet</span>
+                </div>
               </motion.button>
             </motion.div>
           ) : (
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              transition={{ delay: 0.5 }}
-              className="mt-12 flex justify-between items-center max-w-2xl mx-auto px-6"
+              transition={{ delay: 0.8 }}
+              className="mt-16 flex justify-between items-center max-w-3xl mx-auto px-6"
             >
-              <button
+              <motion.button
                 onClick={handlePrevious}
                 disabled={isFirstSlide}
-                className={`p-3 rounded-full transition-all ${
+                whileHover={!isFirstSlide ? { scale: 1.1, rotate: -5 } : {}}
+                whileTap={!isFirstSlide ? { scale: 0.9 } : {}}
+                className={`p-4 rounded-2xl transition-all duration-300 ${
                   isFirstSlide
                     ? 'opacity-0 pointer-events-none'
-                    : 'bg-white shadow-lg hover:shadow-xl hover:scale-110'
+                    : 'bg-white/80 backdrop-blur-sm shadow-xl hover:shadow-2xl'
                 }`}
               >
-                <ChevronLeft className="w-6 h-6 text-emerald-600" />
-              </button>
+                <ChevronLeft className={`w-6 h-6 bg-gradient-to-r ${currentGradient} bg-clip-text text-transparent`} />
+              </motion.button>
 
               <div className="flex-1 flex justify-center">
                 <motion.button
-                  whileHover={{ scale: 1.05 }}
+                  whileHover={{ scale: 1.05, y: -3 }}
                   whileTap={{ scale: 0.95 }}
                   onClick={handleNext}
-                  className="px-8 py-4 bg-gradient-to-r from-emerald-600 to-teal-600 text-white rounded-full font-semibold text-lg shadow-lg hover:shadow-xl transition-shadow flex items-center gap-2"
+                  className={`px-10 py-5 bg-gradient-to-r ${currentGradient} text-white rounded-2xl font-bold text-lg shadow-2xl hover:shadow-3xl transition-all duration-300 flex items-center gap-3`}
                 >
-                  {currentSlideData.ctaText || 'Suivant'}
-                  <ChevronRight className="w-5 h-5" />
+                  <span>{currentSlideData.ctaText || 'Suivant'}</span>
+                  <ChevronRight className="w-6 h-6" />
                 </motion.button>
               </div>
 
-              <button
+              <motion.button
                 onClick={handleNext}
-                className="p-3 rounded-full bg-white shadow-lg hover:shadow-xl hover:scale-110 transition-all"
+                whileHover={{ scale: 1.1, rotate: 5 }}
+                whileTap={{ scale: 0.9 }}
+                className="p-4 rounded-2xl bg-white/80 backdrop-blur-sm shadow-xl hover:shadow-2xl transition-all duration-300"
               >
-                <ChevronRight className="w-6 h-6 text-emerald-600" />
-              </button>
+                <ChevronRight className={`w-6 h-6 bg-gradient-to-r ${currentGradient} bg-clip-text text-transparent`} />
+              </motion.button>
             </motion.div>
           )}
         </div>
       </div>
 
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 1 }}
-        className="py-4 text-center text-sm text-gray-500"
-      >
-        <button
-          onClick={handleFreeAccess}
-          className="hover:text-emerald-600 transition-colors underline"
+      {!isLastSlide && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 1.2 }}
+          className="py-6 text-center relative z-10"
         >
-          Passer l'introduction
-        </button>
-      </motion.div>
+          <button
+            onClick={handleSkip}
+            className="text-sm text-gray-500 hover:text-gray-700 transition-colors underline underline-offset-4"
+          >
+            Passer l'introduction
+          </button>
+        </motion.div>
+      )}
     </div>
   );
 }
