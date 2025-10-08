@@ -130,25 +130,35 @@ const HistoryModal: React.FC<HistoryModalProps> = ({ isOpen, onClose, onStatsUpd
   };
 
   const moveToTrash = async (entry: HistoryEntry) => {
+    if (!confirm(`Supprimer définitivement cette entrée ?`)) {
+      return;
+    }
+
     console.log('🗑️ Deleting from Supabase:', entry.id, entry.type);
 
     try {
       if (entry.type === 'checkin') {
+        console.log('Calling deleteCheckinMutation...');
         await deleteCheckinMutation.mutateAsync(entry.id);
         setCheckins(prev => prev.filter(c => c.id !== entry.id));
+        console.log('✅ Check-in deleted');
       } else if (entry.type === 'journal' || entry.type === 'dream') {
+        console.log('Calling deleteJournalMutation...');
         await deleteJournalMutation.mutateAsync(entry.id);
         if (entry.type === 'journal') {
           setJournals(prev => prev.filter(j => j.id !== entry.id));
+          console.log('✅ Journal deleted');
         } else {
           setDreams(prev => prev.filter(d => d.id !== entry.id));
+          console.log('✅ Dream deleted');
         }
       }
 
       console.log('✅ Entry deleted from Supabase:', entry.id);
       onStatsUpdate();
     } catch (error) {
-      console.error('Error deleting entry:', error);
+      console.error('❌ Error deleting entry:', error);
+      alert(`Erreur lors de la suppression: ${error instanceof Error ? error.message : 'Erreur inconnue'}`);
     }
   };
 
