@@ -89,7 +89,64 @@ export const useCreateCheckin = () => {
   });
 };
 
-// Hook pour supprimer un check-in
+// Hook pour soft delete d'un check-in (mise à la corbeille)
+export const useSoftDeleteCheckin = () => {
+  const { user } = useAuth();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (checkinId: string) => {
+      if (!user?.id) {
+        throw new Error('User not authenticated');
+      }
+
+      const { error } = await supabase
+        .from('checkins')
+        .update({ deleted_at: new Date().toISOString() })
+        .eq('id', checkinId)
+        .eq('user_id', user.id);
+
+      if (error) throw error;
+
+      return checkinId;
+    },
+    onSuccess: (deletedId) => {
+      const queryKey = ['checkins', user?.id, 0];
+      queryClient.setQueryData<CheckinEntry[]>(queryKey, (old = []) =>
+        old.filter(item => item.id !== deletedId)
+      );
+    },
+  });
+};
+
+// Hook pour restaurer un check-in de la corbeille
+export const useRestoreCheckin = () => {
+  const { user } = useAuth();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (checkinId: string) => {
+      if (!user?.id) {
+        throw new Error('User not authenticated');
+      }
+
+      const { error } = await supabase
+        .from('checkins')
+        .update({ deleted_at: null })
+        .eq('id', checkinId)
+        .eq('user_id', user.id);
+
+      if (error) throw error;
+
+      return checkinId;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['checkins', user?.id] });
+    },
+  });
+};
+
+// Hook pour supprimer définitivement un check-in
 export const useDeleteCheckin = () => {
   const { user } = useAuth();
   const queryClient = useQueryClient();
@@ -104,16 +161,15 @@ export const useDeleteCheckin = () => {
         .from('checkins')
         .delete()
         .eq('id', checkinId)
-        .eq('user_id', user.id); // RLS security
+        .eq('user_id', user.id);
 
       if (error) throw error;
-      
+
       return checkinId;
     },
     onSuccess: (deletedId) => {
-      // Supprimer du cache
       const queryKey = ['checkins', user?.id, 0];
-      queryClient.setQueryData<CheckinEntry[]>(queryKey, (old = []) => 
+      queryClient.setQueryData<CheckinEntry[]>(queryKey, (old = []) =>
         old.filter(item => item.id !== deletedId)
       );
     },

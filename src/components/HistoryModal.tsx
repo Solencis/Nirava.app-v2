@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { X, Heart, Moon, Trash2, RotateCcw, Calendar, AlertTriangle, Cloud, Eye, Zap } from 'lucide-react';
-import { useCheckins, useDeleteCheckin } from '../hooks/useCheckins';
-import { useJournals, useDeleteJournal } from '../hooks/useJournals';
+import { useCheckins, useSoftDeleteCheckin, useRestoreCheckin, useDeleteCheckin } from '../hooks/useCheckins';
+import { useJournals, useSoftDeleteJournal, useRestoreJournal, useDeleteJournal } from '../hooks/useJournals';
 import { useAuth } from '../hooks/useAuth';
 import { supabase } from '../lib/supabase';
 import { LoadingSkeleton, HistoryLoadingSkeleton } from './LoadingSkeleton';
@@ -33,6 +33,10 @@ const HistoryModal: React.FC<HistoryModalProps> = ({ isOpen, onClose, onStatsUpd
   const { user } = useAuth();
   const { data: checkinsData, isLoading: checkinsLoading } = useCheckins();
   const { data: journalsData, isLoading: journalsLoading } = useJournals();
+  const softDeleteCheckinMutation = useSoftDeleteCheckin();
+  const softDeleteJournalMutation = useSoftDeleteJournal();
+  const restoreCheckinMutation = useRestoreCheckin();
+  const restoreJournalMutation = useRestoreJournal();
   const deleteCheckinMutation = useDeleteCheckin();
   const deleteJournalMutation = useDeleteJournal();
   const [activeTab, setActiveTab] = useState<'checkins' | 'journals' | 'dreams' | 'trash'>('checkins');
@@ -51,7 +55,7 @@ const HistoryModal: React.FC<HistoryModalProps> = ({ isOpen, onClose, onStatsUpd
     }
   }, [isOpen, user, checkinsData, journalsData]);
 
-  const loadDataFromSupabase = () => {
+  const loadDataFromSupabase = async () => {
     setLoading(true);
     try {
       if (!checkinsData || !journalsData) {
@@ -115,13 +119,50 @@ const HistoryModal: React.FC<HistoryModalProps> = ({ isOpen, onClose, onStatsUpd
         dreams: dreamsHistory.length
       });
 
-      // Charger la corbeille (localStorage pour l'instant - fonctionnalité legacy)
-      const trashEntries = JSON.parse(localStorage.getItem('journal-trash') || '[]');
-      const userTrash = user?.id
-        ? trashEntries.filter((entry: any) => !entry.user_id || entry.user_id === user.id)
-        : trashEntries;
+      // Charger la corbeille depuis Supabase
+      const trashHistory: HistoryEntry[] = [];
 
-      setTrash(userTrash);
+      const { data: trashedCheckins } = await supabase
+        .from('checkins')
+        .select('*')
+        .eq('user_id', user.id)
+        .not('deleted_at', 'is', null)
+        .order('deleted_at', { ascending: false });
+
+      const { data: trashedJournals } = await supabase
+        .from('journals')
+        .select('*')
+        .eq('user_id', user.id)
+        .not('deleted_at', 'is', null)
+        .order('deleted_at', { ascending: false });
+
+      trashedCheckins?.forEach((checkin: any) => {
+        trashHistory.push({
+          id: checkin.id,
+          type: 'checkin',
+          timestamp: checkin.deleted_at,
+          date: new Date(checkin.deleted_at).toLocaleDateString('fr-FR'),
+          emotion: checkin.emotion,
+          intensity: checkin.intensity,
+          need: checkin.need,
+          note: checkin.notes
+        });
+      });
+
+      trashedJournals?.forEach((journal: any) => {
+        const isDream = journal.type === 'dream';
+        trashHistory.push({
+          id: journal.id,
+          type: isDream ? 'dream' : 'journal',
+          timestamp: journal.deleted_at,
+          date: new Date(journal.deleted_at).toLocaleDateString('fr-FR'),
+          content: journal.content,
+          emotion: journal.emotion,
+          title: isDream ? journal.content?.split('\n')[0] : undefined
+        });
+      });
+
+      setTrash(trashHistory);
     } catch (error) {
       console.error('Error loading history data:', error);
     } finally {
@@ -130,34 +171,28 @@ const HistoryModal: React.FC<HistoryModalProps> = ({ isOpen, onClose, onStatsUpd
   };
 
   const moveToTrash = async (entry: HistoryEntry) => {
-    if (!confirm(`Supprimer définitivement cette entrée ?`)) {
-      return;
-    }
-
-    console.log('🗑️ Deleting from Supabase:', entry.id, entry.type);
+    console.log('🗑️ Moving to trash:', entry.id, entry.type);
 
     try {
       if (entry.type === 'checkin') {
-        console.log('Calling deleteCheckinMutation...');
-        await deleteCheckinMutation.mutateAsync(entry.id);
+        await softDeleteCheckinMutation.mutateAsync(entry.id);
         setCheckins(prev => prev.filter(c => c.id !== entry.id));
-        console.log('✅ Check-in deleted');
+        console.log('✅ Check-in moved to trash');
       } else if (entry.type === 'journal' || entry.type === 'dream') {
-        console.log('Calling deleteJournalMutation...');
-        await deleteJournalMutation.mutateAsync(entry.id);
+        await softDeleteJournalMutation.mutateAsync(entry.id);
         if (entry.type === 'journal') {
           setJournals(prev => prev.filter(j => j.id !== entry.id));
-          console.log('✅ Journal deleted');
+          console.log('✅ Journal moved to trash');
         } else {
           setDreams(prev => prev.filter(d => d.id !== entry.id));
-          console.log('✅ Dream deleted');
+          console.log('✅ Dream moved to trash');
         }
       }
 
-      console.log('✅ Entry deleted from Supabase:', entry.id);
+      await loadDataFromSupabase();
       onStatsUpdate();
     } catch (error) {
-      console.error('❌ Error deleting entry:', error);
+      console.error('❌ Error moving to trash:', error);
       alert(`Erreur lors de la suppression: ${error instanceof Error ? error.message : 'Erreur inconnue'}`);
     }
   };
@@ -174,28 +209,52 @@ const HistoryModal: React.FC<HistoryModalProps> = ({ isOpen, onClose, onStatsUpd
     });
   };
 
-  // Note: Corbeille désactivée - les suppressions sont définitives dans Supabase
-  const restoreFromTrash = (entry: HistoryEntry) => {
-    console.log('♻️ Restore from trash not implemented (Supabase direct delete)');
+  const restoreFromTrash = async (entry: HistoryEntry) => {
+    console.log('♻️ Restoring from trash:', entry.id, entry.type);
+
+    try {
+      if (entry.type === 'checkin') {
+        await restoreCheckinMutation.mutateAsync(entry.id);
+        console.log('✅ Check-in restored');
+      } else if (entry.type === 'journal' || entry.type === 'dream') {
+        await restoreJournalMutation.mutateAsync(entry.id);
+        console.log('✅ Journal/Dream restored');
+      }
+
+      await loadDataFromSupabase();
+      onStatsUpdate();
+    } catch (error) {
+      console.error('❌ Error restoring entry:', error);
+      alert(`Erreur lors de la restauration: ${error instanceof Error ? error.message : 'Erreur inconnue'}`);
+    }
   };
 
-  const permanentDelete = (entryId: string) => {
-    setItemToDelete(entryId);
+  const permanentDelete = (entry: HistoryEntry) => {
+    setItemToDelete(entry.id);
     setShowDeleteModal(true);
   };
 
-  const confirmPermanentDelete = () => {
+  const confirmPermanentDelete = async () => {
     if (!itemToDelete) return;
     console.log('🔥 Permanently deleting:', itemToDelete);
-    const currentTrash = JSON.parse(localStorage.getItem('journal-trash') || '[]');
-    
-    const updatedTrash = currentTrash.filter((t: any) => t.id !== itemToDelete);
-    console.log('🗑️ Trash after deletion:', updatedTrash.length);
-    
-    setTrash(updatedTrash);
-    localStorage.setItem('journal-trash', JSON.stringify(updatedTrash));
-    console.log('✅ Trash updated in localStorage');
-    
+
+    try {
+      const entryToDelete = trash.find(t => t.id === itemToDelete);
+      if (!entryToDelete) return;
+
+      if (entryToDelete.type === 'checkin') {
+        await deleteCheckinMutation.mutateAsync(itemToDelete);
+      } else if (entryToDelete.type === 'journal' || entryToDelete.type === 'dream') {
+        await deleteJournalMutation.mutateAsync(itemToDelete);
+      }
+
+      setTrash(prev => prev.filter(t => t.id !== itemToDelete));
+      console.log('✅ Entry permanently deleted');
+    } catch (error) {
+      console.error('❌ Error permanently deleting:', error);
+      alert(`Erreur lors de la suppression: ${error instanceof Error ? error.message : 'Erreur inconnue'}`);
+    }
+
     setShowDeleteModal(false);
     setItemToDelete(null);
   };
@@ -540,7 +599,7 @@ const HistoryModal: React.FC<HistoryModalProps> = ({ isOpen, onClose, onStatsUpd
                               <RotateCcw size={12} />
                             </button>
                             <button
-                              onClick={() => permanentDelete(item.id)}
+                              onClick={() => permanentDelete(item)}
                               className="text-red-400 hover:text-red-600 transition-colors duration-300 p-1"
                               title="Supprimer définitivement"
                             >

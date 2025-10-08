@@ -89,7 +89,64 @@ export const useCreateJournal = () => {
   });
 };
 
-// Hook pour supprimer un journal
+// Hook pour soft delete d'un journal (mise à la corbeille)
+export const useSoftDeleteJournal = () => {
+  const { user } = useAuth();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (journalId: string) => {
+      if (!user?.id) {
+        throw new Error('User not authenticated');
+      }
+
+      const { error } = await supabase
+        .from('journals')
+        .update({ deleted_at: new Date().toISOString() })
+        .eq('id', journalId)
+        .eq('user_id', user.id);
+
+      if (error) throw error;
+
+      return journalId;
+    },
+    onSuccess: (deletedId) => {
+      const queryKey = ['journals', user?.id, 0];
+      queryClient.setQueryData<JournalEntry[]>(queryKey, (old = []) =>
+        old.filter(item => item.id !== deletedId)
+      );
+    },
+  });
+};
+
+// Hook pour restaurer un journal de la corbeille
+export const useRestoreJournal = () => {
+  const { user } = useAuth();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (journalId: string) => {
+      if (!user?.id) {
+        throw new Error('User not authenticated');
+      }
+
+      const { error } = await supabase
+        .from('journals')
+        .update({ deleted_at: null })
+        .eq('id', journalId)
+        .eq('user_id', user.id);
+
+      if (error) throw error;
+
+      return journalId;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['journals', user?.id] });
+    },
+  });
+};
+
+// Hook pour supprimer définitivement un journal
 export const useDeleteJournal = () => {
   const { user } = useAuth();
   const queryClient = useQueryClient();
@@ -104,16 +161,15 @@ export const useDeleteJournal = () => {
         .from('journals')
         .delete()
         .eq('id', journalId)
-        .eq('user_id', user.id); // RLS security
+        .eq('user_id', user.id);
 
       if (error) throw error;
-      
+
       return journalId;
     },
     onSuccess: (deletedId) => {
-      // Supprimer du cache
       const queryKey = ['journals', user?.id, 0];
-      queryClient.setQueryData<JournalEntry[]>(queryKey, (old = []) => 
+      queryClient.setQueryData<JournalEntry[]>(queryKey, (old = []) =>
         old.filter(item => item.id !== deletedId)
       );
     },
