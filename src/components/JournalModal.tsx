@@ -70,46 +70,7 @@ const JournalModal: React.FC<JournalModalProps> = ({ isOpen, onClose, onSave }) 
         }
       });
 
-      // Sauvegarder aussi dans l'historique local pour compatibilité
-      const localJournal = {
-        id: journalEntry.id,
-        type: 'journal' as const,
-        content: content.trim(),
-        emoji: selectedEmoji,
-        photo_url: photoUrl || undefined,
-        timestamp: journalEntry.created_at,
-        date: new Date(journalEntry.created_at).toLocaleDateString('fr-FR'),
-        user_id: user.id
-      };
-      
-      // Ajouter à l'historique local des journaux
-      const journalHistory = JSON.parse(localStorage.getItem('journal-entries') || '[]');
-      journalHistory.unshift(localJournal);
-      // Garder seulement les 100 derniers pour éviter de surcharger le localStorage
-      const limitedHistory = journalHistory.slice(0, 100);
-      localStorage.setItem('journal-entries', JSON.stringify(limitedHistory));
-      
-      // Mettre à jour le streak de journaux
-      const today = new Date().toDateString();
-      const lastEntry = localStorage.getItem('last-journal-entry');
-      const currentStreak = parseInt(localStorage.getItem('current-streak') || '0');
-      
-      if (lastEntry !== today) {
-        const yesterday = new Date();
-        yesterday.setDate(yesterday.getDate() - 1);
-        
-        if (lastEntry === yesterday.toDateString()) {
-          // Continuité du streak
-          const newStreak = currentStreak + 1;
-          localStorage.setItem('current-streak', newStreak.toString());
-        } else {
-          // Nouveau streak
-          localStorage.setItem('current-streak', '1');
-        }
-        localStorage.setItem('last-journal-entry', today);
-      }
-      
-      console.log('✅ Journal sauvegardé dans Supabase et historique local:', journalEntry.id);
+      console.log('✅ Journal sauvegardé dans Supabase:', journalEntry.id);
       // Créer l'activité pour le partage
       const entry: JournalActivity = {
         id: journalEntry.id,

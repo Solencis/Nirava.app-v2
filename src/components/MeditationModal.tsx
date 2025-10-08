@@ -123,24 +123,7 @@ const MeditationModal: React.FC<MeditationModalProps> = ({ isOpen, onClose, onSa
         }
       });
 
-      // Sauvegarder aussi dans l'historique local pour compatibilité
-      const localMeditation = {
-        id: journalEntry.id,
-        type: 'meditation' as const,
-        content: `Méditation de ${sessionDuration} minutes`,
-        duration: sessionDuration,
-        timestamp: journalEntry.created_at,
-        date: new Date(journalEntry.created_at).toLocaleDateString('fr-FR'),
-        user_id: user.id
-      };
-      
-      // Ajouter à l'historique local des méditations (dans journal-entries)
-      const journalHistory = JSON.parse(localStorage.getItem('journal-entries') || '[]');
-      journalHistory.unshift(localMeditation);
-      const limitedHistory = journalHistory.slice(0, 100);
-      localStorage.setItem('journal-entries', JSON.stringify(limitedHistory));
-      
-      console.log('✅ Méditation sauvegardée dans Supabase et historique local:', journalEntry.id);
+      console.log('✅ Méditation sauvegardée dans Supabase:', journalEntry.id);
       // Créer l'activité pour le partage
       const session: JournalActivity = {
         id: journalEntry.id,

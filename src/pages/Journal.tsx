@@ -9,7 +9,10 @@ import HistoryModal from '../components/HistoryModal';
 import DreamJournalModal from '../components/DreamJournalModal';
 import { useAuth } from '../hooks/useAuth';
 import { useMeditationWeeklyStats } from '../hooks/useMeditation';
+import { useCheckins } from '../hooks/useCheckins';
+import { useJournals } from '../hooks/useJournals';
 import { useAudioStore } from '../stores/audioStore';
+import { supabase } from '../lib/supabase';
 
 interface JournalStats {
   checkins: number;
@@ -21,6 +24,8 @@ interface JournalStats {
 
 const Journal: React.FC = () => {
   const { user, isReady } = useAuth();
+  const { data: checkinsData } = useCheckins();
+  const { data: journalsData } = useJournals();
   const { data: supabaseMeditationMinutes, refetch: refetchMeditationStats } = useMeditationWeeklyStats();
   const { reduceMeditationTime, meditationWeekMinutes } = useAudioStore();
   const [stats, setStats] = useState<JournalStats>({
@@ -111,64 +116,120 @@ const Journal: React.FC = () => {
   const loadStats = async () => {
     try {
       setLoading(true);
-      loadLocalStats();
+      await loadSupabaseStats();
     } catch (error) {
       console.error('Error loading journal stats:', error);
-      loadLocalStats();
     } finally {
       setLoading(false);
     }
   };
 
-  // Fallback pour charger les stats depuis localStorage
-  const loadLocalStats = () => {
+  // Charger les stats depuis Supabase
+  const loadSupabaseStats = async () => {
     try {
-      // Check-ins cette semaine
-      const checkinHistory = JSON.parse(localStorage.getItem('checkin-history') || '[]');
+      if (!user?.id) {
+        console.log('User not authenticated, skipping stats load');
+        return;
+      }
+
       const oneWeekAgo = new Date();
       oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
-      const thisWeekCheckins = checkinHistory.filter((entry: any) => 
-        new Date(entry.timestamp || entry.created_at) > oneWeekAgo
-      ).length;
 
-      // Journaux du soir uniquement - filtrage strict
-      const journalEntries = JSON.parse(localStorage.getItem('journal-entries') || '[]')
-        .filter((entry: any) => {
-          return entry.type === 'journal' && 
-                 entry.content && 
-                 !entry.title && 
-                 !entry.emotions && 
-                 !entry.symbols &&
-                 !entry.duration &&
-                 (!entry.metadata || (!entry.metadata.title && !entry.metadata.emotions && !entry.metadata.symbols));
-        });
-      
-      // Méditation cette semaine (depuis le store audio)
-      const thisWeekMeditation = Math.round(meditationWeekMinutes);
+      // Check-ins cette semaine depuis Supabase
+      const thisWeekCheckins = checkinsData?.filter(entry =>
+        new Date(entry.created_at) > oneWeekAgo
+      ).length || 0;
 
-      // Streak de journaux
-      const currentStreak = parseInt(localStorage.getItem('current-streak') || '0');
+      // Journaux du soir uniquement depuis Supabase
+      const journalEntriesOnly = journalsData?.filter(entry => {
+        return entry.type === 'journal' &&
+               entry.content &&
+               (!entry.metadata ||
+                (!entry.metadata.title &&
+                 !entry.metadata.emotions &&
+                 !entry.metadata.symbols &&
+                 !entry.metadata.duration_minutes));
+      }) || [];
 
-      // Rêves cette semaine
-      const dreamEntries = JSON.parse(localStorage.getItem('dream-entries') || '[]');
-      const thisWeekDreams = dreamEntries.filter((entry: any) => 
-        new Date(entry.timestamp || entry.created_at) > oneWeekAgo
-      ).length;
+      // Méditation cette semaine depuis Supabase
+      const thisWeekMeditation = supabaseMeditationMinutes || Math.round(meditationWeekMinutes);
+
+      // Calculer le streak de journaux
+      const currentStreak = await calculateJournalStreak();
+
+      // Rêves cette semaine depuis Supabase
+      const { data: dreamEntries } = await supabase
+        .from('journals')
+        .select('*')
+        .eq('user_id', user.id)
+        .eq('type', 'dream')
+        .gte('created_at', oneWeekAgo.toISOString());
+
+      const thisWeekDreams = dreamEntries?.length || 0;
 
       setStats({
         checkins: thisWeekCheckins,
-        journals: journalEntries.length,
+        journals: journalEntriesOnly.length,
         meditation: thisWeekMeditation,
         streak: currentStreak,
         dreams: thisWeekDreams
       });
     } catch (error) {
-      console.error('Error loading local stats:', error);
+      console.error('Error loading Supabase stats:', error);
+    }
+  };
+
+  // Calculer le streak de journaux depuis Supabase
+  const calculateJournalStreak = async (): Promise<number> => {
+    try {
+      if (!user?.id) return 0;
+
+      const { data: journals } = await supabase
+        .from('journals')
+        .select('created_at')
+        .eq('user_id', user.id)
+        .eq('type', 'journal')
+        .order('created_at', { ascending: false })
+        .limit(30);
+
+      if (!journals || journals.length === 0) return 0;
+
+      // Vérifier la continuité jour par jour
+      let streak = 0;
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+
+      // Grouper les journaux par date
+      const journalsByDate = new Map<string, boolean>();
+      journals.forEach(journal => {
+        const date = new Date(journal.created_at);
+        date.setHours(0, 0, 0, 0);
+        journalsByDate.set(date.toDateString(), true);
+      });
+
+      // Compter le streak à partir d'aujourd'hui ou hier
+      let currentDate = new Date(today);
+
+      // Si pas de journal aujourd'hui, commencer à partir d'hier
+      if (!journalsByDate.has(currentDate.toDateString())) {
+        currentDate.setDate(currentDate.getDate() - 1);
+      }
+
+      // Compter les jours consécutifs
+      while (journalsByDate.has(currentDate.toDateString())) {
+        streak++;
+        currentDate.setDate(currentDate.getDate() - 1);
+      }
+
+      return streak;
+    } catch (error) {
+      console.error('Error calculating journal streak:', error);
+      return 0;
     }
   };
 
   const refreshStats = () => {
-    loadLocalStats();
+    loadSupabaseStats();
     setStats(prev => ({
       ...prev,
       meditation: Math.round(meditationWeekMinutes)

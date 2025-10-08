@@ -9,9 +9,7 @@ export const getModuleProgress = async (moduleId: string): Promise<number> => {
     return moduleProgress?.progress_percentage || 0;
   } catch (error) {
     console.error('Error getting module progress:', error);
-    // Fallback vers localStorage
-    const progress = localStorage.getItem(`module-${moduleId}-progress`);
-    return progress ? parseInt(progress) : 0;
+    return 0;
   }
 };
 
@@ -22,41 +20,29 @@ export const setModuleProgress = async (moduleId: string, progress: number): Pro
       progress_percentage: progress,
       completed: progress >= 100
     });
-    
-    // Aussi sauvegarder en local pour compatibilité
-    localStorage.setItem(`module-${moduleId}-progress`, progress.toString());
+    console.log('✅ Module progress saved to Supabase:', moduleId, progress);
   } catch (error) {
     console.error('Error setting module progress:', error);
-    // Fallback vers localStorage seulement
-    localStorage.setItem(`module-${moduleId}-progress`, progress.toString());
   }
 };
 
 // Fonction pour récupérer la progression globale
 export const getOverallProgress = async (): Promise<number> => {
   const modules = ['emotions-101', 'breath-techniques', 'shadow-work', 'integration-service'];
-  
+
   try {
     const progressData = await getUserProgress();
     let totalProgress = 0;
-    
+
     modules.forEach(moduleId => {
       const moduleProgress = progressData.find(p => p.module_id === moduleId);
       totalProgress += moduleProgress?.progress_percentage || 0;
     });
-    
+
     return Math.round(totalProgress / modules.length);
   } catch (error) {
     console.error('Error getting overall progress:', error);
-    // Fallback vers localStorage
-    let totalProgress = 0;
-    
-    modules.forEach(moduleId => {
-      const progress = localStorage.getItem(`module-${moduleId}-progress`);
-      totalProgress += progress ? parseInt(progress) : 0;
-    });
-    
-    return Math.round(totalProgress / modules.length);
+    return 0;
   }
 };
 
@@ -67,14 +53,9 @@ export const markLessonComplete = async (moduleId: string, lessonId: string): Pr
       completed: true,
       progress_percentage: 100
     });
+    console.log('✅ Lesson marked complete in Supabase:', moduleId, lessonId);
   } catch (error) {
     console.error('Error marking lesson complete:', error);
-    // Fallback vers localStorage
-    const completedLessons = JSON.parse(localStorage.getItem(`module-${moduleId}-completed-lessons`) || '[]');
-    if (!completedLessons.includes(lessonId)) {
-      completedLessons.push(lessonId);
-      localStorage.setItem(`module-${moduleId}-completed-lessons`, JSON.stringify(completedLessons));
-    }
   }
 };
 
@@ -87,8 +68,7 @@ export const getCompletedLessons = async (moduleId: string): Promise<string[]> =
       .map(p => p.lesson_id!);
   } catch (error) {
     console.error('Error getting completed lessons:', error);
-    // Fallback vers localStorage
-    return JSON.parse(localStorage.getItem(`module-${moduleId}-completed-lessons`) || '[]');
+    return [];
   }
 };
 

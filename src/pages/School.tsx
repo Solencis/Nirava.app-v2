@@ -5,6 +5,8 @@ import AudioPlayer from '../components/AudioPlayer';
 import EmotionWheel from '../components/EmotionWheel';
 import EmotionNeedsMapping from '../components/EmotionNeedsMapping';
 import InteractiveCheckin from '../components/InteractiveCheckin';
+import { getModuleProgress, setModuleProgress, markLessonComplete as saveLessonToSupabase, getCompletedLessons } from '../utils/progress';
+import { useAuth } from '../hooks/useAuth';
 
 interface Module {
   id: string;
@@ -29,6 +31,7 @@ interface Lesson {
 }
 
 const School: React.FC = () => {
+  const { user } = useAuth();
   const [expandedModule, setExpandedModule] = useState<string | null>(null);
   const [progress, setProgress] = useState<Record<string, number>>({});
   const [isVisible, setIsVisible] = useState(false);
@@ -281,21 +284,27 @@ const School: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    // Charger la progression depuis localStorage
-    const savedProgress: Record<string, number> = {};
-    const savedCompleted: Record<string, string[]> = {};
-    
-    modules.forEach(module => {
-      const moduleProgress = localStorage.getItem(`module-${module.id}-progress`);
-      savedProgress[module.id] = moduleProgress ? parseInt(moduleProgress) : 0;
-      
-      const completed = localStorage.getItem(`module-${module.id}-completed-lessons`);
-      savedCompleted[module.id] = completed ? JSON.parse(completed) : [];
-    });
-    
-    setProgress(savedProgress);
-    setCompletedLessons(savedCompleted);
-  }, []);
+    // Charger la progression depuis Supabase
+    const loadProgress = async () => {
+      const savedProgress: Record<string, number> = {};
+      const savedCompleted: Record<string, string[]> = {};
+
+      for (const module of modules) {
+        const moduleProgress = await getModuleProgress(module.id);
+        savedProgress[module.id] = moduleProgress;
+
+        const completed = await getCompletedLessons(module.id);
+        savedCompleted[module.id] = completed;
+      }
+
+      setProgress(savedProgress);
+      setCompletedLessons(savedCompleted);
+    };
+
+    if (user?.id) {
+      loadProgress();
+    }
+  }, [user?.id]);
 
   const hapticFeedback = () => {
     if ('vibrate' in navigator) {
@@ -372,25 +381,25 @@ const School: React.FC = () => {
     setPulseKey(prev => prev + 1);
   };
 
-  const markLessonComplete = (moduleId: string, lessonId: string) => {
+  const markLessonComplete = async (moduleId: string, lessonId: string) => {
     const newCompleted = { ...completedLessons };
     if (!newCompleted[moduleId]) {
       newCompleted[moduleId] = [];
     }
-    
+
     if (!newCompleted[moduleId].includes(lessonId)) {
       newCompleted[moduleId].push(lessonId);
       setCompletedLessons(newCompleted);
-      
-      // Sauvegarder dans localStorage
-      localStorage.setItem(`module-${moduleId}-completed-lessons`, JSON.stringify(newCompleted[moduleId]));
-      
+
+      // Sauvegarder dans Supabase
+      await saveLessonToSupabase(moduleId, lessonId);
+
       // Calculer et sauvegarder la progression
       const module = modules.find(m => m.id === moduleId);
       if (module) {
         const newProgress = Math.round((newCompleted[moduleId].length / module.lessons.length) * 100);
         setProgress(prev => ({ ...prev, [moduleId]: newProgress }));
-        localStorage.setItem(`module-${moduleId}-progress`, newProgress.toString());
+        await setModuleProgress(moduleId, newProgress);
         
         // Célébration si module terminé
         if (newProgress === 100) {
