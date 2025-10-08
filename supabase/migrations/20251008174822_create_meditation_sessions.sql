@@ -10,8 +10,10 @@
     - `id` (uuid, primary key): Identifiant unique de la session
     - `user_id` (uuid, foreign key): Référence à auth.users
     - `duration_minutes` (int4): Durée de la session en minutes
+    - `mode` (text): Mode de méditation ('guided' ou 'free')
     - `completed` (boolean): true si terminée normalement, false si arrêtée manuellement
     - `created_at` (timestamptz): Date et heure de la session
+    - `updated_at` (timestamptz): Date et heure de dernière modification
 
   ## Sécurité
   - Active RLS (Row Level Security)
@@ -29,8 +31,10 @@ CREATE TABLE IF NOT EXISTS meditation_sessions (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id uuid REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL,
   duration_minutes int4 NOT NULL CHECK (duration_minutes > 0),
+  mode text NOT NULL CHECK (mode IN ('guided', 'free')),
   completed boolean DEFAULT true,
-  created_at timestamptz DEFAULT now()
+  created_at timestamptz DEFAULT now(),
+  updated_at timestamptz DEFAULT now()
 );
 
 -- Activer RLS

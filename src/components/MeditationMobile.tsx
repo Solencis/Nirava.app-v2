@@ -3,7 +3,7 @@ import { X, Play, Pause, RotateCcw, Check, Timer as TimerIcon, SkipForward, Minu
 import { useAudioStore } from '../stores/audioStore';
 import AmbianceControl from './AmbianceControl';
 import { useAuth } from '../hooks/useAuth';
-import { supabase } from '../lib/supabase';
+import { useCreateMeditationSession } from '../hooks/useMeditation';
 
 interface MeditationMobileProps {
   onClose: () => void;
@@ -11,6 +11,7 @@ interface MeditationMobileProps {
 
 const MeditationMobile: React.FC<MeditationMobileProps> = ({ onClose }) => {
   const { user } = useAuth();
+  const createMeditationMutation = useCreateMeditationSession();
   const {
     startMeditation,
     pauseMeditation,
@@ -33,6 +34,7 @@ const MeditationMobile: React.FC<MeditationMobileProps> = ({ onClose }) => {
   const [showReduceModal, setShowReduceModal] = useState(false);
   const [minutesToReduce, setMinutesToReduce] = useState('');
   const [savedMinutes, setSavedMinutes] = useState(0);
+  const [isFreeMode, setIsFreeMode] = useState(false);
 
   const meditationState = getMeditationState();
 
@@ -101,16 +103,14 @@ const MeditationMobile: React.FC<MeditationMobileProps> = ({ onClose }) => {
     const finalMinutes = Math.round(meditationState.elapsed / 60);
     setSavedMinutes(finalMinutes);
 
-    // Sauvegarder dans Supabase
+    // Sauvegarder dans Supabase via le hook
     if (user && finalMinutes > 0) {
       try {
-        await supabase
-          .from('meditation_sessions')
-          .insert({
-            user_id: user.id,
-            duration_minutes: finalMinutes,
-            completed: true
-          });
+        await createMeditationMutation.mutateAsync({
+          duration_minutes: finalMinutes,
+          mode: isFreeMode ? 'free' : 'guided',
+          completed: true
+        });
         console.log('✅ Méditation sauvegardée dans Supabase:', finalMinutes, 'minutes');
       } catch (error) {
         console.error('Erreur sauvegarde méditation:', error);
@@ -122,9 +122,10 @@ const MeditationMobile: React.FC<MeditationMobileProps> = ({ onClose }) => {
     if ('vibrate' in navigator) navigator.vibrate([100, 50, 100]);
   };
 
-  const handleStartMeditation = (minutes: number, isFreeMode: boolean = false) => {
+  const handleStartMeditation = (minutes: number, freeMode: boolean = false) => {
     setSelectedDuration(minutes);
-    startMeditation(isFreeMode ? undefined : minutes);
+    setIsFreeMode(freeMode);
+    startMeditation(freeMode ? undefined : minutes);
     playStartGong();
     if ('vibrate' in navigator) navigator.vibrate(50);
   };
@@ -149,16 +150,14 @@ const MeditationMobile: React.FC<MeditationMobileProps> = ({ onClose }) => {
     const finalMinutes = Math.max(1, Math.round(meditationState.elapsed / 60));
     setSavedMinutes(finalMinutes);
 
-    // Sauvegarder dans Supabase
+    // Sauvegarder dans Supabase via le hook
     if (user && finalMinutes > 0) {
       try {
-        await supabase
-          .from('meditation_sessions')
-          .insert({
-            user_id: user.id,
-            duration_minutes: finalMinutes,
-            completed: false
-          });
+        await createMeditationMutation.mutateAsync({
+          duration_minutes: finalMinutes,
+          mode: isFreeMode ? 'free' : 'guided',
+          completed: false
+        });
         console.log('✅ Méditation arrêtée et sauvegardée:', finalMinutes, 'minutes');
       } catch (error) {
         console.error('Erreur sauvegarde méditation:', error);
