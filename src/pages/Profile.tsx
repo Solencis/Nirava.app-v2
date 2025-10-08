@@ -95,12 +95,17 @@ const ProfilePage: React.FC = () => {
   }, [meditationWeekMinutes]);
 
   const loadProfile = async () => {
+    console.log('=== LOAD PROFILE START ===');
+    console.log('User:', user?.id, user?.email);
+
     if (!user) {
+      console.warn('No user found, aborting profile load');
       setLoading(false);
       return;
     }
 
     const createFallbackProfile = () => {
+      console.warn('Creating fallback profile for user:', user.id);
       const fallbackProfile: Profile = {
         id: user.id,
         display_name: user.email?.split('@')[0] || 'Utilisateur',
@@ -123,11 +128,14 @@ const ProfilePage: React.FC = () => {
     };
 
     try {
+      console.log('Fetching profile for user ID:', user.id);
       const { data, error } = await supabase
         .from('profiles')
         .select('*')
         .eq('id', user.id)
         .maybeSingle();
+
+      console.log('Profile query result:', { data, error });
 
       if (error) {
         console.error('Error loading profile:', error);
@@ -136,6 +144,7 @@ const ProfilePage: React.FC = () => {
       }
 
       if (data) {
+        console.log('Profile found:', data.display_name, 'with photo:', !!data.photo_url);
         setProfile(data);
         setEditForm({
           display_name: data.display_name || '',
@@ -145,6 +154,7 @@ const ProfilePage: React.FC = () => {
           level: data.level || 'N1'
         });
       } else {
+        console.warn('No profile found in database for user:', user.id);
         createFallbackProfile();
       }
     } catch (error) {
@@ -152,6 +162,7 @@ const ProfilePage: React.FC = () => {
       createFallbackProfile();
     } finally {
       setLoading(false);
+      console.log('=== LOAD PROFILE END ===');
     }
   };
 
@@ -361,10 +372,15 @@ const ProfilePage: React.FC = () => {
   const handleSignOut = async () => {
     if (confirm('Es-tu sûr(e) de vouloir te déconnecter ?')) {
       try {
+        console.log('=== SIGN OUT START ===');
         await signOut();
         console.log('User signed out from profile page');
       } catch (error) {
         console.error('Error signing out:', error);
+        alert('Erreur lors de la déconnexion. Réinitialisation forcée...');
+        localStorage.clear();
+        sessionStorage.clear();
+        window.location.href = '/auth/login';
       }
     }
   };
@@ -449,6 +465,51 @@ const ProfilePage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-sand">
+      {/* Debug Info - Bouton d'urgence */}
+      <div className="bg-yellow-50 border-b border-yellow-200 p-3">
+        <div className="max-w-md mx-auto">
+          <details className="text-xs">
+            <summary className="cursor-pointer font-medium text-yellow-800 mb-2">
+              Diagnostic (cliquez pour voir les détails)
+            </summary>
+            <div className="space-y-2 mt-2 p-3 bg-white rounded-lg border border-yellow-200">
+              <div>
+                <span className="font-medium">User ID actuel:</span>
+                <div className="font-mono text-[10px] break-all bg-gray-100 p-1 rounded mt-1">
+                  {user?.id || 'Non connecté'}
+                </div>
+              </div>
+              <div>
+                <span className="font-medium">Email:</span>
+                <div className="font-mono text-[10px] break-all bg-gray-100 p-1 rounded mt-1">
+                  {user?.email || 'Non défini'}
+                </div>
+              </div>
+              <div>
+                <span className="font-medium">Profil chargé:</span>
+                <div className="text-[10px] bg-gray-100 p-1 rounded mt-1">
+                  {profile?.display_name} (ID: {profile?.id?.substring(0, 8)}...)
+                </div>
+              </div>
+              <button
+                onClick={async () => {
+                  if (confirm('Cela va vous déconnecter et nettoyer toutes les données locales. Continuer ?')) {
+                    console.log('=== RÉINITIALISATION D\'URGENCE ===');
+                    localStorage.clear();
+                    sessionStorage.clear();
+                    await supabase.auth.signOut();
+                    window.location.href = '/auth/login';
+                  }
+                }}
+                className="w-full px-3 py-2 bg-red-500 text-white text-xs rounded-lg hover:bg-red-600 transition-colors"
+              >
+                Réinitialisation d'urgence (Déconnexion totale)
+              </button>
+            </div>
+          </details>
+        </div>
+      </div>
+
       {/* Header avec photo de profil */}
       <div className="bg-gradient-to-br from-wasabi/10 via-jade/5 to-wasabi/5 p-6 pb-8">
         <div className="text-center">
