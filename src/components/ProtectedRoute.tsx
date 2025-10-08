@@ -42,13 +42,15 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
   }
 
   // Rediriger vers la page d'accueil si non authentifié
-  if (!user) {
-    console.log('User not authenticated, redirecting to home');
+  if (!user || !user.id) {
+    console.log('User not authenticated or invalid, redirecting to home');
     console.log('Protected route accessed:', location.pathname);
+    console.log('User state:', user ? 'exists but incomplete' : 'null');
     return <Navigate to="/" replace />;
   }
 
   // Utilisateur authentifié, afficher le contenu protégé
+  console.log('User authenticated, showing protected content for:', user.email);
   return <>{children}</>;
 };
 

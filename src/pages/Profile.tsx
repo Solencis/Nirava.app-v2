@@ -46,35 +46,9 @@ const ProfilePage: React.FC = () => {
   useEffect(() => {
     if (user) {
       loadProfile();
-
-      const timeout = setTimeout(() => {
-        if (loading && !profile) {
-          console.warn('Profile loading timeout - creating fallback profile');
-          // Créer un profil de secours si le chargement prend trop de temps
-          setProfile({
-            id: user.id,
-            display_name: user.email?.split('@')[0] || 'Utilisateur',
-            bio: '',
-            photo_url: '',
-            share_progress: true,
-            level: 'N1',
-            subscription_status: 'none',
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString()
-          });
-          setEditForm({
-            display_name: user.email?.split('@')[0] || 'Utilisateur',
-            bio: '',
-            photo_url: '',
-            share_progress: true,
-            level: 'N1'
-          });
-          setLoading(false);
-        }
-      }, 5000);
-
-      return () => clearTimeout(timeout);
     } else {
+      console.log('No user in useEffect, clearing profile state');
+      setProfile(null);
       setLoading(false);
     }
   }, [user]);
@@ -96,33 +70,14 @@ const ProfilePage: React.FC = () => {
 
   const loadProfile = async () => {
     if (!user) {
+      console.log('No user found, clearing profile');
+      setProfile(null);
       setLoading(false);
       return;
     }
 
-    const createFallbackProfile = () => {
-      const fallbackProfile: Profile = {
-        id: user.id,
-        display_name: user.email?.split('@')[0] || 'Utilisateur',
-        bio: '',
-        photo_url: '',
-        share_progress: true,
-        level: 'N1',
-        subscription_status: 'none',
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
-      };
-      setProfile(fallbackProfile);
-      setEditForm({
-        display_name: fallbackProfile.display_name,
-        bio: '',
-        photo_url: '',
-        share_progress: true,
-        level: 'N1'
-      });
-    };
-
     try {
+      console.log('Loading profile for user:', user.id);
       const { data, error } = await supabase
         .from('profiles')
         .select('*')
@@ -131,11 +86,13 @@ const ProfilePage: React.FC = () => {
 
       if (error) {
         console.error('Error loading profile:', error);
-        createFallbackProfile();
+        setProfile(null);
+        setLoading(false);
         return;
       }
 
       if (data) {
+        console.log('Profile loaded successfully:', data.display_name);
         setProfile(data);
         setEditForm({
           display_name: data.display_name || '',
@@ -145,11 +102,12 @@ const ProfilePage: React.FC = () => {
           level: data.level || 'N1'
         });
       } else {
-        createFallbackProfile();
+        console.log('No profile found in database');
+        setProfile(null);
       }
     } catch (error) {
       console.error('Error loading profile:', error);
-      createFallbackProfile();
+      setProfile(null);
     } finally {
       setLoading(false);
     }
