@@ -154,25 +154,25 @@ const School: React.FC = () => {
   }, 0) / modules.length;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 pb-24">
+    <div className="min-h-screen bg-gradient-to-br from-sand via-pearl to-sand/50 pb-24">
       <div className="safe-top px-4 pt-6">
-        <div className="mb-6">
-          <h1 className="text-3xl font-bold text-white flex items-center gap-2 mb-2">
+        <div className="mb-6 text-center">
+          <h1 className="text-3xl font-bold text-ink flex items-center justify-center gap-2 mb-2" style={{ fontFamily: "'Shippori Mincho', serif" }}>
             <BookOpen className="w-8 h-8 text-jade" />
             École Nirava
           </h1>
-          <p className="text-slate-400">
+          <p className="text-stone" style={{ fontFamily: "'Shippori Mincho', serif" }}>
             Ton parcours d'intégration émotionnelle
           </p>
         </div>
 
         {user && (
-          <div className="bg-gradient-to-r from-jade/20 to-forest/20 backdrop-blur rounded-2xl p-4 mb-6 border border-jade/30">
+          <div className="bg-white/80 backdrop-blur rounded-2xl p-4 mb-6 shadow-soft border border-jade/20">
             <div className="flex items-center justify-between mb-2">
-              <span className="text-white font-semibold">Progression globale</span>
+              <span className="text-ink font-semibold" style={{ fontFamily: "'Shippori Mincho', serif" }}>Progression globale</span>
               <span className="text-jade font-bold">{Math.round(totalProgress)}%</span>
             </div>
-            <div className="h-3 bg-slate-700 rounded-full overflow-hidden">
+            <div className="h-3 bg-pearl rounded-full overflow-hidden">
               <div
                 className="h-full bg-gradient-to-r from-jade to-forest transition-all duration-500"
                 style={{ width: `${totalProgress}%` }}
@@ -189,7 +189,7 @@ const School: React.FC = () => {
               className={`px-4 py-2 rounded-full flex items-center gap-2 whitespace-nowrap transition-all ${
                 selectedCategory === cat.id
                   ? 'bg-gradient-to-r from-jade to-forest text-white shadow-lg'
-                  : 'bg-slate-800 text-slate-400 hover:bg-slate-700'
+                  : 'bg-white/80 text-stone hover:bg-white border border-stone/10'
               }`}
             >
               {cat.icon}

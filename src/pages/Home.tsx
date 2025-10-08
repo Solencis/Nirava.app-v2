@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { GraduationCap, ArrowRight, Sparkles, Heart, BookOpen, Timer, Flame, Award, Trophy, TrendingUp, ChevronRight, Lock } from 'lucide-react';
+import { GraduationCap, ArrowRight, Sparkles, Heart, BookOpen, Timer, Flame } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 import { useCheckins } from '../hooks/useCheckins';
 import { useJournals } from '../hooks/useJournals';
@@ -108,79 +108,102 @@ const Home: React.FC = () => {
     }
   };
 
-  const featuredContent = {
-    title: 'Programme Découverte',
-    subtitle: 'Nouvelle série',
-    description: 'Alphabétisation émotionnelle N1',
-    locked: false,
-    unlockDate: '',
-    image: 'https://images.pexels.com/photos/3775540/pexels-photo-3775540.jpeg?auto=compress&cs=tinysrgb&w=800'
-  };
-
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 pb-24">
-      <div className="safe-top px-4 pt-6 pb-4">
-        <div className="flex items-center justify-between mb-6">
-          <div>
-            <h1 className="text-2xl font-bold text-white flex items-center gap-2">
-              Nirava
-            </h1>
-            {user && (
-              <p className="text-sm text-slate-400 mt-1">
-                Bonjour, {user.email?.split('@')[0]} 👋
-              </p>
-            )}
-          </div>
+    <div className="min-h-screen bg-gradient-to-br from-sand via-pearl to-sand/50 pb-24 relative overflow-hidden">
+      {/* Particules flottantes d'arrière-plan */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        {Array.from({ length: 6 }).map((_, i) => (
+          <div
+            key={i}
+            className="absolute w-2 h-2 bg-jade/10 rounded-full animate-float"
+            style={{
+              left: `${20 + i * 15}%`,
+              top: `${30 + i * 10}%`,
+              animationDelay: `${i * 2}s`,
+              animationDuration: `${8 + i}s`
+            }}
+          />
+        ))}
+      </div>
+
+      <div className="safe-top px-4 pt-8 pb-4 relative z-10">
+        {/* Logo zen emblématique de Nirava */}
+        <div className="text-center mb-8">
+          <button
+            onClick={() => {
+              if ('vibrate' in navigator) navigator.vibrate(30);
+            }}
+            className="w-28 h-28 mx-auto mb-6 animate-breathe hover:scale-110 transition-transform duration-500 active:scale-95"
+          >
+            <svg viewBox="0 0 112 112" className="w-full h-full drop-shadow-lg">
+              <defs>
+                <filter id="logoGlow">
+                  <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+                  <feMerge>
+                    <feMergeNode in="coloredBlur"/>
+                    <feMergeNode in="SourceGraphic"/>
+                  </feMerge>
+                </filter>
+                <linearGradient id="logoGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stopColor="#059669" />
+                  <stop offset="100%" stopColor="#047857" />
+                </linearGradient>
+              </defs>
+
+              <circle
+                cx="56" cy="56" r="42"
+                fill="none" stroke="url(#logoGradient)" strokeWidth="2.5"
+                opacity="0.7" filter="url(#logoGlow)"
+                className="animate-pulse"
+              />
+              <circle
+                cx="56" cy="56" r="28"
+                fill="none" stroke="#E60026" strokeWidth="2"
+                opacity="0.5"
+                style={{ animationDelay: '1s' }}
+                className="animate-pulse"
+              />
+              <circle
+                cx="56" cy="56" r="6"
+                fill="#1E293B" opacity="0.9"
+                className="animate-pulse"
+                style={{ animationDelay: '2s' }}
+              />
+
+              <g className="animate-spin" style={{ transformOrigin: '56px 56px', animationDuration: '20s' }}>
+                <path d="M56 28 Q46 38 51 48 Q56 43 56 38 Q56 43 61 48 Q66 38 56 28 Z" fill="#E60026" opacity="0.6" />
+                <path d="M84 56 Q74 46 64 51 Q69 56 74 56 Q69 56 64 61 Q74 66 84 56 Z" fill="url(#logoGradient)" opacity="0.6" />
+                <path d="M56 84 Q66 74 61 64 Q56 69 56 74 Q56 69 51 64 Q46 74 56 84 Z" fill="#E60026" opacity="0.6" />
+                <path d="M28 56 Q38 66 48 61 Q43 56 38 56 Q43 56 48 51 Q38 46 28 56 Z" fill="url(#logoGradient)" opacity="0.6" />
+              </g>
+            </svg>
+          </button>
+
+          <h1
+            className="text-5xl font-bold text-ink mb-3 leading-tight tracking-tight"
+            style={{ fontFamily: "'Shippori Mincho', serif" }}
+          >
+            Nirava
+          </h1>
+
           {user && userStreak > 0 && (
-            <div className="flex items-center gap-2 bg-gradient-to-r from-orange-500 to-red-500 text-white px-4 py-2 rounded-full">
+            <div className="inline-flex items-center gap-2 bg-gradient-to-r from-vermilion to-sunset text-white px-4 py-2 rounded-full shadow-lg mb-4">
               <Flame className="w-5 h-5" />
-              <span className="font-bold">{userStreak}</span>
+              <span className="font-bold">{userStreak} jours</span>
             </div>
           )}
+
+          <p
+            className="text-lg text-ink/80 font-light leading-relaxed mb-6"
+            style={{ fontFamily: "'Shippori Mincho', serif" }}
+          >
+            École d'intégration émotionnelle
+          </p>
         </div>
 
         {user ? (
           <>
-            <div className="relative mb-6 rounded-3xl overflow-hidden shadow-2xl">
-              <div className="absolute inset-0 bg-gradient-to-br from-purple-900/90 via-indigo-900/90 to-blue-900/90" />
-              <div
-                className="absolute inset-0 opacity-30"
-                style={{
-                  backgroundImage: `url(${featuredContent.image})`,
-                  backgroundSize: 'cover',
-                  backgroundPosition: 'center'
-                }}
-              />
-              <div className="relative p-6">
-                <div className="flex items-center gap-2 mb-2">
-                  <span className="text-xs font-bold text-purple-300 uppercase tracking-wider">
-                    {featuredContent.subtitle}
-                  </span>
-                </div>
-                <h2 className="text-3xl font-bold text-white mb-2 leading-tight">
-                  {featuredContent.title}
-                </h2>
-                <p className="text-purple-200 mb-4">
-                  {featuredContent.description}
-                </p>
-                {featuredContent.locked ? (
-                  <div className="bg-slate-700/50 text-white px-6 py-3 rounded-xl inline-flex items-center gap-2 backdrop-blur">
-                    <Lock className="w-5 h-5" />
-                    <span className="font-semibold">Se débloque dans 3 jours</span>
-                  </div>
-                ) : (
-                  <Link
-                    to="/school"
-                    className="bg-gradient-to-r from-jade to-forest text-white px-6 py-3 rounded-xl inline-flex items-center gap-2 font-semibold hover:scale-105 active:scale-95 transition-transform shadow-lg"
-                  >
-                    <GraduationCap className="w-5 h-5" />
-                    Commencer
-                  </Link>
-                )}
-              </div>
-            </div>
-
-            <div className="bg-slate-800/50 backdrop-blur rounded-2xl p-4 mb-6">
+            <div className="bg-white/80 backdrop-blur rounded-2xl p-5 mb-6 shadow-soft border border-stone/10">
               <DailyQuests
                 onCheckinClick={() => setShowCheckin(true)}
                 onJournalClick={() => setShowJournal(true)}
@@ -188,80 +211,52 @@ const Home: React.FC = () => {
               />
             </div>
 
-            <div className="mb-6">
-              <h3 className="text-lg font-bold text-white mb-3 flex items-center gap-2">
-                <TrendingUp className="w-5 h-5 text-jade" />
-                Progression cette semaine
+            <div className="bg-white/80 backdrop-blur rounded-2xl p-5 shadow-soft border border-stone/10 mb-6">
+              <h3 className="text-lg font-semibold text-ink mb-3 flex items-center gap-2" style={{ fontFamily: "'Shippori Mincho', serif" }}>
+                <Sparkles className="w-5 h-5 text-jade" />
+                Cette semaine
               </h3>
               <div className="grid grid-cols-3 gap-3">
-                <div className="bg-gradient-to-br from-pink-500 to-rose-600 rounded-2xl p-4 text-white">
-                  <Heart className="w-6 h-6 mb-2 opacity-80" />
-                  <div className="text-2xl font-bold">{weeklyStats.checkins}</div>
-                  <div className="text-xs opacity-80">Check-ins</div>
+                <div className="bg-gradient-to-br from-jade/10 to-forest/10 rounded-xl p-3 border border-jade/20">
+                  <Heart className="w-5 h-5 mb-2 text-jade" />
+                  <div className="text-2xl font-bold text-ink">{weeklyStats.checkins}</div>
+                  <div className="text-xs text-stone">Check-ins</div>
                 </div>
-                <div className="bg-gradient-to-br from-blue-500 to-cyan-600 rounded-2xl p-4 text-white">
-                  <BookOpen className="w-6 h-6 mb-2 opacity-80" />
-                  <div className="text-2xl font-bold">{weeklyStats.journals}</div>
-                  <div className="text-xs opacity-80">Journaux</div>
+                <div className="bg-gradient-to-br from-vermilion/10 to-sunset/10 rounded-xl p-3 border border-vermilion/20">
+                  <BookOpen className="w-5 h-5 mb-2 text-vermilion" />
+                  <div className="text-2xl font-bold text-ink">{weeklyStats.journals}</div>
+                  <div className="text-xs text-stone">Journaux</div>
                 </div>
-                <div className="bg-gradient-to-br from-purple-500 to-violet-600 rounded-2xl p-4 text-white">
-                  <Timer className="w-6 h-6 mb-2 opacity-80" />
-                  <div className="text-2xl font-bold">{weeklyStats.meditation}</div>
-                  <div className="text-xs opacity-80">Minutes</div>
+                <div className="bg-gradient-to-br from-wasabi/10 to-jade/10 rounded-xl p-3 border border-wasabi/20">
+                  <Timer className="w-5 h-5 mb-2 text-wasabi" />
+                  <div className="text-2xl font-bold text-ink">{weeklyStats.meditation}</div>
+                  <div className="text-xs text-stone">Minutes</div>
                 </div>
               </div>
             </div>
 
-            <div className="space-y-3">
-              <Link
-                to="/school"
-                className="bg-white rounded-2xl p-4 flex items-center justify-between hover:shadow-lg transition-shadow"
-              >
-                <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 bg-gradient-to-br from-jade to-forest rounded-xl flex items-center justify-center">
-                    <GraduationCap className="w-6 h-6 text-white" />
-                  </div>
-                  <div>
-                    <div className="font-semibold text-charcoal">École Nirava</div>
-                    <div className="text-sm text-charcoal/60">Cours et modules</div>
-                  </div>
-                </div>
-                <ChevronRight className="w-5 h-5 text-charcoal/40" />
-              </Link>
-
-              <Link
-                to="/community"
-                className="bg-white rounded-2xl p-4 flex items-center justify-between hover:shadow-lg transition-shadow"
-              >
-                <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-violet-600 rounded-xl flex items-center justify-center">
-                    <Award className="w-6 h-6 text-white" />
-                  </div>
-                  <div>
-                    <div className="font-semibold text-charcoal">Communauté</div>
-                    <div className="text-sm text-charcoal/60">Partages et soutien</div>
-                  </div>
-                </div>
-                <ChevronRight className="w-5 h-5 text-charcoal/40" />
-              </Link>
-            </div>
+            <Link
+              to="/school"
+              className="group relative bg-gradient-to-r from-vermilion via-sunset to-vermilion text-white px-8 py-5 rounded-full font-bold text-lg transition-all duration-500 transform hover:scale-105 active:scale-95 shadow-xl hover:shadow-vermilion/40 overflow-hidden flex items-center justify-center mx-auto"
+            >
+              <span className="relative z-10 flex items-center">
+                <GraduationCap size={24} className="mr-3" />
+                Entrer dans l'école
+                <ArrowRight size={20} className="ml-2 group-hover:translate-x-1 transition-transform duration-300" />
+              </span>
+              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent transform -skew-x-12 -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
+            </Link>
           </>
         ) : (
-          <div className="text-center py-12">
-            <h2 className="text-2xl font-bold text-white mb-4">
-              Bienvenue sur Nirava
-            </h2>
-            <p className="text-slate-400 mb-8">
-              Votre école d'intégration émotionnelle
-            </p>
-            <Link
-              to="/auth"
-              className="bg-gradient-to-r from-jade to-forest text-white px-8 py-4 rounded-full font-semibold inline-flex items-center gap-2 hover:scale-105 active:scale-95 transition-transform shadow-lg"
-            >
+          <Link
+            to="/auth"
+            className="group bg-white/90 backdrop-blur-sm text-wasabi px-8 py-4 rounded-full font-semibold transition-all duration-300 hover:bg-white hover:shadow-lg hover:scale-105 active:scale-95 flex items-center justify-center mx-auto border-2 border-wasabi/20"
+          >
+            <span className="flex items-center">
               Se connecter
-              <ArrowRight className="w-5 h-5" />
-            </Link>
-          </div>
+              <ArrowRight size={18} className="ml-2 group-hover:translate-x-1 transition-transform duration-300" />
+            </span>
+          </Link>
         )}
       </div>
 
