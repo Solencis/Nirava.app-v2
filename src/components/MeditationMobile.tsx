@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X, Play, Pause, RotateCcw, Check, Timer as TimerIcon } from 'lucide-react';
+import { X, Play, Pause, RotateCcw, Check, Timer as TimerIcon, SkipForward, Minus } from 'lucide-react';
 import { useAudioStore } from '../stores/audioStore';
 import AmbianceControl from './AmbianceControl';
 
@@ -9,7 +9,13 @@ interface MeditationMobileProps {
 
 const MeditationMobile: React.FC<MeditationMobileProps> = ({ onClose }) => {
   const {
-    addMeditationTime
+    addMeditationTime,
+    reduceMeditationTime,
+    current: currentAmbience,
+    isPlaying: ambienceIsPlaying,
+    pause: pauseAmbience,
+    play: playAmbience,
+    playNext
   } = useAudioStore();
   const [selectedDuration, setSelectedDuration] = useState<number | null>(null);
   const [customMinutes, setCustomMinutes] = useState<string>('');
@@ -17,6 +23,8 @@ const MeditationMobile: React.FC<MeditationMobileProps> = ({ onClose }) => {
   const [isPaused, setIsPaused] = useState(false);
   const [timeLeft, setTimeLeft] = useState(0);
   const [showSuccess, setShowSuccess] = useState(false);
+  const [showReduceModal, setShowReduceModal] = useState(false);
+  const [minutesToReduce, setMinutesToReduce] = useState('');
 
   const durations = [
     { minutes: 3, label: '3 min', desc: 'Pause rapide' },
@@ -80,6 +88,31 @@ const MeditationMobile: React.FC<MeditationMobileProps> = ({ onClose }) => {
     setIsActive(false);
     setShowSuccess(true);
     if ('vibrate' in navigator) navigator.vibrate([100, 50, 100]);
+  };
+
+  const handleReduceMinutes = () => {
+    const minutes = parseInt(minutesToReduce);
+    if (minutes > 0) {
+      reduceMeditationTime(minutes);
+      setShowReduceModal(false);
+      setMinutesToReduce('');
+    }
+  };
+
+  const toggleMusicPlayPause = () => {
+    if (currentAmbience) {
+      if (ambienceIsPlaying) {
+        pauseAmbience();
+      } else {
+        playAmbience(currentAmbience);
+      }
+    }
+  };
+
+  const handleSkipNext = () => {
+    if (currentAmbience) {
+      playNext();
+    }
   };
 
   const formatTime = (seconds: number) => {
@@ -332,6 +365,17 @@ const MeditationMobile: React.FC<MeditationMobileProps> = ({ onClose }) => {
             ))}
           </div>
 
+          {/* Reduce Minutes Button */}
+          <div className="max-w-sm mx-auto mb-6">
+            <button
+              onClick={() => setShowReduceModal(true)}
+              className="w-full px-4 py-3 bg-vermilion/10 text-vermilion border border-vermilion/20 rounded-xl hover:bg-vermilion/20 transition-colors duration-300 flex items-center justify-center text-sm font-medium"
+            >
+              <Minus className="w-4 h-4 mr-2" />
+              Corriger les minutes totales
+            </button>
+          </div>
+
           {/* Tips */}
           <div className="bg-jade/5 rounded-2xl p-4 border border-jade/10 max-w-sm mx-auto">
             <h3 className="text-sm font-semibold text-ink mb-2">💡 Conseils</h3>
@@ -342,6 +386,59 @@ const MeditationMobile: React.FC<MeditationMobileProps> = ({ onClose }) => {
               <li>• Concentre-toi sur ta respiration</li>
             </ul>
           </div>
+
+          {/* Reduce Minutes Modal */}
+          {showReduceModal && (
+            <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+              <div className="bg-white rounded-2xl shadow-2xl w-full max-w-xs mx-2">
+                <div className="p-6">
+                  <h3 className="text-lg font-bold text-ink mb-4" style={{ fontFamily: "'Shippori Mincho', serif" }}>
+                    Corriger les minutes
+                  </h3>
+
+                  <p className="text-stone text-sm mb-4 leading-relaxed">
+                    Combien de minutes veux-tu retirer de ta progression hebdomadaire ?
+                  </p>
+
+                  <div className="mb-6">
+                    <label className="block text-sm font-medium text-ink mb-2">
+                      Minutes à retirer
+                    </label>
+                    <input
+                      type="number"
+                      value={minutesToReduce}
+                      onChange={(e) => setMinutesToReduce(e.target.value)}
+                      placeholder="Ex: 5"
+                      min="1"
+                      max="120"
+                      className="w-full px-4 py-3 bg-stone/5 border border-stone/20 rounded-xl focus:border-vermilion focus:ring-2 focus:ring-vermilion/20 transition-all duration-300"
+                      autoFocus
+                      style={{ fontSize: '16px' }}
+                    />
+                  </div>
+
+                  <div className="flex gap-3">
+                    <button
+                      onClick={() => {
+                        setShowReduceModal(false);
+                        setMinutesToReduce('');
+                      }}
+                      className="flex-1 px-4 py-3 border border-stone/20 text-stone rounded-xl hover:bg-stone/5 transition-colors duration-300"
+                    >
+                      Annuler
+                    </button>
+                    <button
+                      onClick={handleReduceMinutes}
+                      disabled={!minutesToReduce || parseInt(minutesToReduce) <= 0}
+                      className="flex-1 px-4 py-3 bg-vermilion text-white rounded-xl hover:bg-vermilion/90 transition-colors duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      Retirer
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>

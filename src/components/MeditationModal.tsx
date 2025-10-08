@@ -15,17 +15,18 @@ interface MeditationModalProps {
 const MeditationModal: React.FC<MeditationModalProps> = ({ isOpen, onClose, onSave }) => {
   const { user } = useAuth();
   const createJournalMutation = useCreateJournal();
-  const { 
-    current: currentAmbience, 
-    isPlaying: ambienceIsPlaying, 
-    pause: pauseAmbience, 
+  const {
+    current: currentAmbience,
+    isPlaying: ambienceIsPlaying,
+    pause: pauseAmbience,
     play: playAmbience,
     startMeditation,
     pauseMeditation,
     resumeMeditation,
     stopMeditation,
     resetMeditation,
-    getMeditationState
+    getMeditationState,
+    reduceMeditationTime
   } = useAudioStore();
   
   const [duration, setDuration] = useState(5);
@@ -187,14 +188,14 @@ const MeditationModal: React.FC<MeditationModalProps> = ({ isOpen, onClose, onSa
     if (wasAmbiencePlaying.current && currentAmbience && muteAmbience) {
       playAmbience(currentAmbience);
     }
-    
+
     // Sauvegarder la session AVANT d'arrêter (pour avoir les bonnes données)
     const currentState = getMeditationState();
     const sessionDuration = Math.max(1, Math.round(currentState.elapsed / 60));
     console.log('🛑 Arrêt méditation libre - Durée:', sessionDuration, 'minutes');
-    
+
     stopMeditation();
-    
+
     // Créer l'activité après arrêt
     const session: JournalActivity = {
       id: `meditation-${Date.now()}`,
@@ -203,11 +204,9 @@ const MeditationModal: React.FC<MeditationModalProps> = ({ isOpen, onClose, onSa
       duration: sessionDuration,
       created_at: new Date().toISOString()
     };
-    
+
     setSavedActivity(session);
   };
-
-  const { reduceMeditationTime } = useAudioStore();
 
   const handleReduceMinutes = () => {
     const minutes = parseInt(minutesToReduce);
