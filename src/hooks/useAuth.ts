@@ -287,7 +287,7 @@ export const useAuth = () => {
       console.log('User signed out successfully, localStorage cleared');
 
       // Forcer le rechargement de la page pour réinitialiser complètement l'état
-      window.location.href = '/auth/login';
+      window.location.href = '/';
     } catch (error) {
       console.error('Error signing out:', error);
 
@@ -295,7 +295,7 @@ export const useAuth = () => {
       storeSignOut();
       queryClient.clear();
       localStorage.clear();
-      window.location.href = '/auth/login';
+      window.location.href = '/';
     }
   };
 

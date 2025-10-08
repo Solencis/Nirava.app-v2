@@ -7,7 +7,7 @@ interface ProtectedRouteProps {
 }
 
 /**
- * Composant de protection des routes - redirige vers /auth/login si non connecté
+ * Composant de protection des routes - redirige vers / si non connecté
  * Utilisé pour protéger les pages sensibles comme /profile et /community
  * Optimisé pour le déploiement avec gestion d'état robuste
  */
@@ -41,12 +41,11 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
     );
   }
 
-  // Rediriger vers la page de connexion si non authentifié
-  // Sauvegarder la page demandée pour redirection après connexion
+  // Rediriger vers la page d'accueil si non authentifié
   if (!user) {
-    console.log('User not authenticated, redirecting to login');
+    console.log('User not authenticated, redirecting to home');
     console.log('Protected route accessed:', location.pathname);
-    return <Navigate to="/auth/login" replace />;
+    return <Navigate to="/" replace />;
   }
 
   // Utilisateur authentifié, afficher le contenu protégé

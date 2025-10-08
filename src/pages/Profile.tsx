@@ -367,7 +367,7 @@ const ProfilePage: React.FC = () => {
         alert('Erreur lors de la déconnexion. Réinitialisation forcée...');
         localStorage.clear();
         sessionStorage.clear();
-        window.location.href = '/auth/login';
+        window.location.href = '/';
       }
     }
   };
@@ -405,10 +405,10 @@ const ProfilePage: React.FC = () => {
         <div className="text-center">
           <p className="text-stone mb-4">Vous devez être connecté pour accéder à votre profil</p>
           <a
-            href="/auth/login"
+            href="/"
             className="px-6 py-3 bg-wasabi text-white rounded-xl hover:bg-wasabi/90 transition-colors duration-300 inline-block"
           >
-            Se connecter
+            Retour à l'accueil
           </a>
         </div>
       </div>

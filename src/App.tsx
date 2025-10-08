@@ -6,6 +6,7 @@ import ProtectedRoute from './components/ProtectedRoute';
 import GlobalAudioController from './components/GlobalAudioController';
 import MiniPlayer from './components/MiniPlayer';
 import { migrateLocalStorageToSupabase } from './utils/migrateLocalStorage';
+import { supabase } from './lib/supabase';
 import Home from './pages/Home';
 import School from './pages/School';
 import Journal from './pages/Journal';
@@ -16,12 +17,8 @@ import SoundAmbience from './pages/SoundAmbience';
 import Pricing from './pages/Pricing';
 import About from './pages/About';
 import Contact from './pages/Contact';
-import AdminDashboard from './pages/admin/Dashboard';
-import Login from './pages/auth/Login';
-import Register from './pages/auth/Register';
-import ForgotPassword from './pages/auth/ForgotPassword';
-import UpdatePassword from './pages/auth/UpdatePassword';
-import Callback from './pages/auth/Callback';
+
+const APP_VERSION = '1.0.1';
 
 // Component to handle scroll to top on route change
 const ScrollToTop: React.FC = () => {
@@ -35,8 +32,39 @@ const ScrollToTop: React.FC = () => {
 };
 
 function App() {
-  // Nettoyer les anciennes données localStorage au démarrage
+  // Vérifier la version et déconnecter si nécessaire
   useEffect(() => {
+    const checkVersion = async () => {
+      const storedVersion = localStorage.getItem('nirava_app_version');
+
+      if (storedVersion && storedVersion !== APP_VERSION) {
+        console.log(`🔄 Nouvelle version détectée (${storedVersion} → ${APP_VERSION}), déconnexion automatique...`);
+
+        // Déconnexion complète
+        await supabase.auth.signOut();
+
+        // Nettoyage du localStorage
+        const keysToRemove = [];
+        for (let i = 0; i < localStorage.length; i++) {
+          const key = localStorage.key(i);
+          if (key && (key.startsWith('nirava_') || key.includes('supabase') || key === 'user-profile')) {
+            keysToRemove.push(key);
+          }
+        }
+        keysToRemove.forEach(key => localStorage.removeItem(key));
+
+        // Enregistrer la nouvelle version
+        localStorage.setItem('nirava_app_version', APP_VERSION);
+
+        // Rediriger vers la page d'accueil
+        window.location.href = '/';
+      } else if (!storedVersion) {
+        // Première installation
+        localStorage.setItem('nirava_app_version', APP_VERSION);
+      }
+    };
+
+    checkVersion();
     migrateLocalStorageToSupabase();
   }, []);
 
@@ -65,16 +93,6 @@ function App() {
           <Route path="/pricing" element={<Pricing />} />
           <Route path="/about" element={<About />} />
           <Route path="/contact" element={<Contact />} />
-          <Route path="/admin" element={
-            <ProtectedRoute>
-              <AdminDashboard />
-            </ProtectedRoute>
-          } />
-          <Route path="/auth/login" element={<Login />} />
-          <Route path="/auth/register" element={<Register />} />
-          <Route path="/auth/forgot" element={<ForgotPassword />} />
-          <Route path="/auth/update-password" element={<UpdatePassword />} />
-          <Route path="/auth/callback" element={<Callback />} />
         </Routes>
       </MobileLayout>
     </Router>
