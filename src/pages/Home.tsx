@@ -317,12 +317,12 @@ const Home: React.FC = () => {
           </p>
           
           {/* Bouton principal avec effet magnétique */}
-          <div className="space-y-6">
+          <div className="space-y-4">
             <Link
               to="/school"
               onClick={hapticFeedback}
               className="group relative bg-gradient-to-r from-vermilion via-sunset to-vermilion text-white px-10 py-5 rounded-full font-bold text-lg transition-all duration-500 transform hover:scale-110 active:scale-95 shadow-2xl hover:shadow-vermilion/40 overflow-hidden flex items-center justify-center mx-auto max-w-xs bg-size-200 hover:bg-pos-100"
-              style={{ 
+              style={{
                 backgroundSize: '200% 100%',
                 backgroundPosition: '0% 50%'
               }}
@@ -332,10 +332,10 @@ const Home: React.FC = () => {
                 Entrer dans l'école
                 <ArrowRight size={20} className="ml-2 group-hover:translate-x-1 transition-transform duration-300" />
               </span>
-              
+
               {/* Effet de vague au hover */}
               <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent transform -skew-x-12 -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
-              
+
               {/* Particules d'énergie */}
               <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500">
                 {Array.from({ length: 8 }).map((_, i) => (
@@ -351,6 +351,20 @@ const Home: React.FC = () => {
                 ))}
               </div>
             </Link>
+
+            {/* Bouton Connexion si pas connecté */}
+            {!user && (
+              <Link
+                to="/auth"
+                onClick={hapticFeedback}
+                className="group bg-white/90 backdrop-blur-sm text-wasabi px-8 py-4 rounded-full font-semibold transition-all duration-300 hover:bg-white hover:shadow-lg hover:scale-105 active:scale-95 flex items-center justify-center mx-auto max-w-xs border-2 border-wasabi/20"
+              >
+                <span className="flex items-center">
+                  Se connecter
+                  <ArrowRight size={18} className="ml-2 group-hover:translate-x-1 transition-transform duration-300" />
+                </span>
+              </Link>
+            )}
             
             {/* Stats utilisateur gamifiées */}
             <button

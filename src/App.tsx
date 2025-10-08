@@ -18,6 +18,7 @@ import SoundAmbience from './pages/SoundAmbience';
 import Pricing from './pages/Pricing';
 import About from './pages/About';
 import Contact from './pages/Contact';
+import Auth from './pages/Auth';
 
 const APP_VERSION = '1.0.2';
 
@@ -74,6 +75,7 @@ function App() {
       <MobileLayout>
         <Routes>
           <Route path="/" element={<Home />} />
+          <Route path="/auth" element={<Auth />} />
           <Route path="/school" element={<School />} />
           <Route path="/school/module/:slug" element={<ModuleDetail />} />
           <Route path="/journal" element={<Journal />} />
