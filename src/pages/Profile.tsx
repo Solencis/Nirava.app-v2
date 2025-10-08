@@ -45,7 +45,16 @@ const ProfilePage: React.FC = () => {
 
   useEffect(() => {
     if (user) {
-      loadProfile();
+      const loadTimeout = setTimeout(() => {
+        console.warn('⚠️ Profile loading timeout - forcing stop');
+        setLoading(false);
+      }, 5000);
+
+      loadProfile().finally(() => {
+        clearTimeout(loadTimeout);
+      });
+
+      return () => clearTimeout(loadTimeout);
     } else {
       console.log('No user in useEffect, clearing profile state');
       setProfile(null);
@@ -379,7 +388,17 @@ const ProfilePage: React.FC = () => {
       <div className="min-h-screen bg-sand p-4 pb-24 flex items-center justify-center">
         <div className="text-center">
           <div className="w-8 h-8 border-2 border-wasabi border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-stone">Chargement du profil...</p>
+          <p className="text-stone mb-4">Chargement du profil...</p>
+          <button
+            onClick={() => {
+              console.log('🧹 Clearing cache and reloading...');
+              localStorage.clear();
+              window.location.href = '/';
+            }}
+            className="text-sm text-stone hover:text-ink underline"
+          >
+            Problème de chargement ? Nettoyer le cache
+          </button>
         </div>
       </div>
     );
