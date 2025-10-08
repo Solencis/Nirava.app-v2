@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { X, Wind, Play, Pause, RotateCcw } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { X, Wind, Play, Pause, RotateCcw, Plus } from 'lucide-react';
 
 interface BreathingMobileProps {
   onClose: () => void;
@@ -26,25 +26,25 @@ const BreathingMobile: React.FC<BreathingMobileProps> = ({ onClose }) => {
   const [currentCycle, setCurrentCycle] = useState(0);
   const [timeLeft, setTimeLeft] = useState(0);
   const [showComplete, setShowComplete] = useState(false);
+  const [totalCycles, setTotalCycles] = useState(0);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
 
   const exercises: BreathingExercise[] = [
     {
-      id: '4-4-4-4',
+      id: 'coherence',
       name: 'Cohérence cardiaque',
-      description: 'Respiration équilibrée pour calmer le système nerveux',
+      description: 'Respiration équilibrée 5s-5s pour calmer le cœur',
       icon: '💚',
       phases: [
-        { instruction: 'Inspire profondément', duration: 4, color: 'from-jade to-wasabi' },
-        { instruction: 'Retiens', duration: 4, color: 'from-wasabi to-jade' },
-        { instruction: 'Expire lentement', duration: 4, color: 'from-sunset to-vermilion' },
-        { instruction: 'Pause', duration: 4, color: 'from-sand to-pearl' },
+        { instruction: 'Inspire profondément', duration: 5, color: 'from-jade to-wasabi' },
+        { instruction: 'Expire lentement', duration: 5, color: 'from-sunset to-vermilion' },
       ],
-      cycles: 5
+      cycles: 6
     },
     {
       id: '4-7-8',
       name: 'Respiration 4-7-8',
-      description: 'Technique relaxante pour l\'endormissement',
+      description: 'Technique du Dr. Weil pour l\'endormissement',
       icon: '🌙',
       phases: [
         { instruction: 'Inspire par le nez', duration: 4, color: 'from-jade to-wasabi' },
@@ -54,19 +54,33 @@ const BreathingMobile: React.FC<BreathingMobileProps> = ({ onClose }) => {
       cycles: 4
     },
     {
-      id: 'box',
-      name: 'Respiration carrée',
-      description: 'Technique simple pour réduire le stress rapidement',
-      icon: '⬜',
+      id: 'triangle',
+      name: 'Respiration triangulaire',
+      description: 'Cycle simple pour se recentrer rapidement',
+      icon: '🔺',
       phases: [
-        { instruction: 'Inspire', duration: 4, color: 'from-jade to-wasabi' },
+        { instruction: 'Inspire doucement', duration: 4, color: 'from-jade to-wasabi' },
         { instruction: 'Retiens', duration: 4, color: 'from-wasabi to-jade' },
-        { instruction: 'Expire', duration: 4, color: 'from-sunset to-vermilion' },
-        { instruction: 'Retiens à vide', duration: 4, color: 'from-sand to-pearl' },
+        { instruction: 'Expire complètement', duration: 4, color: 'from-sunset to-vermilion' },
       ],
       cycles: 5
     },
   ];
+
+  useEffect(() => {
+    // Créer un contexte audio simple pour le son de cycle
+    if (!audioRef.current) {
+      audioRef.current = new Audio();
+      audioRef.current.volume = 0.3;
+    }
+
+    return () => {
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current = null;
+      }
+    };
+  }, []);
 
   useEffect(() => {
     let interval: NodeJS.Timeout;
@@ -83,7 +97,9 @@ const BreathingMobile: React.FC<BreathingMobileProps> = ({ onClose }) => {
             } else {
               // Move to next cycle
               const nextCycle = currentCycle + 1;
-              if (nextCycle < selectedExercise.cycles) {
+              if (nextCycle < totalCycles) {
+                // Play sound at each cycle completion
+                playCycleSound();
                 setCurrentCycle(nextCycle);
                 setCurrentPhase(0);
                 return selectedExercise.phases[0].duration;
@@ -102,10 +118,39 @@ const BreathingMobile: React.FC<BreathingMobileProps> = ({ onClose }) => {
     }
 
     return () => clearInterval(interval);
-  }, [isActive, isPaused, timeLeft, currentPhase, currentCycle, selectedExercise]);
+  }, [isActive, isPaused, timeLeft, currentPhase, currentCycle, selectedExercise, totalCycles]);
+
+  const playCycleSound = () => {
+    // Son apaisant simple avec Web Audio API
+    if ('AudioContext' in window || 'webkitAudioContext' in window) {
+      const AudioContext = window.AudioContext || (window as any).webkitAudioContext;
+      const audioContext = new AudioContext();
+
+      // Créer un son doux comme un bol tibétain
+      const oscillator = audioContext.createOscillator();
+      const gainNode = audioContext.createGain();
+
+      oscillator.connect(gainNode);
+      gainNode.connect(audioContext.destination);
+
+      oscillator.frequency.value = 432; // Fréquence 432Hz apaisante
+      oscillator.type = 'sine';
+
+      gainNode.gain.setValueAtTime(0, audioContext.currentTime);
+      gainNode.gain.linearRampToValueAtTime(0.15, audioContext.currentTime + 0.1);
+      gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 1.5);
+
+      oscillator.start(audioContext.currentTime);
+      oscillator.stop(audioContext.currentTime + 1.5);
+    } else {
+      // Fallback: vibration
+      if ('vibrate' in navigator) navigator.vibrate(100);
+    }
+  };
 
   const startExercise = (exercise: BreathingExercise) => {
     setSelectedExercise(exercise);
+    setTotalCycles(exercise.cycles);
     setCurrentPhase(0);
     setCurrentCycle(0);
     setTimeLeft(exercise.phases[0].duration);
@@ -128,6 +173,11 @@ const BreathingMobile: React.FC<BreathingMobileProps> = ({ onClose }) => {
       setIsActive(false);
       setIsPaused(false);
     }
+  };
+
+  const addMoreCycles = () => {
+    setTotalCycles(prev => prev + 3);
+    if ('vibrate' in navigator) navigator.vibrate(30);
   };
 
   const getCircleSize = () => {
@@ -155,7 +205,7 @@ const BreathingMobile: React.FC<BreathingMobileProps> = ({ onClose }) => {
             Bien joué !
           </h2>
           <p className="text-stone mb-2">
-            Tu as terminé {selectedExercise?.cycles} cycles de respiration
+            Tu as terminé {totalCycles} cycles de respiration
           </p>
           <p className="text-xs text-stone/60 mb-8">
             Ressens-tu la différence ?
@@ -188,7 +238,7 @@ const BreathingMobile: React.FC<BreathingMobileProps> = ({ onClose }) => {
     const currentPhaseData = selectedExercise!.phases[currentPhase];
     const circleSize = getCircleSize();
     const totalPhases = selectedExercise!.phases.length;
-    const phaseProgress = ((currentCycle * totalPhases + currentPhase) / (selectedExercise!.cycles * totalPhases)) * 100;
+    const phaseProgress = ((currentCycle * totalPhases + currentPhase) / (totalCycles * totalPhases)) * 100;
 
     return (
       <div className="fixed inset-0 bg-gradient-to-br from-sand via-pearl to-sand/50 z-50 animate-slide-up flex flex-col">
@@ -219,7 +269,14 @@ const BreathingMobile: React.FC<BreathingMobileProps> = ({ onClose }) => {
         {/* Progress */}
         <div className="bg-white/80 backdrop-blur-lg px-4 py-3 border-b border-stone/10 shrink-0">
           <div className="flex items-center justify-between text-xs text-stone mb-2">
-            <span>Cycle {currentCycle + 1}/{selectedExercise?.cycles}</span>
+            <span>Cycle {currentCycle + 1}/{totalCycles}</span>
+            <button
+              onClick={addMoreCycles}
+              className="flex items-center gap-1 text-jade font-medium active:scale-95 transition-transform"
+            >
+              <Plus className="w-3 h-3" />
+              Ajouter 3 cycles
+            </button>
             <span>Phase {currentPhase + 1}/{totalPhases}</span>
           </div>
           <div className="w-full bg-stone/20 h-1.5 rounded-full overflow-hidden">
@@ -253,6 +310,11 @@ const BreathingMobile: React.FC<BreathingMobileProps> = ({ onClose }) => {
                 {isPaused ? 'En pause' : ''}
               </div>
             </div>
+          </div>
+
+          {/* Sound indicator */}
+          <div className="text-xs text-stone/60 mb-8 text-center">
+            🔔 Son apaisant à chaque cycle
           </div>
 
           {/* Controls */}
@@ -350,10 +412,11 @@ const BreathingMobile: React.FC<BreathingMobileProps> = ({ onClose }) => {
           <div className="bg-jade/5 rounded-2xl p-4 border border-jade/10 max-w-sm mx-auto">
             <h3 className="text-sm font-semibold text-ink mb-2">🌿 Bienfaits</h3>
             <ul className="text-xs text-stone space-y-1">
-              <li>• Réduit le stress et l'anxiété</li>
-              <li>• Améliore la concentration</li>
-              <li>• Calme le système nerveux</li>
-              <li>• Favorise l'endormissement</li>
+              <li>• Réduit le stress et l'anxiété instantanément</li>
+              <li>• Améliore la concentration et la clarté mentale</li>
+              <li>• Régule le rythme cardiaque</li>
+              <li>• Favorise l'endormissement naturel</li>
+              <li>• Active le système nerveux parasympathique</li>
             </ul>
           </div>
         </div>
