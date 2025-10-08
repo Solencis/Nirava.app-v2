@@ -35,22 +35,22 @@ const School: React.FC = () => {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 relative z-10">
         {/* Header avec calligraphie inspirée */}
-        <div className="text-center mb-12">
+        <div className="text-center mb-8 sm:mb-12">
           <div className="inline-block mb-4">
-            <div className="w-20 h-20 mx-auto mb-4 rounded-full bg-gradient-to-br from-jade to-forest flex items-center justify-center shadow-soft">
-              <Mountain className="w-10 h-10 text-white" />
+            <div className="w-16 h-16 sm:w-20 sm:h-20 mx-auto mb-3 sm:mb-4 rounded-full bg-gradient-to-br from-jade to-forest flex items-center justify-center shadow-soft">
+              <Mountain className="w-8 h-8 sm:w-10 sm:h-10 text-white" />
             </div>
           </div>
-          <h1 className="font-shippori text-5xl font-bold text-ink mb-3">
+          <h1 className="font-shippori text-3xl sm:text-5xl font-bold text-ink mb-2 sm:mb-3 px-4">
             L'École Nirava
           </h1>
-          <p className="text-xl text-stone max-w-2xl mx-auto font-inter">
+          <p className="text-base sm:text-xl text-stone max-w-2xl mx-auto font-inter px-6">
             Le chemin de l'intégration en sept étapes
           </p>
-          <div className="mt-6 flex items-center justify-center gap-2 text-sm text-stone">
-            <div className="w-8 h-px bg-jade"></div>
-            <span className="font-shippori">修行の道</span>
-            <div className="w-8 h-px bg-jade"></div>
+          <div className="mt-4 sm:mt-6 flex items-center justify-center gap-2 text-sm text-stone">
+            <div className="w-6 sm:w-8 h-px bg-jade"></div>
+            <span className="font-shippori text-xs sm:text-sm">修行の道</span>
+            <div className="w-6 sm:w-8 h-px bg-jade"></div>
           </div>
         </div>
 
@@ -78,7 +78,7 @@ const School: React.FC = () => {
         )}
 
         {/* Les 7 niveaux */}
-        <div className="space-y-12">
+        <div className="space-y-6 sm:space-y-12">
           {levelGroups.map((group, index) => (
             <LevelSection
               key={group.level}
@@ -136,38 +136,38 @@ const LevelSection: React.FC<LevelSectionProps> = ({ group, allProgress, isPremi
   const stats = calculateLevelStats(group.level, allProgress);
 
   const levelTitles: Record<string, string> = {
-    'N1': '一 · Fondations',
-    'N2': '二 · Pratiques corporelles',
-    'N3': '三 · Profondeurs psychiques',
-    'N4': '四 · Service et sagesse',
-    'N5': '五 · Énergies subtiles',
-    'N6': '六 · Visions chamaniques',
-    'N7': '七 · Éveil et unité'
+    'N1': '一 · Sécurité & Ancrage',
+    'N2': '二 · Émotions, besoins, limites',
+    'N3': '三 · Régulation & Paix intérieure',
+    'N4': '四 · Relation à l\'autre',
+    'N5': '五 · Exploration symbolique',
+    'N6': '六 · Ikigai & Partage',
+    'N7': '七 · Transmission & Contribution'
   };
 
   const levelEmojis: Record<string, string> = {
-    'N1': '🌱',
-    'N2': '🧘',
-    'N3': '🌙',
-    'N4': '🌸',
-    'N5': '⚡',
-    'N6': '🔮',
-    'N7': '✨'
+    'N1': '🌍',
+    'N2': '💗',
+    'N3': '🕊',
+    'N4': '🤝',
+    'N5': '🌙',
+    'N6': '🔥',
+    'N7': '🌟'
   };
 
   return (
-    <div className={`bg-white/60 backdrop-blur rounded-3xl p-8 shadow-soft border-2 ${
+    <div className={`bg-white/60 backdrop-blur rounded-2xl sm:rounded-3xl p-5 sm:p-8 shadow-soft border-2 ${
       isLocked ? 'border-stone/20' : 'border-jade/20'
     } transition-all hover:shadow-lg`}>
       {/* Header du niveau */}
-      <div className="flex items-start justify-between mb-8">
-        <div className="flex items-center gap-6">
-          <div className={`relative w-20 h-20 rounded-2xl flex items-center justify-center ${
+      <div className="flex flex-col sm:flex-row items-start justify-between mb-6 sm:mb-8 gap-4">
+        <div className="flex items-center gap-4 sm:gap-6 w-full sm:w-auto">
+          <div className={`relative w-16 h-16 sm:w-20 sm:h-20 rounded-xl sm:rounded-2xl flex items-center justify-center flex-shrink-0 ${
             isLocked
               ? 'bg-gradient-to-br from-stone/20 to-stone/30'
               : 'bg-gradient-to-br from-jade to-forest shadow-soft'
           }`}>
-            <span className="text-4xl">{levelEmojis[group.level]}</span>
+            <span className="text-3xl sm:text-4xl">{levelEmojis[group.level]}</span>
             {isLocked && (
               <div className="absolute inset-0 bg-white/40 backdrop-blur-sm rounded-2xl flex items-center justify-center">
                 <Lock className="w-8 h-8 text-stone" />
@@ -175,7 +175,7 @@ const LevelSection: React.FC<LevelSectionProps> = ({ group, allProgress, isPremi
             )}
           </div>
           <div>
-            <h2 className="font-shippori text-3xl font-bold text-ink mb-1 flex items-center gap-3">
+            <h2 className="font-shippori text-xl sm:text-3xl font-bold text-ink mb-1 flex flex-wrap items-center gap-2 sm:gap-3">
               {levelTitles[group.level]}
               {!group.isFree && (
                 <span className="px-3 py-1 text-xs font-semibold rounded-full bg-gradient-to-r from-vermilion to-sunset text-white">
@@ -183,15 +183,15 @@ const LevelSection: React.FC<LevelSectionProps> = ({ group, allProgress, isPremi
                 </span>
               )}
             </h2>
-            <p className="text-stone font-inter">
+            <p className="text-sm sm:text-base text-stone font-inter">
               {group.modules.length} module{group.modules.length > 1 ? 's' : ''}
             </p>
           </div>
         </div>
 
         {isLoggedIn && !isLocked && stats.totalModules > 0 && (
-          <div className="text-right">
-            <div className="text-4xl font-bold bg-gradient-to-r from-jade to-forest bg-clip-text text-transparent">
+          <div className="text-right w-full sm:w-auto">
+            <div className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-jade to-forest bg-clip-text text-transparent">
               {stats.percentage}%
             </div>
             <p className="text-sm text-stone font-inter">
@@ -212,7 +212,7 @@ const LevelSection: React.FC<LevelSectionProps> = ({ group, allProgress, isPremi
       )}
 
       {/* Liste des modules */}
-      <div className="grid md:grid-cols-2 gap-4">
+      <div className="grid gap-3 sm:gap-4 sm:grid-cols-2">
         {group.modules.map((module, moduleIndex) => {
           const progress = allProgress[module.slug];
           const isCompleted = progress?.completed || false;
@@ -222,7 +222,7 @@ const LevelSection: React.FC<LevelSectionProps> = ({ group, allProgress, isPremi
             <Link
               key={module.id}
               to={isLocked ? '/pricing' : `/ecole/module/${module.slug}`}
-              className={`block p-5 rounded-xl border-2 transition-all ${
+              className={`block p-4 sm:p-5 rounded-xl border-2 transition-all ${
                 isLocked
                   ? 'border-stone/10 bg-stone/5 opacity-50 cursor-not-allowed'
                   : 'border-jade/20 hover:border-jade hover:shadow-md bg-white/40 hover:bg-white/80'
@@ -235,7 +235,7 @@ const LevelSection: React.FC<LevelSectionProps> = ({ group, allProgress, isPremi
                       {group.level}.{moduleIndex + 1}
                     </span>
                   </div>
-                  <h3 className="font-shippori font-bold text-ink text-lg leading-snug">
+                  <h3 className="font-shippori font-bold text-ink text-base sm:text-lg leading-snug">
                     {module.title}
                   </h3>
                 </div>

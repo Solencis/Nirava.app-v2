@@ -1,226 +1,210 @@
 [
   {
-    "id": "emotions-101",
+    "id": "hygiene-vie",
     "level": "N1",
-    "title": "Alphabétisation émotionnelle",
-    "duration": "45–60 min",
-    "summary": "Nommer ce que je ressens, estimer l'intensité, identifier un besoin.",
-    "slug": "emotions-101"
+    "title": "Hygiène de vie",
+    "duration": "30 min",
+    "summary": "Sommeil, alimentation, rythme de vie sains.",
+    "slug": "hygiene-vie"
   },
   {
-    "id": "breath-4-techniques",
-    "level": "N2", 
-    "title": "Respiration consciente — 4 techniques",
-    "duration": "60–75 min",
-    "summary": "Cohérence 6:6, Box, 4-7-8, expiration allongée — quand et comment les utiliser.",
-    "slug": "breath-4-techniques"
-  },
-  {
-    "id": "shadow-work-jung",
-    "level": "N3",
-    "title": "Travail de l'Ombre (Jung)",
-    "duration": "60–90 min", 
-    "summary": "Comprendre Persona/Ombre, repérer projections, premiers pas d'intégration.",
-    "slug": "shadow-work-jung"
-  },
-  {
-    "id": "body-awareness",
+    "id": "respiration-ancrage",
     "level": "N1",
-    "title": "Conscience corporelle de base",
-    "duration": "30–45 min",
-    "summary": "Scanner corporel, tensions, signaux du corps.",
-    "slug": "body-awareness"
-  },
-  {
-    "id": "boundaries-basics",
-    "level": "N1", 
-    "title": "Limites saines",
-    "duration": "45 min",
-    "summary": "Reconnaître ses limites, dire non avec bienveillance.",
-    "slug": "boundaries-basics"
-  },
-  {
-    "id": "stress-regulation",
-    "level": "N1",
-    "title": "Régulation du stress",
+    "title": "Bases de respiration & ancrage corporel",
     "duration": "40 min",
-    "summary": "Outils simples pour apaiser le système nerveux.",
-    "slug": "stress-regulation"
+    "summary": "Techniques de respiration et ancrage dans le corps.",
+    "slug": "respiration-ancrage"
   },
   {
-    "id": "yoga-1-basics",
-    "level": "N2",
-    "title": "Yoga 1 : Bases accessibles",
-    "duration": "45–60 min",
-    "summary": "Postures douces, respiration fluide, pratique non-compétitive.",
-    "slug": "yoga-1-basics"
+    "id": "environnement-securisant",
+    "level": "N1",
+    "title": "Environnement soutenant",
+    "duration": "25 min",
+    "summary": "Relations et espace sécurisants.",
+    "slug": "environnement-securisant"
   },
   {
-    "id": "yoga-2-daily",
+    "id": "psychoeducation-emotions",
     "level": "N2",
-    "title": "Yoga 2 : Intégration quotidienne",
-    "duration": "20–30 min",
-    "summary": "Séquences matin/soir, ritualisation, pratique durable.",
-    "slug": "yoga-2-daily"
+    "title": "Psychoéducation sur les émotions",
+    "duration": "45 min",
+    "summary": "Comprendre et nommer ses émotions.",
+    "slug": "psychoeducation-emotions"
   },
   {
-    "id": "energy-hygiene",
+    "id": "besoins-fondamentaux",
     "level": "N2",
-    "title": "Hygiène énergétique",
-    "duration": "30–45 min",
-    "summary": "Ancrage, centrage, protection douce — 3 gestes simples au quotidien.",
-    "slug": "energy-hygiene"
+    "title": "Identification des besoins",
+    "duration": "40 min",
+    "summary": "Reconnaître ses besoins essentiels.",
+    "slug": "besoins-fondamentaux"
   },
   {
-    "id": "somatic-experiencing",
+    "id": "limites-protection",
     "level": "N2",
-    "title": "Expérience somatique",
-    "duration": "75 min",
-    "summary": "Libérer les traumatismes stockés dans le corps.",
-    "slug": "somatic-experiencing"
+    "title": "Limites et protection de soi",
+    "duration": "50 min",
+    "summary": "Apprendre à poser ses limites.",
+    "slug": "limites-protection"
   },
   {
-    "id": "inner-child-work",
-    "level": "N2",
-    "title": "Travail de l'enfant intérieur",
-    "duration": "90 min",
-    "summary": "Guérir les blessures d'enfance avec compassion.",
-    "slug": "inner-child-work"
+    "id": "pleine-conscience-meditation",
+    "level": "N3",
+    "title": "Pleine conscience & méditation",
+    "duration": "45 min",
+    "summary": "Cultiver la présence au moment présent.",
+    "slug": "pleine-conscience-meditation"
   },
   {
-    "id": "energy-circulation",
-    "level": "N2",
-    "title": "Circulation énergétique",
+    "id": "respiration-coherence",
+    "level": "N3",
+    "title": "Respiration consciente & cohérence cardiaque",
+    "duration": "35 min",
+    "summary": "Techniques avancées de respiration.",
+    "slug": "respiration-coherence"
+  },
+  {
+    "id": "autocompassion-cnv",
+    "level": "N3",
+    "title": "Auto-compassion & CNV",
+    "duration": "55 min",
+    "summary": "Communication non violente avec soi.",
+    "slug": "autocompassion-cnv"
+  },
+  {
+    "id": "pratiques-corporelles",
+    "level": "N3",
+    "title": "Exercices corporels",
     "duration": "60 min",
-    "summary": "Débloquer et harmoniser les flux d'énergie.",
-    "slug": "energy-circulation"
+    "summary": "Yoga, relaxation, mouvement conscient.",
+    "slug": "pratiques-corporelles"
   },
   {
-    "id": "circles-rituals",
-    "level": "N3",
-    "title": "Cercles & rituels personnels",
-    "duration": "60–75 min",
-    "summary": "Créer un cadre sacré simple, sécurisant et authentique.",
-    "slug": "circles-rituals"
+    "id": "cnv-communication",
+    "level": "N4",
+    "title": "Communication non violente",
+    "duration": "60 min",
+    "summary": "Communiquer avec authenticité et bienveillance.",
+    "slug": "cnv-communication"
   },
   {
-    "id": "archetypes-exploration",
-    "level": "N3",
-    "title": "Exploration des archétypes",
-    "duration": "90 min",
-    "summary": "Découvrir les figures universelles qui nous habitent.",
-    "slug": "archetypes-exploration"
+    "id": "ecoute-feedback",
+    "level": "N4",
+    "title": "Écoute active & feedback",
+    "duration": "45 min",
+    "summary": "Développer l'écoute profonde.",
+    "slug": "ecoute-feedback"
   },
   {
-    "id": "dreams-symbols",
-    "level": "N3",
-    "title": "Rêves et symbolique",
+    "id": "dynamiques-relationnelles",
+    "level": "N4",
+    "title": "Dynamiques relationnelles",
+    "duration": "70 min",
+    "summary": "Ombre, projection et relations.",
+    "slug": "dynamiques-relationnelles"
+  },
+  {
+    "id": "gestion-conflits",
+    "level": "N4",
+    "title": "Gestion des conflits",
+    "duration": "65 min",
+    "summary": "Transformer les conflits en opportunités.",
+    "slug": "gestion-conflits"
+  },
+  {
+    "id": "jung-archetypes",
+    "level": "N5",
+    "title": "Introduction à Jung",
     "duration": "75 min",
+    "summary": "Archétypes, anima/animus, ombre.",
+    "slug": "jung-archetypes"
+  },
+  {
+    "id": "reves-symboles",
+    "level": "N5",
+    "title": "Travail sur les rêves & symboles",
+    "duration": "60 min",
     "summary": "Décoder les messages de l'inconscient.",
-    "slug": "dreams-symbols"
+    "slug": "reves-symboles"
   },
   {
-    "id": "sacred-masculine-feminine",
-    "level": "N3",
-    "title": "Masculin/Féminin sacré",
-    "duration": "90 min",
-    "summary": "Équilibrer les polarités intérieures.",
-    "slug": "sacred-masculine-feminine"
-  },
-  {
-    "id": "service-integration",
-    "level": "N4",
-    "title": "Intégration et service",
-    "duration": "120 min",
-    "summary": "Mettre ses dons au service du collectif.",
-    "slug": "service-integration"
-  },
-  {
-    "id": "spiritual-mentorship",
-    "level": "N4",
-    "title": "Mentorat spirituel",
-    "duration": "90 min",
-    "summary": "Accompagner d'autres sur le chemin.",
-    "slug": "spiritual-mentorship"
-  },
-  {
-    "id": "wisdom-traditions",
-    "level": "N4",
-    "title": "Traditions de sagesse",
-    "duration": "75 min",
-    "summary": "Puiser dans les enseignements ancestraux.",
-    "slug": "wisdom-traditions"
-  },
-  {
-    "id": "chakra-balancing",
+    "id": "mythes-transformation",
     "level": "N5",
-    "title": "Équilibrage des chakras",
-    "duration": "90 min",
-    "summary": "Harmoniser les centres énergétiques et libérer les blocages.",
-    "slug": "chakra-balancing"
+    "title": "Mythes et récits de transformation",
+    "duration": "50 min",
+    "summary": "Les grands récits initiatiques.",
+    "slug": "mythes-transformation"
   },
   {
-    "id": "kundalini-awakening",
+    "id": "creativite-imaginaire",
     "level": "N5",
-    "title": "Éveil de la Kundalini",
-    "duration": "120 min",
-    "summary": "Éveiller l'énergie vitale avec sagesse et précaution.",
-    "slug": "kundalini-awakening"
+    "title": "Créativité",
+    "duration": "55 min",
+    "summary": "Écriture, art, imaginaire.",
+    "slug": "creativite-imaginaire"
   },
   {
-    "id": "sound-healing",
-    "level": "N5",
-    "title": "Guérison par le son",
-    "duration": "75 min",
-    "summary": "Utiliser vibrations et fréquences pour rééquilibrer le corps.",
-    "slug": "sound-healing"
-  },
-  {
-    "id": "shamanic-journey",
+    "id": "ikigai-methode",
     "level": "N6",
-    "title": "Voyage chamanique",
+    "title": "Méthode Ikigai",
     "duration": "90 min",
-    "summary": "Explorer les mondes intérieurs avec des pratiques ancestrales.",
-    "slug": "shamanic-journey"
+    "summary": "Croiser forces, passions et utilité.",
+    "slug": "ikigai-methode"
   },
   {
-    "id": "plant-medicine",
+    "id": "valeurs-profondes",
     "level": "N6",
-    "title": "Médecine des plantes",
+    "title": "Clarification des valeurs",
     "duration": "60 min",
-    "summary": "Se connecter à l'intelligence végétale et ses enseignements.",
-    "slug": "plant-medicine"
+    "summary": "Identifier ce qui compte vraiment.",
+    "slug": "valeurs-profondes"
   },
   {
-    "id": "divination-intuition",
+    "id": "vision-plan-action",
     "level": "N6",
-    "title": "Divination et intuition",
+    "title": "Vision de vie & plan d'action",
     "duration": "75 min",
-    "summary": "Développer la clairvoyance et l'écoute des signes.",
-    "slug": "divination-intuition"
+    "summary": "Aligner sa vie avec son sens.",
+    "slug": "vision-plan-action"
   },
   {
-    "id": "non-duality",
-    "level": "N7",
-    "title": "Non-dualité",
-    "duration": "120 min",
-    "summary": "Expérimenter l'unité au-delà de la séparation.",
-    "slug": "non-duality"
+    "id": "flow-organisation",
+    "level": "N6",
+    "title": "Organisation quotidienne flow",
+    "duration": "45 min",
+    "summary": "Structurer son quotidien avec fluidité.",
+    "slug": "flow-organisation"
   },
   {
-    "id": "mystical-union",
+    "id": "leadership-conscient",
     "level": "N7",
-    "title": "Union mystique",
+    "title": "Leadership conscient",
+    "duration": "80 min",
+    "summary": "Guider avec authenticité et présence.",
+    "slug": "leadership-conscient"
+  },
+  {
+    "id": "mentorat-partage",
+    "level": "N7",
+    "title": "Mentorat & partage d'expérience",
+    "duration": "70 min",
+    "summary": "Transmettre ce qu'on a intégré.",
+    "slug": "mentorat-partage"
+  },
+  {
+    "id": "impact-social",
+    "level": "N7",
+    "title": "Impact social et/ou écologique",
+    "duration": "60 min",
+    "summary": "Contribuer au collectif.",
+    "slug": "impact-social"
+  },
+  {
+    "id": "projet-transmission",
+    "level": "N7",
+    "title": "Création d'un projet ou transmission",
     "duration": "90 min",
-    "summary": "Se fondre dans la conscience universelle.",
-    "slug": "mystical-union"
-  },
-  {
-    "id": "embodied-awakening",
-    "level": "N7",
-    "title": "Éveil incarné",
-    "duration": "75 min",
-    "summary": "Vivre l'éveil dans le quotidien avec grâce et présence.",
-    "slug": "embodied-awakening"
+    "summary": "Concrétiser son engagement.",
+    "slug": "projet-transmission"
   }
 ]
