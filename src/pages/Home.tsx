@@ -6,6 +6,7 @@ import { useCheckins } from '../hooks/useCheckins';
 import { useJournals } from '../hooks/useJournals';
 import { useMeditationWeeklyStats } from '../hooks/useMeditation';
 import { useWeeklyXP } from '../hooks/useProfile';
+import { useAchievementTracker } from '../hooks/useAchievements';
 import { supabase } from '../lib/supabase';
 import DailyQuests from '../components/DailyQuests';
 import CheckinMobile from '../components/CheckinMobile';
@@ -19,6 +20,7 @@ import XPBar from '../components/XPBar';
 
 const Home: React.FC = () => {
   const { user } = useAuth();
+  const { triggerAchievementCheck } = useAchievementTracker();
   const { data: checkinsData } = useCheckins();
   const { data: journalsData } = useJournals();
   const { data: supabaseMeditationMinutes } = useMeditationWeeklyStats();
@@ -285,8 +287,12 @@ const Home: React.FC = () => {
       <InstallCTA />
       <IOSInstallHint />
 
-      {showCheckin && <CheckinMobile onClose={() => setShowCheckin(false)} onSave={() => {}} />}
-      {showJournal && <JournalMobile onClose={() => setShowJournal(false)} onSave={() => {}} />}
+      {showCheckin && <CheckinMobile onClose={() => setShowCheckin(false)} onSave={async () => {
+        await triggerAchievementCheck();
+      }} />}
+      {showJournal && <JournalMobile onClose={() => setShowJournal(false)} onSave={async () => {
+        await triggerAchievementCheck();
+      }} />}
       {showMeditation && <MeditationMobile onClose={() => setShowMeditation(false)} />}
       {showBreathing && <BreathingMobile onClose={() => setShowBreathing(false)} onComplete={() => setShowBreathing(false)} />}
     </div>

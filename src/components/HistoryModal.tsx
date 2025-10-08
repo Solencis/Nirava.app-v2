@@ -3,6 +3,7 @@ import { X, Heart, Moon, Trash2, RotateCcw, Calendar, AlertTriangle, Cloud, Eye,
 import { useCheckins, useSoftDeleteCheckin, useRestoreCheckin, useDeleteCheckin } from '../hooks/useCheckins';
 import { useJournals, useSoftDeleteJournal, useRestoreJournal, useDeleteJournal } from '../hooks/useJournals';
 import { useAuth } from '../hooks/useAuth';
+import { useAchievementTracker } from '../hooks/useAchievements';
 import { supabase } from '../lib/supabase';
 import { LoadingSkeleton, HistoryLoadingSkeleton } from './LoadingSkeleton';
 
@@ -31,6 +32,7 @@ interface HistoryModalProps {
 
 const HistoryModal: React.FC<HistoryModalProps> = ({ isOpen, onClose, onStatsUpdate }) => {
   const { user } = useAuth();
+  const { triggerAchievementCheck } = useAchievementTracker();
   const { data: checkinsData, isLoading: checkinsLoading } = useCheckins();
   const { data: journalsData, isLoading: journalsLoading } = useJournals();
   const softDeleteCheckinMutation = useSoftDeleteCheckin();
@@ -222,6 +224,7 @@ const HistoryModal: React.FC<HistoryModalProps> = ({ isOpen, onClose, onStatsUpd
       }
 
       await loadDataFromSupabase();
+      await triggerAchievementCheck();
       onStatsUpdate();
     } catch (error) {
       console.error('❌ Error restoring entry:', error);
