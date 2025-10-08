@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Heart, Send, Users, Sparkles, Settings, Trash2, MessageCircle, ChevronDown, ChevronUp, Calendar, Award, X, ZoomIn, User, Crown, Star, Flame, TrendingUp, Eye, Zap, Brain, Timer, Target, Shield } from 'lucide-react';
+import { Heart, Send, Users, Sparkles, Settings, Trash2, MessageCircle, ChevronDown, ChevronUp, Calendar, Award, X, ZoomIn, User, Crown, Star, Flame, TrendingUp, Eye, Zap, Brain, Timer, Target, Shield, BookOpen } from 'lucide-react';
+import { motion } from 'framer-motion';
 import { supabase, Post, Profile } from '../lib/supabase';
 import { useAuth } from '../hooks/useAuth';
 
@@ -644,103 +645,76 @@ const Community: React.FC = () => {
       </div>
 
       <div className={`relative z-10 transition-all duration-1000 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
-        {/* Header héroïque avec stats communautaires */}
-        <div className="bg-gradient-to-br from-wasabi/15 via-jade/10 to-wasabi/5 p-6 pb-8 relative overflow-hidden">
-          {/* Ornements décoratifs animés */}
-          <div className="absolute top-4 right-4 opacity-20">
-            <svg width="80" height="80" viewBox="0 0 80 80" className="text-wasabi animate-spin-slow">
-              <circle cx="40" cy="40" r="35" fill="none" stroke="currentColor" strokeWidth="1" opacity="0.3" />
-              <circle cx="40" cy="40" r="25" fill="none" stroke="currentColor" strokeWidth="1.5" opacity="0.5" />
-              <circle cx="40" cy="40" r="15" fill="none" stroke="currentColor" strokeWidth="2" opacity="0.7" />
-              <circle cx="40" cy="40" r="5" fill="currentColor" opacity="0.9" />
-            </svg>
-          </div>
-          
-          <div className="absolute top-8 left-4 opacity-10">
-            <div className="w-12 h-12 bg-jade/30 rounded-full animate-pulse-slow"></div>
-          </div>
-
+        {/* Header simplifié */}
+        <div className="bg-gradient-to-br from-wasabi/10 via-jade/5 to-wasabi/5 p-6 pb-8 relative overflow-hidden">
           <div className="text-center relative z-10">
-            {/* Logo communautaire interactif */}
-            <button
-              onClick={() => {
-                hapticFeedback('medium');
-                setPulseKey(prev => prev + 1);
-              }}
-              className="w-24 h-24 mx-auto mb-4 relative group"
+            <motion.div
+              initial={{ scale: 0.8, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ duration: 0.5 }}
+              className="w-20 h-20 mx-auto mb-4 relative"
             >
-              <div className="w-full h-full bg-gradient-to-br from-wasabi/20 via-jade/20 to-wasabi/10 rounded-full flex items-center justify-center shadow-2xl animate-breathe-enhanced transition-all duration-500 group-hover:scale-110 group-active:scale-95 border-4 border-white/50">
-                <Users className="w-12 h-12 text-wasabi" />
+              <div className="absolute inset-0 bg-wasabi/10 rounded-full animate-pulse"></div>
+              <div className="absolute inset-2 bg-gradient-to-br from-wasabi/20 to-jade/20 rounded-full flex items-center justify-center">
+                <Users className="w-10 h-10 text-wasabi" />
               </div>
-              
-              {/* Indicateur d'activité en temps réel */}
-              <div className="absolute -top-1 -right-1 w-6 h-6 bg-gradient-to-br from-jade to-forest rounded-full flex items-center justify-center shadow-lg animate-pulse">
+
+              <div className="absolute -top-1 -right-1 w-6 h-6 bg-gradient-to-br from-jade to-forest rounded-full flex items-center justify-center shadow-lg">
                 <span className="text-white text-xs font-bold">{onlineUsers}</span>
               </div>
-              
-              {/* Onde d'énergie communautaire */}
-              <div className="absolute inset-0 rounded-full border-2 border-wasabi/30 animate-ping"></div>
-            </button>
-            
-            <h1 
-              className="text-4xl font-bold text-ink mb-2 leading-tight"
+            </motion.div>
+
+            <h1
+              className="text-3xl font-bold text-ink mb-6 leading-tight"
               style={{ fontFamily: "'Shippori Mincho', serif" }}
             >
               Communauté
             </h1>
-            <p className="text-stone text-sm mb-6 animate-pulse-text">{currentMessage}</p>
-            
-            {/* Stats communautaires en temps réel */}
-            <div className="bg-white/95 backdrop-blur-md rounded-3xl p-6 shadow-2xl border border-stone/10 relative overflow-hidden">
-              {/* Effet de brillance */}
-              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-shimmer-slow"></div>
-              
-              <div className="relative z-10">
-                <div className="flex items-center justify-center mb-4">
-                  <TrendingUp className="w-5 h-5 text-wasabi mr-2 animate-pulse" />
-                  <h2 className="text-lg font-bold text-ink" style={{ fontFamily: "'Shippori Mincho', serif" }}>
-                    Activité en direct
-                  </h2>
-                  <div className="w-2 h-2 bg-jade rounded-full animate-pulse ml-2"></div>
+
+            {/* Stats simplifiées */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.2 }}
+              className="bg-white/95 backdrop-blur-md rounded-3xl p-5 shadow-lg border border-stone/10"
+            >
+              <div className="grid grid-cols-3 gap-4">
+                <div className="text-center">
+                  <div className="w-12 h-12 mx-auto mb-2 relative">
+                    <div className="absolute inset-0 bg-jade/10 rounded-full animate-pulse"></div>
+                    <div className="absolute inset-1 bg-gradient-to-br from-jade/20 to-jade/5 rounded-full flex items-center justify-center">
+                      <Eye className="w-5 h-5 text-jade" />
+                    </div>
+                  </div>
+                  <div className="text-2xl font-bold text-jade mb-1">{onlineUsers}</div>
+                  <div className="text-xs text-stone/70">En ligne</div>
                 </div>
-                
-                <div className="grid grid-cols-3 gap-4">
-                  <div className="text-center group">
-                    <div className="w-12 h-12 bg-gradient-to-br from-jade/20 to-jade/10 rounded-xl flex items-center justify-center mx-auto mb-2 transition-all duration-300 group-hover:scale-110 group-hover:shadow-lg group-hover:shadow-jade/30">
-                      <Eye className="w-6 h-6 text-jade animate-pulse-glow" />
+
+                <div className="text-center">
+                  <div className="w-12 h-12 mx-auto mb-2 relative">
+                    <div className="absolute inset-0 bg-wasabi/10 rounded-full animate-pulse" style={{ animationDelay: '0.3s' }}></div>
+                    <div className="absolute inset-1 bg-gradient-to-br from-wasabi/20 to-wasabi/5 rounded-full flex items-center justify-center">
+                      <MessageCircle className="w-5 h-5 text-wasabi" />
                     </div>
-                    <div className="text-2xl font-bold text-jade mb-1 animate-count-up">{onlineUsers}</div>
-                    <div className="text-xs text-stone font-medium">En ligne</div>
                   </div>
-                  
-                  <div className="text-center group">
-                    <div className="w-12 h-12 bg-gradient-to-br from-wasabi/20 to-wasabi/10 rounded-xl flex items-center justify-center mx-auto mb-2 transition-all duration-300 group-hover:scale-110 group-hover:shadow-lg group-hover:shadow-wasabi/30">
-                      <MessageCircle className="w-6 h-6 text-wasabi animate-bounce-gentle" />
-                    </div>
-                    <div className="text-2xl font-bold text-wasabi mb-1 animate-count-up">{posts.length}</div>
-                    <div className="text-xs text-stone font-medium">Messages</div>
-                  </div>
-                  
-                  <div className="text-center group">
-                    <div className="w-12 h-12 bg-gradient-to-br from-vermilion/20 to-vermilion/10 rounded-xl flex items-center justify-center mx-auto mb-2 transition-all duration-300 group-hover:scale-110 group-hover:shadow-lg group-hover:shadow-vermilion/30">
-                      <Heart className="w-6 h-6 text-vermilion animate-pulse-glow" />
-                    </div>
-                    <div className="text-2xl font-bold text-vermilion mb-1 animate-count-up">
-                      {posts.reduce((sum, post) => sum + (post.likes_count || 0), 0)}
-                    </div>
-                    <div className="text-xs text-stone font-medium">Likes</div>
-                  </div>
+                  <div className="text-2xl font-bold text-wasabi mb-1">{posts.length}</div>
+                  <div className="text-xs text-stone/70">Messages</div>
                 </div>
-                
-                {/* Indicateur de connexion en temps réel */}
-                <div className="mt-4 bg-gradient-to-r from-jade/10 to-wasabi/10 rounded-xl p-3 border border-jade/20">
-                  <div className="flex items-center justify-center">
-                    <div className="w-2 h-2 bg-jade rounded-full animate-pulse mr-2"></div>
-                    <span className="text-jade text-sm font-medium">Connexion sécurisée • Temps réel</span>
+
+                <div className="text-center">
+                  <div className="w-12 h-12 mx-auto mb-2 relative">
+                    <div className="absolute inset-0 bg-vermilion/10 rounded-full animate-pulse" style={{ animationDelay: '0.6s' }}></div>
+                    <div className="absolute inset-1 bg-gradient-to-br from-vermilion/20 to-vermilion/5 rounded-full flex items-center justify-center">
+                      <Heart className="w-5 h-5 text-vermilion" />
+                    </div>
                   </div>
+                  <div className="text-2xl font-bold text-vermilion mb-1">
+                    {posts.reduce((sum, post) => sum + (post.likes_count || 0), 0)}
+                  </div>
+                  <div className="text-xs text-stone/70">Likes</div>
                 </div>
               </div>
-            </div>
+            </motion.div>
           </div>
         </div>
 
@@ -822,32 +796,32 @@ const Community: React.FC = () => {
             </div>
           )}
 
-          {/* Composer avec design premium */}
+          {/* Composer simplifié */}
           {profile && (
-            <div className="bg-white/95 backdrop-blur-md rounded-3xl p-6 shadow-2xl border border-stone/10 mb-6 relative overflow-hidden">
-              {/* Effet de brillance */}
-              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-shimmer-slow"></div>
-              
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.3 }}
+              className="bg-white/95 backdrop-blur-md rounded-3xl p-6 shadow-lg border border-stone/10 mb-6 relative overflow-hidden"
+            >
+
               <div className="relative z-10">
-                <div className="flex items-center justify-between mb-6">
+                <div className="flex items-center justify-between mb-4">
                   <div className="flex items-center">
                     {profile.photo_url ? (
                       <img
                         src={profile.photo_url}
                         alt="Ma photo"
-                        className="w-12 h-12 rounded-full object-cover border-3 border-wasabi/30 mr-4 shadow-lg animate-pulse-glow"
+                        className="w-10 h-10 rounded-full object-cover border-2 border-wasabi/30 mr-3 shadow-md"
                       />
                     ) : (
-                      <div className="w-12 h-12 bg-gradient-to-br from-wasabi to-jade rounded-full flex items-center justify-center mr-4 shadow-lg animate-pulse-glow border-3 border-white/50">
-                        <span className="text-white font-bold">{profile.level}</span>
+                      <div className="w-10 h-10 bg-gradient-to-br from-wasabi to-jade rounded-full flex items-center justify-center mr-3 shadow-md">
+                        <span className="text-white font-bold text-sm">{profile.level}</span>
                       </div>
                     )}
                     <div>
-                      <div className="font-bold text-ink text-base">{profile.display_name}</div>
-                      <div className="flex items-center">
-                        <span className="text-sm text-wasabi font-medium">{profile.level}</span>
-                        <div className="w-2 h-2 bg-jade rounded-full animate-pulse ml-2"></div>
-                      </div>
+                      <div className="font-bold text-ink text-sm">{profile.display_name}</div>
+                      <div className="text-xs text-wasabi font-medium">{profile.level}</div>
                     </div>
                   </div>
                   <button
@@ -855,87 +829,72 @@ const Community: React.FC = () => {
                       setShowSettings(true);
                       hapticFeedback('light');
                     }}
-                    className="w-12 h-12 bg-stone/10 rounded-full flex items-center justify-center text-stone hover:text-wasabi hover:bg-wasabi/10 transition-all duration-300 transform hover:scale-110 active:scale-95"
+                    className="w-10 h-10 bg-stone/10 rounded-full flex items-center justify-center text-stone hover:text-wasabi hover:bg-wasabi/10 transition-all duration-300"
                   >
-                    <Settings size={20} />
+                    <Settings size={18} />
                   </button>
                 </div>
-                
+
                 <textarea
                   value={newPost}
                   onChange={(e) => setNewPost(e.target.value)}
-                  placeholder="Partage tes réflexions, ressentis ou découvertes du jour..."
-                  rows={4}
+                  placeholder="Partage tes réflexions..."
+                  rows={3}
                   maxLength={280}
-                  className="w-full px-6 py-4 bg-gradient-to-br from-stone/5 to-stone/10 border border-stone/20 rounded-2xl focus:border-wasabi focus:ring-2 focus:ring-wasabi/20 transition-all duration-300 resize-none text-base leading-relaxed placeholder:text-stone/60"
+                  className="w-full px-4 py-3 bg-stone/5 border border-stone/20 rounded-2xl focus:border-wasabi focus:ring-2 focus:ring-wasabi/20 transition-all duration-300 resize-none text-base leading-relaxed placeholder:text-stone/60"
                   style={{ fontSize: '16px' }}
                 />
-                
-                <div className="flex items-center justify-between mt-4">
-                  <div className="flex items-center">
-                    <span className="text-sm text-stone mr-3 font-medium">Humeur :</span>
-                    <div className="flex gap-2 overflow-x-auto pb-1">
-                      {emojis.slice(0, 8).map(emoji => (
-                        <button
-                          key={emoji}
-                          onClick={() => {
-                            setSelectedEmoji(selectedEmoji === emoji ? '' : emoji);
-                            hapticFeedback('light');
-                          }}
-                          className={`w-12 h-12 rounded-full text-xl transition-all duration-300 transform hover:scale-110 active:scale-90 flex items-center justify-center ${
-                            selectedEmoji === emoji 
-                              ? 'bg-gradient-to-br from-wasabi/30 to-jade/30 scale-110 shadow-lg shadow-wasabi/30 border-2 border-wasabi/50' 
-                              : 'hover:bg-stone/10 hover:scale-105'
-                          }`}
-                        >
-                          {emoji}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
+
+                <div className="flex items-center gap-2 mt-3 overflow-x-auto pb-1">
+                  {emojis.slice(0, 6).map(emoji => (
+                    <button
+                      key={emoji}
+                      onClick={() => {
+                        setSelectedEmoji(selectedEmoji === emoji ? '' : emoji);
+                        hapticFeedback('light');
+                      }}
+                      className={`w-10 h-10 rounded-full text-lg transition-all duration-300 flex items-center justify-center ${
+                        selectedEmoji === emoji
+                          ? 'bg-gradient-to-br from-wasabi/30 to-jade/30 scale-110'
+                          : 'hover:bg-stone/10'
+                      }`}
+                    >
+                      {emoji}
+                    </button>
+                  ))}
                 </div>
-                
-                <div className="flex items-center justify-between mt-6">
-                  <div className="flex items-center">
-                    <span className={`text-sm font-medium transition-colors duration-300 ${
-                      newPost.length > 250 ? 'text-vermilion' : 
-                      newPost.length > 200 ? 'text-yellow-600' : 'text-stone/60'
-                    }`}>
-                      {newPost.length}/280
-                    </span>
-                    {newPost.length > 250 && (
-                      <div className="ml-2 w-2 h-2 bg-vermilion rounded-full animate-pulse"></div>
-                    )}
-                  </div>
-                  
+
+                <div className="flex items-center justify-between mt-4">
+                  <span className={`text-xs font-medium ${
+                    newPost.length > 250 ? 'text-vermilion' :
+                    newPost.length > 200 ? 'text-yellow-600' : 'text-stone/60'
+                  }`}>
+                    {newPost.length}/280
+                  </span>
+
                   <button
                     onClick={() => {
                       publishPost();
                       hapticFeedback('heavy');
                     }}
                     disabled={!newPost.trim() || submitting}
-                    className="bg-gradient-to-r from-wasabi to-jade text-white px-8 py-4 rounded-2xl text-base font-bold hover:shadow-lg hover:shadow-wasabi/30 transition-all duration-300 flex items-center disabled:opacity-50 disabled:cursor-not-allowed transform hover:scale-105 active:scale-95 relative overflow-hidden group"
+                    className="bg-gradient-to-r from-wasabi to-jade text-white px-6 py-3 rounded-2xl text-sm font-bold hover:shadow-lg transition-all duration-300 flex items-center disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    {/* Effet de vague */}
-                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent transform -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
-                    
-                    <div className="relative z-10 flex items-center">
-                      {submitting ? (
-                        <>
-                          <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
-                          Publication...
-                        </>
-                      ) : (
-                        <>
-                          <Send size={20} className="mr-2" />
-                          Publier
-                        </>
-                      )}
-                    </div>
+                    {submitting ? (
+                      <>
+                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
+                        Envoi...
+                      </>
+                    ) : (
+                      <>
+                        <Send size={16} className="mr-2" />
+                        Publier
+                      </>
+                    )}
                   </button>
                 </div>
               </div>
-            </div>
+            </motion.div>
           )}
 
           {/* Feed avec design premium */}
@@ -976,34 +935,39 @@ const Community: React.FC = () => {
                 </div>
               </div>
             ) : (
-              posts.map(post => (
-                <div key={post.id} className="bg-white/95 backdrop-blur-md rounded-3xl shadow-2xl p-6 border border-stone/10 transition-all duration-300 hover:scale-[1.01] hover:shadow-3xl magnetic-hover relative overflow-hidden group">
-                  {/* Effet de brillance au hover */}
-                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent transform -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
-                  
+              posts.map((post, index) => (
+                <motion.div
+                  key={post.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.4, delay: index * 0.1 }}
+                  className="bg-white/95 backdrop-blur-md rounded-3xl shadow-lg p-5 border border-stone/10 transition-all duration-300 hover:shadow-xl relative overflow-hidden"
+                >
                   <div className="relative z-10">
-                    {/* Header du post avec design premium */}
-                    <div className="flex items-center justify-between mb-4">
+                    {/* Header du post simplifié */}
+                    <div className="flex items-center justify-between mb-3">
                       <div className="flex items-center">
                         <button
                           onClick={() => handleUserClick(post.user_id)}
-                          className="flex items-center hover:bg-wasabi/5 rounded-2xl p-2 -m-2 transition-all duration-300 transform hover:scale-105 active:scale-95 group"
+                          className="flex items-center hover:bg-wasabi/5 rounded-xl p-1 -m-1 transition-all duration-300"
                         >
                           {post.profiles?.photo_url ? (
                             <img
                               src={post.profiles.photo_url}
                               alt={`Photo de ${post.profiles.display_name}`}
-                              className="w-12 h-12 rounded-full object-cover border-3 border-white shadow-lg mr-3 group-hover:shadow-wasabi/30 transition-all duration-300"
+                              className="w-10 h-10 rounded-full object-cover border-2 border-white shadow-md mr-3"
                             />
                           ) : (
-                            getLevelBadge(post.profiles?.level || 'N1')
+                            <div className="w-10 h-10 bg-gradient-to-br from-wasabi to-jade rounded-full flex items-center justify-center mr-3 shadow-md">
+                              <span className="text-white text-xs font-bold">{post.profiles?.level || 'N1'}</span>
+                            </div>
                           )}
-                          <div className="mr-3">
-                            <div className="font-bold text-ink text-base group-hover:text-wasabi transition-colors duration-300">
+                          <div>
+                            <div className="font-bold text-ink text-sm">
                               {post.profiles?.display_name || 'Utilisateur'}
                             </div>
                             <div className="flex items-center">
-                              <span className="text-sm text-wasabi font-medium">{post.profiles?.level || 'N1'}</span>
+                              <span className="text-xs text-wasabi font-medium">{post.profiles?.level || 'N1'}</span>
                               {post.user_id === user?.id && (
                                 <Crown className="w-3 h-3 text-sunset ml-1" />
                               )}
@@ -1021,48 +985,48 @@ const Community: React.FC = () => {
                               handleDeleteClick(post.id);
                               hapticFeedback('medium');
                             }}
-                            className="text-stone/60 hover:text-red-600 transition-all duration-300 p-2 rounded-full hover:bg-red-50 transform hover:scale-110 active:scale-90"
+                            className="text-stone/60 hover:text-red-600 transition-all duration-300 p-1 rounded-full hover:bg-red-50"
                             title="Supprimer mon message"
                           >
-                            <Trash2 size={16} />
+                            <Trash2 size={14} />
                           </button>
                         )}
                       </div>
                     </div>
-                    
-                    {/* Badge source avec design premium */}
+
+                    {/* Badge source simplifié */}
                     {post.source_type && (
-                      <div className="mb-4">
-                        <div className={`inline-flex items-center px-4 py-2 rounded-full border-2 shadow-lg ${
-                          post.source_type === 'checkin' ? 'bg-gradient-to-r from-jade/20 to-forest/20 border-jade/30 text-jade' :
-                          post.source_type === 'journal' ? 'bg-gradient-to-r from-vermilion/20 to-sunset/20 border-vermilion/30 text-vermilion' :
-                          post.source_type === 'meditation' ? 'bg-gradient-to-r from-forest/20 to-jade/20 border-forest/30 text-forest' :
-                          'bg-gradient-to-r from-blue-100 to-blue-50 border-blue-200 text-blue-700'
+                      <div className="mb-3">
+                        <div className={`inline-flex items-center px-3 py-1.5 rounded-full border ${
+                          post.source_type === 'checkin' ? 'bg-jade/10 border-jade/20 text-jade' :
+                          post.source_type === 'journal' ? 'bg-vermilion/10 border-vermilion/20 text-vermilion' :
+                          post.source_type === 'meditation' ? 'bg-forest/10 border-forest/20 text-forest' :
+                          'bg-blue-50 border-blue-200 text-blue-700'
                         }`}>
-                          <span className="text-lg mr-2">
+                          <span className="text-sm mr-1.5">
                             {post.source_type === 'checkin' && '🌱'}
                             {post.source_type === 'journal' && '🌙'}
                             {post.source_type === 'meditation' && '🧘'}
                             {post.source_type === 'dream' && '☁️'}
                           </span>
-                          <span className="text-sm font-bold">
-                            {post.source_type === 'checkin' && 'Check-in émotionnel'}
-                            {post.source_type === 'journal' && 'Journal du soir'}
-                            {post.source_type === 'meditation' && 'Session de méditation'}
-                            {post.source_type === 'dream' && 'Journal de rêves'}
+                          <span className="text-xs font-medium">
+                            {post.source_type === 'checkin' && 'Check-in'}
+                            {post.source_type === 'journal' && 'Journal'}
+                            {post.source_type === 'meditation' && 'Méditation'}
+                            {post.source_type === 'dream' && 'Rêve'}
                           </span>
                         </div>
                       </div>
                     )}
-                    
-                    {/* Contenu avec formatage premium */}
-                    <div className="mb-4">
+
+                    {/* Contenu simplifié */}
+                    <div className="mb-3">
                       <div className="flex items-start">
                         {post.emoji && (
-                          <span className="text-2xl mr-3 mt-1 animate-bounce-gentle">{post.emoji}</span>
+                          <span className="text-xl mr-2 mt-0.5">{post.emoji}</span>
                         )}
                         <div className="flex-1">
-                          <div className="text-ink leading-relaxed text-base whitespace-pre-line">
+                          <div className="text-ink leading-relaxed text-sm whitespace-pre-line">
                             {post.content.split('\n').map((paragraph, index) => (
                               <span key={index} className={paragraph.trim() ? 'block mb-2' : 'block mb-1'}>
                                 {paragraph.includes('**') ? (
@@ -1080,38 +1044,38 @@ const Community: React.FC = () => {
                               </span>
                             ))}
                           </div>
-                          
-                          {/* Métadonnées enrichies */}
+
+                          {/* Métadonnées simplifiées */}
                           {post.metadata && (
-                            <div className="mt-4 p-4 bg-gradient-to-r from-stone/5 to-stone/10 rounded-2xl border border-stone/10">
+                            <div className="mt-3 p-3 bg-stone/5 rounded-xl border border-stone/10">
                               <div className="flex flex-wrap gap-2">
                                 {post.metadata.emotion && (
-                                  <div className="flex items-center bg-gradient-to-r from-jade/20 to-forest/20 px-3 py-2 rounded-full border border-jade/30">
-                                    <Heart size={12} className="text-jade mr-2" />
-                                    <span className="text-jade font-medium text-sm">{post.metadata.emotion}</span>
+                                  <div className="flex items-center bg-jade/10 px-2 py-1 rounded-full">
+                                    <Heart size={10} className="text-jade mr-1" />
+                                    <span className="text-jade font-medium text-xs">{post.metadata.emotion}</span>
                                   </div>
                                 )}
                                 {post.metadata.intensity && (
-                                  <div className={`flex items-center px-3 py-2 rounded-full border ${
-                                    post.metadata.intensity <= 3 ? 'bg-gradient-to-r from-jade/20 to-forest/20 border-jade/30 text-jade' :
-                                    post.metadata.intensity <= 6 ? 'bg-gradient-to-r from-yellow-100 to-yellow-200 border-yellow-300 text-yellow-700' :
-                                    post.metadata.intensity <= 8 ? 'bg-gradient-to-r from-vermilion/20 to-sunset/20 border-vermilion/30 text-vermilion' :
-                                    'bg-gradient-to-r from-red-100 to-red-200 border-red-300 text-red-700'
+                                  <div className={`flex items-center px-2 py-1 rounded-full ${
+                                    post.metadata.intensity <= 3 ? 'bg-jade/10 text-jade' :
+                                    post.metadata.intensity <= 6 ? 'bg-yellow-100 text-yellow-700' :
+                                    post.metadata.intensity <= 8 ? 'bg-vermilion/10 text-vermilion' :
+                                    'bg-red-100 text-red-700'
                                   }`}>
-                                    <Zap size={12} className="mr-2" />
-                                    <span className="font-medium text-sm">{post.metadata.intensity}/10</span>
+                                    <Zap size={10} className="mr-1" />
+                                    <span className="font-medium text-xs">{post.metadata.intensity}/10</span>
                                   </div>
                                 )}
                                 {post.metadata.need && (
-                                  <div className="flex items-center bg-gradient-to-r from-forest/20 to-jade/20 px-3 py-2 rounded-full border border-forest/30">
-                                    <Target size={12} className="text-forest mr-2" />
-                                    <span className="text-forest font-medium text-sm">{post.metadata.need}</span>
+                                  <div className="flex items-center bg-forest/10 px-2 py-1 rounded-full">
+                                    <Target size={10} className="text-forest mr-1" />
+                                    <span className="text-forest font-medium text-xs">{post.metadata.need}</span>
                                   </div>
                                 )}
                                 {post.metadata.duration && (
-                                  <div className="flex items-center bg-gradient-to-r from-sunset/20 to-vermilion/20 px-3 py-2 rounded-full border border-sunset/30">
-                                    <Timer size={12} className="text-sunset mr-2" />
-                                    <span className="text-sunset font-medium text-sm">{post.metadata.duration} min</span>
+                                  <div className="flex items-center bg-sunset/10 px-2 py-1 rounded-full">
+                                    <Timer size={10} className="text-sunset mr-1" />
+                                    <span className="text-sunset font-medium text-xs">{post.metadata.duration} min</span>
                                   </div>
                                 )}
                               </div>
@@ -1119,102 +1083,72 @@ const Community: React.FC = () => {
                           )}
                         </div>
                       </div>
-                      
-                      {/* Image avec zoom premium */}
+
+                      {/* Image avec zoom */}
                       {post.image_url && (
-                        <div className="mt-4">
+                        <div className="mt-3">
                           <button
                             onClick={() => {
                               setShowPhotoModal(post.image_url);
                               hapticFeedback('medium');
                             }}
-                            className="relative group overflow-hidden rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:scale-[1.02]"
+                            className="relative group overflow-hidden rounded-xl shadow-md hover:shadow-lg transition-all duration-300"
                           >
-                            <img 
-                              src={post.image_url} 
-                              alt="Photo partagée" 
-                              className="w-full max-w-[280px] h-40 object-cover transition-transform duration-500 group-hover:scale-110"
+                            <img
+                              src={post.image_url}
+                              alt="Photo partagée"
+                              className="w-full max-w-[240px] h-32 object-cover"
                             />
-                            <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
-                              <div className="bg-white/90 backdrop-blur-sm rounded-full p-3 transform scale-0 group-hover:scale-100 transition-transform duration-300">
-                                <ZoomIn className="w-6 h-6 text-ink" />
+                            <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+                              <div className="bg-white/90 rounded-full p-2">
+                                <ZoomIn className="w-5 h-5 text-ink" />
                               </div>
                             </div>
                           </button>
                         </div>
                       )}
                     </div>
-                    
-                    {/* Actions avec design premium */}
-                    <div className="flex items-center justify-between pt-4 border-t border-stone/10">
-                      <div className="flex items-center gap-2">
-                        <button
-                          onClick={() => {
-                            toggleLike(post.id, post.is_liked_by_user);
-                            hapticFeedback(post.is_liked_by_user ? 'light' : 'heavy');
-                          }}
-                          className={`flex items-center px-4 py-3 rounded-2xl text-base transition-all duration-300 transform hover:scale-105 active:scale-95 relative overflow-hidden group ${
-                            post.is_liked_by_user
-                              ? 'bg-gradient-to-r from-red-50 to-pink-50 text-red-600 shadow-lg shadow-red-200 border-2 border-red-200' 
-                              : 'hover:bg-gradient-to-r hover:from-red-50 hover:to-pink-50 text-stone hover:text-red-600 border-2 border-transparent hover:border-red-200'
+
+                    {/* Actions simplifiées */}
+                    <div className="flex items-center gap-2 pt-3 border-t border-stone/10">
+                      <button
+                        onClick={() => {
+                          toggleLike(post.id, post.is_liked_by_user);
+                          hapticFeedback(post.is_liked_by_user ? 'light' : 'heavy');
+                        }}
+                        className={`flex items-center px-3 py-2 rounded-xl text-sm transition-all duration-300 ${
+                          post.is_liked_by_user
+                            ? 'bg-red-50 text-red-600'
+                            : 'hover:bg-red-50 text-stone hover:text-red-600'
+                        }`}
+                      >
+                        <Heart
+                          size={16}
+                          className={`mr-1.5 ${
+                            post.is_liked_by_user ? 'fill-current' : ''
                           }`}
-                        >
-                          {/* Animation de like */}
-                          {likeAnimations.has(post.id) && (
-                            <div className="absolute inset-0 pointer-events-none">
-                              {Array.from({ length: 6 }).map((_, i) => (
-                                <div
-                                  key={i}
-                                  className="absolute w-1 h-1 bg-red-500 rounded-full animate-ping"
-                                  style={{
-                                    left: `${20 + i * 10}%`,
-                                    top: `${20 + (i % 3) * 20}%`,
-                                    animationDelay: `${i * 0.1}s`
-                                  }}
-                                />
-                              ))}
-                            </div>
-                          )}
-                          
-                          <Heart 
-                            size={20} 
-                            className={`mr-2 transition-all duration-300 ${
-                              post.is_liked_by_user ? 'fill-current animate-pulse-glow' : 'group-hover:scale-110'
-                            }`} 
-                          />
-                          {post.likes_count > 0 && (
-                            <span className="font-bold">{post.likes_count}</span>
-                          )}
-                        </button>
-                        
-                        <button
-                          onClick={() => {
-                            toggleComments(post.id);
-                            hapticFeedback('light');
-                          }}
-                          className="flex items-center px-4 py-3 rounded-2xl text-base hover:bg-gradient-to-r hover:from-wasabi/10 hover:to-jade/10 text-stone hover:text-wasabi transition-all duration-300 transform hover:scale-105 active:scale-95 border-2 border-transparent hover:border-wasabi/20"
-                        >
-                          <MessageCircle size={20} className="mr-2" />
-                          {post.comments_count > 0 && (
-                            <span className="font-bold mr-2">{post.comments_count}</span>
-                          )}
-                          {expandedComments.has(post.id) ? 
-                            <ChevronUp size={16} className="transition-transform duration-300" /> : 
-                            <ChevronDown size={16} className="transition-transform duration-300" />
-                          }
-                        </button>
-                      </div>
-                      
-                      <div className="flex items-center">
-                        {post.user_id === user?.id && (
-                          <div className="bg-gradient-to-r from-sunset/20 to-vermilion/20 px-3 py-1 rounded-full border border-sunset/30">
-                            <span className="text-sunset text-xs font-bold flex items-center">
-                              <Crown size={10} className="mr-1" />
-                              Mon post
-                            </span>
-                          </div>
+                        />
+                        {post.likes_count > 0 && (
+                          <span className="font-medium">{post.likes_count}</span>
                         )}
-                      </div>
+                      </button>
+
+                      <button
+                        onClick={() => {
+                          toggleComments(post.id);
+                          hapticFeedback('light');
+                        }}
+                        className="flex items-center px-3 py-2 rounded-xl text-sm hover:bg-wasabi/10 text-stone hover:text-wasabi transition-all duration-300"
+                      >
+                        <MessageCircle size={16} className="mr-1.5" />
+                        {post.comments_count > 0 && (
+                          <span className="font-medium mr-1">{post.comments_count}</span>
+                        )}
+                        {expandedComments.has(post.id) ?
+                          <ChevronUp size={14} /> :
+                          <ChevronDown size={14} />
+                        }
+                      </button>
                     </div>
                     
                     {/* Section commentaires avec design premium */}
@@ -1329,31 +1263,11 @@ const Community: React.FC = () => {
                       </div>
                     )}
                   </div>
-                </div>
+                </motion.div>
               ))
             )}
           </div>
 
-          {/* Message de confidentialité avec design premium */}
-          <div className="mt-8 bg-gradient-to-r from-wasabi/10 via-jade/10 to-wasabi/10 rounded-3xl p-6 border border-wasabi/20 relative overflow-hidden">
-            <div className="absolute inset-0 bg-gradient-to-r from-wasabi/5 to-jade/5 animate-pulse-slow"></div>
-            
-            <div className="relative z-10 flex items-center justify-center">
-              <div className="w-12 h-12 bg-gradient-to-br from-wasabi to-jade rounded-full flex items-center justify-center mr-4 animate-pulse-glow shadow-lg">
-                <Shield className="w-6 h-6 text-white" />
-              </div>
-              <div className="text-center">
-                <p className="text-wasabi text-base font-bold mb-1">
-                  🌐 Communauté sécurisée
-                </p>
-                <p className="text-wasabi/80 text-sm leading-relaxed">
-                  Messages partagés en temps réel • Connexion chiffrée
-                  <br />
-                  <span className="text-xs">🔒 Respect et bienveillance • {onlineUsers} membres connectés</span>
-                </p>
-              </div>
-            </div>
-          </div>
         </div>
       </div>
 
