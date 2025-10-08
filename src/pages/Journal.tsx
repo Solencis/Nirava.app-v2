@@ -392,59 +392,119 @@ const Journal: React.FC = () => {
                   <p className="text-xs text-stone/60">Chaque geste compte</p>
                 </div>
                 
-                {/* Grid stats avec animations */}
-                <div className="grid grid-cols-2 gap-4 mb-6">
-                  <div className="text-center group">
-                    <div className="w-16 h-16 bg-gradient-to-br from-jade/20 to-jade/10 rounded-2xl flex items-center justify-center mx-auto mb-3 transition-all duration-300 group-hover:scale-110 group-hover:shadow-lg group-hover:shadow-jade/30">
-                      <Heart className="w-8 h-8 text-jade animate-pulse-glow" />
+                {/* Grid stats avec animations fluides */}
+                <div className="grid grid-cols-2 gap-5 mb-6">
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.5, delay: 0.1 }}
+                    className="text-center"
+                  >
+                    <div className="relative mb-3">
+                      <div className="w-20 h-20 mx-auto relative">
+                        <div className="absolute inset-0 bg-gradient-to-br from-jade/10 to-jade/5 rounded-full animate-pulse"></div>
+                        <div className="absolute inset-2 bg-gradient-to-br from-jade/20 to-jade/10 rounded-full flex items-center justify-center">
+                          <Heart className="w-9 h-9 text-jade" strokeWidth={1.5} />
+                        </div>
+                      </div>
                     </div>
-                    <div className="text-3xl font-bold text-jade mb-1 animate-count-up">{stats.checkins}</div>
-                    <div className="text-xs text-stone font-medium">Check-ins émotionnels</div>
+                    <div className="text-4xl font-bold text-jade mb-1">{stats.checkins}</div>
+                    <div className="text-xs text-stone/70 font-medium">Check-ins émotionnels</div>
                     {stats.checkins > 0 && (
-                      <div className="mt-2 w-full bg-jade/20 h-1.5 rounded-full overflow-hidden">
-                        <div className="bg-gradient-to-r from-jade to-forest h-1.5 rounded-full progress-bar progress-glow animate-fill-bar" style={{ width: `${Math.min(100, (stats.checkins / 7) * 100)}%` }}></div>
+                      <div className="mt-3 w-full bg-jade/10 h-1 rounded-full overflow-hidden">
+                        <motion.div
+                          initial={{ width: 0 }}
+                          animate={{ width: `${Math.min(100, (stats.checkins / 7) * 100)}%` }}
+                          transition={{ duration: 1, delay: 0.3, ease: "easeOut" }}
+                          className="bg-gradient-to-r from-jade to-forest h-1 rounded-full"
+                        />
                       </div>
                     )}
-                  </div>
-                  
-                  <div className="text-center group">
-                    <div className="w-16 h-16 bg-gradient-to-br from-blue-100 to-blue-50 rounded-2xl flex items-center justify-center mx-auto mb-3 transition-all duration-300 group-hover:scale-110 group-hover:shadow-lg group-hover:shadow-blue-300">
-                      <Cloud className="w-8 h-8 text-blue-600 animate-float-gentle" />
+                  </motion.div>
+
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.5, delay: 0.2 }}
+                    className="text-center"
+                  >
+                    <div className="relative mb-3">
+                      <div className="w-20 h-20 mx-auto relative">
+                        <div className="absolute inset-0 bg-gradient-to-br from-blue-100/50 to-blue-50/50 rounded-full animate-pulse" style={{ animationDelay: '0.3s' }}></div>
+                        <div className="absolute inset-2 bg-gradient-to-br from-blue-100 to-blue-50 rounded-full flex items-center justify-center">
+                          <Cloud className="w-9 h-9 text-blue-600" strokeWidth={1.5} />
+                        </div>
+                      </div>
                     </div>
-                    <div className="text-3xl font-bold text-blue-600 mb-1 animate-count-up">{stats.dreams}</div>
-                    <div className="text-xs text-stone font-medium">Rêves capturés</div>
+                    <div className="text-4xl font-bold text-blue-600 mb-1">{stats.dreams}</div>
+                    <div className="text-xs text-stone/70 font-medium">Rêves capturés</div>
                     {stats.dreams > 0 && (
-                      <div className="mt-2 w-full bg-blue-200 h-1.5 rounded-full overflow-hidden">
-                        <div className="bg-gradient-to-r from-blue-500 to-blue-700 h-1.5 rounded-full progress-bar animate-fill-bar" style={{ width: `${Math.min(100, (stats.dreams / 7) * 100)}%` }}></div>
+                      <div className="mt-3 w-full bg-blue-100/50 h-1 rounded-full overflow-hidden">
+                        <motion.div
+                          initial={{ width: 0 }}
+                          animate={{ width: `${Math.min(100, (stats.dreams / 7) * 100)}%` }}
+                          transition={{ duration: 1, delay: 0.4, ease: "easeOut" }}
+                          className="bg-gradient-to-r from-blue-500 to-blue-700 h-1 rounded-full"
+                        />
                       </div>
                     )}
-                  </div>
-                  
-                  <div className="text-center group">
-                    <div className="w-16 h-16 bg-gradient-to-br from-vermilion/20 to-vermilion/10 rounded-2xl flex items-center justify-center mx-auto mb-3 transition-all duration-300 group-hover:scale-110 group-hover:shadow-lg group-hover:shadow-vermilion/30">
-                      <Moon className="w-8 h-8 text-vermilion animate-glow-pulse" />
+                  </motion.div>
+
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.5, delay: 0.3 }}
+                    className="text-center"
+                  >
+                    <div className="relative mb-3">
+                      <div className="w-20 h-20 mx-auto relative">
+                        <div className="absolute inset-0 bg-gradient-to-br from-vermilion/10 to-vermilion/5 rounded-full animate-pulse" style={{ animationDelay: '0.6s' }}></div>
+                        <div className="absolute inset-2 bg-gradient-to-br from-vermilion/20 to-vermilion/10 rounded-full flex items-center justify-center">
+                          <Moon className="w-9 h-9 text-vermilion" strokeWidth={1.5} />
+                        </div>
+                      </div>
                     </div>
-                    <div className="text-3xl font-bold text-vermilion mb-1 animate-count-up">{stats.journals}</div>
-                    <div className="text-xs text-stone font-medium">Journaux écrits</div>
+                    <div className="text-4xl font-bold text-vermilion mb-1">{stats.journals}</div>
+                    <div className="text-xs text-stone/70 font-medium">Journaux écrits</div>
                     {stats.journals > 0 && (
-                      <div className="mt-2 w-full bg-vermilion/20 h-1.5 rounded-full overflow-hidden">
-                        <div className="bg-gradient-to-r from-vermilion to-sunset h-1.5 rounded-full progress-bar progress-glow animate-fill-bar" style={{ width: `${Math.min(100, (stats.journals / 10) * 100)}%` }}></div>
+                      <div className="mt-3 w-full bg-vermilion/10 h-1 rounded-full overflow-hidden">
+                        <motion.div
+                          initial={{ width: 0 }}
+                          animate={{ width: `${Math.min(100, (stats.journals / 10) * 100)}%` }}
+                          transition={{ duration: 1, delay: 0.5, ease: "easeOut" }}
+                          className="bg-gradient-to-r from-vermilion to-sunset h-1 rounded-full"
+                        />
                       </div>
                     )}
-                  </div>
-                  
-                  <div className="text-center group">
-                    <div className="w-16 h-16 bg-gradient-to-br from-forest/20 to-forest/10 rounded-2xl flex items-center justify-center mx-auto mb-3 transition-all duration-300 group-hover:scale-110 group-hover:shadow-lg group-hover:shadow-forest/30">
-                      <Timer className="w-8 h-8 text-forest animate-tick" />
+                  </motion.div>
+
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.5, delay: 0.4 }}
+                    className="text-center"
+                  >
+                    <div className="relative mb-3">
+                      <div className="w-20 h-20 mx-auto relative">
+                        <div className="absolute inset-0 bg-gradient-to-br from-forest/10 to-forest/5 rounded-full animate-pulse" style={{ animationDelay: '0.9s' }}></div>
+                        <div className="absolute inset-2 bg-gradient-to-br from-forest/20 to-forest/10 rounded-full flex items-center justify-center">
+                          <Timer className="w-9 h-9 text-forest" strokeWidth={1.5} />
+                        </div>
+                      </div>
                     </div>
-                    <div className="text-3xl font-bold text-forest mb-1 animate-count-up">{stats.meditation}</div>
-                    <div className="text-xs text-stone font-medium">Min méditation</div>
+                    <div className="text-4xl font-bold text-forest mb-1">{stats.meditation}</div>
+                    <div className="text-xs text-stone/70 font-medium">Min méditation</div>
                     {stats.meditation > 0 && (
-                      <div className="mt-2 w-full bg-forest/20 h-1.5 rounded-full overflow-hidden">
-                        <div className="bg-gradient-to-r from-forest to-jade h-1.5 rounded-full progress-bar animate-fill-bar" style={{ width: `${Math.min(100, (stats.meditation / 120) * 100)}%` }}></div>
+                      <div className="mt-3 w-full bg-forest/10 h-1 rounded-full overflow-hidden">
+                        <motion.div
+                          initial={{ width: 0 }}
+                          animate={{ width: `${Math.min(100, (stats.meditation / 120) * 100)}%` }}
+                          transition={{ duration: 1, delay: 0.6, ease: "easeOut" }}
+                          className="bg-gradient-to-r from-forest to-jade h-1 rounded-full"
+                        />
                       </div>
                     )}
-                  </div>
+                  </motion.div>
                 </div>
                 
                 {/* Streak en vedette avec animation spéciale */}
@@ -583,84 +643,83 @@ const Journal: React.FC = () => {
             </button>
 
             {/* Méditation chronométrée */}
-            <button
+            <motion.button
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.4, delay: 0.8 }}
+              whileHover={{ scale: 1.03, y: -4 }}
+              whileTap={{ scale: 0.98 }}
               onClick={() => handleActionClick('meditation', () => setShowMeditation(true))}
-              className="group bg-white/95 backdrop-blur-md rounded-3xl p-6 shadow-2xl border border-stone/10 text-center transition-all duration-300 hover:scale-[1.02] hover:shadow-3xl hover:bg-forest/5 min-h-[160px] flex flex-col justify-center btn-addictive magnetic-hover relative overflow-hidden"
+              className="bg-gradient-to-br from-white to-forest/5 backdrop-blur-md rounded-3xl p-6 shadow-lg border border-forest/10 text-center transition-all duration-300 min-h-[170px] flex flex-col justify-center relative overflow-hidden"
             >
-              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-forest/10 to-transparent transform -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
-              
               <div className="relative z-10">
-                <div className="w-14 h-14 mx-auto mb-4 bg-gradient-to-br from-forest/20 to-forest/10 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-all duration-300 shadow-lg group-hover:shadow-forest/30">
-                  <Timer size={28} strokeWidth={1.5} className="text-forest animate-tick" />
+                <div className="w-16 h-16 mx-auto mb-4 relative">
+                  <div className="absolute inset-0 bg-forest/10 rounded-full animate-pulse" style={{ animationDelay: '0.9s' }}></div>
+                  <div className="absolute inset-1 bg-gradient-to-br from-forest/20 to-forest/5 rounded-full flex items-center justify-center">
+                    <Timer size={28} strokeWidth={1.5} className="text-forest" />
+                  </div>
                 </div>
                 <h3 className="font-bold text-ink mb-2 text-base" style={{ fontFamily: "'Shippori Mincho', serif" }}>
-                  Méditation chronometée
+                  Méditation
                 </h3>
-                <p className="text-xs text-stone/80 mb-3 leading-relaxed">Un espace de silence pour observer ce qui est, sans jugement</p>
-                <div className="text-sm text-forest font-bold bg-forest/10 px-3 py-1 rounded-full">
-                  {stats.meditation} min cette semaine
-                </div>
-                {stats.meditation > 0 && (
-                  <div className="mt-3 w-full bg-forest/20 h-2 rounded-full overflow-hidden">
-                    <div className="bg-gradient-to-r from-forest to-jade h-2 rounded-full progress-bar animate-fill-bar" style={{ width: `${Math.min(100, (stats.meditation / 120) * 100)}%` }}></div>
-                  </div>
-                )}
-                
-                {/* Option pour corriger les minutes */}
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setShowReduceModal(true);
-                  }}
-                  className="mt-3 text-xs text-stone/60 hover:text-vermilion transition-colors duration-300 underline"
-                >
-                  Corriger les minutes
-                </button>
+                <p className="text-xs text-stone/60 leading-relaxed">Un espace de silence pour observer</p>
               </div>
-            </button>
+            </motion.button>
           </div>
 
-          {/* Exercices de respiration et Pause émotionnelle */}
+          {/* Exercices secondaires */}
           <div className="grid grid-cols-1 gap-4 mb-8">
             {/* Respiration guidée */}
-            <button
+            <motion.button
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.4, delay: 0.9 }}
+              whileHover={{ scale: 1.02, x: 4 }}
+              whileTap={{ scale: 0.98 }}
               onClick={() => handleActionClick('breathing', () => setShowBreathing(true))}
-              className="group bg-white/95 backdrop-blur-md rounded-3xl p-6 shadow-2xl border border-stone/10 text-center transition-all duration-300 hover:scale-[1.02] hover:shadow-3xl hover:bg-jade/5 btn-addictive magnetic-hover relative overflow-hidden"
+              className="bg-gradient-to-r from-white to-jade/5 backdrop-blur-md rounded-3xl p-5 shadow-lg border border-jade/10 transition-all duration-300 relative overflow-hidden"
             >
-              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-jade/10 to-transparent transform -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
-
-              <div className="relative z-10 flex items-center justify-center">
-                <div className="w-14 h-14 bg-gradient-to-br from-jade/20 to-jade/10 rounded-full flex items-center justify-center mr-4 group-hover:scale-110 transition-all duration-300 shadow-lg group-hover:shadow-jade/30">
-                  <Wind size={28} strokeWidth={1.5} className="text-jade animate-breathe" />
+              <div className="flex items-center">
+                <div className="w-14 h-14 relative mr-4 flex-shrink-0">
+                  <div className="absolute inset-0 bg-jade/10 rounded-full animate-pulse"></div>
+                  <div className="absolute inset-1 bg-gradient-to-br from-jade/20 to-jade/5 rounded-full flex items-center justify-center">
+                    <Wind size={24} strokeWidth={1.5} className="text-jade" />
+                  </div>
                 </div>
                 <div className="text-left">
                   <h3 className="font-bold text-ink mb-1 text-base" style={{ fontFamily: "'Shippori Mincho', serif" }}>
                     Respiration guidée
                   </h3>
-                  <p className="text-xs text-stone/80 leading-relaxed">Reviens à ton souffle. Trois techniques pour t'ancrer dans l'instant</p>
+                  <p className="text-xs text-stone/60 leading-relaxed">Reviens à ton souffle</p>
                 </div>
               </div>
-            </button>
+            </motion.button>
 
             {/* Pause émotionnelle d'urgence */}
-            <button
+            <motion.button
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.4, delay: 1.0 }}
+              whileHover={{ scale: 1.02, x: 4 }}
+              whileTap={{ scale: 0.98 }}
               onClick={() => handleActionClick('emergency', () => setShowEmergencyPause(true))}
-              className="group bg-gradient-to-r from-sunset/10 via-vermilion/10 to-sunset/10 backdrop-blur-md rounded-3xl p-6 shadow-2xl border border-sunset/20 text-center transition-all duration-300 hover:scale-[1.02] hover:shadow-3xl hover:from-sunset/20 hover:to-vermilion/20 btn-addictive magnetic-hover relative overflow-hidden"
+              className="bg-gradient-to-r from-white to-sunset/5 backdrop-blur-md rounded-3xl p-5 shadow-lg border border-sunset/20 transition-all duration-300 relative overflow-hidden"
             >
-              <div className="absolute inset-0 bg-gradient-to-r from-sunset/20 to-vermilion/20 animate-pulse-emergency"></div>
-
-              <div className="relative z-10 flex items-center justify-center">
-                <div className="w-14 h-14 bg-gradient-to-br from-sunset to-vermilion rounded-full flex items-center justify-center mr-4 group-hover:scale-110 transition-all duration-300 shadow-xl animate-breathe-urgent">
-                  <Shield size={28} strokeWidth={1.5} className="text-white" />
+              <div className="flex items-center">
+                <div className="w-14 h-14 relative mr-4 flex-shrink-0">
+                  <div className="absolute inset-0 bg-sunset/10 rounded-full animate-pulse" style={{ animationDelay: '0.5s' }}></div>
+                  <div className="absolute inset-1 bg-gradient-to-br from-sunset to-vermilion rounded-full flex items-center justify-center">
+                    <Shield size={24} strokeWidth={1.5} className="text-white" />
+                  </div>
                 </div>
                 <div className="text-left">
                   <h3 className="font-bold text-ink mb-1 text-base" style={{ fontFamily: "'Shippori Mincho', serif" }}>
                     Pause d'urgence
                   </h3>
-                  <p className="text-xs text-stone/80 leading-relaxed">Quand l'émotion déborde, trouve refuge ici. Trois outils de recentrage immédiat</p>
+                  <p className="text-xs text-stone/60 leading-relaxed">Recentrage immédiat</p>
                 </div>
               </div>
-            </button>
+            </motion.button>
           </div>
 
 
