@@ -127,10 +127,12 @@ const ProfilePage: React.FC = () => {
         new Date(entry.created_at) > oneWeekAgo
       ).length || 0;
 
-      // Journaux écrits (total) depuis Supabase - exclure les méditations et rêves
+      // Journaux écrits CETTE SEMAINE depuis Supabase - exclure les méditations et rêves
       const journalEntriesOnly = journalsData?.filter(entry => {
+        const entryDate = new Date(entry.created_at);
         return entry.type === 'journal' &&
                entry.content &&
+               entryDate > oneWeekAgo &&
                (!entry.metadata ||
                 (!entry.metadata.title &&
                  !entry.metadata.emotions &&

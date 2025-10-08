@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { X, Heart, Moon, Trash2, RotateCcw, Calendar, AlertTriangle, Cloud, Eye, Zap } from 'lucide-react';
-import { useCheckins } from '../hooks/useCheckins';
-import { useJournals } from '../hooks/useJournals';
+import { useCheckins, useDeleteCheckin } from '../hooks/useCheckins';
+import { useJournals, useDeleteJournal } from '../hooks/useJournals';
 import { useAuth } from '../hooks/useAuth';
+import { supabase } from '../lib/supabase';
 import { LoadingSkeleton, HistoryLoadingSkeleton } from './LoadingSkeleton';
 
 interface HistoryEntry {
@@ -30,6 +31,10 @@ interface HistoryModalProps {
 
 const HistoryModal: React.FC<HistoryModalProps> = ({ isOpen, onClose, onStatsUpdate }) => {
   const { user } = useAuth();
+  const { data: checkinsData, isLoading: checkinsLoading } = useCheckins();
+  const { data: journalsData, isLoading: journalsLoading } = useJournals();
+  const deleteCheckinMutation = useDeleteCheckin();
+  const deleteJournalMutation = useDeleteJournal();
   const [activeTab, setActiveTab] = useState<'checkins' | 'journals' | 'dreams' | 'trash'>('checkins');
   const [checkins, setCheckins] = useState<HistoryEntry[]>([]);
   const [journals, setJournals] = useState<HistoryEntry[]>([]);
@@ -40,89 +45,82 @@ const HistoryModal: React.FC<HistoryModalProps> = ({ isOpen, onClose, onStatsUpd
   const [itemToDelete, setItemToDelete] = useState<string | null>(null);
 
   useEffect(() => {
-    if (isOpen) {
-      // Nettoyer le check-in buggé AVANT de charger les données
-      cleanBuggyCheckin();
-      loadData(user);
+    if (isOpen && user) {
+      loadDataFromSupabase();
     }
-  }, [isOpen, user]);
+  }, [isOpen, user, checkinsData, journalsData]);
 
-  const cleanBuggyCheckin = () => {
-    console.log('🧹 Début du nettoyage du check-in buggé...');
-    
-    // Nettoyer l'historique des check-ins
-    const checkinHistory = JSON.parse(localStorage.getItem('checkin-history') || '[]');
-    console.log('📋 Check-ins avant nettoyage:', checkinHistory.length, checkinHistory);
-    
-    const cleanedCheckins = checkinHistory.filter((entry: HistoryEntry) => 
-      !(entry.emotion === 'kk' || entry.note === 'k k' || entry.emotion?.trim() === 'kk' || entry.note?.trim() === 'k k')
-    );
-    
-    console.log('📋 Check-ins après nettoyage:', cleanedCheckins.length, cleanedCheckins);
-    
-    if (cleanedCheckins.length !== checkinHistory.length) {
-      console.log('✅ Check-in buggé supprimé:', checkinHistory.length, '->', cleanedCheckins.length);
-      localStorage.setItem('checkin-history', JSON.stringify(cleanedCheckins));
-    } else {
-      console.log('ℹ️ Aucun check-in buggé trouvé dans l\'historique');
-    }
-    
-    // Nettoyer aussi la corbeille
-    const trashEntries = JSON.parse(localStorage.getItem('journal-trash') || '[]');
-    console.log('🗑️ Corbeille avant nettoyage:', trashEntries.length, trashEntries);
-    
-    const cleanedTrash = trashEntries.filter((entry: any) => 
-      !(entry.emotion === 'kk' || entry.note === 'k k' || entry.emotion?.trim() === 'kk' || entry.note?.trim() === 'k k')
-    );
-    
-    console.log('🗑️ Corbeille après nettoyage:', cleanedTrash.length, cleanedTrash);
-    
-    if (cleanedTrash.length !== trashEntries.length) {
-      console.log('✅ Check-in buggé supprimé de la corbeille:', trashEntries.length, '->', cleanedTrash.length);
-      localStorage.setItem('journal-trash', JSON.stringify(cleanedTrash));
-    } else {
-      console.log('ℹ️ Aucun check-in buggé trouvé dans la corbeille');
-    }
-    
-    console.log('🧹 Nettoyage terminé');
-  };
-
-  const loadData = (currentUser: any) => {
+  const loadDataFromSupabase = () => {
     setLoading(true);
     try {
-      // Charger depuis localStorage et filtrer par utilisateur connecté si disponible
-      
-      let checkinHistory = JSON.parse(localStorage.getItem('checkin-history') || '[]');
-      let journalEntries = JSON.parse(localStorage.getItem('journal-entries') || '[]').filter((entry: any) => entry.type !== 'dream');
-      let dreamEntries = JSON.parse(localStorage.getItem('dream-entries') || '[]');
-      
-      // Filtrer par utilisateur si connecté (pour éviter de voir les données d'autres utilisateurs)
-      if (currentUser?.id) {
-        checkinHistory = checkinHistory.filter((entry: any) => 
-          !entry.user_id || entry.user_id === currentUser.id
-        );
-        journalEntries = journalEntries.filter((entry: any) => 
-          !entry.user_id || entry.user_id === currentUser.id
-        );
-        dreamEntries = dreamEntries.filter((entry: any) => 
-          !entry.user_id || entry.user_id === currentUser.id
-        );
+      if (!checkinsData || !journalsData) {
+        console.log('Données Supabase non encore chargées');
+        setLoading(false);
+        return;
       }
-      
-      const trashEntries = JSON.parse(localStorage.getItem('journal-trash') || '[]');
-      
-      setCheckins(checkinHistory);
-      setJournals(journalEntries);
-      setDreams(dreamEntries);
-      setTrash(trashEntries);
-      
-      console.log('📊 Historique chargé:', {
-        checkins: checkinHistory.length,
-        journals: journalEntries.length,
-        dreams: dreamEntries.length,
-        trash: trashEntries.length,
-        userId: currentUser?.id
+
+      // Convertir les check-ins Supabase au format HistoryEntry
+      const checkinsHistory: HistoryEntry[] = checkinsData.map(entry => ({
+        id: entry.id,
+        type: 'checkin' as const,
+        timestamp: entry.created_at,
+        date: new Date(entry.created_at).toLocaleDateString('fr-FR'),
+        emotion: entry.emotion || '',
+        intensity: entry.intensity,
+        need: entry.need || '',
+        note: entry.notes || ''
+      }));
+
+      // Séparer les journaux et les rêves
+      const journalsHistory: HistoryEntry[] = [];
+      const dreamsHistory: HistoryEntry[] = [];
+
+      journalsData.forEach(entry => {
+        if (entry.type === 'dream') {
+          dreamsHistory.push({
+            id: entry.id,
+            type: 'dream',
+            timestamp: entry.created_at,
+            date: new Date(entry.created_at).toLocaleDateString('fr-FR'),
+            content: entry.content,
+            title: entry.metadata?.title,
+            lucidity: entry.metadata?.lucidity,
+            recurring: entry.metadata?.recurring,
+            nightmare: entry.metadata?.nightmare
+          });
+        } else if (entry.type === 'journal') {
+          journalsHistory.push({
+            id: entry.id,
+            type: 'journal',
+            timestamp: entry.created_at,
+            date: new Date(entry.created_at).toLocaleDateString('fr-FR'),
+            content: entry.content,
+            emoji: entry.metadata?.emoji
+          });
+        }
       });
+
+      // Trier par date (plus récent en premier)
+      const sortByDate = (a: HistoryEntry, b: HistoryEntry) =>
+        new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime();
+
+      setCheckins(checkinsHistory.sort(sortByDate));
+      setJournals(journalsHistory.sort(sortByDate));
+      setDreams(dreamsHistory.sort(sortByDate));
+
+      console.log('✅ Données chargées depuis Supabase:', {
+        checkins: checkinsHistory.length,
+        journals: journalsHistory.length,
+        dreams: dreamsHistory.length
+      });
+
+      // Charger la corbeille (localStorage pour l'instant - fonctionnalité legacy)
+      const trashEntries = JSON.parse(localStorage.getItem('journal-trash') || '[]');
+      const userTrash = user?.id
+        ? trashEntries.filter((entry: any) => !entry.user_id || entry.user_id === user.id)
+        : trashEntries;
+
+      setTrash(userTrash);
     } catch (error) {
       console.error('Error loading history data:', error);
     } finally {
@@ -130,81 +128,32 @@ const HistoryModal: React.FC<HistoryModalProps> = ({ isOpen, onClose, onStatsUpd
     }
   };
 
-  const moveToTrash = (entry: HistoryEntry) => {
-    console.log('🗑️ Moving to trash:', entry.id, entry.type, entry.emotion || entry.content?.substring(0, 20));
-    
-    const trashEntry = { 
-      ...entry, 
-      deletedAt: new Date().toISOString() 
-    };
-    
-    // Ajouter à la corbeille
-    const currentTrash = JSON.parse(localStorage.getItem('journal-trash') || '[]');
-    const newTrash = [trashEntry, ...currentTrash].slice(0, 10);
-    localStorage.setItem('journal-trash', JSON.stringify(newTrash));
+  const moveToTrash = async (entry: HistoryEntry) => {
+    console.log('🗑️ Deleting from Supabase:', entry.id, entry.type);
 
-    if (entry.type === 'checkin') {
-      // Supprimer des check-ins
-      const currentCheckins = JSON.parse(localStorage.getItem('checkin-history') || '[]');
-      console.log('📋 Current checkins before deletion:', currentCheckins.length);
-      console.log('🎯 Looking for ID to delete:', entry.id);
-      
-      const updatedCheckins = currentCheckins.filter((c: HistoryEntry) => c.id !== entry.id);
-      console.log('📋 Checkins after filter:', updatedCheckins.length);
-      
-      setCheckins(updatedCheckins);
-      localStorage.setItem('checkin-history', JSON.stringify(updatedCheckins));
-      console.log('✅ Checkins updated:', updatedCheckins.length);
-    } else if (entry.type === 'journal') {
-      // Supprimer des journaux
-      const currentJournals = JSON.parse(localStorage.getItem('journal-entries') || '[]');
-      const updatedJournals = currentJournals.filter((j: HistoryEntry) => j.id !== entry.id);
-      setJournals(updatedJournals);
-      localStorage.setItem('journal-entries', JSON.stringify(updatedJournals));
-    } else if (entry.type === 'dream') {
-      // Supprimer des rêves
-      const currentDreams = JSON.parse(localStorage.getItem('dream-entries') || '[]');
-      const updatedDreams = currentDreams.filter((d: HistoryEntry) => d.id !== entry.id);
-      setDreams(updatedDreams);
-      localStorage.setItem('dream-entries', JSON.stringify(updatedDreams));
+    try {
+      if (entry.type === 'checkin') {
+        await deleteCheckinMutation.mutateAsync(entry.id);
+        setCheckins(prev => prev.filter(c => c.id !== entry.id));
+      } else if (entry.type === 'journal' || entry.type === 'dream') {
+        await deleteJournalMutation.mutateAsync(entry.id);
+        if (entry.type === 'journal') {
+          setJournals(prev => prev.filter(j => j.id !== entry.id));
+        } else {
+          setDreams(prev => prev.filter(d => d.id !== entry.id));
+        }
+      }
+
+      console.log('✅ Entry deleted from Supabase:', entry.id);
+      onStatsUpdate();
+    } catch (error) {
+      console.error('Error deleting entry:', error);
     }
-
-    setTrash(newTrash);
-    onStatsUpdate();
   };
 
+  // Note: Corbeille désactivée - les suppressions sont définitives dans Supabase
   const restoreFromTrash = (entry: HistoryEntry) => {
-    console.log('♻️ Restoring from trash:', entry.id, entry.type);
-    
-    // Retirer de la corbeille
-    const currentTrash = JSON.parse(localStorage.getItem('journal-trash') || '[]');
-    const updatedTrash = currentTrash.filter((t: any) => t.id !== entry.id);
-    setTrash(updatedTrash);
-    localStorage.setItem('journal-trash', JSON.stringify(updatedTrash));
-
-    // Restaurer dans la liste appropriée
-    const restoredEntry = { ...entry };
-    delete (restoredEntry as any).deletedAt;
-
-    if (entry.type === 'checkin') {
-      const currentCheckins = JSON.parse(localStorage.getItem('checkin-history') || '[]');
-      const updatedCheckins = [restoredEntry, ...currentCheckins];
-      setCheckins(updatedCheckins);
-      localStorage.setItem('checkin-history', JSON.stringify(updatedCheckins));
-    } else if (entry.type === 'journal') {
-      const currentJournals = JSON.parse(localStorage.getItem('journal-entries') || '[]');
-      const updatedJournals = [restoredEntry, ...currentJournals];
-      console.log('✅ Journal restored, total:', updatedJournals.length);
-      setJournals(updatedJournals);
-      localStorage.setItem('journal-entries', JSON.stringify(updatedJournals));
-    } else if (entry.type === 'dream') {
-      const currentDreams = JSON.parse(localStorage.getItem('dream-entries') || '[]');
-      const updatedDreams = [restoredEntry, ...currentDreams];
-      setDreams(updatedDreams);
-      localStorage.setItem('dream-entries', JSON.stringify(updatedDreams));
-    }
-
-    onStatsUpdate();
+    console.log('♻️ Restore from trash not implemented (Supabase direct delete)');
   };
 
   const permanentDelete = (entryId: string) => {
@@ -214,11 +163,8 @@ const HistoryModal: React.FC<HistoryModalProps> = ({ isOpen, onClose, onStatsUpd
 
   const confirmPermanentDelete = () => {
     if (!itemToDelete) return;
-    
     console.log('🔥 Permanently deleting:', itemToDelete);
-    
     const currentTrash = JSON.parse(localStorage.getItem('journal-trash') || '[]');
-    console.log('🗑️ Trash before deletion:', currentTrash.length);
     
     const updatedTrash = currentTrash.filter((t: any) => t.id !== itemToDelete);
     console.log('🗑️ Trash after deletion:', updatedTrash.length);
