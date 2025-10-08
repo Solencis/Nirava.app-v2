@@ -1,5 +1,5 @@
 import React from 'react';
-import { X, Heart, Wind, Anchor, Play, Volume2, VolumeX } from 'lucide-react';
+import { X, Heart, Wind, Anchor, Play, Volume2, VolumeX, Pause, RotateCcw, Plus } from 'lucide-react';
 import { useAudioStore } from '../stores/audioStore';
 
 interface EmergencyPauseProps {
@@ -11,87 +11,137 @@ const EmergencyPause: React.FC<EmergencyPauseProps> = ({ isOpen, onClose }) => {
   const { current: currentAmbience, isPlaying: ambienceIsPlaying, pause: pauseAmbience, play: playAmbience } = useAudioStore();
   const [activeExercise, setActiveExercise] = React.useState<string | null>(null);
   const [breathCount, setBreathCount] = React.useState(0);
+  const [totalBreaths, setTotalBreaths] = React.useState(0);
   const [phase, setPhase] = React.useState<'inhale' | 'hold' | 'exhale' | 'pause'>('inhale');
+  const [timeLeft, setTimeLeft] = React.useState(0);
+  const [isPaused, setIsPaused] = React.useState(false);
   const [anchoringStep, setAnchoringStep] = React.useState(0);
   const [muteAmbience, setMuteAmbience] = React.useState(false);
   const wasAmbiencePlaying = React.useRef(false);
+  const timerRef = React.useRef<NodeJS.Timeout | null>(null);
+  const audioContextRef = React.useRef<AudioContext | null>(null);
+
+  React.useEffect(() => {
+    return () => {
+      if (timerRef.current) clearInterval(timerRef.current);
+    };
+  }, []);
+
+  React.useEffect(() => {
+    if (activeExercise && activeExercise !== 'anchoring' && !isPaused && timeLeft > 0) {
+      timerRef.current = setInterval(() => {
+        setTimeLeft(prev => {
+          if (prev <= 1) {
+            moveToNextPhase();
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+    }
+
+    return () => {
+      if (timerRef.current) clearInterval(timerRef.current);
+    };
+  }, [activeExercise, isPaused, timeLeft]);
 
   if (!isOpen) return null;
 
+  const playCycleSound = () => {
+    if ('AudioContext' in window || 'webkitAudioContext' in window) {
+      const AudioContext = window.AudioContext || (window as any).webkitAudioContext;
+      if (!audioContextRef.current) {
+        audioContextRef.current = new AudioContext();
+      }
+      const audioContext = audioContextRef.current;
+
+      const oscillator = audioContext.createOscillator();
+      const gainNode = audioContext.createGain();
+
+      oscillator.connect(gainNode);
+      gainNode.connect(audioContext.destination);
+
+      oscillator.frequency.value = 432;
+      oscillator.type = 'sine';
+
+      gainNode.gain.setValueAtTime(0, audioContext.currentTime);
+      gainNode.gain.linearRampToValueAtTime(0.15, audioContext.currentTime + 0.1);
+      gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 1.5);
+
+      oscillator.start(audioContext.currentTime);
+      oscillator.stop(audioContext.currentTime + 1.5);
+    } else {
+      if ('vibrate' in navigator) navigator.vibrate(100);
+    }
+  };
+
+  const moveToNextPhase = () => {
+    if (activeExercise === '478') {
+      if (phase === 'inhale') {
+        setPhase('hold');
+        setTimeLeft(7);
+      } else if (phase === 'hold') {
+        setPhase('exhale');
+        setTimeLeft(8);
+      } else if (phase === 'exhale') {
+        const newCount = breathCount + 1;
+        if (newCount < totalBreaths) {
+          playCycleSound();
+          setBreathCount(newCount);
+          setPhase('inhale');
+          setTimeLeft(4);
+        } else {
+          setActiveExercise(null);
+          if ('vibrate' in navigator) navigator.vibrate([100, 50, 100]);
+        }
+      }
+    } else if (activeExercise === 'coherence') {
+      if (phase === 'inhale') {
+        setPhase('exhale');
+        setTimeLeft(5);
+      } else if (phase === 'exhale') {
+        const newCount = breathCount + 1;
+        if (newCount < totalBreaths) {
+          playCycleSound();
+          setBreathCount(newCount);
+          setPhase('inhale');
+          setTimeLeft(5);
+        } else {
+          setActiveExercise(null);
+          if ('vibrate' in navigator) navigator.vibrate([100, 50, 100]);
+        }
+      }
+    }
+  };
+
   const start478Breathing = () => {
-    // Remember and optionally mute ambience
     wasAmbiencePlaying.current = ambienceIsPlaying;
     if (muteAmbience && currentAmbience && ambienceIsPlaying) {
       pauseAmbience();
     }
-    
+
     setActiveExercise('478');
     setBreathCount(0);
+    setTotalBreaths(4);
     setPhase('inhale');
-    
-    const cycle = () => {
-      // Inspire 4s
-      setPhase('inhale');
-      setTimeout(() => {
-        // Retiens 7s
-        setPhase('hold');
-        setTimeout(() => {
-          // Expire 8s
-          setPhase('exhale');
-          setTimeout(() => {
-            // Pause 2s
-            setPhase('pause');
-            setTimeout(() => {
-              setBreathCount(prev => {
-                const newCount = prev + 1;
-                if (newCount < 4) {
-                  cycle(); // Continuer le cycle
-                } else {
-                  setActiveExercise(null); // Terminer
-                }
-                return newCount;
-              });
-            }, 2000);
-          }, 8000);
-        }, 7000);
-      }, 4000);
-    };
-    
-    cycle();
+    setTimeLeft(4);
+    setIsPaused(false);
+    if ('vibrate' in navigator) navigator.vibrate(50);
   };
 
   const startCoherence = () => {
-    // Remember and optionally mute ambience
     wasAmbiencePlaying.current = ambienceIsPlaying;
     if (muteAmbience && currentAmbience && ambienceIsPlaying) {
       pauseAmbience();
     }
-    
+
     setActiveExercise('coherence');
     setBreathCount(0);
+    setTotalBreaths(6);
     setPhase('inhale');
-    
-    const cycle = () => {
-      // Inspire 5s
-      setPhase('inhale');
-      setTimeout(() => {
-        // Expire 5s
-        setPhase('exhale');
-        setTimeout(() => {
-          setBreathCount(prev => {
-            const newCount = prev + 1;
-            if (newCount < 6) {
-              cycle(); // Continuer le cycle
-            } else {
-              setActiveExercise(null); // Terminer
-            }
-            return newCount;
-          });
-        }, 5000);
-      }, 5000);
-    };
-    
-    cycle();
+    setTimeLeft(5);
+    setIsPaused(false);
+    if ('vibrate' in navigator) navigator.vibrate(50);
   };
 
   const startAnchoring = () => {
@@ -113,24 +163,57 @@ const EmergencyPause: React.FC<EmergencyPauseProps> = ({ isOpen, onClose }) => {
     { title: "1 chose que tu goûtes", description: "Concentre-toi sur le goût dans ta bouche" }
   ];
 
+  const togglePause = () => {
+    setIsPaused(!isPaused);
+    if ('vibrate' in navigator) navigator.vibrate(30);
+  };
+
+  const resetExercise = () => {
+    setBreathCount(0);
+    setPhase('inhale');
+    setTimeLeft(activeExercise === '478' ? 4 : 5);
+    setIsPaused(false);
+    if ('vibrate' in navigator) navigator.vibrate(30);
+  };
+
+  const addMoreBreaths = () => {
+    setTotalBreaths(prev => prev + 3);
+    if ('vibrate' in navigator) navigator.vibrate(30);
+  };
+
   const getPhaseText = () => {
     switch (phase) {
-      case 'inhale': return activeExercise === '478' ? 'Inspire (4s)' : 'Inspire (5s)';
-      case 'hold': return 'Retiens (7s)';
-      case 'exhale': return activeExercise === '478' ? 'Expire (8s)' : 'Expire (5s)';
-      case 'pause': return 'Pause (2s)';
+      case 'inhale': return 'Inspire profondément';
+      case 'hold': return 'Retiens ton souffle';
+      case 'exhale': return 'Expire lentement';
+      case 'pause': return 'Pause';
       default: return '';
     }
   };
 
   const getPhaseColor = () => {
     switch (phase) {
-      case 'inhale': return 'text-jade';
-      case 'hold': return 'text-yellow-600';
-      case 'exhale': return 'text-vermilion';
-      case 'pause': return 'text-stone';
-      default: return 'text-ink';
+      case 'inhale': return 'from-jade to-wasabi';
+      case 'hold': return 'from-wasabi to-jade';
+      case 'exhale': return 'from-sunset to-vermilion';
+      case 'pause': return 'from-stone to-stone';
+      default: return 'from-ink to-ink';
     }
+  };
+
+  const getCircleSize = () => {
+    if (!timeLeft) return 1;
+    const phaseDuration = activeExercise === '478'
+      ? (phase === 'inhale' ? 4 : phase === 'hold' ? 7 : 8)
+      : 5;
+    const progress = (phaseDuration - timeLeft) / phaseDuration;
+
+    if (phase === 'inhale') {
+      return 0.7 + (progress * 0.3);
+    } else if (phase === 'exhale') {
+      return 1 - (progress * 0.3);
+    }
+    return 1;
   };
 
   const exercises = [
@@ -233,27 +316,74 @@ const EmergencyPause: React.FC<EmergencyPauseProps> = ({ isOpen, onClose }) => {
               {/* Exercice de respiration */}
               {(activeExercise === '478' || activeExercise === 'coherence') && (
                 <>
-                  <div className="w-32 h-32 mx-auto relative">
-                    <div className={`w-full h-full rounded-full border-4 transition-all duration-1000 ${
-                      phase === 'inhale' ? 'scale-110 border-jade' :
-                      phase === 'hold' ? 'scale-110 border-yellow-500' :
-                      phase === 'exhale' ? 'scale-90 border-vermilion' :
-                      'scale-100 border-stone'
-                    } bg-white/50`}></div>
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      <div className="text-center">
-                        <div className={`text-lg font-bold ${getPhaseColor()}`}>
-                          {getPhaseText()}
-                        </div>
-                        <div className="text-sm text-stone mt-1">
-                          {breathCount + 1}/4
-                        </div>
-                      </div>
+                  {/* Progress bar */}
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between text-xs text-stone">
+                      <span>Cycle {breathCount + 1}/{totalBreaths}</span>
+                      <button
+                        onClick={addMoreBreaths}
+                        className="flex items-center gap-1 text-jade font-medium active:scale-95 transition-transform"
+                      >
+                        <Plus className="w-3 h-3" />
+                        +3
+                      </button>
+                    </div>
+                    <div className="w-full bg-stone/20 h-1.5 rounded-full overflow-hidden">
+                      <div
+                        className="bg-gradient-to-r from-jade to-forest h-1.5 rounded-full transition-all duration-300"
+                        style={{ width: `${((breathCount / totalBreaths) * 100)}%` }}
+                      />
                     </div>
                   </div>
-                  <p className="text-stone text-sm">
-                    Suis le rythme de la bulle et respire calmement
-                  </p>
+
+                  {/* Breathing Circle */}
+                  <div className="relative w-48 h-48 mx-auto flex items-center justify-center my-8">
+                    <div
+                      className={`absolute w-full h-full rounded-full bg-gradient-to-br ${getPhaseColor()} opacity-30 transition-transform duration-1000 ease-in-out`}
+                      style={{
+                        transform: `scale(${getCircleSize()})`,
+                      }}
+                    />
+                    <div className="relative z-10 text-center">
+                      <div className="text-5xl font-bold text-ink mb-2" style={{ fontFamily: "'Shippori Mincho', serif" }}>
+                        {timeLeft}
+                      </div>
+                      <div className="text-lg text-ink font-medium animate-pulse">
+                        {getPhaseText()}
+                      </div>
+                      {isPaused && (
+                        <div className="text-sm text-stone/60 mt-2">En pause</div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Sound indicator */}
+                  <div className="text-xs text-stone/60 mb-4">
+                    🔔 Son apaisant à chaque cycle
+                  </div>
+
+                  {/* Controls */}
+                  <div className="flex items-center justify-center gap-4">
+                    <button
+                      onClick={resetExercise}
+                      className="w-12 h-12 rounded-full bg-stone/10 flex items-center justify-center text-stone active:scale-95 transition-transform"
+                      title="Recommencer"
+                    >
+                      <RotateCcw className="w-5 h-5" />
+                    </button>
+
+                    <button
+                      onClick={togglePause}
+                      className="w-16 h-16 bg-gradient-to-br from-jade to-forest rounded-full flex items-center justify-center text-white shadow-xl active:scale-95 transition-transform"
+                      title={isPaused ? 'Reprendre' : 'Pause'}
+                    >
+                      {isPaused ? (
+                        <Play className="w-7 h-7 ml-1" />
+                      ) : (
+                        <Pause className="w-7 h-7" />
+                      )}
+                    </button>
+                  </div>
                 </>
               )}
 
