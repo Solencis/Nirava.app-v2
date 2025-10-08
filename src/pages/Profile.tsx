@@ -46,7 +46,6 @@ const ProfilePage: React.FC = () => {
   useEffect(() => {
     if (user) {
       loadProfile();
-      loadUserStats();
 
       const timeout = setTimeout(() => {
         if (loading) {
@@ -63,10 +62,10 @@ const ProfilePage: React.FC = () => {
 
   // Recharger les stats quand les données Supabase changent
   useEffect(() => {
-    if (user && (checkinsData || journalsData || supabaseMeditationMinutes !== undefined)) {
+    if (user && checkinsData && journalsData) {
       loadUserStats();
     }
-  }, [checkinsData, journalsData, supabaseMeditationMinutes]);
+  }, [user, checkinsData, journalsData, supabaseMeditationMinutes]);
 
   // Update meditation stats when store data changes
   useEffect(() => {
@@ -91,6 +90,17 @@ const ProfilePage: React.FC = () => {
 
       if (error) {
         console.error('Error loading profile:', error);
+        // Créer un profil par défaut si l'erreur n'est pas grave
+        setProfile({
+          id: user.id,
+          display_name: user.email?.split('@')[0] || 'Utilisateur',
+          bio: '',
+          photo_url: '',
+          share_progress: true,
+          level: 'N1',
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        });
         setLoading(false);
         return;
       }
@@ -104,9 +114,41 @@ const ProfilePage: React.FC = () => {
           share_progress: data.share_progress,
           level: data.level || 'N1'
         });
+      } else {
+        // Pas de profil trouvé, créer un profil par défaut
+        const defaultProfile: Profile = {
+          id: user.id,
+          display_name: user.email?.split('@')[0] || 'Utilisateur',
+          bio: '',
+          photo_url: '',
+          share_progress: true,
+          level: 'N1',
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        };
+        setProfile(defaultProfile);
+        setEditForm({
+          display_name: defaultProfile.display_name,
+          bio: defaultProfile.bio || '',
+          photo_url: defaultProfile.photo_url || '',
+          share_progress: defaultProfile.share_progress,
+          level: defaultProfile.level || 'N1'
+        });
       }
     } catch (error) {
       console.error('Error loading profile:', error);
+      // En cas d'erreur, créer un profil minimal
+      const fallbackProfile: Profile = {
+        id: user.id,
+        display_name: user.email?.split('@')[0] || 'Utilisateur',
+        bio: '',
+        photo_url: '',
+        share_progress: true,
+        level: 'N1',
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      };
+      setProfile(fallbackProfile);
     } finally {
       setLoading(false);
     }
@@ -119,16 +161,21 @@ const ProfilePage: React.FC = () => {
         return;
       }
 
+      if (!checkinsData || !journalsData) {
+        console.log('Data not yet loaded, skipping stats calculation');
+        return;
+      }
+
       const oneWeekAgo = new Date();
       oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
 
       // Check-ins cette semaine depuis Supabase
-      const thisWeekCheckins = checkinsData?.filter(entry =>
+      const thisWeekCheckins = checkinsData.filter(entry =>
         new Date(entry.created_at) > oneWeekAgo
-      ).length || 0;
+      ).length;
 
       // Journaux écrits CETTE SEMAINE depuis Supabase - exclure les méditations et rêves
-      const journalEntriesOnly = journalsData?.filter(entry => {
+      const journalEntriesOnly = journalsData.filter(entry => {
         const entryDate = new Date(entry.created_at);
         return entry.type === 'journal' &&
                entry.content &&
@@ -138,15 +185,19 @@ const ProfilePage: React.FC = () => {
                  !entry.metadata.emotions &&
                  !entry.metadata.symbols &&
                  !entry.metadata.duration_minutes));
-      }) || [];
+      });
 
       // Rêves cette semaine depuis Supabase
-      const { data: dreamEntries } = await supabase
+      const { data: dreamEntries, error: dreamError } = await supabase
         .from('journals')
         .select('*')
         .eq('user_id', user.id)
         .eq('type', 'dream')
         .gte('created_at', oneWeekAgo.toISOString());
+
+      if (dreamError) {
+        console.error('Error loading dreams:', dreamError);
+      }
 
       const thisWeekDreams = dreamEntries?.length || 0;
 
@@ -165,6 +216,14 @@ const ProfilePage: React.FC = () => {
       });
     } catch (error) {
       console.error('Error loading user stats:', error);
+      // Ne pas crasher, juste logger l'erreur
+      setStats({
+        checkins: 0,
+        journals: 0,
+        meditationMinutes: 0,
+        currentStreak: 0,
+        dreams: 0
+      });
     }
   };
 
