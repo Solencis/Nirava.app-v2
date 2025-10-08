@@ -45,14 +45,13 @@ export async function getUserStats(userId: string): Promise<UserStats> {
     .eq('user_id', userId)
     .eq('completed', true);
 
-  const { data: userAchievements } = await supabase
-    .from('user_achievements')
-    .select('achievement_id, achievements(points)')
-    .eq('user_id', userId);
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('total_xp')
+    .eq('id', userId)
+    .single();
 
-  const totalPoints = userAchievements?.reduce((sum, ua: any) => {
-    return sum + (ua.achievements?.points || 0);
-  }, 0) || 0;
+  const totalPoints = profile?.total_xp || 0;
 
   const checkinStreak = calculateCheckinStreak(checkins || []);
 
@@ -160,7 +159,7 @@ export async function checkAndUnlockAchievements(userId: string): Promise<string
 
   const { data: allAchievements } = await supabase
     .from('achievements')
-    .select('id, code');
+    .select('id, code, points, title');
 
   const { data: userAchievements } = await supabase
     .from('user_achievements')
@@ -186,7 +185,25 @@ export async function checkAndUnlockAchievements(userId: string): Promise<string
 
       if (!error) {
         newlyUnlocked.push(achievement.code);
-        console.log(`✨ Achievement unlocked: ${achievement.code}`);
+        console.log(`✨ Achievement unlocked: ${achievement.code} - ${achievement.title}`);
+
+        if (achievement.points > 0) {
+          const { data: currentProfile } = await supabase
+            .from('profiles')
+            .select('total_xp')
+            .eq('id', userId)
+            .single();
+
+          const currentXP = currentProfile?.total_xp || 0;
+          const newXP = currentXP + achievement.points;
+
+          await supabase
+            .from('profiles')
+            .update({ total_xp: newXP })
+            .eq('id', userId);
+
+          console.log(`🎉 +${achievement.points} XP awarded! Total: ${newXP} XP`);
+        }
       }
     }
   }
