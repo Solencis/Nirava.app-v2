@@ -207,10 +207,11 @@ const MeditationModal: React.FC<MeditationModalProps> = ({ isOpen, onClose, onSa
     setSavedActivity(session);
   };
 
+  const { reduceMeditationTime } = useAudioStore();
+
   const handleReduceMinutes = () => {
     const minutes = parseInt(minutesToReduce);
     if (minutes > 0) {
-      const { reduceMeditationTime } = useAudioStore.getState();
       reduceMeditationTime(minutes);
       setShowReduceModal(false);
       setMinutesToReduce('');
@@ -360,8 +361,8 @@ const MeditationModal: React.FC<MeditationModalProps> = ({ isOpen, onClose, onSa
                     <button
                       onClick={() => setMuteAmbience(!muteAmbience)}
                       className={`flex items-center px-3 py-2 rounded-lg text-sm transition-colors duration-300 min-h-[44px] ${
-                        muteAmbience 
-                          ? 'bg-vermilion/10 text-vermilion border border-vermilion/20' 
+                        muteAmbience
+                          ? 'bg-vermilion/10 text-vermilion border border-vermilion/20'
                           : 'bg-jade/10 text-jade border border-jade/20'
                       }`}
                     >
@@ -371,6 +372,17 @@ const MeditationModal: React.FC<MeditationModalProps> = ({ isOpen, onClose, onSa
                   </div>
                 </div>
               )}
+
+              {/* Bouton pour corriger les minutes */}
+              <div className="mt-4">
+                <button
+                  onClick={() => setShowReduceModal(true)}
+                  className="w-full px-4 py-3 bg-vermilion/10 text-vermilion border border-vermilion/20 rounded-xl hover:bg-vermilion/20 transition-colors duration-300 flex items-center justify-center text-sm font-medium"
+                >
+                  <RotateCcw size={16} className="mr-2" />
+                  Corriger les minutes de méditation
+                </button>
+              </div>
             </div>
           )}
 
