@@ -65,18 +65,38 @@ const DailyQuests: React.FC<DailyQuestsProps> = ({
   }, [user]);
 
   useEffect(() => {
-    const savedClaimed = localStorage.getItem('daily-quests-claimed');
-    const savedDate = localStorage.getItem('daily-quests-date');
-    const today = new Date().toDateString();
+    const loadClaimedStatus = async () => {
+      if (!user?.id) return;
 
-    if (savedDate !== today) {
-      localStorage.removeItem('daily-quests-claimed');
-      localStorage.setItem('daily-quests-date', today);
-      setClaimed({});
-    } else if (savedClaimed) {
-      setClaimed(JSON.parse(savedClaimed));
-    }
-  }, []);
+      const today = new Date();
+      const monday = new Date(today);
+      const dayOfWeek = today.getDay();
+      const diff = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
+      monday.setDate(today.getDate() + diff);
+      monday.setHours(0, 0, 0, 0);
+      const weekStart = monday.toISOString().split('T')[0];
+
+      const { data: weekData } = await supabase
+        .from('weekly_quests')
+        .select('*')
+        .eq('user_id', user.id)
+        .eq('week_start', weekStart)
+        .maybeSingle();
+
+      if (weekData) {
+        const todayDate = new Date().toISOString().split('T')[0];
+        const claimedStatus: Record<string, boolean> = {
+          checkin: weekData.checkin_last_claim_date === todayDate,
+          journal: weekData.journal_last_claim_date === todayDate,
+          meditation: weekData.meditation_last_claim_date === todayDate,
+          breathing: weekData.breathing_last_claim_date === todayDate
+        };
+        setClaimed(claimedStatus);
+      }
+    };
+
+    loadClaimedStatus();
+  }, [user]);
 
   useEffect(() => {
     const updateTimer = () => {
@@ -209,14 +229,31 @@ const DailyQuests: React.FC<DailyQuestsProps> = ({
         'breathing': 'breathing_xp'
       };
 
+      const claimDateFieldMap: Record<string, string> = {
+        'checkin': 'checkin_last_claim_date',
+        'journal': 'journal_last_claim_date',
+        'meditation': 'meditation_last_claim_date',
+        'breathing': 'breathing_last_claim_date'
+      };
+
       const xpField = questFieldMap[quest.id];
+      const claimDateField = claimDateFieldMap[quest.id];
+      const todayDate = new Date().toISOString().split('T')[0];
 
       if (existingWeek) {
+        const lastClaimDate = existingWeek[claimDateField];
+        if (lastClaimDate === todayDate) {
+          console.warn('Quest already claimed today');
+          setAnimatingXP(null);
+          return;
+        }
+
         const currentXP = existingWeek[xpField] || 0;
         await supabase
           .from('weekly_quests')
           .update({
             [xpField]: currentXP + quest_xp,
+            [claimDateField]: todayDate,
             updated_at: new Date().toISOString()
           })
           .eq('id', existingWeek.id);
@@ -227,6 +264,7 @@ const DailyQuests: React.FC<DailyQuestsProps> = ({
             user_id: user.id,
             week_start: weekStart,
             [xpField]: quest_xp,
+            [claimDateField]: todayDate,
             checkin_completed: quest.id === 'checkin',
             journal_completed: quest.id === 'journal',
             meditation_completed: quest.id === 'meditation',
@@ -240,7 +278,6 @@ const DailyQuests: React.FC<DailyQuestsProps> = ({
       setTimeout(() => {
         const newClaimed = { ...claimed, [quest.id]: true };
         setClaimed(newClaimed);
-        localStorage.setItem('daily-quests-claimed', JSON.stringify(newClaimed));
         setAnimatingXP(null);
       }, 1500);
 
