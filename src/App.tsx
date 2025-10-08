@@ -7,6 +7,7 @@ import GlobalAudioController from './components/GlobalAudioController';
 import MiniPlayer from './components/MiniPlayer';
 import { migrateLocalStorageToSupabase } from './utils/migrateLocalStorage';
 import { supabase } from './lib/supabase';
+import { useAuthStore } from './stores/authStore';
 import Home from './pages/Home';
 import School from './pages/School';
 import Journal from './pages/Journal';
@@ -32,31 +33,58 @@ const ScrollToTop: React.FC = () => {
 };
 
 function App() {
+  const authStore = useAuthStore();
+
   // Vérifier la version et déconnecter si nécessaire
   useEffect(() => {
     const checkVersion = async () => {
-      const storedVersion = localStorage.getItem('nirava_app_version');
-
-      // FORCER LA DÉCONNEXION - décommenter après le premier chargement
+      // FORCER LA DÉCONNEXION IMMÉDIATE
       const forceLogout = true;
 
-      if (forceLogout || (storedVersion && storedVersion !== APP_VERSION)) {
-        console.log(`🔄 Déconnexion forcée en cours...`);
+      if (forceLogout) {
+        console.log(`🔄 DÉCONNEXION FORCÉE IMMÉDIATE...`);
 
-        // Déconnexion complète
-        await supabase.auth.signOut();
+        // 1. Nettoyer Zustand authStore
+        authStore.signOut();
 
-        // Nettoyage du localStorage
+        // 2. Déconnexion Supabase
+        try {
+          await supabase.auth.signOut();
+        } catch (e) {
+          console.error('Erreur déconnexion Supabase:', e);
+        }
+
+        // 3. TOUT nettoyer
         localStorage.clear();
         sessionStorage.clear();
 
-        // Enregistrer la nouvelle version
+        // 4. Vider les cookies Supabase
+        document.cookie.split(";").forEach((c) => {
+          document.cookie = c
+            .replace(/^ +/, "")
+            .replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/");
+        });
+
+        // 5. Enregistrer la nouvelle version
         localStorage.setItem('nirava_app_version', APP_VERSION);
 
-        // Rediriger vers la page d'accueil
-        window.location.href = '/';
+        // 6. Forcer le rechargement complet
+        console.log('🔄 Rechargement complet...');
+        window.location.replace('/');
+        return;
+      }
+
+      const storedVersion = localStorage.getItem('nirava_app_version');
+      if (storedVersion && storedVersion !== APP_VERSION) {
+        console.log(`🔄 Nouvelle version détectée (${storedVersion} → ${APP_VERSION})`);
+
+        authStore.signOut();
+        await supabase.auth.signOut();
+        localStorage.clear();
+        sessionStorage.clear();
+        localStorage.setItem('nirava_app_version', APP_VERSION);
+        window.location.replace('/');
       } else if (!storedVersion) {
-        // Première installation
         localStorage.setItem('nirava_app_version', APP_VERSION);
       }
     };
