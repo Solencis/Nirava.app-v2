@@ -48,8 +48,27 @@ const ProfilePage: React.FC = () => {
       loadProfile();
 
       const timeout = setTimeout(() => {
-        if (loading) {
-          console.warn('Profile loading timeout - forcing loading to false');
+        if (loading && !profile) {
+          console.warn('Profile loading timeout - creating fallback profile');
+          // Créer un profil de secours si le chargement prend trop de temps
+          setProfile({
+            id: user.id,
+            display_name: user.email?.split('@')[0] || 'Utilisateur',
+            bio: '',
+            photo_url: '',
+            share_progress: true,
+            level: 'N1',
+            subscription_status: 'none',
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString()
+          });
+          setEditForm({
+            display_name: user.email?.split('@')[0] || 'Utilisateur',
+            bio: '',
+            photo_url: '',
+            share_progress: true,
+            level: 'N1'
+          });
           setLoading(false);
         }
       }, 5000);
