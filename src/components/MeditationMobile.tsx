@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { X, Play, Pause, RotateCcw, Check, Timer as TimerIcon, SkipForward } from 'lucide-react';
-import { useAudioStore } from '../stores/audioStore';
+import { useAudioStore, AMBIENCES } from '../stores/audioStore';
 
 interface MeditationMobileProps {
   onClose: () => void;
@@ -319,44 +319,76 @@ const MeditationMobile: React.FC<MeditationMobileProps> = ({ onClose }) => {
             </div>
           </div>
 
-          {/* Music Controls */}
+          {/* Music Selection */}
           <div className="max-w-sm mx-auto mb-8">
             <div className="bg-white rounded-2xl p-4 shadow-lg border border-stone/10">
-              <div className="flex items-center justify-between mb-3">
-                <div className="text-left">
-                  <div className="font-semibold text-ink text-sm">Musique d'ambiance</div>
-                  <div className="text-xs text-stone">
-                    {currentAmbience ? `${currentAmbience.emoji} ${currentAmbience.title}` : 'Aucune sélectionnée'}
-                  </div>
+              <div className="mb-3">
+                <div className="font-semibold text-ink text-sm mb-1">Musique d'ambiance</div>
+                <div className="text-xs text-stone">
+                  {currentAmbience ? `En cours : ${currentAmbience.emoji} ${currentAmbience.title}` : 'Choisis une ambiance'}
                 </div>
               </div>
-              <div className="flex gap-2">
-                <button
-                  onClick={toggleMusicPlayPause}
-                  className="flex-1 bg-gradient-to-r from-jade to-forest text-white py-3 rounded-xl font-medium active:scale-95 transition-transform shadow flex items-center justify-center gap-2"
-                  disabled={!currentAmbience}
-                >
-                  {ambienceIsPlaying ? (
-                    <>
-                      <Pause className="w-4 h-4" />
-                      <span>Pause</span>
-                    </>
-                  ) : (
-                    <>
-                      <Play className="w-4 h-4 ml-0.5" />
-                      <span>Play</span>
-                    </>
-                  )}
-                </button>
-                <button
-                  onClick={handleSkipNext}
-                  className="px-4 py-3 bg-stone/10 text-ink rounded-xl font-medium active:scale-95 transition-transform flex items-center justify-center"
-                  title="Suivante"
-                  disabled={!currentAmbience}
-                >
-                  <SkipForward className="w-4 h-4" />
-                </button>
+
+              {/* Ambience List */}
+              <div className="space-y-2 mb-3">
+                {AMBIENCES.map((ambience) => (
+                  <button
+                    key={ambience.key}
+                    onClick={() => playAmbience(ambience)}
+                    className={`w-full px-3 py-2 rounded-lg text-left flex items-center gap-3 transition-all ${
+                      currentAmbience?.key === ambience.key
+                        ? 'bg-jade/10 border border-jade/30'
+                        : 'bg-sand/20 border border-transparent hover:bg-sand/40'
+                    }`}
+                  >
+                    <span className="text-xl">{ambience.emoji}</span>
+                    <div className="flex-1">
+                      <div className={`text-sm font-medium ${
+                        currentAmbience?.key === ambience.key ? 'text-jade' : 'text-ink'
+                      }`}>
+                        {ambience.title}
+                      </div>
+                      <div className="text-xs text-stone/70">{ambience.description}</div>
+                    </div>
+                    {currentAmbience?.key === ambience.key && ambienceIsPlaying && (
+                      <div className="flex gap-1">
+                        <div className="w-1 h-3 bg-jade rounded animate-pulse" />
+                        <div className="w-1 h-3 bg-jade rounded animate-pulse delay-75" />
+                        <div className="w-1 h-3 bg-jade rounded animate-pulse delay-150" />
+                      </div>
+                    )}
+                  </button>
+                ))}
               </div>
+
+              {/* Controls */}
+              {currentAmbience && (
+                <div className="flex gap-2 pt-3 border-t border-stone/10">
+                  <button
+                    onClick={toggleMusicPlayPause}
+                    className="flex-1 bg-gradient-to-r from-jade to-forest text-white py-3 rounded-xl font-medium active:scale-95 transition-transform shadow flex items-center justify-center gap-2"
+                  >
+                    {ambienceIsPlaying ? (
+                      <>
+                        <Pause className="w-4 h-4" />
+                        <span>Pause</span>
+                      </>
+                    ) : (
+                      <>
+                        <Play className="w-4 h-4 ml-0.5" />
+                        <span>Play</span>
+                      </>
+                    )}
+                  </button>
+                  <button
+                    onClick={handleSkipNext}
+                    className="px-4 py-3 bg-stone/10 text-ink rounded-xl font-medium active:scale-95 transition-transform flex items-center justify-center"
+                    title="Suivante"
+                  >
+                    <SkipForward className="w-4 h-4" />
+                  </button>
+                </div>
+              )}
             </div>
           </div>
 
