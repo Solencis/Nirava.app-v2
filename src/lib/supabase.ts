@@ -225,10 +225,11 @@ export const getJournals = async (limit = 50) => {
 
 export const createJournal = async (journalData: Omit<JournalEntry, 'id' | 'user_id' | 'created_at' | 'updated_at'>) => {
   const user = await requireAuth();
-  
+
   const { data, error } = await supabase
     .from('journals')
     .insert({
+      type: 'journal',
       ...journalData,
       user_id: user.id // CRITICAL: user_id pour que RLS accepte l'insert
     })

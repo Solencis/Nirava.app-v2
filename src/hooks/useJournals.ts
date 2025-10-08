@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { getJournals, createJournal, JournalEntry } from '../lib/supabase';
+import { getJournals, createJournal, JournalEntry, supabase } from '../lib/supabase';
 import { useAuth } from './useAuth';
 
 const PAGE_SIZE = 50;

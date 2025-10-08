@@ -15,13 +15,13 @@ const JournalMobile: React.FC<JournalMobileProps> = ({ onClose, onSave }) => {
   const { user } = useAuth();
   const createJournalMutation = useCreateJournal();
   const [content, setContent] = useState('');
-  const [mood, setMood] = useState('');
+  const [emotion, setEmotion] = useState('');
   const [photoUrl, setPhotoUrl] = useState('');
   const [isUploading, setIsUploading] = useState(false);
   const [savedActivity, setSavedActivity] = useState<JournalActivity | null>(null);
   const [showSuccess, setShowSuccess] = useState(false);
 
-  const moods = [
+  const emotions = [
     { emoji: '😊', label: 'Joyeux', value: 'joyeux' },
     { emoji: '😌', label: 'Serein', value: 'serein' },
     { emoji: '🤔', label: 'Pensif', value: 'pensif' },
@@ -46,7 +46,7 @@ const JournalMobile: React.FC<JournalMobileProps> = ({ onClose, onSave }) => {
     try {
       const journalEntry = await createJournalMutation.mutateAsync({
         content: content.trim(),
-        mood: mood || undefined,
+        emotion: emotion || undefined,
         image_url: photoUrl || undefined
       });
 
@@ -54,7 +54,7 @@ const JournalMobile: React.FC<JournalMobileProps> = ({ onClose, onSave }) => {
         id: journalEntry.id,
         type: 'journal',
         content: content.trim(),
-        mood: mood || undefined,
+        mood: emotion || undefined,
         photo_url: photoUrl || undefined,
         timestamp: journalEntry.created_at,
         created_at: journalEntry.created_at
@@ -142,27 +142,27 @@ const JournalMobile: React.FC<JournalMobileProps> = ({ onClose, onSave }) => {
           </p>
         </div>
 
-        {/* Mood Selection */}
+        {/* Emotion Selection */}
         <div className="mb-6">
           <label className="block text-sm font-medium text-ink mb-3">
             Ambiance du moment
           </label>
           <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
-            {moods.map((m) => (
+            {emotions.map((m) => (
               <button
                 key={m.value}
                 onClick={() => {
-                  setMood(m.value);
+                  setEmotion(m.value);
                   if ('vibrate' in navigator) navigator.vibrate(20);
                 }}
                 className={`flex-shrink-0 px-4 py-3 rounded-2xl border-2 transition-all active:scale-95 ${
-                  mood === m.value
+                  emotion === m.value
                     ? 'bg-vermilion/10 border-vermilion'
                     : 'bg-white border-stone/10'
                 }`}
               >
                 <div className="text-2xl mb-1">{m.emoji}</div>
-                <div className={`text-xs ${mood === m.value ? 'text-vermilion font-medium' : 'text-stone'}`}>
+                <div className={`text-xs ${emotion === m.value ? 'text-vermilion font-medium' : 'text-stone'}`}>
                   {m.label}
                 </div>
               </button>
