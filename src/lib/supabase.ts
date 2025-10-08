@@ -47,14 +47,14 @@ const createMockSupabaseClient = () => ({
 });
 
 // Client Supabase avec ANON KEY uniquement (jamais service role en frontend)
-export const supabase = isSupabaseConfigured 
+export const supabase = isSupabaseConfigured
   ? createClient(supabaseUrl!, supabaseAnonKey!, {
   auth: {
     persistSession: true,
     autoRefreshToken: true,
     detectSessionInUrl: true,
-    flowType: 'pkce',
-    debug: false
+    flowType: 'implicit',
+    debug: true
   }
 })
   : createMockSupabaseClient() as any;

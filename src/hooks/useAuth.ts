@@ -10,15 +10,15 @@ export const useAuth = () => {
   useEffect(() => {
     let mounted = true;
 
-    // Timeout de sécurité : si après 2 secondes on n'a toujours pas de réponse, on considère qu'il n'y a pas de session
+    // Timeout de sécurité : si après 10 secondes on n'a toujours pas de réponse, on considère qu'il n'y a pas de session
     const safetyTimeout = setTimeout(() => {
       if (mounted) {
-        console.warn('Auth loading timeout - assuming no session');
+        console.warn('⏱️ Auth loading timeout - assuming no session');
         setLoading(false);
         setSession(null);
         setUser(null);
       }
-    }, 2000);
+    }, 10000);
 
     // 1. Récupérer la session initiale au chargement de l'app
     supabase.auth.getSession()
