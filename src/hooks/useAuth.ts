@@ -8,29 +8,56 @@ export const useAuth = () => {
   const { user, session, loading, setUser, setSession, setLoading, signOut: storeSignOut } = useAuthStore();
 
   useEffect(() => {
-    // 1. Récupérer la session initiale au chargement de l'app
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      console.log('Initial session loaded:', session?.user?.email);
-      setSession(session);
-      setUser(session?.user ?? null);
-      
-      // Si l'utilisateur est connecté, créer/mettre à jour son profil
-      if (session?.user) {
-        createOrUpdateProfile(session.user);
+    let mounted = true;
+
+    // Timeout de sécurité : si après 2 secondes on n'a toujours pas de réponse, on considère qu'il n'y a pas de session
+    const safetyTimeout = setTimeout(() => {
+      if (mounted) {
+        console.warn('Auth loading timeout - assuming no session');
+        setLoading(false);
+        setSession(null);
+        setUser(null);
       }
-      
-      setLoading(false);
-    });
+    }, 2000);
+
+    // 1. Récupérer la session initiale au chargement de l'app
+    supabase.auth.getSession()
+      .then(({ data: { session } }) => {
+        if (!mounted) return;
+
+        clearTimeout(safetyTimeout);
+        console.log('Initial session loaded:', session?.user?.email || 'No session');
+        setSession(session);
+        setUser(session?.user ?? null);
+
+        // Si l'utilisateur est connecté, créer/mettre à jour son profil
+        if (session?.user) {
+          createOrUpdateProfile(session.user);
+        }
+
+        setLoading(false);
+      })
+      .catch((error) => {
+        if (!mounted) return;
+
+        clearTimeout(safetyTimeout);
+        console.error('Error loading session:', error);
+        setSession(null);
+        setUser(null);
+        setLoading(false);
+      });
 
     // 2. Écouter les changements d'authentification (connexion/déconnexion)
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
-        console.log('Auth state changed:', event, session?.user?.email, 'Session valid:', !!session);
-        
+        if (!mounted) return;
+
+        console.log('Auth state changed:', event, session?.user?.email || 'No user', 'Session valid:', !!session);
+
         setSession(session);
         setUser(session?.user ?? null);
         setLoading(false);
-        
+
         // Gérer les différents événements d'authentification
         if (event === 'SIGNED_IN' && session?.user) {
           // Utilisateur connecté : créer/mettre à jour le profil
@@ -49,7 +76,11 @@ export const useAuth = () => {
       }
     );
 
-    return () => subscription.unsubscribe();
+    return () => {
+      mounted = false;
+      clearTimeout(safetyTimeout);
+      subscription.unsubscribe();
+    };
   }, [setUser, setSession, setLoading]);
 
   // 3. Créer ou mettre à jour le profil utilisateur dans Supabase
