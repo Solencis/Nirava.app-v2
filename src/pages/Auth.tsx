@@ -30,6 +30,8 @@ const AuthPage: React.FC = () => {
     setSuccess('');
     setLoading(true);
 
+    console.log('🔐 Auth form submitted:', { mode, email: formData.email });
+
     try {
       if (mode === 'signup') {
         if (formData.password !== formData.confirmPassword) {
@@ -40,19 +42,32 @@ const AuthPage: React.FC = () => {
           throw new Error('Le mot de passe doit contenir au moins 6 caractères');
         }
 
-        await signUp(formData.email, formData.password, {
+        console.log('📝 Attempting signup...');
+        const result = await signUp(formData.email, formData.password, {
           firstName: formData.firstName
         });
+        console.log('✅ Signup successful:', result);
 
         setSuccess('Inscription réussie ! Connexion en cours...');
         setTimeout(() => navigate('/profile'), 1500);
       } else {
-        await signInWithPassword(formData.email, formData.password);
+        console.log('🔑 Attempting signin...');
+        const result = await signInWithPassword(formData.email, formData.password);
+        console.log('✅ Signin successful:', result);
+
         setSuccess('Connexion réussie !');
-        setTimeout(() => navigate('/profile'), 1000);
+        setTimeout(() => {
+          console.log('🚀 Navigating to profile...');
+          navigate('/profile');
+        }, 1000);
       }
     } catch (err: any) {
-      console.error('Auth error:', err);
+      console.error('❌ Auth error:', err);
+      console.error('Error details:', {
+        message: err.message,
+        name: err.name,
+        stack: err.stack
+      });
 
       if (err.message?.includes('Invalid login credentials')) {
         setError('Email ou mot de passe incorrect');
