@@ -12,6 +12,7 @@ import JournalMobile from '../components/JournalMobile';
 import MeditationMobile from '../components/MeditationMobile';
 import InstallCTA from '../components/InstallCTA';
 import IOSInstallHint from '../components/IOSInstallHint';
+import AmbianceControl from '../components/AmbianceControl';
 
 const Home: React.FC = () => {
   const { user } = useAuth();
@@ -233,6 +234,10 @@ const Home: React.FC = () => {
                   <div className="text-xs text-stone">Minutes</div>
                 </div>
               </div>
+            </div>
+
+            <div className="mb-6">
+              <AmbianceControl />
             </div>
 
             <Link
