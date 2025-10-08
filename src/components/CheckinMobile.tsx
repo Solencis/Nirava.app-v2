@@ -87,9 +87,9 @@ const CheckinMobile: React.FC<CheckinMobileProps> = ({ onClose, onSave }) => {
   };
 
   return (
-    <div className="fixed inset-0 bg-gradient-to-br from-sand via-pearl to-sand/50 z-50 animate-slide-up">
+    <div className="fixed inset-0 bg-gradient-to-br from-sand via-pearl to-sand/50 z-50 animate-slide-up flex flex-col">
       {/* Header */}
-      <div className="bg-white/80 backdrop-blur-lg border-b border-stone/10 px-4 py-4 flex items-center justify-between sticky top-0 z-10">
+      <div className="bg-white/80 backdrop-blur-lg border-b border-stone/10 px-4 py-4 flex items-center justify-between shrink-0">
         <button
           onClick={onClose}
           className="w-10 h-10 rounded-full bg-stone/10 flex items-center justify-center active:scale-95 transition-transform"
@@ -109,7 +109,7 @@ const CheckinMobile: React.FC<CheckinMobileProps> = ({ onClose, onSave }) => {
 
       {/* Progress bar */}
       {step < 4 && (
-        <div className="bg-white/80 backdrop-blur-lg px-4 py-3 border-b border-stone/10">
+        <div className="bg-white/80 backdrop-blur-lg px-4 py-3 border-b border-stone/10 shrink-0">
           <div className="flex gap-2">
             {[1, 2, 3].map((s) => (
               <div
@@ -123,226 +123,229 @@ const CheckinMobile: React.FC<CheckinMobileProps> = ({ onClose, onSave }) => {
         </div>
       )}
 
-      <div className="px-4 pt-8 pb-24 overflow-y-auto">
-        {/* Step 1: Emotion */}
-        {step === 1 && (
-          <div className="animate-fade-in">
-            <h2 className="text-3xl font-bold text-ink mb-3 text-center" style={{ fontFamily: "'Shippori Mincho', serif" }}>
-              Comment te sens-tu ?
-            </h2>
-            <p className="text-stone text-center mb-8">
-              Choisis l'émotion qui te correspond le mieux
-            </p>
+      {/* Content with scroll */}
+      <div className="flex-1 overflow-y-auto">
+        <div className="px-4 pt-8 pb-8 min-h-full">
+          {/* Step 1: Emotion */}
+          {step === 1 && (
+            <div className="animate-fade-in">
+              <h2 className="text-3xl font-bold text-ink mb-3 text-center" style={{ fontFamily: "'Shippori Mincho', serif" }}>
+                Comment te sens-tu ?
+              </h2>
+              <p className="text-stone text-center mb-8">
+                Choisis l'émotion qui te correspond le mieux
+              </p>
 
-            <div className="grid grid-cols-2 gap-3 max-w-sm mx-auto">
-              {emotions.map((emo) => (
-                <button
-                  key={emo.value}
-                  onClick={() => {
-                    setEmotion(emo.value);
-                    if ('vibrate' in navigator) navigator.vibrate(30);
-                  }}
-                  className={`p-6 rounded-2xl border-2 transition-all active:scale-95 ${
-                    emotion === emo.value
-                      ? 'bg-jade/10 border-jade shadow-lg'
-                      : 'bg-white border-stone/10 hover:border-jade/30'
-                  }`}
-                >
-                  <div className="text-4xl mb-2">{emo.emoji}</div>
-                  <div className={`font-medium ${emotion === emo.value ? 'text-jade' : 'text-ink'}`}>
-                    {emo.label}
-                  </div>
-                </button>
-              ))}
-            </div>
-
-            {emotion && (
-              <button
-                onClick={() => setStep(2)}
-                className="mt-8 w-full max-w-sm mx-auto flex items-center justify-center gap-2 bg-gradient-to-r from-jade to-forest text-white px-6 py-4 rounded-full font-semibold shadow-lg active:scale-95 transition-transform"
-              >
-                Continuer
-                <ChevronRight className="w-5 h-5" />
-              </button>
-            )}
-          </div>
-        )}
-
-        {/* Step 2: Intensity */}
-        {step === 2 && (
-          <div className="animate-fade-in">
-            <button
-              onClick={() => setStep(1)}
-              className="text-stone mb-4 active:scale-95 transition-transform"
-            >
-              ← Retour
-            </button>
-
-            <h2 className="text-3xl font-bold text-ink mb-3 text-center" style={{ fontFamily: "'Shippori Mincho', serif" }}>
-              À quel point ?
-            </h2>
-            <p className="text-stone text-center mb-8">
-              Évalue l'intensité de ton émotion
-            </p>
-
-            <div className="max-w-sm mx-auto">
-              <div className="mb-8">
-                <div className={`w-32 h-32 mx-auto rounded-full ${getIntensityColor()} flex items-center justify-center shadow-2xl mb-4`}>
-                  <span className="text-5xl font-bold text-white">{intensity}</span>
-                </div>
-                <div className="text-center text-xl font-semibold text-ink mb-2">
-                  {getIntensityLabel()}
-                </div>
-              </div>
-
-              <div className="space-y-2 mb-8">
-                {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((level) => (
+              <div className="grid grid-cols-2 gap-3 max-w-sm mx-auto">
+                {emotions.map((emo) => (
                   <button
-                    key={level}
+                    key={emo.value}
                     onClick={() => {
-                      setIntensity(level);
-                      if ('vibrate' in navigator) navigator.vibrate(20);
-                    }}
-                    className={`w-full py-3 rounded-xl transition-all active:scale-95 ${
-                      intensity === level
-                        ? 'bg-jade text-white shadow-lg'
-                        : 'bg-white border border-stone/10 text-ink hover:border-jade/30'
-                    }`}
-                  >
-                    {level}
-                  </button>
-                ))}
-              </div>
-
-              <button
-                onClick={() => setStep(3)}
-                className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-jade to-forest text-white px-6 py-4 rounded-full font-semibold shadow-lg active:scale-95 transition-transform"
-              >
-                Continuer
-                <ChevronRight className="w-5 h-5" />
-              </button>
-            </div>
-          </div>
-        )}
-
-        {/* Step 3: Need & Note */}
-        {step === 3 && (
-          <div className="animate-fade-in">
-            <button
-              onClick={() => setStep(2)}
-              className="text-stone mb-4 active:scale-95 transition-transform"
-            >
-              ← Retour
-            </button>
-
-            <h2 className="text-3xl font-bold text-ink mb-3 text-center" style={{ fontFamily: "'Shippori Mincho', serif" }}>
-              De quoi as-tu besoin ?
-            </h2>
-            <p className="text-stone text-center mb-8">
-              Identifie ton besoin principal
-            </p>
-
-            <div className="max-w-sm mx-auto space-y-6">
-              <div className="grid grid-cols-2 gap-3">
-                {needs.map((nee) => (
-                  <button
-                    key={nee.value}
-                    onClick={() => {
-                      setNeed(nee.value);
+                      setEmotion(emo.value);
                       if ('vibrate' in navigator) navigator.vibrate(30);
                     }}
-                    className={`p-4 rounded-2xl border-2 transition-all active:scale-95 ${
-                      need === nee.value
+                    className={`p-6 rounded-2xl border-2 transition-all active:scale-95 ${
+                      emotion === emo.value
                         ? 'bg-jade/10 border-jade shadow-lg'
                         : 'bg-white border-stone/10 hover:border-jade/30'
                     }`}
                   >
-                    <div className="text-3xl mb-2">{nee.icon}</div>
-                    <div className={`font-medium text-sm ${need === nee.value ? 'text-jade' : 'text-ink'}`}>
-                      {nee.label}
+                    <div className="text-4xl mb-2">{emo.emoji}</div>
+                    <div className={`font-medium ${emotion === emo.value ? 'text-jade' : 'text-ink'}`}>
+                      {emo.label}
                     </div>
                   </button>
                 ))}
               </div>
 
-              <div>
-                <label className="block text-sm font-medium text-ink mb-2">
-                  Note libre (optionnel)
-                </label>
-                <textarea
-                  value={note}
-                  onChange={(e) => setNote(e.target.value)}
-                  placeholder="Tes pensées du moment..."
-                  rows={4}
-                  className="w-full px-4 py-3 bg-white border border-stone/20 rounded-2xl focus:border-jade focus:ring-2 focus:ring-jade/20 transition-all resize-none"
-                  style={{ fontSize: '16px' }}
-                />
-              </div>
-
-              <button
-                onClick={handleSubmit}
-                disabled={createCheckinMutation.isPending}
-                className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-jade to-forest text-white px-6 py-4 rounded-full font-semibold shadow-lg active:scale-95 transition-transform disabled:opacity-50"
-              >
-                {createCheckinMutation.isPending ? (
-                  <>Enregistrement...</>
-                ) : (
-                  <>
-                    <Check className="w-5 h-5" />
-                    Terminer
-                  </>
-                )}
-              </button>
-            </div>
-          </div>
-        )}
-
-        {/* Step 4: Success */}
-        {step === 4 && savedActivity && (
-          <div className="animate-fade-in text-center max-w-sm mx-auto">
-            <div className="w-24 h-24 bg-jade/10 rounded-full flex items-center justify-center mx-auto mb-6 animate-scale-in">
-              <Sparkles className="w-12 h-12 text-jade" />
-            </div>
-
-            <h2 className="text-3xl font-bold text-ink mb-3" style={{ fontFamily: "'Shippori Mincho', serif" }}>
-              Bravo !
-            </h2>
-            <p className="text-stone mb-8">
-              Ton check-in a été enregistré avec succès
-            </p>
-
-            <div className="bg-white/80 backdrop-blur-lg rounded-2xl p-6 mb-6 text-left">
-              <div className="flex items-center gap-3 mb-4">
-                <div className="text-4xl">{emotions.find(e => e.value === emotion)?.emoji}</div>
-                <div>
-                  <div className="font-semibold text-ink capitalize">{emotion}</div>
-                  <div className="text-sm text-stone">Intensité: {intensity}/10</div>
-                </div>
-              </div>
-              {need && (
-                <div className="text-sm text-stone">
-                  Besoin: <span className="text-ink capitalize">{need}</span>
-                </div>
+              {emotion && (
+                <button
+                  onClick={() => setStep(2)}
+                  className="mt-8 w-full max-w-sm mx-auto flex items-center justify-center gap-2 bg-gradient-to-r from-jade to-forest text-white px-6 py-4 rounded-full font-semibold shadow-lg active:scale-95 transition-transform"
+                >
+                  Continuer
+                  <ChevronRight className="w-5 h-5" />
+                </button>
               )}
             </div>
+          )}
 
-            <div className="space-y-3">
-              <ShareToCommunityButton
-                activity={savedActivity}
-                onShared={() => {
-                  setTimeout(onClose, 1000);
-                }}
-              />
-
+          {/* Step 2: Intensity */}
+          {step === 2 && (
+            <div className="animate-fade-in">
               <button
-                onClick={onClose}
-                className="w-full px-6 py-3 border-2 border-stone/20 text-stone rounded-full active:scale-95 transition-transform"
+                onClick={() => setStep(1)}
+                className="text-stone mb-4 active:scale-95 transition-transform"
               >
-                Terminer
+                ← Retour
               </button>
+
+              <h2 className="text-3xl font-bold text-ink mb-3 text-center" style={{ fontFamily: "'Shippori Mincho', serif" }}>
+                À quel point ?
+              </h2>
+              <p className="text-stone text-center mb-8">
+                Évalue l'intensité de ton émotion
+              </p>
+
+              <div className="max-w-sm mx-auto">
+                <div className="mb-8">
+                  <div className={`w-32 h-32 mx-auto rounded-full ${getIntensityColor()} flex items-center justify-center shadow-2xl mb-4`}>
+                    <span className="text-5xl font-bold text-white">{intensity}</span>
+                  </div>
+                  <div className="text-center text-xl font-semibold text-ink mb-2">
+                    {getIntensityLabel()}
+                  </div>
+                </div>
+
+                <div className="space-y-2 mb-8">
+                  {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((level) => (
+                    <button
+                      key={level}
+                      onClick={() => {
+                        setIntensity(level);
+                        if ('vibrate' in navigator) navigator.vibrate(20);
+                      }}
+                      className={`w-full py-3 rounded-xl transition-all active:scale-95 ${
+                        intensity === level
+                          ? 'bg-jade text-white shadow-lg'
+                          : 'bg-white border border-stone/10 text-ink hover:border-jade/30'
+                      }`}
+                    >
+                      {level}
+                    </button>
+                  ))}
+                </div>
+
+                <button
+                  onClick={() => setStep(3)}
+                  className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-jade to-forest text-white px-6 py-4 rounded-full font-semibold shadow-lg active:scale-95 transition-transform"
+                >
+                  Continuer
+                  <ChevronRight className="w-5 h-5" />
+                </button>
+              </div>
             </div>
-          </div>
-        )}
+          )}
+
+          {/* Step 3: Need & Note */}
+          {step === 3 && (
+            <div className="animate-fade-in">
+              <button
+                onClick={() => setStep(2)}
+                className="text-stone mb-4 active:scale-95 transition-transform"
+              >
+                ← Retour
+              </button>
+
+              <h2 className="text-3xl font-bold text-ink mb-3 text-center" style={{ fontFamily: "'Shippori Mincho', serif" }}>
+                De quoi as-tu besoin ?
+              </h2>
+              <p className="text-stone text-center mb-8">
+                Identifie ton besoin principal
+              </p>
+
+              <div className="max-w-sm mx-auto space-y-6">
+                <div className="grid grid-cols-2 gap-3">
+                  {needs.map((nee) => (
+                    <button
+                      key={nee.value}
+                      onClick={() => {
+                        setNeed(nee.value);
+                        if ('vibrate' in navigator) navigator.vibrate(30);
+                      }}
+                      className={`p-4 rounded-2xl border-2 transition-all active:scale-95 ${
+                        need === nee.value
+                          ? 'bg-jade/10 border-jade shadow-lg'
+                          : 'bg-white border-stone/10 hover:border-jade/30'
+                      }`}
+                    >
+                      <div className="text-3xl mb-2">{nee.icon}</div>
+                      <div className={`font-medium text-sm ${need === nee.value ? 'text-jade' : 'text-ink'}`}>
+                        {nee.label}
+                      </div>
+                    </button>
+                  ))}
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-ink mb-2">
+                    Note libre (optionnel)
+                  </label>
+                  <textarea
+                    value={note}
+                    onChange={(e) => setNote(e.target.value)}
+                    placeholder="Tes pensées du moment..."
+                    rows={4}
+                    className="w-full px-4 py-3 bg-white border border-stone/20 rounded-2xl focus:border-jade focus:ring-2 focus:ring-jade/20 transition-all resize-none"
+                    style={{ fontSize: '16px' }}
+                  />
+                </div>
+
+                <button
+                  onClick={handleSubmit}
+                  disabled={createCheckinMutation.isPending}
+                  className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-jade to-forest text-white px-6 py-4 rounded-full font-semibold shadow-lg active:scale-95 transition-transform disabled:opacity-50"
+                >
+                  {createCheckinMutation.isPending ? (
+                    <>Enregistrement...</>
+                  ) : (
+                    <>
+                      <Check className="w-5 h-5" />
+                      Terminer
+                    </>
+                  )}
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* Step 4: Success */}
+          {step === 4 && savedActivity && (
+            <div className="animate-fade-in text-center max-w-sm mx-auto">
+              <div className="w-24 h-24 bg-jade/10 rounded-full flex items-center justify-center mx-auto mb-6 animate-scale-in">
+                <Sparkles className="w-12 h-12 text-jade" />
+              </div>
+
+              <h2 className="text-3xl font-bold text-ink mb-3" style={{ fontFamily: "'Shippori Mincho', serif" }}>
+                Bravo !
+              </h2>
+              <p className="text-stone mb-8">
+                Ton check-in a été enregistré avec succès
+              </p>
+
+              <div className="bg-white/80 backdrop-blur-lg rounded-2xl p-6 mb-6 text-left">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="text-4xl">{emotions.find(e => e.value === emotion)?.emoji}</div>
+                  <div>
+                    <div className="font-semibold text-ink capitalize">{emotion}</div>
+                    <div className="text-sm text-stone">Intensité: {intensity}/10</div>
+                  </div>
+                </div>
+                {need && (
+                  <div className="text-sm text-stone">
+                    Besoin: <span className="text-ink capitalize">{need}</span>
+                  </div>
+                )}
+              </div>
+
+              <div className="space-y-3">
+                <ShareToCommunityButton
+                  activity={savedActivity}
+                  onShared={() => {
+                    setTimeout(onClose, 1000);
+                  }}
+                />
+
+                <button
+                  onClick={onClose}
+                  className="w-full px-6 py-3 border-2 border-stone/20 text-stone rounded-full active:scale-95 transition-transform"
+                >
+                  Terminer
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

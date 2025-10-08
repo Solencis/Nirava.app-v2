@@ -6,7 +6,7 @@ import JournalMobile from '../components/JournalMobile';
 import MeditationMobile from '../components/MeditationMobile';
 import EmergencyPause from '../components/EmergencyPause';
 import HistoryModal from '../components/HistoryModal';
-import DreamJournalModal from '../components/DreamJournalModal';
+import DreamJournalMobile from '../components/DreamJournalMobile';
 import { useAuth } from '../hooks/useAuth';
 import { useMeditationWeeklyStats } from '../hooks/useMeditation';
 import { useCheckins } from '../hooks/useCheckins';
@@ -913,11 +913,12 @@ const Journal: React.FC = () => {
         onStatsUpdate={refreshStats}
       />
       
-      <DreamJournalModal 
-        isOpen={showDreamJournal}
-        onClose={() => setShowDreamJournal(false)}
-        onSave={refreshStats}
-      />
+      {showDreamJournal && (
+        <DreamJournalMobile
+          onClose={() => setShowDreamJournal(false)}
+          onSave={refreshStats}
+        />
+      )}
       
       {/* Modal de correction des minutes */}
       {showReduceModal && (

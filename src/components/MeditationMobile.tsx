@@ -80,8 +80,8 @@ const MeditationMobile: React.FC<MeditationMobileProps> = ({ onClose }) => {
 
   if (showSuccess) {
     return (
-      <div className="fixed inset-0 bg-gradient-to-br from-sand via-pearl to-sand/50 z-50 animate-slide-up">
-        <div className="h-full flex flex-col items-center justify-center px-4 text-center">
+      <div className="fixed inset-0 bg-gradient-to-br from-sand via-pearl to-sand/50 z-50 animate-slide-up flex flex-col">
+        <div className="flex-1 flex flex-col items-center justify-center px-4 text-center">
           <div className="w-24 h-24 bg-jade/10 rounded-full flex items-center justify-center mx-auto mb-6 animate-scale-in">
             <Check className="w-12 h-12 text-jade" />
           </div>
@@ -214,9 +214,9 @@ const MeditationMobile: React.FC<MeditationMobileProps> = ({ onClose }) => {
   }
 
   return (
-    <div className="fixed inset-0 bg-gradient-to-br from-sand via-pearl to-sand/50 z-50 animate-slide-up">
+    <div className="fixed inset-0 bg-gradient-to-br from-sand via-pearl to-sand/50 z-50 animate-slide-up flex flex-col">
       {/* Header */}
-      <div className="bg-white/80 backdrop-blur-lg border-b border-stone/10 px-4 py-4 flex items-center justify-between">
+      <div className="bg-white/80 backdrop-blur-lg border-b border-stone/10 px-4 py-4 flex items-center justify-between shrink-0">
         <button
           onClick={onClose}
           className="w-10 h-10 rounded-full bg-stone/10 flex items-center justify-center active:scale-95 transition-transform"
@@ -234,46 +234,48 @@ const MeditationMobile: React.FC<MeditationMobileProps> = ({ onClose }) => {
         <div className="w-10" />
       </div>
 
-      {/* Content */}
-      <div className="px-4 pt-8 pb-24 overflow-y-auto">
-        <h2 className="text-3xl font-bold text-ink mb-3 text-center" style={{ fontFamily: "'Shippori Mincho', serif" }}>
-          Choisis ta durée
-        </h2>
-        <p className="text-stone text-center mb-8">
-          Prends un moment pour te recentrer
-        </p>
+      {/* Content with scroll */}
+      <div className="flex-1 overflow-y-auto">
+        <div className="px-4 pt-8 pb-8">
+          <h2 className="text-3xl font-bold text-ink mb-3 text-center" style={{ fontFamily: "'Shippori Mincho', serif" }}>
+            Choisis ta durée
+          </h2>
+          <p className="text-stone text-center mb-8">
+            Prends un moment pour te recentrer
+          </p>
 
-        <div className="space-y-3 max-w-sm mx-auto">
-          {durations.map((duration) => (
-            <button
-              key={duration.minutes}
-              onClick={() => startMeditation(duration.minutes)}
-              className="w-full bg-white border-2 border-stone/10 rounded-2xl p-6 hover:border-jade/30 active:scale-98 transition-all group"
-            >
-              <div className="flex items-center justify-between">
-                <div className="text-left">
-                  <div className="text-2xl font-bold text-ink mb-1 group-hover:text-jade transition-colors">
-                    {duration.label}
+          <div className="space-y-3 max-w-sm mx-auto mb-8">
+            {durations.map((duration) => (
+              <button
+                key={duration.minutes}
+                onClick={() => startMeditation(duration.minutes)}
+                className="w-full bg-white border-2 border-stone/10 rounded-2xl p-6 hover:border-jade/30 active:scale-98 transition-all group"
+              >
+                <div className="flex items-center justify-between">
+                  <div className="text-left">
+                    <div className="text-2xl font-bold text-ink mb-1 group-hover:text-jade transition-colors">
+                      {duration.label}
+                    </div>
+                    <div className="text-sm text-stone">{duration.desc}</div>
                   </div>
-                  <div className="text-sm text-stone">{duration.desc}</div>
+                  <div className="w-12 h-12 bg-jade/10 rounded-full flex items-center justify-center group-hover:bg-jade group-hover:scale-110 transition-all">
+                    <Play className="w-5 h-5 text-jade group-hover:text-white ml-0.5" />
+                  </div>
                 </div>
-                <div className="w-12 h-12 bg-jade/10 rounded-full flex items-center justify-center group-hover:bg-jade group-hover:scale-110 transition-all">
-                  <Play className="w-5 h-5 text-jade group-hover:text-white ml-0.5" />
-                </div>
-              </div>
-            </button>
-          ))}
-        </div>
+              </button>
+            ))}
+          </div>
 
-        {/* Tips */}
-        <div className="mt-8 bg-jade/5 rounded-2xl p-4 border border-jade/10 max-w-sm mx-auto">
-          <h3 className="text-sm font-semibold text-ink mb-2">💡 Conseils</h3>
-          <ul className="text-xs text-stone space-y-1">
-            <li>• Trouve un endroit calme</li>
-            <li>• Assieds-toi confortablement</li>
-            <li>• Ferme les yeux si possible</li>
-            <li>• Concentre-toi sur ta respiration</li>
-          </ul>
+          {/* Tips */}
+          <div className="bg-jade/5 rounded-2xl p-4 border border-jade/10 max-w-sm mx-auto">
+            <h3 className="text-sm font-semibold text-ink mb-2">💡 Conseils</h3>
+            <ul className="text-xs text-stone space-y-1">
+              <li>• Trouve un endroit calme</li>
+              <li>• Assieds-toi confortablement</li>
+              <li>• Ferme les yeux si possible</li>
+              <li>• Concentre-toi sur ta respiration</li>
+            </ul>
+          </div>
         </div>
       </div>
     </div>
