@@ -100,72 +100,7 @@ const ProfilePage: React.FC = () => {
       return;
     }
 
-    try {
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', user.id)
-        .maybeSingle();
-
-      if (error) {
-        console.error('Error loading profile:', error);
-        // Créer un profil par défaut si l'erreur n'est pas grave
-        setProfile({
-          id: user.id,
-          display_name: user.email?.split('@')[0] || 'Utilisateur',
-          bio: '',
-          photo_url: '',
-          share_progress: true,
-          level: 'N1',
-          subscription_status: 'none',
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString()
-        });
-        setEditForm({
-          display_name: user.email?.split('@')[0] || 'Utilisateur',
-          bio: '',
-          photo_url: '',
-          share_progress: true,
-          level: 'N1'
-        });
-        setLoading(false);
-        return;
-      }
-
-      if (data) {
-        setProfile(data);
-        setEditForm({
-          display_name: data.display_name || '',
-          bio: data.bio || '',
-          photo_url: data.photo_url || '',
-          share_progress: data.share_progress,
-          level: data.level || 'N1'
-        });
-      } else {
-        // Pas de profil trouvé, créer un profil par défaut
-        const defaultProfile: Profile = {
-          id: user.id,
-          display_name: user.email?.split('@')[0] || 'Utilisateur',
-          bio: '',
-          photo_url: '',
-          share_progress: true,
-          level: 'N1',
-          subscription_status: 'none',
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString()
-        };
-        setProfile(defaultProfile);
-        setEditForm({
-          display_name: defaultProfile.display_name,
-          bio: defaultProfile.bio || '',
-          photo_url: defaultProfile.photo_url || '',
-          share_progress: defaultProfile.share_progress,
-          level: defaultProfile.level || 'N1'
-        });
-      }
-    } catch (error) {
-      console.error('Error loading profile:', error);
-      // En cas d'erreur, créer un profil minimal
+    const createFallbackProfile = () => {
       const fallbackProfile: Profile = {
         id: user.id,
         display_name: user.email?.split('@')[0] || 'Utilisateur',
@@ -185,6 +120,36 @@ const ProfilePage: React.FC = () => {
         share_progress: true,
         level: 'N1'
       });
+    };
+
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', user.id)
+        .maybeSingle();
+
+      if (error) {
+        console.error('Error loading profile:', error);
+        createFallbackProfile();
+        return;
+      }
+
+      if (data) {
+        setProfile(data);
+        setEditForm({
+          display_name: data.display_name || '',
+          bio: data.bio || '',
+          photo_url: data.photo_url || '',
+          share_progress: data.share_progress,
+          level: data.level || 'N1'
+        });
+      } else {
+        createFallbackProfile();
+      }
+    } catch (error) {
+      console.error('Error loading profile:', error);
+      createFallbackProfile();
     } finally {
       setLoading(false);
     }

@@ -69,9 +69,14 @@ export const useAuth = () => {
         .from('profiles')
         .select('*')
         .eq('id', user.id)
-        .single();
+        .maybeSingle();
 
-      if (fetchError && fetchError.code === 'PGRST116') {
+      if (fetchError) {
+        console.error('Error fetching profile:', fetchError);
+        return;
+      }
+
+      if (!existingProfile) {
         // Profil n'existe pas, le créer
         const displayName = user.user_metadata?.firstName 
           ? user.user_metadata.firstName 
@@ -94,8 +99,6 @@ export const useAuth = () => {
         } else {
           console.log('Profile created successfully for:', user.email);
         }
-      } else if (fetchError) {
-        console.error('Error fetching profile:', fetchError);
       } else {
         console.log('Profile already exists for:', user.email);
       }
@@ -258,22 +261,41 @@ export const useAuth = () => {
   // 9. Déconnexion avec nettoyage complet
   const signOut = async () => {
     try {
+      console.log('Starting sign out process...');
+
       const { error } = await supabase.auth.signOut();
-      if (error) throw error;
-      
-      // Nettoyer le store local
+      if (error) {
+        console.error('Supabase signOut error:', error);
+      }
+
+      // Nettoyer le store local (même en cas d'erreur Supabase)
       storeSignOut();
-      
+
       // Vider le cache React Query
       queryClient.clear();
-      
-      // Nettoyer les données locales
-      localStorage.removeItem('user-profile');
-      
-      console.log('User signed out successfully');
+
+      // Nettoyer TOUTES les données locales liées à l'app
+      const keysToRemove = [];
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key && (key.startsWith('nirava_') || key.includes('supabase') || key === 'user-profile')) {
+          keysToRemove.push(key);
+        }
+      }
+      keysToRemove.forEach(key => localStorage.removeItem(key));
+
+      console.log('User signed out successfully, localStorage cleared');
+
+      // Forcer le rechargement de la page pour réinitialiser complètement l'état
+      window.location.href = '/auth/login';
     } catch (error) {
       console.error('Error signing out:', error);
-      throw error;
+
+      // Forcer la déconnexion même en cas d'erreur
+      storeSignOut();
+      queryClient.clear();
+      localStorage.clear();
+      window.location.href = '/auth/login';
     }
   };
 

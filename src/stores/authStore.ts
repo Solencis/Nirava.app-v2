@@ -1,5 +1,4 @@
 import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
 import { User, Session } from '@supabase/supabase-js';
 
 interface AuthState {
@@ -15,26 +14,15 @@ interface AuthActions {
   signOut: () => void;
 }
 
-export const useAuthStore = create<AuthState & AuthActions>()(
-  persist(
-    (set) => ({
-      // State
-      user: null,
-      session: null,
-      loading: true,
+export const useAuthStore = create<AuthState & AuthActions>()((set) => ({
+  // State
+  user: null,
+  session: null,
+  loading: true,
 
-      // Actions
-      setUser: (user) => set({ user }),
-      setSession: (session) => set({ session }),
-      setLoading: (loading) => set({ loading }),
-      signOut: () => set({ user: null, session: null }),
-    }),
-    {
-      name: 'nirava_auth',
-      partialize: (state) => ({
-        user: state.user,
-        session: state.session,
-      }),
-    }
-  )
-);
+  // Actions
+  setUser: (user) => set({ user }),
+  setSession: (session) => set({ session }),
+  setLoading: (loading) => set({ loading }),
+  signOut: () => set({ user: null, session: null }),
+}));
