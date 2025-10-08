@@ -7,9 +7,9 @@ import { useJournals } from '../hooks/useJournals';
 import { useMeditationWeeklyStats } from '../hooks/useMeditation';
 import { supabase } from '../lib/supabase';
 import DailyQuests from '../components/DailyQuests';
-import CheckinModal from '../components/CheckinModal';
-import JournalModal from '../components/JournalModal';
-import MeditationModal from '../components/MeditationModal';
+import CheckinMobile from '../components/CheckinMobile';
+import JournalMobile from '../components/JournalMobile';
+import MeditationMobile from '../components/MeditationMobile';
 import InstallCTA from '../components/InstallCTA';
 import IOSInstallHint from '../components/IOSInstallHint';
 
@@ -263,9 +263,9 @@ const Home: React.FC = () => {
       <InstallCTA />
       <IOSInstallHint />
 
-      {showCheckin && <CheckinModal onClose={() => setShowCheckin(false)} />}
-      {showJournal && <JournalModal onClose={() => setShowJournal(false)} />}
-      {showMeditation && <MeditationModal onClose={() => setShowMeditation(false)} />}
+      {showCheckin && <CheckinMobile onClose={() => setShowCheckin(false)} onSave={() => {}} />}
+      {showJournal && <JournalMobile onClose={() => setShowJournal(false)} onSave={() => {}} />}
+      {showMeditation && <MeditationMobile onClose={() => setShowMeditation(false)} />}
     </div>
   );
 };

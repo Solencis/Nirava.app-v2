@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Heart, Moon, Timer, Shield, Plus, Calendar, Flame, CheckCircle, History, Cloud, Sparkles, Award, Target, Zap, TrendingUp, Star, Users } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import CheckinModal from '../components/CheckinModal';
-import JournalModal from '../components/JournalModal';
-import MeditationModal from '../components/MeditationModal';
+import CheckinMobile from '../components/CheckinMobile';
+import JournalMobile from '../components/JournalMobile';
+import MeditationMobile from '../components/MeditationMobile';
 import EmergencyPause from '../components/EmergencyPause';
 import HistoryModal from '../components/HistoryModal';
 import DreamJournalModal from '../components/DreamJournalModal';
@@ -882,23 +882,25 @@ const Journal: React.FC = () => {
       </div>
 
       {/* Modals */}
-      <CheckinModal 
-        isOpen={showCheckin}
-        onClose={() => setShowCheckin(false)}
-        onSave={refreshStats}
-      />
-      
-      <JournalModal 
-        isOpen={showJournal}
-        onClose={() => setShowJournal(false)}
-        onSave={refreshStats}
-      />
-      
-      <MeditationModal 
-        isOpen={showMeditation}
-        onClose={() => setShowMeditation(false)}
-        onSave={refreshStats}
-      />
+      {showCheckin && (
+        <CheckinMobile
+          onClose={() => setShowCheckin(false)}
+          onSave={refreshStats}
+        />
+      )}
+
+      {showJournal && (
+        <JournalMobile
+          onClose={() => setShowJournal(false)}
+          onSave={refreshStats}
+        />
+      )}
+
+      {showMeditation && (
+        <MeditationMobile
+          onClose={() => setShowMeditation(false)}
+        />
+      )}
       
       <EmergencyPause 
         isOpen={showEmergencyPause}
