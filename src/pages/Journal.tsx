@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Heart, Moon, Timer, Shield, Plus, Calendar, Flame, CheckCircle, History, Cloud, Sparkles, Award, Target, Zap, TrendingUp, Star, Users } from 'lucide-react';
+import { Heart, Moon, Timer, Shield, Plus, Calendar, Flame, CheckCircle, History, Cloud, Sparkles, Award, Target, Zap, TrendingUp, Star, Users, Wind, Trophy } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import CheckinMobile from '../components/CheckinMobile';
 import JournalMobile from '../components/JournalMobile';
@@ -7,6 +7,7 @@ import MeditationMobile from '../components/MeditationMobile';
 import EmergencyPause from '../components/EmergencyPause';
 import HistoryModal from '../components/HistoryModal';
 import DreamJournalMobile from '../components/DreamJournalMobile';
+import BreathingMobile from '../components/BreathingMobile';
 import { useAuth } from '../hooks/useAuth';
 import { useMeditationWeeklyStats } from '../hooks/useMeditation';
 import { useCheckins } from '../hooks/useCheckins';
@@ -42,6 +43,7 @@ const Journal: React.FC = () => {
   const [showEmergencyPause, setShowEmergencyPause] = useState(false);
   const [showHistory, setShowHistory] = useState(false);
   const [showDreamJournal, setShowDreamJournal] = useState(false);
+  const [showBreathing, setShowBreathing] = useState(false);
   const [loading, setLoading] = useState(true);
   const [showReduceModal, setShowReduceModal] = useState(false);
   const [minutesToReduce, setMinutesToReduce] = useState('');
@@ -619,89 +621,49 @@ const Journal: React.FC = () => {
             </button>
           </div>
 
-          {/* Pause émotionnelle - Design spécial */}
-          <div className="mb-8">
+          {/* Exercices de respiration et Pause émotionnelle */}
+          <div className="grid grid-cols-1 gap-4 mb-8">
+            {/* Respiration guidée */}
             <button
-              onClick={() => handleActionClick('emergency', () => setShowEmergencyPause(true))}
-              className="group w-full bg-gradient-to-r from-sunset/10 via-vermilion/10 to-sunset/10 backdrop-blur-md rounded-3xl p-6 shadow-2xl border border-sunset/20 text-center transition-all duration-300 hover:scale-[1.02] hover:shadow-3xl hover:from-sunset/20 hover:to-vermilion/20 btn-addictive magnetic-hover relative overflow-hidden"
+              onClick={() => handleActionClick('breathing', () => setShowBreathing(true))}
+              className="group bg-white/95 backdrop-blur-md rounded-3xl p-6 shadow-2xl border border-stone/10 text-center transition-all duration-300 hover:scale-[1.02] hover:shadow-3xl hover:bg-jade/5 btn-addictive magnetic-hover relative overflow-hidden"
             >
-              {/* Effet de pulsation d'urgence */}
-              <div className="absolute inset-0 bg-gradient-to-r from-sunset/20 to-vermilion/20 animate-pulse-emergency"></div>
-              
+              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-jade/10 to-transparent transform -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
+
               <div className="relative z-10 flex items-center justify-center">
-                <div className="w-16 h-16 bg-gradient-to-br from-sunset to-vermilion rounded-full flex items-center justify-center mr-4 group-hover:scale-110 transition-all duration-300 shadow-xl animate-breathe-urgent">
-                  <Shield size={32} strokeWidth={1.5} className="text-white" />
+                <div className="w-14 h-14 bg-gradient-to-br from-jade/20 to-jade/10 rounded-full flex items-center justify-center mr-4 group-hover:scale-110 transition-all duration-300 shadow-lg group-hover:shadow-jade/30">
+                  <Wind size={28} strokeWidth={1.5} className="text-jade animate-breathe" />
                 </div>
                 <div className="text-left">
-                  <h3 className="font-bold text-ink mb-1 text-lg" style={{ fontFamily: "'Shippori Mincho', serif" }}>
-                    Pause émotionnelle
+                  <h3 className="font-bold text-ink mb-1 text-base" style={{ fontFamily: "'Shippori Mincho', serif" }}>
+                    Exercices de respiration
                   </h3>
-                  <p className="text-sm text-stone mb-2 leading-tight">Respiration guidée d'urgence</p>
-                  <div className="text-sm text-sunset font-bold bg-sunset/20 px-3 py-1 rounded-full inline-block">
-                    🆘 Toujours disponible
-                  </div>
+                  <p className="text-xs text-stone leading-tight">3 exercices guidés pour te recentrer</p>
                 </div>
               </div>
-              
-              {/* Onde d'énergie */}
-              <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-sunset via-vermilion to-sunset animate-wave"></div>
+            </button>
+
+            {/* Pause émotionnelle d'urgence */}
+            <button
+              onClick={() => handleActionClick('emergency', () => setShowEmergencyPause(true))}
+              className="group bg-gradient-to-r from-sunset/10 via-vermilion/10 to-sunset/10 backdrop-blur-md rounded-3xl p-6 shadow-2xl border border-sunset/20 text-center transition-all duration-300 hover:scale-[1.02] hover:shadow-3xl hover:from-sunset/20 hover:to-vermilion/20 btn-addictive magnetic-hover relative overflow-hidden"
+            >
+              <div className="absolute inset-0 bg-gradient-to-r from-sunset/20 to-vermilion/20 animate-pulse-emergency"></div>
+
+              <div className="relative z-10 flex items-center justify-center">
+                <div className="w-14 h-14 bg-gradient-to-br from-sunset to-vermilion rounded-full flex items-center justify-center mr-4 group-hover:scale-110 transition-all duration-300 shadow-xl animate-breathe-urgent">
+                  <Shield size={28} strokeWidth={1.5} className="text-white" />
+                </div>
+                <div className="text-left">
+                  <h3 className="font-bold text-ink mb-1 text-base" style={{ fontFamily: "'Shippori Mincho', serif" }}>
+                    Pause émotionnelle
+                  </h3>
+                  <p className="text-xs text-stone leading-tight">🆘 Respiration d'urgence</p>
+                </div>
+              </div>
             </button>
           </div>
 
-          {/* Citation inspirante rotative */}
-          <div 
-            key={pulseKey}
-            className="mb-8 bg-white/95 backdrop-blur-md rounded-3xl p-6 shadow-2xl border border-stone/10 text-center relative overflow-hidden animate-fade-in-up"
-          >
-            {/* Ornements décoratifs */}
-            <div className="absolute top-4 left-4 opacity-10">
-              <Star className="w-6 h-6 text-jade animate-twinkle" />
-            </div>
-            <div className="absolute bottom-4 right-4 opacity-10">
-              <Sparkles className="w-6 h-6 text-vermilion animate-twinkle" style={{ animationDelay: '1s' }} />
-            </div>
-            
-            <div className="relative z-10">
-              <div className="w-12 h-12 bg-gradient-to-br from-jade/20 to-vermilion/20 rounded-full flex items-center justify-center mx-auto mb-4 animate-breathe-enhanced">
-                <Award className="w-6 h-6 text-jade" />
-              </div>
-              
-              <blockquote 
-                className="text-lg text-ink font-medium leading-relaxed mb-4 min-h-[3rem] flex items-center justify-center"
-                style={{ fontFamily: "'Shippori Mincho', serif" }}
-              >
-                {inspirationalQuotes[currentQuote].text.split('\n').map((line, index) => (
-                  <span key={index} className="block">
-                    {line}
-                    {index < inspirationalQuotes[currentQuote].text.split('\n').length - 1 && <br />}
-                  </span>
-                ))}
-              </blockquote>
-              
-              <cite className="text-sm text-stone/80 font-medium">
-                — {inspirationalQuotes[currentQuote].author}
-              </cite>
-              
-              {/* Indicateurs de citation */}
-              <div className="flex justify-center mt-4 space-x-2">
-                {inspirationalQuotes.map((_, index) => (
-                  <button
-                    key={index}
-                    onClick={() => {
-                      setCurrentQuote(index);
-                      setPulseKey(prev => prev + 1);
-                      hapticFeedback();
-                    }}
-                    className={`w-2 h-2 rounded-full transition-all duration-300 ${
-                      index === currentQuote 
-                        ? 'bg-jade scale-125 shadow-lg shadow-jade/50' 
-                        : 'bg-stone/30 hover:bg-jade/50 hover:scale-110'
-                    }`}
-                  />
-                ))}
-              </div>
-            </div>
-          </div>
 
           {/* Bouton Historique premium */}
           <div className="mb-8">
@@ -917,6 +879,12 @@ const Journal: React.FC = () => {
         <DreamJournalMobile
           onClose={() => setShowDreamJournal(false)}
           onSave={refreshStats}
+        />
+      )}
+
+      {showBreathing && (
+        <BreathingMobile
+          onClose={() => setShowBreathing(false)}
         />
       )}
       
