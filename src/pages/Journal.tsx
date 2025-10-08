@@ -375,10 +375,9 @@ const Journal: React.FC = () => {
               className="text-3xl md:text-4xl font-bold text-ink mb-3 leading-tight"
               style={{ fontFamily: "'Shippori Mincho', serif" }}
             >
-              Ton Tableau de Bord
+              Ton Espace Sacré
             </h1>
-            <p className="text-stone text-base mb-2 leading-relaxed italic opacity-90">{currentMessage}</p>
-            <p className="text-stone/70 text-sm mb-6 leading-relaxed">Chaque action est une pierre sur ton chemin vers la sérénité</p>
+            <p className="text-stone text-base mb-6 leading-relaxed italic opacity-90">{currentMessage}</p>
             
             {/* Stats dashboard premium */}
             <div className="bg-white/95 backdrop-blur-md rounded-3xl p-6 shadow-2xl border border-stone/10 relative overflow-hidden">
@@ -386,10 +385,11 @@ const Journal: React.FC = () => {
               <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-shimmer-slow"></div>
               
               <div className="relative z-10">
-                <div className="flex items-center justify-center mb-6">
-                  <h2 className="text-xl font-bold bg-gradient-to-r from-jade via-forest to-jade bg-clip-text text-transparent" style={{ fontFamily: "'Shippori Mincho', serif" }}>
-                    Ta semaine en un coup d'œil
+                <div className="text-center mb-6">
+                  <h2 className="text-xl font-bold bg-gradient-to-r from-jade via-forest to-jade bg-clip-text text-transparent mb-2" style={{ fontFamily: "'Shippori Mincho', serif" }}>
+                    Cette semaine
                   </h2>
+                  <p className="text-xs text-stone/60">Chaque geste compte</p>
                 </div>
                 
                 {/* Grid stats avec animations */}
@@ -668,22 +668,19 @@ const Journal: React.FC = () => {
           <div className="mb-8">
             <button
               onClick={() => handleActionClick('history', () => setShowHistory(true))}
-              className="group w-full bg-white/95 backdrop-blur-md rounded-3xl p-5 shadow-2xl border border-stone/10 text-center transition-all duration-300 hover:scale-[1.02] hover:shadow-3xl hover:bg-stone/5 flex items-center justify-center btn-addictive magnetic-hover relative overflow-hidden"
+              className="group w-full bg-white/95 backdrop-blur-md rounded-3xl p-5 shadow-xl border border-stone/10 text-center transition-all duration-300 hover:scale-[1.01] hover:shadow-2xl hover:bg-stone/5 flex items-center justify-center btn-addictive magnetic-hover relative overflow-hidden"
             >
               <div className="absolute inset-0 bg-gradient-to-r from-transparent via-stone/5 to-transparent transform -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
-              
+
               <div className="relative z-10 flex items-center">
-                <div className="w-14 h-14 bg-gradient-to-br from-stone/20 to-stone/10 rounded-2xl flex items-center justify-center mr-4 group-hover:scale-110 transition-all duration-300 shadow-lg">
-                  <History className="w-7 h-7 text-stone animate-rotate-gentle" />
+                <div className="w-12 h-12 bg-gradient-to-br from-stone/15 to-stone/5 rounded-2xl flex items-center justify-center mr-4 group-hover:scale-110 transition-all duration-300">
+                  <History className="w-6 h-6 text-stone" />
                 </div>
                 <div className="text-left">
-                  <h3 className="font-bold text-ink text-lg mb-1" style={{ fontFamily: "'Shippori Mincho', serif" }}>
-                    Voir l'historique
+                  <h3 className="font-bold text-ink text-base mb-1" style={{ fontFamily: "'Shippori Mincho', serif" }}>
+                    Historique
                   </h3>
-                  <p className="text-sm text-stone">Tes check-ins et journaux passés</p>
-                  <div className="text-xs text-stone/60 mt-1">
-                    📊 {stats.checkins + stats.journals + stats.dreams} entrées au total
-                  </div>
+                  <p className="text-xs text-stone/70">Ton parcours jusqu'ici</p>
                 </div>
               </div>
             </button>
@@ -702,12 +699,12 @@ const Journal: React.FC = () => {
                   </div>
                   <div>
                     <h3 className="font-bold text-sunset text-lg" style={{ fontFamily: "'Shippori Mincho', serif" }}>
-                      🏆 Série de {stats.streak} jours !
+                      Série de {stats.streak} jours
                     </h3>
                     <p className="text-stone text-sm">
-                      {stats.streak >= 30 ? 'Maître du journaling !' :
-                       stats.streak >= 14 ? 'Série impressionnante !' :
-                       'Belle régularité !'}
+                      {stats.streak >= 30 ? 'Ta discipline est devenue nature.' :
+                       stats.streak >= 14 ? 'Le rituel s\'ancre profondément.' :
+                       'Chaque jour te rapproche de toi.'}
                     </p>
                   </div>
                 </div>
@@ -723,10 +720,10 @@ const Journal: React.FC = () => {
                   </div>
                   <div>
                     <h3 className="font-bold text-forest text-lg" style={{ fontFamily: "'Shippori Mincho', serif" }}>
-                      🧘 {stats.meditation} minutes de méditation !
+                      {stats.meditation} minutes de silence
                     </h3>
                     <p className="text-stone text-sm">
-                      {stats.meditation >= 120 ? 'Méditant accompli !' : 'Belle pratique contemplative !'}
+                      {stats.meditation >= 120 ? 'Dans le silence, tu as trouvé un refuge.' : 'Chaque minute d\'immobilité est une victoire.'}
                     </p>
                   </div>
                 </div>
@@ -734,52 +731,11 @@ const Journal: React.FC = () => {
             )}
           </div>
 
-          {/* Raccourcis rapides avec design premium */}
-          <div className="mb-8">
-            <h3 className="text-lg font-bold text-ink mb-4 text-center" style={{ fontFamily: "'Shippori Mincho', serif" }}>
-              Accès rapide
-            </h3>
-            
-            <div className="grid grid-cols-3 gap-3">
-              <Link
-                to="/school"
-                onClick={hapticFeedback}
-                className="group bg-white/90 backdrop-blur-sm rounded-2xl p-4 shadow-xl border border-stone/10 text-center transition-all duration-300 hover:scale-105 active:scale-95 hover:bg-jade/5 magnetic-hover"
-              >
-                <div className="w-12 h-12 bg-gradient-to-br from-jade/20 to-jade/10 rounded-xl flex items-center justify-center mx-auto mb-2 group-hover:scale-110 transition-all duration-300">
-                  <Target className="w-6 h-6 text-jade" />
-                </div>
-                <span className="text-xs font-medium text-ink">École</span>
-              </Link>
-              
-              <Link
-                to="/community"
-                onClick={hapticFeedback}
-                className="group bg-white/90 backdrop-blur-sm rounded-2xl p-4 shadow-xl border border-stone/10 text-center transition-all duration-300 hover:scale-105 active:scale-95 hover:bg-wasabi/5 magnetic-hover"
-              >
-                <div className="w-12 h-12 bg-gradient-to-br from-wasabi/20 to-wasabi/10 rounded-xl flex items-center justify-center mx-auto mb-2 group-hover:scale-110 transition-all duration-300">
-                  <Users className="w-6 h-6 text-wasabi" />
-                </div>
-                <span className="text-xs font-medium text-ink">Communauté</span>
-              </Link>
-              
-              <Link
-                to="/profile"
-                onClick={hapticFeedback}
-                className="group bg-white/90 backdrop-blur-sm rounded-2xl p-4 shadow-xl border border-stone/10 text-center transition-all duration-300 hover:scale-105 active:scale-95 hover:bg-vermilion/5 magnetic-hover"
-              >
-                <div className="w-12 h-12 bg-gradient-to-br from-vermilion/20 to-vermilion/10 rounded-xl flex items-center justify-center mx-auto mb-2 group-hover:scale-110 transition-all duration-300">
-                  <Award className="w-6 h-6 text-vermilion" />
-                </div>
-                <span className="text-xs font-medium text-ink">Profil</span>
-              </Link>
-            </div>
-          </div>
 
           {/* Citation inspirante du jour */}
-          <div className="bg-gradient-to-br from-slate-50 via-white to-slate-100 rounded-3xl p-8 text-center border border-stone/10 relative overflow-hidden shadow-2xl mb-8">
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(134,239,172,0.1),transparent_50%)]"></div>
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_80%,rgba(134,239,172,0.08),transparent_50%)]"></div>
+          <div className="bg-gradient-to-br from-white via-pearl to-white rounded-3xl p-8 text-center border border-jade/10 relative overflow-hidden shadow-lg mb-8">
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(5,150,105,0.05),transparent_60%)]"></div>
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_80%,rgba(5,150,105,0.03),transparent_60%)]"></div>
 
             <div className="relative z-10">
               <motion.div
@@ -788,58 +744,33 @@ const Journal: React.FC = () => {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.8 }}
               >
-                <div className="w-2 h-2 bg-jade rounded-full mx-auto mb-6 animate-pulse"></div>
+                <div className="w-1.5 h-1.5 bg-jade/40 rounded-full mx-auto mb-6 animate-pulse"></div>
 
-                <p className="text-lg md:text-xl text-ink leading-relaxed mb-4 whitespace-pre-line italic" style={{ fontFamily: "'Shippori Mincho', serif" }}>
+                <p className="text-lg md:text-xl text-ink/90 leading-relaxed mb-4 whitespace-pre-line italic" style={{ fontFamily: "'Shippori Mincho', serif" }}>
                   {inspirationalQuotes[currentQuote].text}
                 </p>
 
-                <p className="text-sm text-stone/70">
-                  — {inspirationalQuotes[currentQuote].author}
+                <p className="text-sm text-stone/60">
+                  {inspirationalQuotes[currentQuote].author}
                 </p>
 
-                <div className="w-2 h-2 bg-jade rounded-full mx-auto mt-6 animate-pulse" style={{ animationDelay: '0.5s' }}></div>
+                <div className="w-1.5 h-1.5 bg-jade/40 rounded-full mx-auto mt-6 animate-pulse" style={{ animationDelay: '0.5s' }}></div>
               </motion.div>
             </div>
           </div>
 
           {/* Message d'encouragement personnalisé */}
-          <div className="bg-gradient-to-br from-jade/10 via-wasabi/10 to-jade/5 rounded-3xl p-6 text-center border border-jade/20 relative overflow-hidden">
-            <div className="absolute top-2 right-2 opacity-20">
-              <div className="w-8 h-8 bg-jade/20 rounded-full animate-pulse"></div>
-            </div>
-            <div className="absolute bottom-2 left-2 opacity-20">
-              <div className="w-6 h-6 bg-vermilion/20 rounded-full animate-pulse" style={{ animationDelay: '1s' }}></div>
-            </div>
+          {(stats.streak > 0 || stats.checkins > 0 || stats.journals > 0 || stats.meditation > 0) && (
+            <div className="bg-gradient-to-br from-jade/8 via-wasabi/8 to-jade/5 rounded-3xl p-6 text-center border border-jade/10 relative overflow-hidden mb-8">
+              <div className="relative z-10">
+                <p className="text-stone text-sm leading-relaxed mb-3">
+                  {stats.streak > 0
+                    ? `${stats.streak} jour${stats.streak > 1 ? 's' : ''} consécutif${stats.streak > 1 ? 's' : ''}. Chaque rituel renforce ta présence à toi-même.`
+                    : "Ta pratique prend forme, petit à petit."
+                  }
+                </p>
 
-            <div className="relative z-10">
-              <div className="w-16 h-16 bg-gradient-to-br from-jade to-forest rounded-full flex items-center justify-center mx-auto mb-4 shadow-2xl animate-breathe-enhanced">
-                <Heart className="w-8 h-8 text-white" />
-              </div>
-
-              <h3 className="text-xl font-bold text-ink mb-3" style={{ fontFamily: "'Shippori Mincho', serif" }}>
-                {stats.checkins > 0 || stats.journals > 0 || stats.meditation > 0
-                  ? "Ta pratique grandit"
-                  : "Commence quand tu es prêt(e)"
-                }
-              </h3>
-
-              <p className="text-stone text-sm leading-relaxed mb-4">
-                {stats.streak > 0
-                  ? `${stats.streak} jour${stats.streak > 1 ? 's' : ''} de rituel. Ton engagement se transforme en routine, ta routine en transformation.`
-                  : "Il n'y a pas de bonne ou mauvaise façon de commencer. Choisis une action, une seule, et observe ce qui se passe."
-                }
-              </p>
-
-              {/* Niveau d'engagement visuel */}
-              <div className={`bg-gradient-to-r ${engagement.bg} rounded-2xl p-4 border border-jade/20`}>
-                <div className="flex items-center justify-center mb-2">
-                  <span className={`font-bold text-sm ${engagement.color}`}>
-                    Niveau d'engagement : {engagement.level}
-                  </span>
-                </div>
-
-                <div className="text-xs text-stone/80 leading-relaxed">
+                <div className="text-xs text-stone/60 leading-relaxed">
                   {engagement.level === 'Expert' && 'Ton intégration est profonde. Continue à explorer.'}
                   {engagement.level === 'Avancé' && 'Tu as trouvé ton rythme. La pratique devient naturelle.'}
                   {engagement.level === 'Régulier' && 'Tu construis une fondation solide, jour après jour.'}
@@ -847,23 +778,8 @@ const Journal: React.FC = () => {
                 </div>
               </div>
             </div>
-          </div>
+          )}
 
-          {/* Bannière confidentialité avec design moderne */}
-          <div className="bg-gradient-to-r from-jade/5 via-wasabi/5 to-jade/5 rounded-3xl p-5 border border-jade/10 relative overflow-hidden">
-            <div className="absolute inset-0 bg-gradient-to-r from-jade/5 to-wasabi/5 animate-pulse-slow"></div>
-            
-            <div className="relative z-10 flex items-center justify-center">
-              <div className="w-10 h-10 bg-jade/20 rounded-full flex items-center justify-center mr-3 animate-pulse-glow">
-                <Shield className="w-5 h-5 text-jade" />
-              </div>
-              <p className="text-jade text-sm text-center font-medium leading-relaxed">
-                🔒 Tes données restent privées et sécurisées sur ton appareil. 
-                <br />
-                <span className="text-jade/80 text-xs">Stockage local chiffré • Aucune collecte de données</span>
-              </p>
-            </div>
-          </div>
         </div>
       </div>
 
