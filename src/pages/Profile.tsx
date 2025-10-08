@@ -393,6 +393,24 @@ const ProfilePage: React.FC = () => {
     return `Il y a ${Math.floor(diffInDays / 365)} an${Math.floor(diffInDays / 365) > 1 ? 's' : ''}`;
   };
 
+  // Si pas d'utilisateur connecté, le ProtectedRoute devrait rediriger
+  // Mais affichons quand même un message au cas où
+  if (!user) {
+    return (
+      <div className="min-h-screen bg-sand p-4 pb-24 flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-stone mb-4">Vous devez être connecté pour accéder à votre profil</p>
+          <a
+            href="/auth/login"
+            className="px-6 py-3 bg-wasabi text-white rounded-xl hover:bg-wasabi/90 transition-colors duration-300 inline-block"
+          >
+            Se connecter
+          </a>
+        </div>
+      </div>
+    );
+  }
+
   // États de chargement
   if (loading) {
     return (
@@ -405,14 +423,19 @@ const ProfilePage: React.FC = () => {
     );
   }
 
+  // Si toujours pas de profil après le chargement, c'est une vraie erreur
   if (!profile) {
     return (
       <div className="min-h-screen bg-sand p-4 pb-24 flex items-center justify-center">
         <div className="text-center">
-          <p className="text-stone">Erreur lors du chargement du profil</p>
+          <p className="text-stone mb-2">Erreur lors du chargement du profil</p>
+          <p className="text-stone/60 text-sm mb-4">Impossible de charger vos informations</p>
           <button
-            onClick={() => window.location.reload()}
-            className="mt-4 px-4 py-2 bg-wasabi text-white rounded-xl hover:bg-wasabi/90 transition-colors duration-300"
+            onClick={() => {
+              setLoading(true);
+              loadProfile();
+            }}
+            className="px-4 py-2 bg-wasabi text-white rounded-xl hover:bg-wasabi/90 transition-colors duration-300"
           >
             Réessayer
           </button>
