@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { Heart, BookOpen, Timer, Check, ChevronRight, Sparkles, Trophy, Flame, Star, Target, Zap } from 'lucide-react';
+import { Heart, BookOpen, Timer, Check, ChevronRight, Sparkles, Trophy, Flame, Star, Target, Zap, Wind } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 import { useCheckins } from '../hooks/useCheckins';
 import { useJournals } from '../hooks/useJournals';
 import { useMeditationWeeklyStats } from '../hooks/useMeditation';
+import { supabase } from '../lib/supabase';
 
 interface Quest {
   id: string;
@@ -14,6 +15,7 @@ interface Quest {
   total: number;
   completed: boolean;
   color: string;
+  xp: number;
   action?: () => void;
 }
 
@@ -21,12 +23,14 @@ interface DailyQuestsProps {
   onCheckinClick: () => void;
   onJournalClick: () => void;
   onMeditationClick: () => void;
+  onBreathingClick: () => void;
 }
 
 const DailyQuests: React.FC<DailyQuestsProps> = ({
   onCheckinClick,
   onJournalClick,
-  onMeditationClick
+  onMeditationClick,
+  onBreathingClick
 }) => {
   const { user } = useAuth();
   const { data: checkinsData } = useCheckins();
@@ -34,6 +38,28 @@ const DailyQuests: React.FC<DailyQuestsProps> = ({
   const { data: meditationMinutes } = useMeditationWeeklyStats();
   const [claimed, setClaimed] = useState<Record<string, boolean>>({});
   const [timeLeft, setTimeLeft] = useState('');
+  const [breathingSessions, setBreathingSessions] = useState(0);
+
+  useEffect(() => {
+    const loadBreathingSessions = async () => {
+      if (!user?.id) return;
+
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+
+      const { data, error } = await supabase
+        .from('breathing_sessions')
+        .select('id')
+        .eq('user_id', user.id)
+        .gte('created_at', today.toISOString());
+
+      if (!error && data) {
+        setBreathingSessions(data.length);
+      }
+    };
+
+    loadBreathingSessions();
+  }, [user]);
 
   useEffect(() => {
     const savedClaimed = localStorage.getItem('daily-quests-claimed');
@@ -93,6 +119,7 @@ const DailyQuests: React.FC<DailyQuestsProps> = ({
       total: 1,
       completed: todayCheckins >= 1,
       color: 'from-pink-400 to-rose-500',
+      xp: 10,
       action: onCheckinClick
     },
     {
@@ -104,6 +131,7 @@ const DailyQuests: React.FC<DailyQuestsProps> = ({
       total: 1,
       completed: todayJournals >= 1,
       color: 'from-blue-400 to-cyan-500',
+      xp: 15,
       action: onJournalClick
     },
     {
@@ -115,20 +143,54 @@ const DailyQuests: React.FC<DailyQuestsProps> = ({
       total: 1,
       completed: todayMeditation >= 5,
       color: 'from-purple-400 to-violet-500',
+      xp: 20,
       action: onMeditationClick
+    },
+    {
+      id: 'breathing',
+      title: 'Exercice de respiration',
+      description: 'Calme ton esprit et ton corps',
+      icon: <Wind className="w-6 h-6" />,
+      progress: Math.min(breathingSessions, 1),
+      total: 1,
+      completed: breathingSessions >= 1,
+      color: 'from-cyan-400 to-teal-500',
+      xp: 10,
+      action: onBreathingClick
     }
   ];
 
   const completedQuests = quests.filter(q => q.completed).length;
   const allCompleted = completedQuests === quests.length;
 
-  const handleClaim = (questId: string) => {
-    const newClaimed = { ...claimed, [questId]: true };
-    setClaimed(newClaimed);
-    localStorage.setItem('daily-quests-claimed', JSON.stringify(newClaimed));
+  const handleClaim = async (quest: Quest) => {
+    if (!user?.id) return;
 
-    if ('vibrate' in navigator) {
-      navigator.vibrate([30, 50, 30]);
+    try {
+      const quest_xp = quest.xp;
+
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('total_xp')
+        .eq('id', user.id)
+        .single();
+
+      if (profile) {
+        await supabase
+          .from('profiles')
+          .update({ total_xp: profile.total_xp + quest_xp })
+          .eq('id', user.id);
+      }
+
+      const newClaimed = { ...claimed, [quest.id]: true };
+      setClaimed(newClaimed);
+      localStorage.setItem('daily-quests-claimed', JSON.stringify(newClaimed));
+
+      if ('vibrate' in navigator) {
+        navigator.vibrate([30, 50, 30]);
+      }
+    } catch (error) {
+      console.error('Error claiming quest XP:', error);
     }
   };
 
@@ -208,11 +270,14 @@ const DailyQuests: React.FC<DailyQuestsProps> = ({
 
                 {canClaim ? (
                   <button
-                    onClick={() => handleClaim(quest.id)}
-                    className="px-4 py-2 bg-gradient-to-r from-jade to-forest text-white font-semibold rounded-xl hover:scale-105 active:scale-95 transition-transform duration-200 shadow-lg flex items-center gap-1 whitespace-nowrap"
+                    onClick={() => handleClaim(quest)}
+                    className="px-4 py-2 bg-gradient-to-r from-jade to-forest text-white font-semibold rounded-xl hover:scale-105 active:scale-95 transition-transform duration-200 shadow-lg flex flex-col items-center gap-0.5 whitespace-nowrap"
                   >
-                    <Sparkles className="w-4 h-4" />
-                    Claim!
+                    <div className="flex items-center gap-1">
+                      <Sparkles className="w-4 h-4" />
+                      <span>Réclamer</span>
+                    </div>
+                    <span className="text-xs opacity-90">+{quest.xp} XP</span>
                   </button>
                 ) : isClaimed ? (
                   <div className="px-4 py-2 bg-jade/20 text-jade font-semibold rounded-xl flex items-center gap-1">

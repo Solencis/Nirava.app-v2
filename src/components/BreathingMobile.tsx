@@ -1,8 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { X, Wind, Play, Pause, RotateCcw, Plus } from 'lucide-react';
+import { useAuth } from '../hooks/useAuth';
+import { supabase } from '../lib/supabase';
 
 interface BreathingMobileProps {
   onClose: () => void;
+  onComplete?: () => void;
 }
 
 interface BreathingExercise {
@@ -18,7 +21,8 @@ interface BreathingExercise {
   cycles: number;
 }
 
-const BreathingMobile: React.FC<BreathingMobileProps> = ({ onClose }) => {
+const BreathingMobile: React.FC<BreathingMobileProps> = ({ onClose, onComplete }) => {
+  const { user } = useAuth();
   const [selectedExercise, setSelectedExercise] = useState<BreathingExercise | null>(null);
   const [isActive, setIsActive] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
@@ -184,13 +188,35 @@ const BreathingMobile: React.FC<BreathingMobileProps> = ({ onClose }) => {
             }
           }, 100);
         } else {
-          setIsActive(false);
-          setShowComplete(true);
-          if ('vibrate' in navigator) navigator.vibrate([100, 50, 100]);
+          handleComplete();
         }
       }
     }
   }, [timeLeft, isActive, selectedExercise, currentPhase, currentCycle, totalCycles]);
+
+  const handleComplete = async () => {
+    setIsActive(false);
+    setShowComplete(true);
+    if ('vibrate' in navigator) navigator.vibrate([100, 50, 100]);
+
+    if (user?.id && selectedExercise) {
+      try {
+        const totalDuration = selectedExercise.phases.reduce((sum, phase) => sum + phase.duration, 0) * totalCycles;
+        await supabase.from('breathing_sessions').insert({
+          user_id: user.id,
+          duration_seconds: totalDuration,
+          type: selectedExercise.id,
+          completed: true
+        });
+
+        if (onComplete) {
+          onComplete();
+        }
+      } catch (error) {
+        console.error('Error saving breathing session:', error);
+      }
+    }
+  };
 
   const startExercise = (exercise: BreathingExercise) => {
     setSelectedExercise(exercise);

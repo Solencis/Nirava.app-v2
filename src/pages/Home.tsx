@@ -10,6 +10,7 @@ import DailyQuests from '../components/DailyQuests';
 import CheckinMobile from '../components/CheckinMobile';
 import JournalMobile from '../components/JournalMobile';
 import MeditationMobile from '../components/MeditationMobile';
+import BreathingMobile from '../components/BreathingMobile';
 import InstallCTA from '../components/InstallCTA';
 import IOSInstallHint from '../components/IOSInstallHint';
 import AmbianceControl from '../components/AmbianceControl';
@@ -23,6 +24,7 @@ const Home: React.FC = () => {
   const [showCheckin, setShowCheckin] = useState(false);
   const [showJournal, setShowJournal] = useState(false);
   const [showMeditation, setShowMeditation] = useState(false);
+  const [showBreathing, setShowBreathing] = useState(false);
   const [userStreak, setUserStreak] = useState(0);
   const [weeklyStats, setWeeklyStats] = useState({
     checkins: 0,
@@ -209,6 +211,7 @@ const Home: React.FC = () => {
                 onCheckinClick={() => setShowCheckin(true)}
                 onJournalClick={() => setShowJournal(true)}
                 onMeditationClick={() => setShowMeditation(true)}
+                onBreathingClick={() => setShowBreathing(true)}
               />
             </div>
 
@@ -271,6 +274,7 @@ const Home: React.FC = () => {
       {showCheckin && <CheckinMobile onClose={() => setShowCheckin(false)} onSave={() => {}} />}
       {showJournal && <JournalMobile onClose={() => setShowJournal(false)} onSave={() => {}} />}
       {showMeditation && <MeditationMobile onClose={() => setShowMeditation(false)} />}
+      {showBreathing && <BreathingMobile onClose={() => setShowBreathing(false)} onComplete={() => setShowBreathing(false)} />}
     </div>
   );
 };
