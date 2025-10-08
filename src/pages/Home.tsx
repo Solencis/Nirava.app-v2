@@ -2,10 +2,19 @@ import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { GraduationCap, ArrowRight, Sparkles, Music, Play, Pause, SkipForward, RotateCcw, Volume2, Heart, BookOpen, Users, Timer } from 'lucide-react';
 import { useAudioStore, AMBIENCES } from '../stores/audioStore';
+import { useAuth } from '../hooks/useAuth';
+import { useCheckins } from '../hooks/useCheckins';
+import { useJournals } from '../hooks/useJournals';
+import { useMeditationWeeklyStats } from '../hooks/useMeditation';
+import { supabase } from '../lib/supabase';
 import InstallCTA from '../components/InstallCTA';
 import IOSInstallHint from '../components/IOSInstallHint';
 
 const Home: React.FC = () => {
+  const { user } = useAuth();
+  const { data: checkinsData } = useCheckins();
+  const { data: journalsData } = useJournals();
+  const { data: supabaseMeditationMinutes } = useMeditationWeeklyStats();
   const {
     current,
     isPlaying,
@@ -63,8 +72,10 @@ const Home: React.FC = () => {
 
   // Charger les stats utilisateur
   useEffect(() => {
-    loadUserStats();
-  }, [meditationWeekMinutes]);
+    if (user) {
+      loadUserStats();
+    }
+  }, [user, checkinsData, journalsData, supabaseMeditationMinutes, meditationWeekMinutes]);
 
   // Changer de citation toutes les 8 secondes
   useEffect(() => {
@@ -97,33 +108,90 @@ const Home: React.FC = () => {
     };
   }, []);
 
-  const loadUserStats = () => {
+  const loadUserStats = async () => {
     try {
-      // Check-ins cette semaine
-      const checkinHistory = JSON.parse(localStorage.getItem('checkin-history') || '[]');
+      if (!user?.id) {
+        setUserStats({ checkins: 0, journals: 0, meditation: 0, streak: 0 });
+        return;
+      }
+
       const oneWeekAgo = new Date();
       oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
-      const thisWeekCheckins = checkinHistory.filter((entry: any) => 
-        new Date(entry.timestamp || entry.created_at) > oneWeekAgo
-      ).length;
 
-      // Journaux écrits (total)
-      const journalEntries = JSON.parse(localStorage.getItem('journal-entries') || '[]').filter((entry: any) => entry.type !== 'dream');
-      
-      // Minutes de méditation cette semaine
-      const thisWeekMeditation = Math.round(meditationWeekMinutes);
+      // Check-ins cette semaine depuis Supabase
+      const thisWeekCheckins = checkinsData?.filter(entry =>
+        new Date(entry.created_at) > oneWeekAgo
+      ).length || 0;
 
-      // Streak de journaux
-      const currentStreak = parseInt(localStorage.getItem('current-streak') || '0');
+      // Journaux écrits CETTE SEMAINE depuis Supabase
+      const journalEntriesOnly = journalsData?.filter(entry => {
+        const entryDate = new Date(entry.created_at);
+        return entry.type === 'journal' &&
+               entry.content &&
+               entryDate > oneWeekAgo &&
+               (!entry.metadata ||
+                (!entry.metadata.title &&
+                 !entry.metadata.emotions &&
+                 !entry.metadata.symbols &&
+                 !entry.metadata.duration_minutes));
+      }) || [];
+
+      // Minutes de méditation cette semaine depuis Supabase
+      const thisWeekMeditation = supabaseMeditationMinutes || Math.round(meditationWeekMinutes);
+
+      // Calculer le streak depuis Supabase
+      const currentStreak = await calculateJournalStreak();
 
       setUserStats({
         checkins: thisWeekCheckins,
-        journals: journalEntries.length,
+        journals: journalEntriesOnly.length,
         meditation: thisWeekMeditation,
         streak: currentStreak
       });
     } catch (error) {
       console.error('Error loading user stats:', error);
+    }
+  };
+
+  const calculateJournalStreak = async (): Promise<number> => {
+    try {
+      if (!user?.id) return 0;
+
+      const { data: journals } = await supabase
+        .from('journals')
+        .select('created_at')
+        .eq('user_id', user.id)
+        .eq('type', 'journal')
+        .order('created_at', { ascending: false })
+        .limit(30);
+
+      if (!journals || journals.length === 0) return 0;
+
+      let streak = 0;
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+
+      const journalsByDate = new Map<string, boolean>();
+      journals.forEach(journal => {
+        const date = new Date(journal.created_at);
+        date.setHours(0, 0, 0, 0);
+        journalsByDate.set(date.toDateString(), true);
+      });
+
+      let currentDate = new Date(today);
+      if (!journalsByDate.has(currentDate.toDateString())) {
+        currentDate.setDate(currentDate.getDate() - 1);
+      }
+
+      while (journalsByDate.has(currentDate.toDateString())) {
+        streak++;
+        currentDate.setDate(currentDate.getDate() - 1);
+      }
+
+      return streak;
+    } catch (error) {
+      console.error('Error calculating journal streak:', error);
+      return 0;
     }
   };
 

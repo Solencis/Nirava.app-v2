@@ -43,6 +43,7 @@ const HistoryModal: React.FC<HistoryModalProps> = ({ isOpen, onClose, onStatsUpd
   const [loading, setLoading] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [itemToDelete, setItemToDelete] = useState<string | null>(null);
+  const [expandedItems, setExpandedItems] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     if (isOpen && user) {
@@ -149,6 +150,18 @@ const HistoryModal: React.FC<HistoryModalProps> = ({ isOpen, onClose, onStatsUpd
     } catch (error) {
       console.error('Error deleting entry:', error);
     }
+  };
+
+  const toggleExpand = (itemId: string) => {
+    setExpandedItems(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(itemId)) {
+        newSet.delete(itemId);
+      } else {
+        newSet.add(itemId);
+      }
+      return newSet;
+    });
   };
 
   // Note: Corbeille désactivée - les suppressions sont définitives dans Supabase
@@ -275,42 +288,59 @@ const HistoryModal: React.FC<HistoryModalProps> = ({ isOpen, onClose, onStatsUpd
                     <p className="text-sm">Aucun check-in</p>
                   </div>
                 ) : (
-                  checkins.map((checkin) => (
-                    <div key={checkin.id} className="bg-jade/5 rounded-lg p-3 border border-jade/10">
-                      <div className="flex items-start justify-between mb-1">
-                        <div className="flex-1">
-                          <div className="flex items-center mb-0.5">
-                            <Heart size={12} className="text-jade mr-1" />
-                            <span className="font-medium text-ink text-sm">{checkin.emotion}</span>
-                            {checkin.intensity && (
-                              <span className={`ml-1 text-xs font-bold ${getIntensityColor(checkin.intensity)}`}>
-                                {checkin.intensity}/10
-                              </span>
+                  checkins.map((checkin) => {
+                    const isExpanded = expandedItems.has(checkin.id);
+                    const needsExpansion = checkin.note && checkin.note.length > 150;
+
+                    return (
+                      <div key={checkin.id} className="bg-jade/5 rounded-lg p-3 border border-jade/10">
+                        <div className="flex items-start justify-between mb-1">
+                          <div className="flex-1">
+                            <div className="flex items-center mb-0.5">
+                              <Heart size={12} className="text-jade mr-1" />
+                              <span className="font-medium text-ink text-sm">{checkin.emotion}</span>
+                              {checkin.intensity && (
+                                <span className={`ml-1 text-xs font-bold ${getIntensityColor(checkin.intensity)}`}>
+                                  {checkin.intensity}/10
+                                </span>
+                              )}
+                            </div>
+                            <div className="text-xs text-stone/70 mb-1">
+                              {formatDate(checkin.timestamp)}
+                            </div>
+                            {checkin.need && (
+                              <div className="text-xs text-jade mb-1">
+                                <span className="font-medium">Besoin:</span> {checkin.need}
+                              </div>
+                            )}
+                            {checkin.note && (
+                              <div className="text-xs text-stone">
+                                {needsExpansion && !isExpanded
+                                  ? `${checkin.note.substring(0, 150)}...`
+                                  : checkin.note
+                                }
+                              </div>
+                            )}
+                            {needsExpansion && (
+                              <button
+                                onClick={() => toggleExpand(checkin.id)}
+                                className="text-xs text-jade hover:text-jade/80 font-medium mt-1 flex items-center gap-1"
+                              >
+                                <Eye size={10} />
+                                {isExpanded ? 'Voir moins' : 'Lire plus'}
+                              </button>
                             )}
                           </div>
-                          <div className="text-xs text-stone/70 mb-1">
-                            {formatDate(checkin.timestamp)}
-                          </div>
-                          {checkin.need && (
-                            <div className="text-xs text-jade mb-1">
-                              <span className="font-medium">Besoin:</span> {checkin.need}
-                            </div>
-                          )}
-                          {checkin.note && (
-                            <div className="text-xs text-stone">
-                              {checkin.note}
-                            </div>
-                          )}
+                          <button
+                            onClick={() => moveToTrash(checkin)}
+                            className="text-stone/60 hover:text-red-600 transition-colors duration-300 ml-1 p-1"
+                          >
+                            <Trash2 size={12} />
+                          </button>
                         </div>
-                        <button
-                          onClick={() => moveToTrash(checkin)}
-                          className="text-stone/60 hover:text-red-600 transition-colors duration-300 ml-1 p-1"
-                        >
-                          <Trash2 size={12} />
-                        </button>
                       </div>
-                    </div>
-                  ))
+                    );
+                  })
                 )}
               </>
             )}
@@ -324,35 +354,49 @@ const HistoryModal: React.FC<HistoryModalProps> = ({ isOpen, onClose, onStatsUpd
                     <p className="text-sm">Aucun journal</p>
                   </div>
                 ) : (
-                  journals.map((journal) => (
-                    <div key={journal.id} className="bg-vermilion/5 rounded-lg p-3 border border-vermilion/10">
-                      <div className="flex items-start justify-between mb-1">
-                        <div className="flex-1">
-                          <div className="flex items-center mb-0.5">
-                            <Moon size={12} className="text-vermilion mr-1" />
-                            {journal.emoji && (
-                              <span className="text-sm mr-1">{journal.emoji}</span>
-                            )}
-                            <div className="text-xs text-stone/70">
-                              {formatDate(journal.timestamp)}
+                  journals.map((journal) => {
+                    const isExpanded = expandedItems.has(journal.id);
+                    const needsExpansion = journal.content && journal.content.length > 150;
+
+                    return (
+                      <div key={journal.id} className="bg-vermilion/5 rounded-lg p-3 border border-vermilion/10">
+                        <div className="flex items-start justify-between mb-1">
+                          <div className="flex-1">
+                            <div className="flex items-center mb-0.5">
+                              <Moon size={12} className="text-vermilion mr-1" />
+                              {journal.emoji && (
+                                <span className="text-sm mr-1">{journal.emoji}</span>
+                              )}
+                              <div className="text-xs text-stone/70">
+                                {formatDate(journal.timestamp)}
+                              </div>
                             </div>
+                            <div className="text-xs text-ink leading-relaxed">
+                              {needsExpansion && !isExpanded
+                                ? `${journal.content.substring(0, 150)}...`
+                                : journal.content
+                              }
+                            </div>
+                            {needsExpansion && (
+                              <button
+                                onClick={() => toggleExpand(journal.id)}
+                                className="text-xs text-vermilion hover:text-vermilion/80 font-medium mt-1 flex items-center gap-1"
+                              >
+                                <Eye size={10} />
+                                {isExpanded ? 'Voir moins' : 'Lire plus'}
+                              </button>
+                            )}
                           </div>
-                          <div className="text-xs text-ink leading-relaxed">
-                            {journal.content && journal.content.length > 150
-                              ? `${journal.content.substring(0, 100)}...`
-                              : journal.content
-                            }
-                          </div>
+                          <button
+                            onClick={() => moveToTrash(journal)}
+                            className="text-stone/60 hover:text-red-600 transition-colors duration-300 ml-1 p-1"
+                          >
+                            <Trash2 size={12} />
+                          </button>
                         </div>
-                        <button
-                          onClick={() => moveToTrash(journal)}
-                          className="text-stone/60 hover:text-red-600 transition-colors duration-300 ml-1 p-1"
-                        >
-                          <Trash2 size={12} />
-                        </button>
                       </div>
-                    </div>
-                  ))
+                    );
+                  })
                 )}
               </>
             )}
@@ -366,55 +410,69 @@ const HistoryModal: React.FC<HistoryModalProps> = ({ isOpen, onClose, onStatsUpd
                     <p className="text-sm">Aucun rêve capturé</p>
                   </div>
                 ) : (
-                  dreams.map((dream) => (
-                    <div key={dream.id} className="bg-blue-50 rounded-lg p-3 border border-blue-100">
-                      <div className="flex items-start justify-between mb-1">
-                        <div className="flex-1">
-                          <div className="flex items-center mb-0.5">
-                            <Cloud size={12} className="text-blue-600 mr-1" />
-                            {dream.title && (
-                              <span className="font-medium text-blue-700 text-sm mr-1">{dream.title}</span>
+                  dreams.map((dream) => {
+                    const isExpanded = expandedItems.has(dream.id);
+                    const needsExpansion = dream.content && dream.content.length > 150;
+
+                    return (
+                      <div key={dream.id} className="bg-blue-50 rounded-lg p-3 border border-blue-100">
+                        <div className="flex items-start justify-between mb-1">
+                          <div className="flex-1">
+                            <div className="flex items-center mb-0.5">
+                              <Cloud size={12} className="text-blue-600 mr-1" />
+                              {dream.title && (
+                                <span className="font-medium text-blue-700 text-sm mr-1">{dream.title}</span>
+                              )}
+                              <div className="text-xs text-stone/70">
+                                {formatDate(dream.timestamp)}
+                              </div>
+                            </div>
+                            <div className="text-xs text-ink leading-relaxed mb-1">
+                              {needsExpansion && !isExpanded
+                                ? `${dream.content.substring(0, 150)}...`
+                                : dream.content
+                              }
+                            </div>
+                            {needsExpansion && (
+                              <button
+                                onClick={() => toggleExpand(dream.id)}
+                                className="text-xs text-blue-600 hover:text-blue-500 font-medium mt-1 mb-1 flex items-center gap-1"
+                              >
+                                <Eye size={10} />
+                                {isExpanded ? 'Voir moins' : 'Lire plus'}
+                              </button>
                             )}
-                            <div className="text-xs text-stone/70">
-                              {formatDate(dream.timestamp)}
+                            {/* Badges pour les rêves */}
+                            <div className="flex flex-wrap gap-1">
+                              {dream.lucidity && (
+                                <span className="bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded-full text-xs flex items-center">
+                                  <Eye size={8} className="mr-0.5" />
+                                  Lucide
+                                </span>
+                              )}
+                              {dream.recurring && (
+                                <span className="bg-purple-100 text-purple-700 px-1.5 py-0.5 rounded-full text-xs flex items-center">
+                                  <Zap size={8} className="mr-0.5" />
+                                  Récurrent
+                                </span>
+                              )}
+                              {dream.nightmare && (
+                                <span className="bg-red-100 text-red-700 px-1.5 py-0.5 rounded-full text-xs">
+                                  Cauchemar
+                                </span>
+                              )}
                             </div>
                           </div>
-                          <div className="text-xs text-ink leading-relaxed mb-1">
-                            {dream.content && dream.content.length > 100
-                              ? `${dream.content.substring(0, 100)}...`
-                              : dream.content
-                            }
-                          </div>
-                          {/* Badges pour les rêves */}
-                          <div className="flex flex-wrap gap-1">
-                            {dream.lucidity && (
-                              <span className="bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded-full text-xs flex items-center">
-                                <Eye size={8} className="mr-0.5" />
-                                Lucide
-                              </span>
-                            )}
-                            {dream.recurring && (
-                              <span className="bg-purple-100 text-purple-700 px-1.5 py-0.5 rounded-full text-xs flex items-center">
-                                <Zap size={8} className="mr-0.5" />
-                                Récurrent
-                              </span>
-                            )}
-                            {dream.nightmare && (
-                              <span className="bg-red-100 text-red-700 px-1.5 py-0.5 rounded-full text-xs">
-                                Cauchemar
-                              </span>
-                            )}
-                          </div>
+                          <button
+                            onClick={() => moveToTrash(dream)}
+                            className="text-stone/60 hover:text-red-600 transition-colors duration-300 ml-1 p-1"
+                          >
+                            <Trash2 size={12} />
+                          </button>
                         </div>
-                        <button
-                          onClick={() => moveToTrash(dream)}
-                          className="text-stone/60 hover:text-red-600 transition-colors duration-300 ml-1 p-1"
-                        >
-                          <Trash2 size={12} />
-                        </button>
                       </div>
-                    </div>
-                  ))
+                    );
+                  })
                 )}
               </>
             )}
