@@ -56,14 +56,17 @@ const Login: React.FC = () => {
       console.log('Login successful, user should be redirected by Navigate component');
     } catch (error: any) {
       console.error('Login error:', error);
-      
-      // Messages d'erreur plus clairs pour l'utilisateur
-      if (error.message?.includes('Invalid login credentials')) {
-        setError('❌ E-mail ou mot de passe incorrect. Si vous venez de vous inscrire, votre compte pourrait ne pas être encore activé. Vérifiez vos informations ou contactez le support.');
+
+      if (error.message?.includes('Supabase not configured') || error.message?.includes('Supabase n\'est pas configuré')) {
+        setError('⚠️ Configuration requise : Les identifiants Supabase ont expiré ou sont invalides. Veuillez configurer les variables VITE_SUPABASE_URL et VITE_SUPABASE_ANON_KEY avec des clés valides depuis votre projet Supabase.');
+      } else if (error.message?.includes('Invalid login credentials')) {
+        setError('❌ E-mail ou mot de passe incorrect.');
       } else if (error.message?.includes('Email not confirmed')) {
-        setError('⚠️ Votre compte n\'est pas encore confirmé. Si vous ne recevez pas d\'email de confirmation, contactez le support.');
+        setError('⚠️ Votre compte n\'est pas encore confirmé.');
       } else if (error.message?.includes('rate limit')) {
         setError('Trop de tentatives. Veuillez patienter quelques minutes.');
+      } else if (error.message?.includes('JWT') || error.message?.includes('token')) {
+        setError('⚠️ Session expirée ou clés Supabase invalides. Veuillez vérifier votre configuration.');
       } else {
         setError('Erreur lors de la connexion. Veuillez réessayer.');
       }
