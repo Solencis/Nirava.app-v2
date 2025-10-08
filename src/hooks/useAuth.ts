@@ -10,23 +10,12 @@ export const useAuth = () => {
   useEffect(() => {
     let mounted = true;
 
-    // Timeout de sécurité : si après 10 secondes on n'a toujours pas de réponse, on considère qu'il n'y a pas de session
-    const safetyTimeout = setTimeout(() => {
-      if (mounted) {
-        console.warn('⏱️ Auth loading timeout - assuming no session');
-        setLoading(false);
-        setSession(null);
-        setUser(null);
-      }
-    }, 10000);
-
     // 1. Récupérer la session initiale au chargement de l'app
     supabase.auth.getSession()
       .then(({ data: { session } }) => {
         if (!mounted) return;
 
-        clearTimeout(safetyTimeout);
-        console.log('Initial session loaded:', session?.user?.email || 'No session');
+        console.log('✅ Initial session loaded:', session?.user?.email || 'No session');
         setSession(session);
         setUser(session?.user ?? null);
 
@@ -40,8 +29,7 @@ export const useAuth = () => {
       .catch((error) => {
         if (!mounted) return;
 
-        clearTimeout(safetyTimeout);
-        console.error('Error loading session:', error);
+        console.error('❌ Error loading session:', error);
         setSession(null);
         setUser(null);
         setLoading(false);
@@ -78,7 +66,6 @@ export const useAuth = () => {
 
     return () => {
       mounted = false;
-      clearTimeout(safetyTimeout);
       subscription.unsubscribe();
     };
   }, [setUser, setSession, setLoading]);
