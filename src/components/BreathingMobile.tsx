@@ -27,13 +27,13 @@ const BreathingMobile: React.FC<BreathingMobileProps> = ({ onClose }) => {
   const [timeLeft, setTimeLeft] = useState(0);
   const [showComplete, setShowComplete] = useState(false);
   const [totalCycles, setTotalCycles] = useState(0);
-  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const audioContextRef = useRef<AudioContext | null>(null);
 
   const exercises: BreathingExercise[] = [
     {
       id: 'coherence',
       name: 'Cohérence cardiaque',
-      description: 'Respiration équilibrée 5s-5s pour calmer le cœur',
+      description: '💚 Équilibre émotionnel et calme mental',
       icon: '💚',
       phases: [
         { instruction: 'Inspire profondément', duration: 5, color: 'from-jade to-wasabi' },
@@ -44,7 +44,7 @@ const BreathingMobile: React.FC<BreathingMobileProps> = ({ onClose }) => {
     {
       id: '4-7-8',
       name: 'Respiration 4-7-8',
-      description: 'Technique du Dr. Weil pour l\'endormissement',
+      description: '🌙 Idéale pour l\'endormissement et le sommeil',
       icon: '🌙',
       phases: [
         { instruction: 'Inspire par le nez', duration: 4, color: 'from-jade to-wasabi' },
@@ -54,99 +54,143 @@ const BreathingMobile: React.FC<BreathingMobileProps> = ({ onClose }) => {
       cycles: 4
     },
     {
-      id: 'triangle',
-      name: 'Respiration triangulaire',
-      description: 'Cycle simple pour se recentrer rapidement',
-      icon: '🔺',
+      id: 'square',
+      name: 'Respiration au carré',
+      description: '🟦 Concentration et gestion du stress',
+      icon: '🟦',
       phases: [
-        { instruction: 'Inspire doucement', duration: 4, color: 'from-jade to-wasabi' },
+        { instruction: 'Inspire calmement', duration: 4, color: 'from-jade to-wasabi' },
         { instruction: 'Retiens', duration: 4, color: 'from-wasabi to-jade' },
-        { instruction: 'Expire complètement', duration: 4, color: 'from-sunset to-vermilion' },
+        { instruction: 'Expire doucement', duration: 4, color: 'from-sunset to-vermilion' },
+        { instruction: 'Pause poumons vides', duration: 4, color: 'from-stone to-stone' },
       ],
       cycles: 5
     },
+    {
+      id: 'energizing',
+      name: 'Respiration énergisante',
+      description: '⚡ Boost d\'énergie et vitalité rapide',
+      icon: '⚡',
+      phases: [
+        { instruction: 'Inspire vigoureusement', duration: 2, color: 'from-jade to-wasabi' },
+        { instruction: 'Expire activement', duration: 2, color: 'from-sunset to-vermilion' },
+      ],
+      cycles: 10
+    },
   ];
 
-  useEffect(() => {
-    // Créer un contexte audio simple pour le son de cycle
-    if (!audioRef.current) {
-      audioRef.current = new Audio();
-      audioRef.current.volume = 0.3;
-    }
-
-    return () => {
-      if (audioRef.current) {
-        audioRef.current.pause();
-        audioRef.current = null;
-      }
-    };
-  }, []);
-
-  useEffect(() => {
-    let interval: NodeJS.Timeout;
-
-    if (isActive && !isPaused && selectedExercise && timeLeft > 0) {
-      interval = setInterval(() => {
-        setTimeLeft((time) => {
-          if (time <= 1) {
-            // Move to next phase
-            const nextPhase = currentPhase + 1;
-            if (nextPhase < selectedExercise.phases.length) {
-              setCurrentPhase(nextPhase);
-              return selectedExercise.phases[nextPhase].duration;
-            } else {
-              // Move to next cycle
-              const nextCycle = currentCycle + 1;
-              if (nextCycle < totalCycles) {
-                // Play sound at each cycle completion
-                playCycleSound();
-                setCurrentCycle(nextCycle);
-                setCurrentPhase(0);
-                return selectedExercise.phases[0].duration;
-              } else {
-                // Exercise complete
-                setIsActive(false);
-                setShowComplete(true);
-                if ('vibrate' in navigator) navigator.vibrate([100, 50, 100]);
-                return 0;
-              }
-            }
-          }
-          return time - 1;
-        });
-      }, 1000);
-    }
-
-    return () => clearInterval(interval);
-  }, [isActive, isPaused, timeLeft, currentPhase, currentCycle, selectedExercise, totalCycles]);
-
-  const playCycleSound = () => {
-    // Son apaisant simple avec Web Audio API
+  const playPhaseSound = (phaseType: 'inhale' | 'hold' | 'exhale' | 'pause' | 'cycle') => {
     if ('AudioContext' in window || 'webkitAudioContext' in window) {
       const AudioContext = window.AudioContext || (window as any).webkitAudioContext;
-      const audioContext = new AudioContext();
+      if (!audioContextRef.current) {
+        audioContextRef.current = new AudioContext();
+      }
+      const audioContext = audioContextRef.current;
 
-      // Créer un son doux comme un bol tibétain
       const oscillator = audioContext.createOscillator();
       const gainNode = audioContext.createGain();
 
       oscillator.connect(gainNode);
       gainNode.connect(audioContext.destination);
 
-      oscillator.frequency.value = 432; // Fréquence 432Hz apaisante
       oscillator.type = 'sine';
 
-      gainNode.gain.setValueAtTime(0, audioContext.currentTime);
-      gainNode.gain.linearRampToValueAtTime(0.15, audioContext.currentTime + 0.1);
-      gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 1.5);
-
-      oscillator.start(audioContext.currentTime);
-      oscillator.stop(audioContext.currentTime + 1.5);
+      if (phaseType === 'inhale') {
+        oscillator.frequency.value = 480;
+        gainNode.gain.setValueAtTime(0, audioContext.currentTime);
+        gainNode.gain.linearRampToValueAtTime(0.12, audioContext.currentTime + 0.05);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.4);
+        oscillator.start(audioContext.currentTime);
+        oscillator.stop(audioContext.currentTime + 0.4);
+      } else if (phaseType === 'hold') {
+        oscillator.frequency.value = 528;
+        gainNode.gain.setValueAtTime(0, audioContext.currentTime);
+        gainNode.gain.linearRampToValueAtTime(0.1, audioContext.currentTime + 0.05);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
+        oscillator.start(audioContext.currentTime);
+        oscillator.stop(audioContext.currentTime + 0.3);
+      } else if (phaseType === 'exhale') {
+        oscillator.frequency.value = 396;
+        gainNode.gain.setValueAtTime(0, audioContext.currentTime);
+        gainNode.gain.linearRampToValueAtTime(0.12, audioContext.currentTime + 0.05);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
+        oscillator.start(audioContext.currentTime);
+        oscillator.stop(audioContext.currentTime + 0.5);
+      } else if (phaseType === 'pause') {
+        oscillator.frequency.value = 285;
+        gainNode.gain.setValueAtTime(0, audioContext.currentTime);
+        gainNode.gain.linearRampToValueAtTime(0.08, audioContext.currentTime + 0.05);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
+        oscillator.start(audioContext.currentTime);
+        oscillator.stop(audioContext.currentTime + 0.3);
+      } else if (phaseType === 'cycle') {
+        oscillator.frequency.value = 432;
+        gainNode.gain.setValueAtTime(0, audioContext.currentTime);
+        gainNode.gain.linearRampToValueAtTime(0.15, audioContext.currentTime + 0.1);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 1.5);
+        oscillator.start(audioContext.currentTime);
+        oscillator.stop(audioContext.currentTime + 1.5);
+      }
     } else {
-      // Fallback: vibration
-      if ('vibrate' in navigator) navigator.vibrate(100);
+      if ('vibrate' in navigator) {
+        if (phaseType === 'cycle') {
+          navigator.vibrate(100);
+        } else {
+          navigator.vibrate(30);
+        }
+      }
     }
   };
+
+  useEffect(() => {
+    let interval: NodeJS.Timeout;
+
+    if (isActive && !isPaused && selectedExercise && timeLeft > 0) {
+      interval = setInterval(() => {
+        setTimeLeft((time) => time - 1);
+      }, 1000);
+    }
+
+    return () => clearInterval(interval);
+  }, [isActive, isPaused, timeLeft, selectedExercise]);
+
+  useEffect(() => {
+    if (timeLeft === 0 && isActive && selectedExercise) {
+      const nextPhase = currentPhase + 1;
+      if (nextPhase < selectedExercise.phases.length) {
+        const phaseInstruction = selectedExercise.phases[nextPhase].instruction.toLowerCase();
+        if (phaseInstruction.includes('inspire')) {
+          playPhaseSound('inhale');
+        } else if (phaseInstruction.includes('retiens')) {
+          playPhaseSound('hold');
+        } else if (phaseInstruction.includes('expire')) {
+          playPhaseSound('exhale');
+        } else if (phaseInstruction.includes('pause')) {
+          playPhaseSound('pause');
+        }
+        setCurrentPhase(nextPhase);
+        setTimeLeft(selectedExercise.phases[nextPhase].duration);
+      } else {
+        const nextCycle = currentCycle + 1;
+        if (nextCycle < totalCycles) {
+          playPhaseSound('cycle');
+          setCurrentCycle(nextCycle);
+          setCurrentPhase(0);
+          setTimeLeft(selectedExercise.phases[0].duration);
+          setTimeout(() => {
+            const firstPhaseInstruction = selectedExercise.phases[0].instruction.toLowerCase();
+            if (firstPhaseInstruction.includes('inspire')) {
+              playPhaseSound('inhale');
+            }
+          }, 100);
+        } else {
+          setIsActive(false);
+          setShowComplete(true);
+          if ('vibrate' in navigator) navigator.vibrate([100, 50, 100]);
+        }
+      }
+    }
+  }, [timeLeft, isActive, selectedExercise, currentPhase, currentCycle, totalCycles]);
 
   const startExercise = (exercise: BreathingExercise) => {
     setSelectedExercise(exercise);
@@ -158,6 +202,7 @@ const BreathingMobile: React.FC<BreathingMobileProps> = ({ onClose }) => {
     setIsPaused(false);
     setShowComplete(false);
     if ('vibrate' in navigator) navigator.vibrate(50);
+    setTimeout(() => playPhaseSound('inhale'), 200);
   };
 
   const togglePause = () => {
@@ -165,13 +210,16 @@ const BreathingMobile: React.FC<BreathingMobileProps> = ({ onClose }) => {
     if ('vibrate' in navigator) navigator.vibrate(30);
   };
 
-  const reset = () => {
+  const resetExercise = () => {
     if (selectedExercise) {
       setCurrentPhase(0);
       setCurrentCycle(0);
       setTimeLeft(selectedExercise.phases[0].duration);
-      setIsActive(false);
+      setIsActive(true);
       setIsPaused(false);
+      setShowComplete(false);
+      if ('vibrate' in navigator) navigator.vibrate(30);
+      setTimeout(() => playPhaseSound('inhale'), 200);
     }
   };
 
@@ -181,244 +229,175 @@ const BreathingMobile: React.FC<BreathingMobileProps> = ({ onClose }) => {
   };
 
   const getCircleSize = () => {
-    if (!selectedExercise) return 1;
-    const phase = selectedExercise.phases[currentPhase];
-    const progress = (phase.duration - timeLeft) / phase.duration;
+    if (!selectedExercise || timeLeft === 0) return 1;
 
-    if (phase.instruction.toLowerCase().includes('inspire')) {
+    const currentPhaseDuration = selectedExercise.phases[currentPhase].duration;
+    const progress = (currentPhaseDuration - timeLeft) / currentPhaseDuration;
+
+    const instruction = selectedExercise.phases[currentPhase].instruction.toLowerCase();
+    if (instruction.includes('inspire')) {
       return 0.7 + (progress * 0.3);
-    } else if (phase.instruction.toLowerCase().includes('expire')) {
+    } else if (instruction.includes('expire')) {
       return 1 - (progress * 0.3);
     }
     return 1;
   };
 
-  if (showComplete) {
-    return (
-      <div className="fixed inset-0 bg-gradient-to-br from-sand via-pearl to-sand/50 z-50 animate-slide-up flex flex-col">
-        <div className="flex-1 flex flex-col items-center justify-center px-4 text-center">
-          <div className="w-24 h-24 bg-jade/10 rounded-full flex items-center justify-center mx-auto mb-6 animate-scale-in">
-            <Wind className="w-12 h-12 text-jade" />
-          </div>
-
-          <h2 className="text-3xl font-bold text-ink mb-3" style={{ fontFamily: "'Shippori Mincho', serif" }}>
-            Bien joué !
-          </h2>
-          <p className="text-stone mb-2">
-            Tu as terminé {totalCycles} cycles de respiration
-          </p>
-          <p className="text-xs text-stone/60 mb-8">
-            Ressens-tu la différence ?
-          </p>
-
-          <div className="space-y-3 w-full max-w-sm">
-            <button
-              onClick={() => {
-                setShowComplete(false);
-                setSelectedExercise(null);
-              }}
-              className="w-full px-8 py-4 bg-gradient-to-r from-jade to-forest text-white rounded-full font-semibold active:scale-95 transition-transform shadow-lg"
-            >
-              Choisir un autre exercice
-            </button>
-
+  return (
+    <div className="fixed inset-0 bg-gradient-to-br from-jade/5 via-white to-wasabi/5 z-50 overflow-y-auto">
+      <div className="min-h-screen p-4 pb-24">
+        <div className="max-w-lg mx-auto">
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center">
+              <Wind className="w-6 h-6 text-jade mr-2" />
+              <h1 className="text-2xl font-bold text-ink" style={{ fontFamily: "'Shippori Mincho', serif" }}>
+                Respiration
+              </h1>
+            </div>
             <button
               onClick={onClose}
-              className="w-full px-6 py-3 border-2 border-stone/20 text-stone rounded-full active:scale-95 transition-transform"
+              className="w-10 h-10 rounded-full bg-stone/10 flex items-center justify-center text-stone hover:text-vermilion transition-colors"
             >
-              Terminer
+              <X size={20} />
             </button>
           </div>
-        </div>
-      </div>
-    );
-  }
 
-  if (isActive || selectedExercise) {
-    const currentPhaseData = selectedExercise!.phases[currentPhase];
-    const circleSize = getCircleSize();
-    const totalPhases = selectedExercise!.phases.length;
-    const phaseProgress = ((currentCycle * totalPhases + currentPhase) / (totalCycles * totalPhases)) * 100;
+          {!selectedExercise ? (
+            <div className="space-y-4">
+              <p className="text-stone text-sm mb-6">
+                Choisis une technique de respiration adaptée à ton besoin du moment.
+              </p>
 
-    return (
-      <div className="fixed inset-0 bg-gradient-to-br from-sand via-pearl to-sand/50 z-50 animate-slide-up flex flex-col">
-        {/* Header */}
-        <div className="bg-white/80 backdrop-blur-lg border-b border-stone/10 px-4 py-4 flex items-center justify-between shrink-0">
-          <button
-            onClick={reset}
-            className="text-stone active:scale-95 transition-transform"
-          >
-            <RotateCcw className="w-5 h-5" />
-          </button>
-
-          <div className="flex items-center gap-2">
-            <Wind className="w-5 h-5 text-jade" />
-            <span className="font-semibold text-ink" style={{ fontFamily: "'Shippori Mincho', serif" }}>
-              {selectedExercise?.name}
-            </span>
-          </div>
-
-          <button
-            onClick={onClose}
-            className="w-10 h-10 rounded-full bg-stone/10 flex items-center justify-center active:scale-95 transition-transform"
-          >
-            <X className="w-5 h-5 text-stone" />
-          </button>
-        </div>
-
-        {/* Progress */}
-        <div className="bg-white/80 backdrop-blur-lg px-4 py-3 border-b border-stone/10 shrink-0">
-          <div className="flex items-center justify-between text-xs text-stone mb-2">
-            <span>Cycle {currentCycle + 1}/{totalCycles}</span>
-            <button
-              onClick={addMoreCycles}
-              className="flex items-center gap-1 text-jade font-medium active:scale-95 transition-transform"
-            >
-              <Plus className="w-3 h-3" />
-              Ajouter 3 cycles
-            </button>
-            <span>Phase {currentPhase + 1}/{totalPhases}</span>
-          </div>
-          <div className="w-full bg-stone/20 h-1.5 rounded-full overflow-hidden">
-            <div
-              className="bg-gradient-to-r from-jade to-forest h-1.5 rounded-full transition-all duration-300"
-              style={{ width: `${phaseProgress}%` }}
-            />
-          </div>
-        </div>
-
-        {/* Breathing Circle */}
-        <div className="flex-1 flex flex-col items-center justify-center px-4">
-          <div className="relative w-full max-w-sm aspect-square flex items-center justify-center mb-8">
-            {/* Animated Circle */}
-            <div
-              className={`absolute w-64 h-64 rounded-full bg-gradient-to-br ${currentPhaseData.color} opacity-30 transition-transform duration-1000 ease-in-out`}
-              style={{
-                transform: `scale(${circleSize})`,
-              }}
-            />
-
-            {/* Center Content */}
-            <div className="relative z-10 text-center">
-              <div className="text-6xl font-bold text-ink mb-2" style={{ fontFamily: "'Shippori Mincho', serif" }}>
-                {timeLeft}
+              {exercises.map((exercise) => (
+                <button
+                  key={exercise.id}
+                  onClick={() => startExercise(exercise)}
+                  className="w-full bg-white rounded-2xl p-5 shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1 border border-stone/10 text-left"
+                >
+                  <div className="flex items-start">
+                    <div className="text-3xl mr-4">
+                      {exercise.icon}
+                    </div>
+                    <div className="flex-1">
+                      <h3 className="font-bold text-lg text-ink mb-1" style={{ fontFamily: "'Shippori Mincho', serif" }}>
+                        {exercise.name}
+                      </h3>
+                      <p className="text-sm text-stone leading-relaxed">
+                        {exercise.description}
+                      </p>
+                      <p className="text-xs text-stone/60 mt-2">
+                        {exercise.cycles} cycles • {exercise.phases.reduce((acc, p) => acc + p.duration, 0)}s par cycle
+                      </p>
+                    </div>
+                    <Play size={16} className="text-jade mt-1 ml-2" />
+                  </div>
+                </button>
+              ))}
+            </div>
+          ) : showComplete ? (
+            <div className="text-center py-12">
+              <div className="w-24 h-24 bg-gradient-to-br from-jade to-wasabi rounded-full flex items-center justify-center mx-auto mb-6 animate-bounce-slow">
+                <span className="text-4xl">✨</span>
               </div>
-              <div className="text-xl text-ink mb-4 font-medium animate-pulse">
-                {currentPhaseData.instruction}
-              </div>
-              <div className="text-sm text-stone">
-                {isPaused ? 'En pause' : ''}
+              <h2 className="text-2xl font-bold text-ink mb-3" style={{ fontFamily: "'Shippori Mincho', serif" }}>
+                Exercice terminé !
+              </h2>
+              <p className="text-stone mb-8">
+                Bravo, tu as complété {totalCycles} cycles de {selectedExercise.name}
+              </p>
+              <div className="space-y-3">
+                <button
+                  onClick={resetExercise}
+                  className="w-full bg-gradient-to-r from-jade to-wasabi text-white py-4 rounded-xl font-medium hover:shadow-lg transition-all duration-300"
+                >
+                  Recommencer
+                </button>
+                <button
+                  onClick={() => {
+                    setSelectedExercise(null);
+                    setShowComplete(false);
+                  }}
+                  className="w-full bg-stone/10 text-ink py-4 rounded-xl font-medium hover:bg-stone/20 transition-colors"
+                >
+                  Choisir un autre exercice
+                </button>
               </div>
             </div>
-          </div>
-
-          {/* Sound indicator */}
-          <div className="text-xs text-stone/60 mb-8 text-center">
-            🔔 Son apaisant à chaque cycle
-          </div>
-
-          {/* Controls */}
-          <div className="flex gap-4">
-            {!isActive ? (
-              <button
-                onClick={() => {
-                  setIsActive(true);
-                  if ('vibrate' in navigator) navigator.vibrate(50);
-                }}
-                className="w-20 h-20 bg-gradient-to-br from-jade to-forest rounded-full flex items-center justify-center text-white shadow-2xl active:scale-95 transition-transform"
-              >
-                <Play className="w-8 h-8 ml-1" />
-              </button>
-            ) : (
-              <button
-                onClick={togglePause}
-                className="w-20 h-20 bg-gradient-to-br from-jade to-forest rounded-full flex items-center justify-center text-white shadow-2xl active:scale-95 transition-transform"
-              >
-                {isPaused ? (
-                  <Play className="w-8 h-8 ml-1" />
-                ) : (
-                  <Pause className="w-8 h-8" />
-                )}
-              </button>
-            )}
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  return (
-    <div className="fixed inset-0 bg-gradient-to-br from-sand via-pearl to-sand/50 z-50 animate-slide-up flex flex-col">
-      {/* Header */}
-      <div className="bg-white/80 backdrop-blur-lg border-b border-stone/10 px-4 py-4 flex items-center justify-between shrink-0">
-        <button
-          onClick={onClose}
-          className="w-10 h-10 rounded-full bg-stone/10 flex items-center justify-center active:scale-95 transition-transform"
-        >
-          <X className="w-5 h-5 text-stone" />
-        </button>
-
-        <div className="flex items-center gap-2">
-          <Wind className="w-5 h-5 text-jade" />
-          <span className="font-semibold text-ink" style={{ fontFamily: "'Shippori Mincho', serif" }}>
-            Respiration
-          </span>
-        </div>
-
-        <div className="w-10" />
-      </div>
-
-      {/* Content */}
-      <div className="flex-1 overflow-y-auto">
-        <div className="px-4 pt-8 pb-8">
-          <h2 className="text-3xl font-bold text-ink mb-3 text-center" style={{ fontFamily: "'Shippori Mincho', serif" }}>
-            Choisis ton exercice
-          </h2>
-          <p className="text-stone text-center mb-8">
-            Laisse-toi guider par la respiration
-          </p>
-
-          <div className="space-y-4 max-w-sm mx-auto mb-8">
-            {exercises.map((exercise) => (
-              <button
-                key={exercise.id}
-                onClick={() => startExercise(exercise)}
-                className="w-full bg-white border-2 border-stone/10 rounded-2xl p-6 hover:border-jade/30 active:scale-98 transition-all group text-left"
-              >
-                <div className="flex items-start gap-4">
-                  <div className="text-4xl shrink-0">{exercise.icon}</div>
-                  <div className="flex-1">
-                    <h3 className="text-lg font-bold text-ink mb-1 group-hover:text-jade transition-colors">
-                      {exercise.name}
-                    </h3>
-                    <p className="text-sm text-stone mb-3">{exercise.description}</p>
-                    <div className="flex items-center gap-2 text-xs text-stone">
-                      <span>{exercise.cycles} cycles</span>
-                      <span>•</span>
-                      <span>{exercise.phases.length} phases</span>
-                      <span>•</span>
-                      <span>{exercise.cycles * exercise.phases.reduce((sum, p) => sum + p.duration, 0)}s</span>
-                    </div>
-                  </div>
-                  <div className="w-10 h-10 bg-jade/10 rounded-full flex items-center justify-center group-hover:bg-jade group-hover:scale-110 transition-all shrink-0">
-                    <Play className="w-5 h-5 text-jade group-hover:text-white ml-0.5" />
-                  </div>
+          ) : (
+            <div className="text-center">
+              <div className="mb-6">
+                <div className="flex items-center justify-between text-xs text-stone mb-2">
+                  <span>Cycle {currentCycle + 1}/{totalCycles}</span>
+                  <button
+                    onClick={addMoreCycles}
+                    className="flex items-center gap-1 text-jade font-medium active:scale-95 transition-transform"
+                  >
+                    <Plus className="w-3 h-3" />
+                    +3
+                  </button>
                 </div>
-              </button>
-            ))}
-          </div>
+                <div className="w-full bg-stone/20 h-1.5 rounded-full overflow-hidden">
+                  <div
+                    className="bg-gradient-to-r from-jade to-wasabi h-1.5 rounded-full transition-all duration-300"
+                    style={{ width: `${((currentCycle / totalCycles) * 100)}%` }}
+                  />
+                </div>
+              </div>
 
-          {/* Benefits */}
-          <div className="bg-jade/5 rounded-2xl p-4 border border-jade/10 max-w-sm mx-auto">
-            <h3 className="text-sm font-semibold text-ink mb-2">🌿 Bienfaits</h3>
-            <ul className="text-xs text-stone space-y-1">
-              <li>• Réduit le stress et l'anxiété instantanément</li>
-              <li>• Améliore la concentration et la clarté mentale</li>
-              <li>• Régule le rythme cardiaque</li>
-              <li>• Favorise l'endormissement naturel</li>
-              <li>• Active le système nerveux parasympathique</li>
-            </ul>
-          </div>
+              <div className="relative w-48 h-48 mx-auto flex items-center justify-center my-12">
+                <div
+                  className={`absolute w-full h-full rounded-full bg-gradient-to-br ${selectedExercise.phases[currentPhase].color} opacity-30 transition-transform duration-1000 ease-in-out`}
+                  style={{
+                    transform: `scale(${getCircleSize()})`,
+                  }}
+                />
+                <div className="relative z-10 text-center">
+                  <div className="text-5xl font-bold text-ink mb-2" style={{ fontFamily: "'Shippori Mincho', serif" }}>
+                    {timeLeft > 0 ? timeLeft : ''}
+                  </div>
+                  <div className="text-lg text-ink font-medium animate-pulse">
+                    {selectedExercise.phases[currentPhase].instruction}
+                  </div>
+                  {isPaused && (
+                    <div className="text-sm text-stone/60 mt-2">En pause</div>
+                  )}
+                </div>
+              </div>
+
+              <div className="text-xs text-stone/60 mb-6">
+                🔔 Son apaisant à chaque phase
+              </div>
+
+              <div className="flex items-center justify-center gap-4 mb-8">
+                <button
+                  onClick={resetExercise}
+                  className="w-12 h-12 rounded-full bg-stone/10 flex items-center justify-center text-stone active:scale-95 transition-transform"
+                  title="Recommencer"
+                >
+                  <RotateCcw className="w-5 h-5" />
+                </button>
+
+                <button
+                  onClick={togglePause}
+                  className="w-16 h-16 bg-gradient-to-br from-jade to-wasabi rounded-full flex items-center justify-center text-white shadow-xl active:scale-95 transition-transform"
+                  title={isPaused ? 'Reprendre' : 'Pause'}
+                >
+                  {isPaused ? (
+                    <Play className="w-7 h-7 ml-1" />
+                  ) : (
+                    <Pause className="w-7 h-7" />
+                  )}
+                </button>
+              </div>
+
+              <button
+                onClick={() => setSelectedExercise(null)}
+                className="text-stone hover:text-vermilion transition-colors text-sm"
+              >
+                Changer d'exercice
+              </button>
+            </div>
+          )}
         </div>
       </div>
     </div>
