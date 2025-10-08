@@ -11,6 +11,7 @@ import { supabase } from './lib/supabase';
 import { useAuthStore } from './stores/authStore';
 import Home from './pages/Home';
 import School from './pages/School';
+import SchoolModuleView from './pages/SchoolModuleView';
 import Journal from './pages/Journal';
 import Community from './pages/Community';
 import Profile from './pages/Profile';
@@ -82,6 +83,8 @@ function App() {
             <Route path="/auth" element={<Auth />} />
             <Route path="/school" element={<School />} />
             <Route path="/school/module/:slug" element={<ModuleDetail />} />
+            <Route path="/ecole" element={<School />} />
+            <Route path="/ecole/module/:slug" element={<SchoolModuleView />} />
             <Route path="/journal" element={<Journal />} />
             <Route path="/community" element={
               <ProtectedRoute>
