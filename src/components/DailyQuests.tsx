@@ -70,38 +70,54 @@ const DailyQuests: React.FC<DailyQuestsProps> = ({
     loadBreathingSessions();
   }, [user]);
 
+  const loadClaimedStatus = async () => {
+    if (!user?.id) return;
+
+    const today = new Date();
+    const monday = new Date(today);
+    const dayOfWeek = today.getDay();
+    const diff = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
+    monday.setDate(today.getDate() + diff);
+    monday.setHours(0, 0, 0, 0);
+    const weekStart = monday.toISOString().split('T')[0];
+
+    const { data: weekData } = await supabase
+      .from('weekly_quests')
+      .select('*')
+      .eq('user_id', user.id)
+      .eq('week_start', weekStart)
+      .maybeSingle();
+
+    if (weekData) {
+      const todayDate = new Date().toISOString().split('T')[0];
+      const claimedStatus: Record<string, boolean> = {
+        checkin: weekData.checkin_last_claim_date === todayDate,
+        journal: weekData.journal_last_claim_date === todayDate,
+        meditation: weekData.meditation_last_claim_date === todayDate,
+        breathing: weekData.breathing_last_claim_date === todayDate
+      };
+      setClaimed(claimedStatus);
+    } else {
+      setClaimed({});
+    }
+  };
+
   useEffect(() => {
-    const loadClaimedStatus = async () => {
-      if (!user?.id) return;
+    loadClaimedStatus();
+  }, [user]);
 
-      const today = new Date();
-      const monday = new Date(today);
-      const dayOfWeek = today.getDay();
-      const diff = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
-      monday.setDate(today.getDate() + diff);
-      monday.setHours(0, 0, 0, 0);
-      const weekStart = monday.toISOString().split('T')[0];
-
-      const { data: weekData } = await supabase
-        .from('weekly_quests')
-        .select('*')
-        .eq('user_id', user.id)
-        .eq('week_start', weekStart)
-        .maybeSingle();
-
-      if (weekData) {
-        const todayDate = new Date().toISOString().split('T')[0];
-        const claimedStatus: Record<string, boolean> = {
-          checkin: weekData.checkin_last_claim_date === todayDate,
-          journal: weekData.journal_last_claim_date === todayDate,
-          meditation: weekData.meditation_last_claim_date === todayDate,
-          breathing: weekData.breathing_last_claim_date === todayDate
-        };
-        setClaimed(claimedStatus);
-      }
+  useEffect(() => {
+    const handleFocus = () => {
+      loadClaimedStatus();
     };
 
-    loadClaimedStatus();
+    window.addEventListener('focus', handleFocus);
+    document.addEventListener('visibilitychange', handleFocus);
+
+    return () => {
+      window.removeEventListener('focus', handleFocus);
+      document.removeEventListener('visibilitychange', handleFocus);
+    };
   }, [user]);
 
   useEffect(() => {
@@ -281,9 +297,9 @@ const DailyQuests: React.FC<DailyQuestsProps> = ({
       queryClient.invalidateQueries({ queryKey: ['weekly-xp', user.id] });
       queryClient.invalidateQueries({ queryKey: ['profile', user.id] });
 
+      await loadClaimedStatus();
+
       setTimeout(() => {
-        const newClaimed = { ...claimed, [quest.id]: true };
-        setClaimed(newClaimed);
         setAnimatingXP(null);
       }, 1500);
 
