@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X, Play, Pause, RotateCcw, Check, Timer as TimerIcon } from 'lucide-react';
+import { X, Play, Pause, RotateCcw, Check, Timer as TimerIcon, Music, Volume2, VolumeX } from 'lucide-react';
 import { useAudioStore } from '../stores/audioStore';
 
 interface MeditationMobileProps {
@@ -7,12 +7,14 @@ interface MeditationMobileProps {
 }
 
 const MeditationMobile: React.FC<MeditationMobileProps> = ({ onClose }) => {
-  const { addMeditationTime } = useAudioStore();
+  const { addMeditationTime, currentAmbience, ambienceIsPlaying, playAmbience, pauseAmbience } = useAudioStore();
   const [selectedDuration, setSelectedDuration] = useState<number | null>(null);
+  const [customMinutes, setCustomMinutes] = useState<string>('');
   const [isActive, setIsActive] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
   const [timeLeft, setTimeLeft] = useState(0);
   const [showSuccess, setShowSuccess] = useState(false);
+  const [enableMusic, setEnableMusic] = useState(true);
 
   const durations = [
     { minutes: 3, label: '3 min', desc: 'Pause rapide' },
@@ -46,6 +48,26 @@ const MeditationMobile: React.FC<MeditationMobileProps> = ({ onClose }) => {
     setIsActive(true);
     setIsPaused(false);
     if ('vibrate' in navigator) navigator.vibrate(50);
+
+    if (enableMusic && !ambienceIsPlaying && currentAmbience) {
+      playAmbience();
+    }
+  };
+
+  const startCustomMeditation = () => {
+    const minutes = parseInt(customMinutes);
+    if (minutes > 0 && minutes <= 120) {
+      startMeditation(minutes);
+    }
+  };
+
+  const toggleMusic = () => {
+    if (enableMusic && ambienceIsPlaying) {
+      pauseAmbience();
+    } else if (!enableMusic && !ambienceIsPlaying && currentAmbience) {
+      playAmbience();
+    }
+    setEnableMusic(!enableMusic);
   };
 
   const togglePause = () => {
@@ -126,12 +148,25 @@ const MeditationMobile: React.FC<MeditationMobileProps> = ({ onClose }) => {
             </span>
           </div>
 
-          <button
-            onClick={onClose}
-            className="w-10 h-10 rounded-full bg-stone/10 flex items-center justify-center active:scale-95 transition-transform"
-          >
-            <X className="w-5 h-5 text-stone" />
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={toggleMusic}
+              className="w-10 h-10 rounded-full bg-stone/10 flex items-center justify-center active:scale-95 transition-transform"
+              title={enableMusic ? 'Désactiver la musique' : 'Activer la musique'}
+            >
+              {enableMusic ? (
+                <Volume2 className="w-5 h-5 text-jade" />
+              ) : (
+                <VolumeX className="w-5 h-5 text-stone" />
+              )}
+            </button>
+            <button
+              onClick={onClose}
+              className="w-10 h-10 rounded-full bg-stone/10 flex items-center justify-center active:scale-95 transition-transform"
+            >
+              <X className="w-5 h-5 text-stone" />
+            </button>
+          </div>
         </div>
 
         {/* Timer Display */}
@@ -243,6 +278,57 @@ const MeditationMobile: React.FC<MeditationMobileProps> = ({ onClose }) => {
           <p className="text-stone text-center mb-8">
             Prends un moment pour te recentrer
           </p>
+
+          {/* Custom Duration Input */}
+          <div className="max-w-sm mx-auto mb-6">
+            <div className="bg-white rounded-2xl p-4 shadow-lg border border-jade/20">
+              <label className="text-sm text-stone mb-2 block">Durée personnalisée (1-120 min)</label>
+              <div className="flex gap-2">
+                <input
+                  type="number"
+                  min="1"
+                  max="120"
+                  value={customMinutes}
+                  onChange={(e) => setCustomMinutes(e.target.value)}
+                  placeholder="Ex: 25"
+                  className="flex-1 px-4 py-3 bg-sand/30 rounded-xl text-ink text-center font-semibold focus:outline-none focus:ring-2 focus:ring-jade/50"
+                  style={{ fontFamily: "'Shippori Mincho', serif" }}
+                />
+                <button
+                  onClick={startCustomMeditation}
+                  disabled={!customMinutes || parseInt(customMinutes) <= 0 || parseInt(customMinutes) > 120}
+                  className="px-6 py-3 bg-gradient-to-r from-jade to-forest text-white rounded-xl font-semibold active:scale-95 transition-transform shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <Play className="w-5 h-5" />
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* Music Toggle */}
+          <div className="max-w-sm mx-auto mb-8">
+            <button
+              onClick={toggleMusic}
+              className="w-full bg-white rounded-2xl p-4 shadow-lg border border-stone/10 flex items-center justify-between active:scale-[0.98] transition-transform"
+            >
+              <div className="flex items-center gap-3">
+                {enableMusic ? (
+                  <Music className="w-5 h-5 text-jade" />
+                ) : (
+                  <VolumeX className="w-5 h-5 text-stone" />
+                )}
+                <div className="text-left">
+                  <div className="font-semibold text-ink text-sm">Musique d'ambiance</div>
+                  <div className="text-xs text-stone">{enableMusic ? 'Activée' : 'Désactivée'}</div>
+                </div>
+              </div>
+              <div className={`w-12 h-6 rounded-full transition-colors ${enableMusic ? 'bg-jade' : 'bg-stone/20'}`}>
+                <div className={`w-5 h-5 rounded-full bg-white shadow-md transform transition-transform ${enableMusic ? 'translate-x-6' : 'translate-x-0.5'} mt-0.5`} />
+              </div>
+            </button>
+          </div>
+
+          <div className="text-center text-sm text-stone/60 mb-4">Durées recommandées</div>
 
           <div className="space-y-3 max-w-sm mx-auto mb-8">
             {durations.map((duration) => (
