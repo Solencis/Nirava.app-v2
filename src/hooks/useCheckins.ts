@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { getCheckins, createCheckin, CheckinEntry } from '../lib/supabase';
+import { getCheckins, createCheckin, CheckinEntry, supabase } from '../lib/supabase';
 import { useAuth } from './useAuth';
 
 const PAGE_SIZE = 50;
