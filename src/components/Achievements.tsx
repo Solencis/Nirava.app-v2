@@ -1,8 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Trophy, Lock, Sparkles } from 'lucide-react';
+import { Trophy, Lock, Sparkles, Gift } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../hooks/useAuth';
+import { claimAchievementXP } from '../utils/achievementSystem';
+import { useQueryClient } from '@tanstack/react-query';
 
 interface Achievement {
   id: string;
@@ -14,13 +16,16 @@ interface Achievement {
   points: number;
   unlocked?: boolean;
   unlocked_at?: string;
+  xp_claimed?: boolean;
 }
 
 export default function Achievements() {
   const { user } = useAuth();
+  const queryClient = useQueryClient();
   const [achievements, setAchievements] = useState<Achievement[]>([]);
   const [totalPoints, setTotalPoints] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [claiming, setClaiming] = useState<string | null>(null);
 
   useEffect(() => {
     if (user) {
@@ -54,7 +59,7 @@ export default function Achievements() {
 
       const { data: userAchievements, error: userAchievementsError } = await supabase
         .from('user_achievements')
-        .select('achievement_id, unlocked_at')
+        .select('achievement_id, unlocked_at, xp_claimed')
         .eq('user_id', user?.id);
 
       if (userAchievementsError) {
@@ -63,11 +68,15 @@ export default function Achievements() {
 
       const unlockedIds = new Set(userAchievements?.map(ua => ua.achievement_id) || []);
 
-      const achievementsWithStatus = allAchievements?.map(achievement => ({
-        ...achievement,
-        unlocked: unlockedIds.has(achievement.id),
-        unlocked_at: userAchievements?.find(ua => ua.achievement_id === achievement.id)?.unlocked_at
-      })) || [];
+      const achievementsWithStatus = allAchievements?.map(achievement => {
+        const userAch = userAchievements?.find(ua => ua.achievement_id === achievement.id);
+        return {
+          ...achievement,
+          unlocked: unlockedIds.has(achievement.id),
+          unlocked_at: userAch?.unlocked_at,
+          xp_claimed: userAch?.xp_claimed || false
+        };
+      }) || [];
 
       setAchievements(achievementsWithStatus);
 
@@ -79,6 +88,28 @@ export default function Achievements() {
       console.error('Error loading achievements:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleClaimXP = async (achievement: Achievement) => {
+    if (!user?.id || claiming || achievement.xp_claimed) return;
+
+    setClaiming(achievement.id);
+
+    try {
+      const result = await claimAchievementXP(user.id, achievement.id);
+
+      if (result.success) {
+        await loadAchievements();
+        queryClient.invalidateQueries({ queryKey: ['profile', user.id] });
+      } else {
+        alert(result.error || 'Erreur lors de la réclamation de l\'XP');
+      }
+    } catch (error) {
+      console.error('Error claiming XP:', error);
+      alert('Erreur lors de la réclamation de l\'XP');
+    } finally {
+      setClaiming(null);
     }
   };
 
@@ -183,13 +214,33 @@ export default function Achievements() {
                       }`}>
                         {achievement.description}
                       </p>
-                      <div className="flex items-center justify-between">
+                      <div className="flex items-center justify-between gap-2">
                         <span className={`text-sm font-semibold ${
                           achievement.unlocked ? 'text-emerald-600' : 'text-gray-400'
                         }`}>
                           +{achievement.points} XP
                         </span>
-                        {achievement.unlocked && achievement.unlocked_at && (
+
+                        {achievement.unlocked && !achievement.xp_claimed && achievement.points > 0 && (
+                          <motion.button
+                            whileHover={{ scale: 1.05 }}
+                            whileTap={{ scale: 0.95 }}
+                            onClick={() => handleClaimXP(achievement)}
+                            disabled={claiming === achievement.id}
+                            className="flex items-center gap-1 px-3 py-1 bg-gradient-to-r from-amber-500 to-orange-500 text-white rounded-full text-xs font-bold shadow-lg hover:shadow-xl transition-shadow disabled:opacity-50"
+                          >
+                            <Gift className="w-3 h-3" />
+                            {claiming === achievement.id ? 'Réclamation...' : 'Réclamer XP'}
+                          </motion.button>
+                        )}
+
+                        {achievement.unlocked && achievement.xp_claimed && (
+                          <span className="text-xs text-emerald-600 font-semibold">
+                            ✓ XP réclamé
+                          </span>
+                        )}
+
+                        {achievement.unlocked && achievement.unlocked_at && !achievement.xp_claimed && achievement.points === 0 && (
                           <span className="text-xs text-gray-500">
                             {new Date(achievement.unlocked_at).toLocaleDateString('fr-FR')}
                           </span>

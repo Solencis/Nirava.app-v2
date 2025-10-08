@@ -186,27 +186,62 @@ export async function checkAndUnlockAchievements(userId: string): Promise<string
       if (!error) {
         newlyUnlocked.push(achievement.code);
         console.log(`✨ Achievement unlocked: ${achievement.code} - ${achievement.title}`);
-
-        if (achievement.points > 0) {
-          const { data: currentProfile } = await supabase
-            .from('profiles')
-            .select('total_xp')
-            .eq('id', userId)
-            .single();
-
-          const currentXP = currentProfile?.total_xp || 0;
-          const newXP = currentXP + achievement.points;
-
-          await supabase
-            .from('profiles')
-            .update({ total_xp: newXP })
-            .eq('id', userId);
-
-          console.log(`🎉 +${achievement.points} XP awarded! Total: ${newXP} XP`);
-        }
+        console.log(`💎 ${achievement.points} XP disponibles à réclamer !`);
       }
     }
   }
 
   return newlyUnlocked;
+}
+
+export async function claimAchievementXP(userId: string, achievementId: string): Promise<{ success: boolean; xp: number; error?: string }> {
+  try {
+    const { data: userAchievement } = await supabase
+      .from('user_achievements')
+      .select('id, xp_claimed, achievements(points, title)')
+      .eq('user_id', userId)
+      .eq('achievement_id', achievementId)
+      .single();
+
+    if (!userAchievement) {
+      return { success: false, xp: 0, error: 'Achievement not unlocked' };
+    }
+
+    if (userAchievement.xp_claimed) {
+      return { success: false, xp: 0, error: 'XP already claimed' };
+    }
+
+    const achievement = userAchievement.achievements as any;
+    const xpToAdd = achievement?.points || 0;
+
+    if (xpToAdd === 0) {
+      return { success: false, xp: 0, error: 'No XP to claim' };
+    }
+
+    const { data: currentProfile } = await supabase
+      .from('profiles')
+      .select('total_xp')
+      .eq('id', userId)
+      .single();
+
+    const currentXP = currentProfile?.total_xp || 0;
+    const newXP = currentXP + xpToAdd;
+
+    await supabase
+      .from('profiles')
+      .update({ total_xp: newXP })
+      .eq('id', userId);
+
+    await supabase
+      .from('user_achievements')
+      .update({ xp_claimed: true })
+      .eq('id', userAchievement.id);
+
+    console.log(`🎉 ${achievement.title}: +${xpToAdd} XP réclamés ! Total: ${newXP} XP`);
+
+    return { success: true, xp: xpToAdd };
+  } catch (error) {
+    console.error('Error claiming XP:', error);
+    return { success: false, xp: 0, error: 'Error claiming XP' };
+  }
 }
