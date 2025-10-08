@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { motion } from 'framer-motion';
 import { Heart, Moon, Timer, Shield, Plus, Calendar, Flame, CheckCircle, History, Cloud, Sparkles, Award, Target, Zap, TrendingUp, Star, Users, Wind, Trophy } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import CheckinMobile from '../components/CheckinMobile';
