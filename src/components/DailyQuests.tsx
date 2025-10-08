@@ -94,7 +94,13 @@ const DailyQuests: React.FC<DailyQuestsProps> = ({
         checkin: weekData.checkin_last_claim_date === todayDate,
         journal: weekData.journal_last_claim_date === todayDate,
         meditation: weekData.meditation_last_claim_date === todayDate,
-        breathing: weekData.breathing_last_claim_date === todayDate
+        breathing: weekData.breathing_last_claim_date === todayDate,
+        'meditation-15': weekData.meditation_15_last_claim_date === todayDate,
+        'breathing-3': weekData.breathing_3_last_claim_date === todayDate,
+        'meditation-30': weekData.meditation_30_last_claim_date === todayDate,
+        'journal-reflection': weekData.journal_reflection_last_claim_date === todayDate,
+        'meditation-60': weekData.meditation_60_last_claim_date === todayDate,
+        'daily-mastery': weekData.daily_mastery_last_claim_date === todayDate
       };
       setClaimed(claimedStatus);
     } else {
@@ -248,14 +254,26 @@ const DailyQuests: React.FC<DailyQuestsProps> = ({
         'checkin': 'checkin_xp',
         'journal': 'journal_xp',
         'meditation': 'meditation_xp',
-        'breathing': 'breathing_xp'
+        'breathing': 'breathing_xp',
+        'meditation-15': 'meditation_15_xp',
+        'breathing-3': 'breathing_3_xp',
+        'meditation-30': 'meditation_30_xp',
+        'journal-reflection': 'journal_reflection_xp',
+        'meditation-60': 'meditation_60_xp',
+        'daily-mastery': 'daily_mastery_xp'
       };
 
       const claimDateFieldMap: Record<string, string> = {
         'checkin': 'checkin_last_claim_date',
         'journal': 'journal_last_claim_date',
         'meditation': 'meditation_last_claim_date',
-        'breathing': 'breathing_last_claim_date'
+        'breathing': 'breathing_last_claim_date',
+        'meditation-15': 'meditation_15_last_claim_date',
+        'breathing-3': 'breathing_3_last_claim_date',
+        'meditation-30': 'meditation_30_last_claim_date',
+        'journal-reflection': 'journal_reflection_last_claim_date',
+        'meditation-60': 'meditation_60_last_claim_date',
+        'daily-mastery': 'daily_mastery_last_claim_date'
       };
 
       const xpField = questFieldMap[quest.id];
@@ -456,15 +474,60 @@ const DailyQuests: React.FC<DailyQuestsProps> = ({
               {tier.quests.map((advQuest) => {
                 const isLocked = userLevel < tier.minLevel;
 
+                let progress = 0;
+                let total = advQuest.requirement;
+                let completed = false;
+
+                if (!isLocked) {
+                  if (advQuest.id === 'meditation-15') {
+                    progress = Math.min(Math.floor(todayMeditation / 15), 1);
+                    completed = todayMeditation >= 15;
+                  } else if (advQuest.id === 'breathing-3') {
+                    progress = Math.min(breathingSessions, 3);
+                    total = 3;
+                    completed = breathingSessions >= 3;
+                  } else if (advQuest.id === 'meditation-30') {
+                    progress = Math.min(Math.floor(todayMeditation / 30), 1);
+                    completed = todayMeditation >= 30;
+                  } else if (advQuest.id === 'journal-reflection') {
+                    progress = Math.min(todayJournals, 2);
+                    total = 2;
+                    completed = todayJournals >= 2;
+                  } else if (advQuest.id === 'meditation-60') {
+                    progress = Math.min(Math.floor(todayMeditation / 60), 1);
+                    completed = todayMeditation >= 60;
+                  } else if (advQuest.id === 'daily-mastery') {
+                    const baseQuests = [todayCheckins >= 1, todayJournals >= 1, todayMeditation >= 5, breathingSessions >= 1];
+                    progress = baseQuests.filter(Boolean).length;
+                    total = 4;
+                    completed = progress === 4;
+                  }
+                }
+
+                const isClaimed = claimed[advQuest.id];
+                const canClaim = completed && !isClaimed && !isLocked;
+                const isAnimating = animatingXP === advQuest.id;
+
                 return (
                   <div
                     key={advQuest.id}
                     className={`bg-white rounded-2xl overflow-hidden transition-all duration-300 ${
                       isLocked ? 'opacity-60' : 'shadow-md hover:shadow-lg'
-                    }`}
+                    } ${isAnimating ? 'ring-2 ring-jade animate-pulse' : ''}`}
                   >
+                    {isAnimating && (
+                      <div className="absolute inset-0 pointer-events-none z-20 flex items-center justify-center">
+                        <div className="animate-float-away text-jade font-bold text-4xl flex items-center gap-2">
+                          <Sparkles className="w-8 h-8 animate-spin" />
+                          +{advQuest.xp} XP
+                          <Sparkles className="w-8 h-8 animate-spin" />
+                        </div>
+                      </div>
+                    )}
                     <div className="p-4 flex items-center gap-4">
-                      <div className={`w-14 h-14 rounded-xl bg-gradient-to-br ${advQuest.color} flex items-center justify-center text-white flex-shrink-0 relative`}>
+                      <div className={`w-14 h-14 rounded-xl bg-gradient-to-br ${advQuest.color} flex items-center justify-center text-white flex-shrink-0 relative ${
+                        completed ? 'scale-110' : ''
+                      } transition-transform duration-300`}>
                         {isLocked ? (
                           <Lock className="w-6 h-6" />
                         ) : advQuest.icon === 'Timer' ? (
@@ -481,15 +544,27 @@ const DailyQuests: React.FC<DailyQuestsProps> = ({
                       <div className="flex-1 min-w-0">
                         <h3 className="font-semibold text-charcoal flex items-center gap-2">
                           {advQuest.title}
+                          {completed && !isLocked && (
+                            <Check className="w-4 h-4 text-jade" />
+                          )}
                         </h3>
                         <p className="text-sm text-charcoal/60">{advQuest.description}</p>
 
-                        <div className="mt-2 flex items-center gap-2">
-                          <Sparkles className="w-4 h-4 text-jade" />
-                          <span className="text-sm font-bold text-jade">
-                            +{advQuest.xp} XP
-                          </span>
-                        </div>
+                        {!isLocked && (
+                          <div className="mt-2 flex items-center gap-2">
+                            <div className="flex-1 h-2 bg-pearl rounded-full overflow-hidden">
+                              <div
+                                className={`h-full bg-gradient-to-r ${advQuest.color} transition-all duration-500 ease-out`}
+                                style={{ width: `${(progress / total) * 100}%` }}
+                              />
+                            </div>
+                            <span className={`text-xs font-medium ${
+                              completed ? 'text-jade' : 'text-charcoal/60'
+                            }`}>
+                              {progress}/{total}
+                            </span>
+                          </div>
+                        )}
                       </div>
 
                       {isLocked ? (
@@ -497,10 +572,40 @@ const DailyQuests: React.FC<DailyQuestsProps> = ({
                           <Lock className="w-4 h-4" />
                           <span className="text-sm font-medium">Niv. {tier.minLevel}</span>
                         </div>
+                      ) : canClaim ? (
+                        <button
+                          onClick={() => handleClaim({
+                            id: advQuest.id,
+                            title: advQuest.title,
+                            description: advQuest.description,
+                            icon: advQuest.icon === 'Timer' ? <Timer className="w-6 h-6" /> :
+                                  advQuest.icon === 'Wind' ? <Wind className="w-6 h-6" /> :
+                                  advQuest.icon === 'BookOpen' ? <BookOpen className="w-6 h-6" /> :
+                                  <Star className="w-6 h-6" />,
+                            progress,
+                            total,
+                            completed,
+                            color: advQuest.color,
+                            xp: advQuest.xp
+                          })}
+                          disabled={isAnimating}
+                          className="px-4 py-2 bg-gradient-to-r from-jade to-forest text-white font-semibold rounded-xl hover:scale-105 active:scale-95 transition-transform duration-200 shadow-lg flex flex-col items-center gap-0.5 whitespace-nowrap disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                          <div className="flex items-center gap-1">
+                            <Sparkles className="w-4 h-4" />
+                            <span>{isAnimating ? 'Réclamé...' : 'Réclamer'}</span>
+                          </div>
+                          <span className="text-xs opacity-90">+{advQuest.xp} XP</span>
+                        </button>
+                      ) : isClaimed ? (
+                        <div className="px-4 py-2 bg-jade/20 text-jade font-semibold rounded-xl flex items-center gap-1">
+                          <Check className="w-4 h-4" />
+                          Réclamé
+                        </div>
                       ) : (
                         <div className="text-center">
-                          <div className="text-xs text-charcoal/60">Bientôt</div>
-                          <div className="text-xs text-jade font-semibold">disponible</div>
+                          <div className="text-xs text-charcoal/60">En cours</div>
+                          <div className="text-xs text-jade font-semibold">{progress}/{total}</div>
                         </div>
                       )}
                     </div>
