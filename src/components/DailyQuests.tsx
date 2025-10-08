@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Heart, BookOpen, Timer, Check, ChevronRight, Sparkles, Trophy, Flame, Star, Target, Zap, Wind } from 'lucide-react';
+import { useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '../hooks/useAuth';
 import { useCheckins } from '../hooks/useCheckins';
 import { useJournals } from '../hooks/useJournals';
@@ -33,6 +34,7 @@ const DailyQuests: React.FC<DailyQuestsProps> = ({
   onBreathingClick
 }) => {
   const { user } = useAuth();
+  const queryClient = useQueryClient();
   const { data: checkinsData } = useCheckins();
   const { data: journalsData } = useJournals();
   const { data: meditationMinutes } = useMeditationWeeklyStats();
@@ -184,6 +186,56 @@ const DailyQuests: React.FC<DailyQuestsProps> = ({
           .update({ total_xp: profile.total_xp + quest_xp })
           .eq('id', user.id);
       }
+
+      const today = new Date();
+      const monday = new Date(today);
+      const dayOfWeek = today.getDay();
+      const diff = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
+      monday.setDate(today.getDate() + diff);
+      monday.setHours(0, 0, 0, 0);
+      const weekStart = monday.toISOString().split('T')[0];
+
+      const { data: existingWeek } = await supabase
+        .from('weekly_quests')
+        .select('*')
+        .eq('user_id', user.id)
+        .eq('week_start', weekStart)
+        .maybeSingle();
+
+      const questFieldMap: Record<string, string> = {
+        'checkin': 'checkin_xp',
+        'journal': 'journal_xp',
+        'meditation': 'meditation_xp',
+        'breathing': 'breathing_xp'
+      };
+
+      const xpField = questFieldMap[quest.id];
+
+      if (existingWeek) {
+        const currentXP = existingWeek[xpField] || 0;
+        await supabase
+          .from('weekly_quests')
+          .update({
+            [xpField]: currentXP + quest_xp,
+            updated_at: new Date().toISOString()
+          })
+          .eq('id', existingWeek.id);
+      } else {
+        await supabase
+          .from('weekly_quests')
+          .insert({
+            user_id: user.id,
+            week_start: weekStart,
+            [xpField]: quest_xp,
+            checkin_completed: quest.id === 'checkin',
+            journal_completed: quest.id === 'journal',
+            meditation_completed: quest.id === 'meditation',
+            breathing_completed: quest.id === 'breathing'
+          });
+      }
+
+      queryClient.invalidateQueries({ queryKey: ['weekly-xp', user.id] });
+      queryClient.invalidateQueries({ queryKey: ['profile', user.id] });
 
       setTimeout(() => {
         const newClaimed = { ...claimed, [quest.id]: true };
