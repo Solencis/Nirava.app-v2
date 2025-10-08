@@ -18,7 +18,7 @@ import Pricing from './pages/Pricing';
 import About from './pages/About';
 import Contact from './pages/Contact';
 
-const APP_VERSION = '1.0.1';
+const APP_VERSION = '1.0.2';
 
 // Component to handle scroll to top on route change
 const ScrollToTop: React.FC = () => {
