@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { User, Award, Flame, Settings, Shield, LogOut, CreditCard, Edit3, Save, X, Heart, Timer, BookOpen, Camera, Check, AlertCircle, Calendar, MapPin, Globe } from 'lucide-react';
+import { User, Award, Flame, Settings, Shield, LogOut, CreditCard, Edit3, Save, X, Heart, Timer, BookOpen, Camera, Check, AlertCircle, Calendar, MapPin, Globe, PlayCircle } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 import { supabase, Profile, uploadJournalPhoto, deleteJournalPhoto } from '../lib/supabase';
 import { useAudioStore } from '../stores/audioStore';
@@ -7,12 +7,16 @@ import { useCheckins } from '../hooks/useCheckins';
 import { useJournals } from '../hooks/useJournals';
 import { useMeditationWeeklyStats } from '../hooks/useMeditation';
 import { useProfile } from '../hooks/useProfile';
+import { useOnboarding } from '../hooks/useOnboarding';
+import { useNavigate } from 'react-router-dom';
 import IOSInstallHint from '../components/IOSInstallHint';
 import Achievements from '../components/Achievements';
 import XPBar from '../components/XPBar';
 
 const ProfilePage: React.FC = () => {
   const { user, signOut } = useAuth();
+  const navigate = useNavigate();
+  const { resetOnboarding } = useOnboarding();
   const { meditationWeekMinutes } = useAudioStore();
   const { data: checkinsData } = useCheckins();
   const { data: journalsData } = useJournals();
@@ -24,6 +28,7 @@ const ProfilePage: React.FC = () => {
   const [saving, setSaving] = useState(false);
   const [uploadingPhoto, setUploadingPhoto] = useState(false);
   const [photoError, setPhotoError] = useState('');
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
   const [stats, setStats] = useState({
     checkins: 0,
     journals: 0,
@@ -329,17 +334,21 @@ const ProfilePage: React.FC = () => {
   };
 
   const handleSignOut = async () => {
-    if (confirm('Es-tu sûr(e) de vouloir te déconnecter ?')) {
-      try {
-        await signOut();
-      } catch (error) {
-        console.error('Error signing out:', error);
-        alert('Erreur lors de la déconnexion. Réinitialisation forcée...');
-        localStorage.clear();
-        sessionStorage.clear();
-        window.location.href = '/';
-      }
+    try {
+      await signOut();
+      setShowLogoutModal(false);
+    } catch (error) {
+      console.error('Error signing out:', error);
+      alert('Erreur lors de la déconnexion. Réinitialisation forcée...');
+      localStorage.clear();
+      sessionStorage.clear();
+      window.location.href = '/';
     }
+  };
+
+  const handleReviewOnboarding = async () => {
+    await resetOnboarding();
+    navigate('/onboarding');
   };
 
   const getSubscriptionStatus = () => {
@@ -610,7 +619,15 @@ const ProfilePage: React.FC = () => {
         {/* Actions */}
         <div className="space-y-3">
           <button
-            onClick={handleSignOut}
+            onClick={handleReviewOnboarding}
+            className="w-full bg-emerald-50 border border-emerald-200 text-emerald-600 py-4 rounded-xl hover:bg-emerald-100 transition-colors duration-300 text-sm font-medium flex items-center justify-center min-h-[56px]"
+          >
+            <PlayCircle size={18} className="mr-2" />
+            Revoir l'introduction
+          </button>
+
+          <button
+            onClick={() => setShowLogoutModal(true)}
             className="w-full bg-red-50 border border-red-200 text-red-600 py-4 rounded-xl hover:bg-red-100 transition-colors duration-300 text-sm font-medium flex items-center justify-center min-h-[56px]"
           >
             <LogOut size={18} className="mr-2" />
@@ -837,6 +854,40 @@ const ProfilePage: React.FC = () => {
                   </button>
                 </div>
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de déconnexion */}
+      {showLogoutModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl p-6 max-w-sm w-full shadow-2xl">
+            <div className="text-center mb-6">
+              <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <LogOut className="w-8 h-8 text-red-600" />
+              </div>
+              <h3 className="text-xl font-bold text-gray-900 mb-2">
+                Déconnexion
+              </h3>
+              <p className="text-gray-600">
+                Es-tu sûr(e) de vouloir te déconnecter ?
+              </p>
+            </div>
+
+            <div className="flex gap-3">
+              <button
+                onClick={() => setShowLogoutModal(false)}
+                className="flex-1 px-4 py-3 border border-gray-300 text-gray-700 rounded-xl hover:bg-gray-50 transition-colors duration-300 font-medium"
+              >
+                Annuler
+              </button>
+              <button
+                onClick={handleSignOut}
+                className="flex-1 px-4 py-3 bg-red-600 text-white rounded-xl hover:bg-red-700 transition-colors duration-300 font-medium"
+              >
+                Se déconnecter
+              </button>
             </div>
           </div>
         </div>

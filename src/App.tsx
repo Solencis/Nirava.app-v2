@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-route
 import { QueryProvider } from './providers/QueryProvider';
 import MobileLayout from './components/MobileLayout';
 import ProtectedRoute from './components/ProtectedRoute';
+import OnboardingGuard from './components/OnboardingGuard';
 import GlobalAudioController from './components/GlobalAudioController';
 import MiniPlayer from './components/MiniPlayer';
 import { migrateLocalStorageToSupabase } from './utils/migrateLocalStorage';
@@ -19,6 +20,7 @@ import Pricing from './pages/Pricing';
 import About from './pages/About';
 import Contact from './pages/Contact';
 import Auth from './pages/Auth';
+import Onboarding from './pages/Onboarding';
 
 const APP_VERSION = '1.0.2';
 
@@ -72,29 +74,32 @@ function App() {
     <Router>
       <ScrollToTop />
       <GlobalAudioController />
-      <MobileLayout>
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/auth" element={<Auth />} />
-          <Route path="/school" element={<School />} />
-          <Route path="/school/module/:slug" element={<ModuleDetail />} />
-          <Route path="/journal" element={<Journal />} />
-          <Route path="/community" element={
-            <ProtectedRoute>
-              <Community />
-            </ProtectedRoute>
-          } />
-          <Route path="/profile" element={
-            <ProtectedRoute>
-              <Profile />
-            </ProtectedRoute>
-          } />
-          <Route path="/sounds" element={<SoundAmbience />} />
-          <Route path="/pricing" element={<Pricing />} />
-          <Route path="/about" element={<About />} />
-          <Route path="/contact" element={<Contact />} />
-        </Routes>
-      </MobileLayout>
+      <OnboardingGuard>
+        <MobileLayout>
+          <Routes>
+            <Route path="/onboarding" element={<Onboarding />} />
+            <Route path="/" element={<Home />} />
+            <Route path="/auth" element={<Auth />} />
+            <Route path="/school" element={<School />} />
+            <Route path="/school/module/:slug" element={<ModuleDetail />} />
+            <Route path="/journal" element={<Journal />} />
+            <Route path="/community" element={
+              <ProtectedRoute>
+                <Community />
+              </ProtectedRoute>
+            } />
+            <Route path="/profile" element={
+              <ProtectedRoute>
+                <Profile />
+              </ProtectedRoute>
+            } />
+            <Route path="/sounds" element={<SoundAmbience />} />
+            <Route path="/pricing" element={<Pricing />} />
+            <Route path="/about" element={<About />} />
+            <Route path="/contact" element={<Contact />} />
+          </Routes>
+        </MobileLayout>
+      </OnboardingGuard>
     </Router>
     </QueryProvider>
   );
