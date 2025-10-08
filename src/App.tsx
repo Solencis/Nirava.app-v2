@@ -37,21 +37,18 @@ function App() {
     const checkVersion = async () => {
       const storedVersion = localStorage.getItem('nirava_app_version');
 
-      if (storedVersion && storedVersion !== APP_VERSION) {
-        console.log(`🔄 Nouvelle version détectée (${storedVersion} → ${APP_VERSION}), déconnexion automatique...`);
+      // FORCER LA DÉCONNEXION - décommenter après le premier chargement
+      const forceLogout = true;
+
+      if (forceLogout || (storedVersion && storedVersion !== APP_VERSION)) {
+        console.log(`🔄 Déconnexion forcée en cours...`);
 
         // Déconnexion complète
         await supabase.auth.signOut();
 
         // Nettoyage du localStorage
-        const keysToRemove = [];
-        for (let i = 0; i < localStorage.length; i++) {
-          const key = localStorage.key(i);
-          if (key && (key.startsWith('nirava_') || key.includes('supabase') || key === 'user-profile')) {
-            keysToRemove.push(key);
-          }
-        }
-        keysToRemove.forEach(key => localStorage.removeItem(key));
+        localStorage.clear();
+        sessionStorage.clear();
 
         // Enregistrer la nouvelle version
         localStorage.setItem('nirava_app_version', APP_VERSION);
