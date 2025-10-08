@@ -47,7 +47,7 @@ const EmergencyPause: React.FC<EmergencyPauseProps> = ({ isOpen, onClose }) => {
 
   if (!isOpen) return null;
 
-  const playCycleSound = () => {
+  const playPhaseSound = (phaseType: 'inhale' | 'hold' | 'exhale' | 'cycle') => {
     if ('AudioContext' in window || 'webkitAudioContext' in window) {
       const AudioContext = window.AudioContext || (window as any).webkitAudioContext;
       if (!audioContextRef.current) {
@@ -61,35 +61,66 @@ const EmergencyPause: React.FC<EmergencyPauseProps> = ({ isOpen, onClose }) => {
       oscillator.connect(gainNode);
       gainNode.connect(audioContext.destination);
 
-      oscillator.frequency.value = 432;
       oscillator.type = 'sine';
 
-      gainNode.gain.setValueAtTime(0, audioContext.currentTime);
-      gainNode.gain.linearRampToValueAtTime(0.15, audioContext.currentTime + 0.1);
-      gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 1.5);
-
-      oscillator.start(audioContext.currentTime);
-      oscillator.stop(audioContext.currentTime + 1.5);
+      if (phaseType === 'inhale') {
+        oscillator.frequency.value = 480;
+        gainNode.gain.setValueAtTime(0, audioContext.currentTime);
+        gainNode.gain.linearRampToValueAtTime(0.12, audioContext.currentTime + 0.05);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.4);
+        oscillator.start(audioContext.currentTime);
+        oscillator.stop(audioContext.currentTime + 0.4);
+      } else if (phaseType === 'hold') {
+        oscillator.frequency.value = 528;
+        gainNode.gain.setValueAtTime(0, audioContext.currentTime);
+        gainNode.gain.linearRampToValueAtTime(0.1, audioContext.currentTime + 0.05);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
+        oscillator.start(audioContext.currentTime);
+        oscillator.stop(audioContext.currentTime + 0.3);
+      } else if (phaseType === 'exhale') {
+        oscillator.frequency.value = 396;
+        gainNode.gain.setValueAtTime(0, audioContext.currentTime);
+        gainNode.gain.linearRampToValueAtTime(0.12, audioContext.currentTime + 0.05);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
+        oscillator.start(audioContext.currentTime);
+        oscillator.stop(audioContext.currentTime + 0.5);
+      } else if (phaseType === 'cycle') {
+        oscillator.frequency.value = 432;
+        gainNode.gain.setValueAtTime(0, audioContext.currentTime);
+        gainNode.gain.linearRampToValueAtTime(0.15, audioContext.currentTime + 0.1);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 1.5);
+        oscillator.start(audioContext.currentTime);
+        oscillator.stop(audioContext.currentTime + 1.5);
+      }
     } else {
-      if ('vibrate' in navigator) navigator.vibrate(100);
+      if ('vibrate' in navigator) {
+        if (phaseType === 'cycle') {
+          navigator.vibrate(100);
+        } else {
+          navigator.vibrate(30);
+        }
+      }
     }
   };
 
   const moveToNextPhase = () => {
     if (activeExercise === '478') {
       if (phase === 'inhale') {
+        playPhaseSound('hold');
         setPhase('hold');
         setTimeLeft(7);
       } else if (phase === 'hold') {
+        playPhaseSound('exhale');
         setPhase('exhale');
         setTimeLeft(8);
       } else if (phase === 'exhale') {
         const newCount = breathCount + 1;
         if (newCount < totalBreaths) {
-          playCycleSound();
+          playPhaseSound('cycle');
           setBreathCount(newCount);
           setPhase('inhale');
           setTimeLeft(4);
+          setTimeout(() => playPhaseSound('inhale'), 100);
         } else {
           setActiveExercise(null);
           if ('vibrate' in navigator) navigator.vibrate([100, 50, 100]);
@@ -97,15 +128,17 @@ const EmergencyPause: React.FC<EmergencyPauseProps> = ({ isOpen, onClose }) => {
       }
     } else if (activeExercise === 'coherence') {
       if (phase === 'inhale') {
+        playPhaseSound('exhale');
         setPhase('exhale');
         setTimeLeft(5);
       } else if (phase === 'exhale') {
         const newCount = breathCount + 1;
         if (newCount < totalBreaths) {
-          playCycleSound();
+          playPhaseSound('cycle');
           setBreathCount(newCount);
           setPhase('inhale');
           setTimeLeft(5);
+          setTimeout(() => playPhaseSound('inhale'), 100);
         } else {
           setActiveExercise(null);
           if ('vibrate' in navigator) navigator.vibrate([100, 50, 100]);
@@ -127,6 +160,7 @@ const EmergencyPause: React.FC<EmergencyPauseProps> = ({ isOpen, onClose }) => {
     setTimeLeft(4);
     setIsPaused(false);
     if ('vibrate' in navigator) navigator.vibrate(50);
+    setTimeout(() => playPhaseSound('inhale'), 200);
   };
 
   const startCoherence = () => {
@@ -142,6 +176,7 @@ const EmergencyPause: React.FC<EmergencyPauseProps> = ({ isOpen, onClose }) => {
     setTimeLeft(5);
     setIsPaused(false);
     if ('vibrate' in navigator) navigator.vibrate(50);
+    setTimeout(() => playPhaseSound('inhale'), 200);
   };
 
   const startAnchoring = () => {
@@ -360,7 +395,7 @@ const EmergencyPause: React.FC<EmergencyPauseProps> = ({ isOpen, onClose }) => {
 
                   {/* Sound indicator */}
                   <div className="text-xs text-stone/60 mb-4">
-                    🔔 Son apaisant à chaque cycle
+                    🔔 Son apaisant à chaque phase
                   </div>
 
                   {/* Controls */}
