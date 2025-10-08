@@ -196,18 +196,25 @@ export async function checkAndUnlockAchievements(userId: string): Promise<string
 
 export async function claimAchievementXP(userId: string, achievementId: string): Promise<{ success: boolean; xp: number; error?: string }> {
   try {
-    const { data: userAchievement } = await supabase
+    const { data: userAchievement, error: fetchError } = await supabase
       .from('user_achievements')
       .select('id, xp_claimed, achievements(points, title)')
       .eq('user_id', userId)
       .eq('achievement_id', achievementId)
-      .single();
+      .maybeSingle();
+
+    if (fetchError) {
+      console.error('Error fetching user achievement:', fetchError);
+      return { success: false, xp: 0, error: 'Database error' };
+    }
 
     if (!userAchievement) {
+      console.log('Achievement not unlocked for user');
       return { success: false, xp: 0, error: 'Achievement not unlocked' };
     }
 
     if (userAchievement.xp_claimed) {
+      console.log('XP already claimed for this achievement');
       return { success: false, xp: 0, error: 'XP already claimed' };
     }
 
@@ -227,15 +234,25 @@ export async function claimAchievementXP(userId: string, achievementId: string):
     const currentXP = currentProfile?.total_xp || 0;
     const newXP = currentXP + xpToAdd;
 
-    await supabase
+    const { error: updateProfileError } = await supabase
       .from('profiles')
       .update({ total_xp: newXP })
       .eq('id', userId);
 
-    await supabase
+    if (updateProfileError) {
+      console.error('Error updating profile XP:', updateProfileError);
+      return { success: false, xp: 0, error: 'Failed to update profile' };
+    }
+
+    const { error: updateAchievementError } = await supabase
       .from('user_achievements')
       .update({ xp_claimed: true })
       .eq('id', userAchievement.id);
+
+    if (updateAchievementError) {
+      console.error('Error updating achievement claimed status:', updateAchievementError);
+      return { success: false, xp: 0, error: 'Failed to mark as claimed' };
+    }
 
     console.log(`🎉 ${achievement.title}: +${xpToAdd} XP réclamés ! Total: ${newXP} XP`);
 

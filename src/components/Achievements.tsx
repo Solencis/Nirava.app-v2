@@ -100,9 +100,16 @@ export default function Achievements() {
       const result = await claimAchievementXP(user.id, achievement.id);
 
       if (result.success) {
+        setAchievements(prev => prev.map(a =>
+          a.id === achievement.id
+            ? { ...a, xp_claimed: true }
+            : a
+        ));
+
         await loadAchievements();
         queryClient.invalidateQueries({ queryKey: ['profile', user.id] });
       } else {
+        console.error('Claim failed:', result.error);
         alert(result.error || 'Erreur lors de la réclamation de l\'XP');
       }
     } catch (error) {
