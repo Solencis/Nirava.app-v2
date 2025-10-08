@@ -89,12 +89,21 @@ const Journal: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    loadStats();
-    
+    if (user) {
+      loadStats();
+    }
+
     // Message motivationnel aléatoire
     const randomMessage = motivationalMessages[Math.floor(Math.random() * motivationalMessages.length)];
     setCurrentMessage(randomMessage);
   }, [user]);
+
+  // Recharger les stats quand les données Supabase changent
+  useEffect(() => {
+    if (user && (checkinsData || journalsData || supabaseMeditationMinutes !== undefined)) {
+      loadSupabaseStats();
+    }
+  }, [checkinsData, journalsData, supabaseMeditationMinutes]);
 
   // Rotation des citations
   useEffect(() => {
@@ -140,10 +149,12 @@ const Journal: React.FC = () => {
         new Date(entry.created_at) > oneWeekAgo
       ).length || 0;
 
-      // Journaux du soir uniquement depuis Supabase
+      // Journaux du soir uniquement depuis Supabase (cette semaine)
       const journalEntriesOnly = journalsData?.filter(entry => {
+        const entryDate = new Date(entry.created_at);
         return entry.type === 'journal' &&
                entry.content &&
+               entryDate > oneWeekAgo &&
                (!entry.metadata ||
                 (!entry.metadata.title &&
                  !entry.metadata.emotions &&

@@ -1,10 +1,11 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import { QueryProvider } from './providers/QueryProvider';
 import MobileLayout from './components/MobileLayout';
 import ProtectedRoute from './components/ProtectedRoute';
 import GlobalAudioController from './components/GlobalAudioController';
 import MiniPlayer from './components/MiniPlayer';
+import { migrateLocalStorageToSupabase } from './utils/migrateLocalStorage';
 import Home from './pages/Home';
 import School from './pages/School';
 import Journal from './pages/Journal';
@@ -34,6 +35,11 @@ const ScrollToTop: React.FC = () => {
 };
 
 function App() {
+  // Nettoyer les anciennes données localStorage au démarrage
+  useEffect(() => {
+    migrateLocalStorageToSupabase();
+  }, []);
+
   return (
     <QueryProvider>
     <Router>
