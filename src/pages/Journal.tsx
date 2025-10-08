@@ -658,7 +658,7 @@ const Journal: React.FC = () => {
                   <h3 className="font-bold text-ink mb-1 text-base" style={{ fontFamily: "'Shippori Mincho', serif" }}>
                     Pause émotionnelle
                   </h3>
-                  <p className="text-xs text-stone leading-tight">🆘 Respiration d'urgence</p>
+                  <p className="text-xs text-stone leading-tight">🆘 3 techniques de recentrage</p>
                 </div>
               </div>
             </button>

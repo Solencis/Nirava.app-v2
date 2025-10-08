@@ -30,13 +30,7 @@ const EmergencyPause: React.FC<EmergencyPauseProps> = ({ isOpen, onClose }) => {
   React.useEffect(() => {
     if (activeExercise && activeExercise !== 'anchoring' && !isPaused && timeLeft > 0) {
       timerRef.current = setInterval(() => {
-        setTimeLeft(prev => {
-          if (prev <= 1) {
-            moveToNextPhase();
-            return 0;
-          }
-          return prev - 1;
-        });
+        setTimeLeft(prev => prev - 1);
       }, 1000);
     }
 
@@ -44,6 +38,12 @@ const EmergencyPause: React.FC<EmergencyPauseProps> = ({ isOpen, onClose }) => {
       if (timerRef.current) clearInterval(timerRef.current);
     };
   }, [activeExercise, isPaused, timeLeft]);
+
+  React.useEffect(() => {
+    if (timeLeft === 0 && activeExercise && activeExercise !== 'anchoring') {
+      moveToNextPhase();
+    }
+  }, [timeLeft]);
 
   if (!isOpen) return null;
 
@@ -202,7 +202,8 @@ const EmergencyPause: React.FC<EmergencyPauseProps> = ({ isOpen, onClose }) => {
   };
 
   const getCircleSize = () => {
-    if (!timeLeft) return 1;
+    if (timeLeft === 0) return phase === 'inhale' ? 1 : 0.7;
+
     const phaseDuration = activeExercise === '478'
       ? (phase === 'inhale' ? 4 : phase === 'hold' ? 7 : 8)
       : 5;
@@ -346,7 +347,7 @@ const EmergencyPause: React.FC<EmergencyPauseProps> = ({ isOpen, onClose }) => {
                     />
                     <div className="relative z-10 text-center">
                       <div className="text-5xl font-bold text-ink mb-2" style={{ fontFamily: "'Shippori Mincho', serif" }}>
-                        {timeLeft}
+                        {timeLeft > 0 ? timeLeft : ''}
                       </div>
                       <div className="text-lg text-ink font-medium animate-pulse">
                         {getPhaseText()}
