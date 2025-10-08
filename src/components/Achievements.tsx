@@ -25,20 +25,41 @@ export default function Achievements() {
   useEffect(() => {
     if (user) {
       loadAchievements();
+
+      const timeout = setTimeout(() => {
+        if (loading) {
+          console.warn('Achievements loading timeout - forcing loading to false');
+          setLoading(false);
+        }
+      }, 5000);
+
+      return () => clearTimeout(timeout);
+    } else {
+      setLoading(false);
     }
   }, [user]);
 
   const loadAchievements = async () => {
     try {
-      const { data: allAchievements } = await supabase
+      const { data: allAchievements, error: achievementsError } = await supabase
         .from('achievements')
         .select('*')
         .order('category', { ascending: true });
 
-      const { data: userAchievements } = await supabase
+      if (achievementsError) {
+        console.error('Error loading achievements:', achievementsError);
+        setLoading(false);
+        return;
+      }
+
+      const { data: userAchievements, error: userAchievementsError } = await supabase
         .from('user_achievements')
         .select('achievement_id, unlocked_at')
         .eq('user_id', user?.id);
+
+      if (userAchievementsError) {
+        console.error('Error loading user achievements:', userAchievementsError);
+      }
 
       const unlockedIds = new Set(userAchievements?.map(ua => ua.achievement_id) || []);
 

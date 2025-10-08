@@ -66,6 +66,15 @@ const Community: React.FC = () => {
       loadProfile();
       loadPosts();
       subscribeToPostChanges();
+
+      const timeout = setTimeout(() => {
+        if (loading) {
+          console.warn('Loading timeout - forcing loading to false');
+          setLoading(false);
+        }
+      }, 5000);
+
+      return () => clearTimeout(timeout);
     } else {
       setLoading(false);
     }
@@ -149,9 +158,12 @@ const Community: React.FC = () => {
         `)
         .order('created_at', { ascending: false });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error loading posts:', error);
+        setPosts([]);
+        return;
+      }
 
-      // Transform data to include likes count and user like status
       const transformedPosts = data?.map(post => ({
         ...post,
         likes_count: post.post_likes?.length || 0,
@@ -163,6 +175,7 @@ const Community: React.FC = () => {
       setPosts(transformedPosts);
     } catch (error) {
       console.error('Error loading posts:', error);
+      setPosts([]);
     } finally {
       setLoading(false);
     }

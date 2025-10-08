@@ -41,6 +41,17 @@ const ProfilePage: React.FC = () => {
     if (user) {
       loadProfile();
       loadUserStats();
+
+      const timeout = setTimeout(() => {
+        if (loading) {
+          console.warn('Profile loading timeout - forcing loading to false');
+          setLoading(false);
+        }
+      }, 5000);
+
+      return () => clearTimeout(timeout);
+    } else {
+      setLoading(false);
     }
   }, [user]);
 
@@ -53,25 +64,34 @@ const ProfilePage: React.FC = () => {
   }, [meditationWeekMinutes]);
 
   const loadProfile = async () => {
-    if (!user) return;
+    if (!user) {
+      setLoading(false);
+      return;
+    }
 
     try {
       const { data, error } = await supabase
         .from('profiles')
         .select('*')
         .eq('id', user.id)
-        .single();
+        .maybeSingle();
 
-      if (error) throw error;
-      
-      setProfile(data);
-      setEditForm({
-        display_name: data.display_name || '',
-        bio: data.bio || '',
-        photo_url: data.photo_url || '',
-        share_progress: data.share_progress,
-        level: data.level || 'N1'
-      });
+      if (error) {
+        console.error('Error loading profile:', error);
+        setLoading(false);
+        return;
+      }
+
+      if (data) {
+        setProfile(data);
+        setEditForm({
+          display_name: data.display_name || '',
+          bio: data.bio || '',
+          photo_url: data.photo_url || '',
+          share_progress: data.share_progress,
+          level: data.level || 'N1'
+        });
+      }
     } catch (error) {
       console.error('Error loading profile:', error);
     } finally {
