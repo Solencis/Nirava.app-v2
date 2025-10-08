@@ -6,8 +6,10 @@ import { useAudioStore } from '../stores/audioStore';
 import { useCheckins } from '../hooks/useCheckins';
 import { useJournals } from '../hooks/useJournals';
 import { useMeditationWeeklyStats } from '../hooks/useMeditation';
+import { useProfile } from '../hooks/useProfile';
 import IOSInstallHint from '../components/IOSInstallHint';
 import Achievements from '../components/Achievements';
+import XPBar from '../components/XPBar';
 
 const ProfilePage: React.FC = () => {
   const { user, signOut } = useAuth();
@@ -15,6 +17,7 @@ const ProfilePage: React.FC = () => {
   const { data: checkinsData } = useCheckins();
   const { data: journalsData } = useJournals();
   const { data: supabaseMeditationMinutes } = useMeditationWeeklyStats();
+  const { profile: userProfile, xpProgress } = useProfile();
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState(false);
@@ -470,6 +473,19 @@ const ProfilePage: React.FC = () => {
             </p>
           )}
           
+          {userProfile && (
+            <div className="mt-4 max-w-md mx-auto">
+              <XPBar
+                current={xpProgress.current}
+                max={xpProgress.needed}
+                label="Progression"
+                variant="level"
+                level={userProfile.current_level}
+                compact={false}
+              />
+            </div>
+          )}
+
           <button
             onClick={() => setEditing(true)}
             className="mt-4 bg-white/90 text-wasabi px-6 py-2 rounded-full text-sm font-medium hover:bg-white transition-colors duration-300 flex items-center mx-auto shadow-sm"

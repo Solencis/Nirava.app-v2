@@ -5,6 +5,7 @@ import { useAuth } from '../hooks/useAuth';
 import { useCheckins } from '../hooks/useCheckins';
 import { useJournals } from '../hooks/useJournals';
 import { useMeditationWeeklyStats } from '../hooks/useMeditation';
+import { useWeeklyXP } from '../hooks/useProfile';
 import { supabase } from '../lib/supabase';
 import DailyQuests from '../components/DailyQuests';
 import CheckinMobile from '../components/CheckinMobile';
@@ -14,12 +15,14 @@ import BreathingMobile from '../components/BreathingMobile';
 import InstallCTA from '../components/InstallCTA';
 import IOSInstallHint from '../components/IOSInstallHint';
 import AmbianceControl from '../components/AmbianceControl';
+import XPBar from '../components/XPBar';
 
 const Home: React.FC = () => {
   const { user } = useAuth();
   const { data: checkinsData } = useCheckins();
   const { data: journalsData } = useJournals();
   const { data: supabaseMeditationMinutes } = useMeditationWeeklyStats();
+  const { weeklyXP } = useWeeklyXP();
 
   const [showCheckin, setShowCheckin] = useState(false);
   const [showJournal, setShowJournal] = useState(false);
@@ -242,6 +245,17 @@ const Home: React.FC = () => {
             <div className="mb-6">
               <AmbianceControl />
             </div>
+
+            {weeklyXP && (
+              <div className="mb-6">
+                <XPBar
+                  current={weeklyXP.total}
+                  max={weeklyXP.max}
+                  label="XP Hebdomadaire"
+                  variant="weekly"
+                />
+              </div>
+            )}
 
             <Link
               to="/school"

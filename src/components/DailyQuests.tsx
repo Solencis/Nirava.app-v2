@@ -39,6 +39,7 @@ const DailyQuests: React.FC<DailyQuestsProps> = ({
   const [claimed, setClaimed] = useState<Record<string, boolean>>({});
   const [timeLeft, setTimeLeft] = useState('');
   const [breathingSessions, setBreathingSessions] = useState(0);
+  const [animatingXP, setAnimatingXP] = useState<string | null>(null);
 
   useEffect(() => {
     const loadBreathingSessions = async () => {
@@ -167,6 +168,8 @@ const DailyQuests: React.FC<DailyQuestsProps> = ({
     if (!user?.id) return;
 
     try {
+      setAnimatingXP(quest.id);
+
       const quest_xp = quest.xp;
 
       const { data: profile } = await supabase
@@ -182,15 +185,19 @@ const DailyQuests: React.FC<DailyQuestsProps> = ({
           .eq('id', user.id);
       }
 
-      const newClaimed = { ...claimed, [quest.id]: true };
-      setClaimed(newClaimed);
-      localStorage.setItem('daily-quests-claimed', JSON.stringify(newClaimed));
+      setTimeout(() => {
+        const newClaimed = { ...claimed, [quest.id]: true };
+        setClaimed(newClaimed);
+        localStorage.setItem('daily-quests-claimed', JSON.stringify(newClaimed));
+        setAnimatingXP(null);
+      }, 1500);
 
       if ('vibrate' in navigator) {
-        navigator.vibrate([30, 50, 30]);
+        navigator.vibrate([30, 50, 30, 50, 30]);
       }
     } catch (error) {
       console.error('Error claiming quest XP:', error);
+      setAnimatingXP(null);
     }
   };
 
@@ -226,17 +233,27 @@ const DailyQuests: React.FC<DailyQuestsProps> = ({
         {quests.map((quest, index) => {
           const isClaimed = claimed[quest.id];
           const canClaim = quest.completed && !isClaimed;
+          const isAnimating = animatingXP === quest.id;
 
           return (
             <div
               key={quest.id}
-              className={`bg-white rounded-2xl overflow-hidden transition-all duration-300 ${
+              className={`bg-white rounded-2xl overflow-hidden transition-all duration-300 relative ${
                 quest.completed ? 'shadow-lg' : 'shadow-md hover:shadow-lg'
-              }`}
+              } ${isAnimating ? 'ring-2 ring-jade animate-pulse' : ''}`}
               style={{
                 animation: `slideInUp 0.5s ease-out ${index * 0.1}s both`
               }}
             >
+              {isAnimating && (
+                <div className="absolute inset-0 pointer-events-none z-20 flex items-center justify-center">
+                  <div className="animate-float-away text-jade font-bold text-4xl flex items-center gap-2">
+                    <Sparkles className="w-8 h-8 animate-spin" />
+                    +{quest.xp} XP
+                    <Sparkles className="w-8 h-8 animate-spin" />
+                  </div>
+                </div>
+              )}
               <div className="p-4 flex items-center gap-4">
                 <div className={`w-14 h-14 rounded-xl bg-gradient-to-br ${quest.color} flex items-center justify-center text-white flex-shrink-0 ${
                   quest.completed ? 'scale-110' : ''
@@ -271,11 +288,12 @@ const DailyQuests: React.FC<DailyQuestsProps> = ({
                 {canClaim ? (
                   <button
                     onClick={() => handleClaim(quest)}
-                    className="px-4 py-2 bg-gradient-to-r from-jade to-forest text-white font-semibold rounded-xl hover:scale-105 active:scale-95 transition-transform duration-200 shadow-lg flex flex-col items-center gap-0.5 whitespace-nowrap"
+                    disabled={isAnimating}
+                    className="px-4 py-2 bg-gradient-to-r from-jade to-forest text-white font-semibold rounded-xl hover:scale-105 active:scale-95 transition-transform duration-200 shadow-lg flex flex-col items-center gap-0.5 whitespace-nowrap disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     <div className="flex items-center gap-1">
                       <Sparkles className="w-4 h-4" />
-                      <span>Réclamer</span>
+                      <span>{isAnimating ? 'Réclamé...' : 'Réclamer'}</span>
                     </div>
                     <span className="text-xs opacity-90">+{quest.xp} XP</span>
                   </button>
@@ -304,6 +322,30 @@ const DailyQuests: React.FC<DailyQuestsProps> = ({
           Continue! Plus que {quests.length - completedQuests} quête{quests.length - completedQuests > 1 ? 's' : ''}
         </div>
       )}
+
+      <style>{`
+        @keyframes float-away {
+          0% {
+            opacity: 0;
+            transform: translateY(10px) scale(0.8);
+          }
+          30% {
+            opacity: 1;
+            transform: translateY(0) scale(1.2);
+          }
+          70% {
+            opacity: 1;
+            transform: translateY(-10px) scale(1);
+          }
+          100% {
+            opacity: 0;
+            transform: translateY(-40px) scale(0.8);
+          }
+        }
+        .animate-float-away {
+          animation: float-away 1.5s ease-out forwards;
+        }
+      `}</style>
     </div>
   );
 };
