@@ -177,11 +177,12 @@ export const signInWithPassword = async (email: string, password: string) => {
 // 2) LISTER L'HISTORIQUE - Check-ins avec index optimisé
 export const getCheckins = async (limit = 50) => {
   const user = await requireAuth();
-  
+
   const { data, error } = await supabase
     .from('checkins')
     .select('*')
     .eq('user_id', user.id) // IMPORTANT: filter par user_id pour RLS
+    .is('deleted_at', null) // Ne récupérer que les entrées actives
     .order('created_at', { ascending: false })
     .limit(limit);
 
@@ -209,11 +210,12 @@ export const createCheckin = async (checkinData: Omit<CheckinEntry, 'id' | 'user
 // Journals functions
 export const getJournals = async (limit = 50) => {
   const user = await requireAuth();
-  
+
   const { data, error } = await supabase
     .from('journals')
     .select('*')
     .eq('user_id', user.id) // IMPORTANT: filter par user_id pour RLS
+    .is('deleted_at', null) // Ne récupérer que les entrées actives
     .order('created_at', { ascending: false })
     .limit(limit);
 
