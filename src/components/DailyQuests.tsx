@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { Heart, BookOpen, Timer, Check, ChevronRight, Sparkles, Trophy, Flame, Star, Target, Zap, Wind } from 'lucide-react';
+import { Heart, BookOpen, Timer, Check, ChevronRight, Sparkles, Trophy, Flame, Star, Target, Zap, Wind, Lock } from 'lucide-react';
 import { useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '../hooks/useAuth';
 import { useCheckins } from '../hooks/useCheckins';
 import { useJournals } from '../hooks/useJournals';
 import { useMeditationWeeklyStats } from '../hooks/useMeditation';
+import { useProfile } from '../hooks/useProfile';
 import { supabase } from '../lib/supabase';
+import { groupQuestsByTier } from '../utils/questSystem';
 
 interface Quest {
   id: string;
@@ -38,10 +40,14 @@ const DailyQuests: React.FC<DailyQuestsProps> = ({
   const { data: checkinsData } = useCheckins();
   const { data: journalsData } = useJournals();
   const { data: meditationMinutes } = useMeditationWeeklyStats();
+  const { xpProgress } = useProfile();
   const [claimed, setClaimed] = useState<Record<string, boolean>>({});
   const [timeLeft, setTimeLeft] = useState('');
   const [breathingSessions, setBreathingSessions] = useState(0);
   const [animatingXP, setAnimatingXP] = useState<string | null>(null);
+
+  const userLevel = xpProgress.level || 1;
+  const questTiers = groupQuestsByTier(userLevel);
 
   useEffect(() => {
     const loadBreathingSessions = async () => {
@@ -409,6 +415,84 @@ const DailyQuests: React.FC<DailyQuestsProps> = ({
         <div className="text-center text-sm text-charcoal/60 bg-sand/50 p-3 rounded-xl">
           <Zap className="w-4 h-4 inline mr-1" />
           Continue! Plus que {quests.length - completedQuests} quête{quests.length - completedQuests > 1 ? 's' : ''}
+        </div>
+      )}
+
+      {questTiers.length > 1 && (
+        <div className="mt-8 space-y-6">
+          <div className="flex items-center gap-3">
+            <Star className="w-6 h-6 text-jade" />
+            <h3 className="text-xl font-bold text-charcoal">
+              Quêtes Avancées
+            </h3>
+            <div className="flex-1 h-px bg-gradient-to-r from-jade/30 to-transparent" />
+          </div>
+
+          {questTiers.slice(1).map((tier) => (
+            <div key={tier.tier} className="space-y-3">
+              <div className="flex items-center gap-2 px-3 py-1.5 bg-gradient-to-r from-jade/10 to-transparent rounded-lg w-fit">
+                <Trophy className="w-4 h-4 text-jade" />
+                <span className="text-sm font-semibold text-jade">
+                  Niveau {tier.minLevel}+ débloqué
+                </span>
+              </div>
+
+              {tier.quests.map((advQuest) => {
+                const isLocked = userLevel < tier.minLevel;
+
+                return (
+                  <div
+                    key={advQuest.id}
+                    className={`bg-white rounded-2xl overflow-hidden transition-all duration-300 ${
+                      isLocked ? 'opacity-60' : 'shadow-md hover:shadow-lg'
+                    }`}
+                  >
+                    <div className="p-4 flex items-center gap-4">
+                      <div className={`w-14 h-14 rounded-xl bg-gradient-to-br ${advQuest.color} flex items-center justify-center text-white flex-shrink-0 relative`}>
+                        {isLocked ? (
+                          <Lock className="w-6 h-6" />
+                        ) : advQuest.icon === 'Timer' ? (
+                          <Timer className="w-6 h-6" />
+                        ) : advQuest.icon === 'Wind' ? (
+                          <Wind className="w-6 h-6" />
+                        ) : advQuest.icon === 'BookOpen' ? (
+                          <BookOpen className="w-6 h-6" />
+                        ) : (
+                          <Star className="w-6 h-6" />
+                        )}
+                      </div>
+
+                      <div className="flex-1 min-w-0">
+                        <h3 className="font-semibold text-charcoal flex items-center gap-2">
+                          {advQuest.title}
+                        </h3>
+                        <p className="text-sm text-charcoal/60">{advQuest.description}</p>
+
+                        <div className="mt-2 flex items-center gap-2">
+                          <Sparkles className="w-4 h-4 text-jade" />
+                          <span className="text-sm font-bold text-jade">
+                            +{advQuest.xp} XP
+                          </span>
+                        </div>
+                      </div>
+
+                      {isLocked ? (
+                        <div className="px-4 py-2 bg-stone/10 text-stone rounded-xl flex items-center gap-2">
+                          <Lock className="w-4 h-4" />
+                          <span className="text-sm font-medium">Niv. {tier.minLevel}</span>
+                        </div>
+                      ) : (
+                        <div className="text-center">
+                          <div className="text-xs text-charcoal/60">Bientôt</div>
+                          <div className="text-xs text-jade font-semibold">disponible</div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          ))}
         </div>
       )}
 

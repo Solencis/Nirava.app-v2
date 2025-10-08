@@ -1,6 +1,7 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '../lib/supabase';
 import { useAuth } from './useAuth';
+import { calculateLevel } from '../utils/levelSystem';
 
 interface Profile {
   id: string;
@@ -66,26 +67,15 @@ export const useProfile = () => {
   };
 
   const calculateXPProgress = () => {
-    if (!profile) return { current: 0, needed: 100, percentage: 0 };
+    if (!profile) return { current: 0, needed: 100, percentage: 0, level: 1 };
 
-    let accumulated = 0;
-    let level = 1;
-    let xpNeeded = 100;
-
-    while (level < profile.current_level) {
-      accumulated += xpNeeded;
-      level++;
-      xpNeeded = 100 + ((level - 1) * 50);
-    }
-
-    const currentLevelXP = profile.total_xp - accumulated;
-    const xpForNextLevel = profile.xp_to_next_level;
-    const percentage = (currentLevelXP / xpForNextLevel) * 100;
+    const levelInfo = calculateLevel(profile.total_xp);
 
     return {
-      current: currentLevelXP,
-      needed: xpForNextLevel,
-      percentage: Math.min(percentage, 100)
+      current: levelInfo.xpForCurrentLevel,
+      needed: levelInfo.xpForNextLevel,
+      percentage: (levelInfo.xpForCurrentLevel / levelInfo.xpForNextLevel) * 100,
+      level: levelInfo.level
     };
   };
 

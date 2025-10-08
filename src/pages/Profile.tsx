@@ -480,7 +480,7 @@ const ProfilePage: React.FC = () => {
                 max={xpProgress.needed}
                 label="Progression"
                 variant="level"
-                level={userProfile.current_level}
+                level={xpProgress.level}
                 compact={false}
               />
             </div>
