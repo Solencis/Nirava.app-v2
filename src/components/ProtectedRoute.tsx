@@ -14,9 +14,22 @@ interface ProtectedRouteProps {
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
   const { user, loading } = useAuth();
   const location = useLocation();
+  const [forceShow, setForceShow] = React.useState(false);
+
+  // Timeout de sécurité : forcer l'affichage après 3 secondes
+  React.useEffect(() => {
+    const timeout = setTimeout(() => {
+      if (loading) {
+        console.warn('ProtectedRoute: Loading timeout, forcing render');
+        setForceShow(true);
+      }
+    }, 3000);
+
+    return () => clearTimeout(timeout);
+  }, [loading]);
 
   // Afficher un loader pendant la vérification de l'authentification
-  if (loading) {
+  if (loading && !forceShow) {
     return (
       <div className="min-h-screen bg-sand flex items-center justify-center">
         <div className="text-center">

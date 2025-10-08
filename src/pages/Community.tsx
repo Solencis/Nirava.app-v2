@@ -66,19 +66,23 @@ const Community: React.FC = () => {
       loadProfile();
       loadPosts();
       subscribeToPostChanges();
-
-      const timeout = setTimeout(() => {
-        if (loading) {
-          console.warn('Loading timeout - forcing loading to false');
-          setLoading(false);
-        }
-      }, 5000);
-
-      return () => clearTimeout(timeout);
-    } else {
+    } else if (!authLoading) {
+      // Si pas d'utilisateur et que l'auth a fini de charger, arrêter le loading
       setLoading(false);
     }
-  }, [user]);
+  }, [user, authLoading]);
+
+  // Timeout de sécurité pour forcer la fin du loading
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      if (loading || authLoading) {
+        console.warn('Loading timeout - forcing loading to false');
+        setLoading(false);
+      }
+    }, 5000);
+
+    return () => clearTimeout(timeout);
+  }, []);
 
   // Simulate online users fluctuation
   useEffect(() => {
@@ -99,31 +103,71 @@ const Community: React.FC = () => {
         .from('profiles')
         .select('*')
         .eq('id', user.id)
-        .single();
+        .maybeSingle();
 
-      if (error && error.code === 'PGRST116') {
+      if (error) {
+        console.error('Error loading profile:', error);
+        // Créer un profil par défaut si erreur
+        setProfile({
+          id: user.id,
+          display_name: user.email?.split('@')[0] || `Voyageur${Math.floor(Math.random() * 1000)}`,
+          level: 'N1',
+          share_progress: true,
+          bio: '',
+          photo_url: '',
+          subscription_status: 'none',
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        });
+        return;
+      }
+
+      if (!data) {
         // Profile doesn't exist, create one
         const newProfile = {
           id: user.id,
-          display_name: `Voyageur${Math.floor(Math.random() * 1000)}`,
-          level: 'N1'
+          display_name: user.email?.split('@')[0] || `Voyageur${Math.floor(Math.random() * 1000)}`,
+          level: 'N1',
+          share_progress: true,
+          subscription_status: 'none'
         };
 
         const { data: createdProfile, error: createError } = await supabase
           .from('profiles')
           .insert(newProfile)
           .select()
-          .single();
+          .maybeSingle();
 
-        if (createError) throw createError;
-        setProfile(createdProfile);
-      } else if (error) {
-        throw error;
+        if (createError) {
+          console.error('Error creating profile:', createError);
+          // Profil par défaut en local
+          setProfile({
+            ...newProfile,
+            bio: '',
+            photo_url: '',
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString()
+          });
+        } else {
+          setProfile(createdProfile);
+        }
       } else {
         setProfile(data);
       }
     } catch (error) {
       console.error('Error loading profile:', error);
+      // Profil de secours
+      setProfile({
+        id: user.id,
+        display_name: user.email?.split('@')[0] || `Voyageur${Math.floor(Math.random() * 1000)}`,
+        level: 'N1',
+        share_progress: true,
+        bio: '',
+        photo_url: '',
+        subscription_status: 'none',
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      });
     }
   };
 
