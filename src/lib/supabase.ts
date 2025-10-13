@@ -54,7 +54,14 @@ export const supabase = isSupabaseConfigured
     autoRefreshToken: true,
     detectSessionInUrl: true,
     flowType: 'implicit',
-    debug: true
+    storage: window.localStorage,
+    storageKey: 'nirava-auth-token',
+    debug: false
+  },
+  global: {
+    headers: {
+      'X-Client-Info': 'nirava-app'
+    }
   }
 })
   : createMockSupabaseClient() as any;
