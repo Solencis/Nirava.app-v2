@@ -61,8 +61,13 @@ export default function Onboarding() {
       {!isLastSlide && (
         <div className="absolute top-4 right-4 z-50">
           <button
-            onClick={handleSkip}
-            className="bg-white/90 backdrop-blur-sm rounded-full p-3 shadow-lg active:scale-95 transition-transform"
+            type="button"
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              handleSkip();
+            }}
+            className="bg-white/90 backdrop-blur-sm rounded-full p-3 shadow-lg active:scale-95 transition-transform cursor-pointer touch-manipulation"
           >
             <X className="w-5 h-5 text-gray-600" />
           </button>
@@ -127,19 +132,29 @@ export default function Onboarding() {
       </div>
 
       {/* Bottom actions */}
-      <div className="pb-8 px-6 space-y-3">
+      <div className="pb-8 px-6 space-y-3 relative z-50">
         {isLastSlide ? (
           <>
             <button
-              onClick={handleFreeAccess}
-              className="w-full py-4 bg-white text-gray-800 rounded-2xl font-semibold shadow-lg active:scale-95 transition-transform flex items-center justify-center gap-2"
+              type="button"
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                handleFreeAccess();
+              }}
+              className="w-full py-4 bg-white text-gray-800 rounded-2xl font-semibold shadow-lg active:scale-95 transition-transform flex items-center justify-center gap-2 cursor-pointer touch-manipulation"
             >
               <Sparkles className="w-5 h-5 text-emerald-600" />
               Continuer gratuitement
             </button>
             <button
-              onClick={handleFullAccess}
-              className={`w-full py-4 bg-gradient-to-r ${currentSlideData.gradient} text-white rounded-2xl font-semibold shadow-lg active:scale-95 transition-transform flex items-center justify-center gap-2`}
+              type="button"
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                handleFullAccess();
+              }}
+              className={`w-full py-4 bg-gradient-to-r ${currentSlideData.gradient} text-white rounded-2xl font-semibold shadow-lg active:scale-95 transition-transform flex items-center justify-center gap-2 cursor-pointer touch-manipulation`}
             >
               <Sparkles className="w-5 h-5" />
               Activer l'accès complet
@@ -147,8 +162,13 @@ export default function Onboarding() {
           </>
         ) : (
           <button
-            onClick={handleNext}
-            className={`w-full py-4 bg-gradient-to-r ${currentSlideData.gradient} text-white rounded-2xl font-bold shadow-lg active:scale-95 transition-transform flex items-center justify-center gap-2`}
+            type="button"
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              handleNext();
+            }}
+            className={`w-full py-4 bg-gradient-to-r ${currentSlideData.gradient} text-white rounded-2xl font-bold shadow-lg active:scale-95 transition-transform flex items-center justify-center gap-2 cursor-pointer touch-manipulation`}
           >
             {currentSlideData.ctaText || 'Suivant'}
             <ChevronRight className="w-5 h-5" />
