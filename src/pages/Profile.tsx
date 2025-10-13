@@ -481,26 +481,19 @@ const ProfilePage: React.FC = () => {
         <div className="text-center max-w-sm mx-auto">
           <div className="w-8 h-8 border-2 border-wasabi border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
           <p className="text-stone mb-4">Chargement du profil...</p>
-          <button
-            type="button"
+          <a
+            href="#"
             onClick={(e) => {
               e.preventDefault();
-              e.stopPropagation();
-              console.log('🔴 FORCE LOGOUT FROM LOADING');
-              try {
-                supabase.auth.signOut().catch(console.error);
-              } catch (e) {
-                console.error('Sign out error:', e);
-              }
+              console.log('🔴 LOADING LOGOUT CLICKED');
               localStorage.clear();
               sessionStorage.clear();
-              console.log('🔄 REDIRECTING');
-              window.location.replace('/');
+              window.location.href = '/';
             }}
             className="px-4 py-2 text-sm text-stone hover:text-ink underline transition-colors cursor-pointer"
           >
             Problème de chargement ? Déconnexion forcée
-          </button>
+          </a>
         </div>
       </div>
     );
@@ -522,26 +515,19 @@ const ProfilePage: React.FC = () => {
             >
               Réessayer
             </button>
-            <button
-              type="button"
+            <a
+              href="#"
               onClick={(e) => {
                 e.preventDefault();
-                e.stopPropagation();
-                console.log('🔴 FORCE LOGOUT FROM ERROR SCREEN');
-                try {
-                  supabase.auth.signOut().catch(console.error);
-                } catch (e) {
-                  console.error('Sign out error:', e);
-                }
+                console.log('🔴 ERROR LOGOUT CLICKED');
                 localStorage.clear();
                 sessionStorage.clear();
-                console.log('🔄 REDIRECTING');
-                window.location.replace('/');
+                window.location.href = '/';
               }}
-              className="w-full px-4 py-3 bg-red-50 border border-red-200 text-red-600 rounded-xl hover:bg-red-100 transition-colors duration-300 font-medium cursor-pointer"
+              className="block w-full px-4 py-3 bg-red-50 border border-red-200 text-red-600 rounded-xl hover:bg-red-100 transition-colors duration-300 font-medium text-center cursor-pointer"
             >
               Déconnexion forcée
-            </button>
+            </a>
           </div>
           <p className="text-xs text-stone/60 mt-4">
             La déconnexion forcée nettoie toutes les données locales
@@ -555,6 +541,26 @@ const ProfilePage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-sand pb-24">
+      {/* Emergency Logout */}
+      <div className="p-4 bg-red-50">
+        <a
+          href="#"
+          onClick={(e) => {
+            e.preventDefault();
+            const confirmed = confirm('Voulez-vous vous déconnecter et effacer toutes les données locales ?');
+            if (confirmed) {
+              console.log('🔴 EMERGENCY LOGOUT');
+              localStorage.clear();
+              sessionStorage.clear();
+              window.location.href = '/';
+            }
+          }}
+          className="block w-full max-w-md mx-auto bg-red-600 text-white py-3 px-4 rounded-xl text-center font-medium hover:bg-red-700 transition-colors"
+        >
+          🚨 Déconnexion d'urgence
+        </a>
+      </div>
+
       {/* Header avec nom et édition */}
       <div className="bg-gradient-to-br from-wasabi/10 via-jade/5 to-wasabi/5 p-6">
         <div className="flex items-center justify-between mb-4">
@@ -723,32 +729,19 @@ const ProfilePage: React.FC = () => {
             <p className="text-xs text-stone mb-3 text-center">
               Problème de synchronisation ou de chargement ?
             </p>
-            <button
-              type="button"
+            <a
+              href="#"
               onClick={(e) => {
                 e.preventDefault();
-                e.stopPropagation();
-
-                console.log('🔴 FORCE LOGOUT CLICKED');
-
-                // Immediate action without async
-                try {
-                  supabase.auth.signOut().catch(console.error);
-                } catch (e) {
-                  console.error('Sign out error:', e);
-                }
-
+                console.log('🔴 LOGOUT LINK CLICKED');
                 localStorage.clear();
                 sessionStorage.clear();
-
-                console.log('🔄 REDIRECTING NOW');
-                window.location.replace('/');
+                window.location.href = '/';
               }}
-              className="w-full bg-orange-600 text-white py-3 rounded-lg hover:bg-orange-700 transition-colors text-sm font-medium flex items-center justify-center cursor-pointer"
+              className="block w-full bg-orange-600 text-white py-3 rounded-lg hover:bg-orange-700 transition-colors text-sm font-medium text-center cursor-pointer"
             >
-              <Settings size={18} className="mr-2" />
-              Déconnexion forcée (debug)
-            </button>
+              Déconnexion forcée
+            </a>
           </div>
         </div>
       </div>
