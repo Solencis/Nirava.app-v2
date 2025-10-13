@@ -482,18 +482,22 @@ const ProfilePage: React.FC = () => {
           <div className="w-8 h-8 border-2 border-wasabi border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
           <p className="text-stone mb-4">Chargement du profil...</p>
           <button
-            onClick={async () => {
-              console.log('🧹 Force logout from loading screen...');
+            type="button"
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              console.log('🔴 FORCE LOGOUT FROM LOADING');
               try {
-                await supabase.auth.signOut();
+                supabase.auth.signOut().catch(console.error);
               } catch (e) {
-                console.error('Supabase signOut error:', e);
+                console.error('Sign out error:', e);
               }
               localStorage.clear();
               sessionStorage.clear();
-              window.location.href = '/';
+              console.log('🔄 REDIRECTING');
+              window.location.replace('/');
             }}
-            className="px-4 py-2 text-sm text-stone hover:text-ink underline transition-colors"
+            className="px-4 py-2 text-sm text-stone hover:text-ink underline transition-colors cursor-pointer"
           >
             Problème de chargement ? Déconnexion forcée
           </button>
@@ -509,6 +513,7 @@ const ProfilePage: React.FC = () => {
           <p className="text-stone mb-4">Erreur lors du chargement du profil</p>
           <div className="space-y-3">
             <button
+              type="button"
               onClick={() => {
                 setLoading(true);
                 loadProfile();
@@ -518,18 +523,22 @@ const ProfilePage: React.FC = () => {
               Réessayer
             </button>
             <button
-              onClick={async () => {
-                console.log('🧹 Force logout - clearing all data...');
+              type="button"
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                console.log('🔴 FORCE LOGOUT FROM ERROR SCREEN');
                 try {
-                  await supabase.auth.signOut();
+                  supabase.auth.signOut().catch(console.error);
                 } catch (e) {
-                  console.error('Supabase signOut error:', e);
+                  console.error('Sign out error:', e);
                 }
                 localStorage.clear();
                 sessionStorage.clear();
-                window.location.href = '/';
+                console.log('🔄 REDIRECTING');
+                window.location.replace('/');
               }}
-              className="w-full px-4 py-3 bg-red-50 border border-red-200 text-red-600 rounded-xl hover:bg-red-100 transition-colors duration-300 font-medium"
+              className="w-full px-4 py-3 bg-red-50 border border-red-200 text-red-600 rounded-xl hover:bg-red-100 transition-colors duration-300 font-medium cursor-pointer"
             >
               Déconnexion forcée
             </button>
@@ -693,6 +702,7 @@ const ProfilePage: React.FC = () => {
         {/* Actions */}
         <div className="space-y-3">
           <button
+            type="button"
             onClick={handleReviewOnboarding}
             className="w-full bg-emerald-50 border border-emerald-200 text-emerald-600 py-4 rounded-xl hover:bg-emerald-100 transition-colors text-sm font-medium flex items-center justify-center"
           >
@@ -701,6 +711,7 @@ const ProfilePage: React.FC = () => {
           </button>
 
           <button
+            type="button"
             onClick={() => setShowLogoutModal(true)}
             className="w-full bg-red-50 border border-red-200 text-red-600 py-4 rounded-xl hover:bg-red-100 transition-colors text-sm font-medium flex items-center justify-center"
           >
@@ -713,29 +724,27 @@ const ProfilePage: React.FC = () => {
               Problème de synchronisation ou de chargement ?
             </p>
             <button
-              onClick={async () => {
-                const confirmed = window.confirm(
-                  'Déconnexion forcée\n\n' +
-                  'Cette action va :\n' +
-                  '- Déconnecter votre compte\n' +
-                  '- Effacer toutes les données locales\n' +
-                  '- Redémarrer l\'application\n\n' +
-                  'Utilisez ceci en cas de problème de synchronisation.'
-                );
+              type="button"
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
 
-                if (!confirmed) return;
+                console.log('🔴 FORCE LOGOUT CLICKED');
 
-                console.log('🧹 Force logout from profile settings...');
+                // Immediate action without async
                 try {
-                  await supabase.auth.signOut();
+                  supabase.auth.signOut().catch(console.error);
                 } catch (e) {
-                  console.error('Supabase signOut error:', e);
+                  console.error('Sign out error:', e);
                 }
+
                 localStorage.clear();
                 sessionStorage.clear();
-                window.location.href = '/';
+
+                console.log('🔄 REDIRECTING NOW');
+                window.location.replace('/');
               }}
-              className="w-full bg-orange-600 text-white py-3 rounded-lg hover:bg-orange-700 transition-colors text-sm font-medium flex items-center justify-center"
+              className="w-full bg-orange-600 text-white py-3 rounded-lg hover:bg-orange-700 transition-colors text-sm font-medium flex items-center justify-center cursor-pointer"
             >
               <Settings size={18} className="mr-2" />
               Déconnexion forcée (debug)

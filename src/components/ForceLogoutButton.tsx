@@ -11,26 +11,38 @@ const ForceLogoutButton: React.FC<ForceLogoutButtonProps> = ({
   variant = 'secondary',
   className = ''
 }) => {
-  const handleForceLogout = async () => {
+  const handleForceLogout = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    console.log('🔴 FORCE LOGOUT BUTTON CLICKED');
+
     const confirmed = window.confirm(
       'Êtes-vous sûr de vouloir vous déconnecter et effacer toutes les données locales ?\n\n' +
       'Cette action est utile en cas de problème de chargement.'
     );
 
-    if (!confirmed) return;
-
-    console.log('🧹 Force logout - clearing all data...');
-
-    try {
-      await supabase.auth.signOut();
-    } catch (e) {
-      console.error('Supabase signOut error:', e);
+    if (!confirmed) {
+      console.log('❌ User cancelled');
+      return;
     }
 
+    console.log('🧹 Force logout - clearing all...');
+
+    // Sign out (fire and forget)
+    try {
+      supabase.auth.signOut().catch(console.error);
+    } catch (e) {
+      console.error('Sign out error:', e);
+    }
+
+    // Clear storage
     localStorage.clear();
     sessionStorage.clear();
 
-    window.location.href = '/';
+    // Redirect immediately
+    console.log('🔄 REDIRECTING');
+    window.location.replace('/');
   };
 
   const variants = {
@@ -41,8 +53,9 @@ const ForceLogoutButton: React.FC<ForceLogoutButtonProps> = ({
 
   return (
     <button
+      type="button"
       onClick={handleForceLogout}
-      className={`flex items-center justify-center gap-2 px-4 py-3 rounded-xl transition-colors duration-300 font-medium ${variants[variant]} ${className}`}
+      className={`flex items-center justify-center gap-2 px-4 py-3 rounded-xl transition-colors duration-300 font-medium cursor-pointer ${variants[variant]} ${className}`}
     >
       <LogOut size={18} />
       Déconnexion forcée
