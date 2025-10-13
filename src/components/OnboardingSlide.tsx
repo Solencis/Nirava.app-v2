@@ -17,7 +17,7 @@ export default function OnboardingSlide({ title, subtitle, description, icon, gr
       animate={{ opacity: 1, scale: 1 }}
       exit={{ opacity: 0, scale: 0.95 }}
       transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-      className="flex flex-col items-center justify-center text-center px-6 py-8 max-w-3xl mx-auto"
+      className="flex flex-col items-center justify-center text-center px-6 py-8 max-w-3xl mx-auto relative z-10 pointer-events-none"
     >
       {icon && (
         <motion.div
