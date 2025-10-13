@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { User, Award, Flame, Settings, Shield, LogOut, CreditCard, Edit3, Save, X, Heart, Timer, BookOpen, Camera, Check, AlertCircle, Calendar, MapPin, Globe, PlayCircle } from 'lucide-react';
+import { User, Award, Flame, Settings, Shield, LogOut, CreditCard, Edit3, Save, X, Heart, Timer, BookOpen, Camera, Check, AlertCircle, Calendar as CalendarIcon, MapPin, Globe, PlayCircle, ChevronLeft, ChevronRight, Clock, Target } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 import { supabase, Profile, uploadJournalPhoto, deleteJournalPhoto } from '../lib/supabase';
 import { useAudioStore } from '../stores/audioStore';
@@ -29,10 +29,13 @@ const ProfilePage: React.FC = () => {
   const [uploadingPhoto, setUploadingPhoto] = useState(false);
   const [photoError, setPhotoError] = useState('');
   const [showLogoutModal, setShowLogoutModal] = useState(false);
+  const [currentMonth, setCurrentMonth] = useState(new Date());
   const [stats, setStats] = useState({
     checkins: 0,
     journals: 0,
     meditationMinutes: 0,
+    totalMeditationMinutes: 0,
+    totalSessions: 0,
     currentStreak: 0,
     dreams: 0
   });
@@ -43,12 +46,22 @@ const ProfilePage: React.FC = () => {
     share_progress: true,
     level: 'N1'
   });
+  const [calendarData, setCalendarData] = useState<Set<string>>(new Set());
 
   const levels = [
     { value: 'N1', label: 'N1 - Découverte', description: 'Premiers pas dans l\'intégration émotionnelle' },
     { value: 'N2', label: 'N2 - Approfondissement', description: 'Techniques avancées et pratiques régulières' },
     { value: 'N3', label: 'N3 - Intégration', description: 'Travail de l\'ombre et archétypes' },
     { value: 'N4', label: 'N4 - Service', description: 'Accompagnement et transmission' }
+  ];
+
+  const achievementBadges = [
+    { days: 3, title: '3 jours - Éveilleur en m...', icon: '🌅', unlocked: false },
+    { days: 7, title: '7 jours - Porteur d\'intention', icon: '🌱', unlocked: false },
+    { days: 10, title: '10 jours - Artisan du sou...', icon: '🌺', unlocked: false },
+    { days: 30, title: '30 jours - Maître du calme', icon: '🌳', unlocked: false },
+    { days: 50, title: '50 jours - Voyageur pais...', icon: '🪷', unlocked: false },
+    { days: 100, title: '100 jours - Artisan de lu...', icon: '💖', unlocked: false },
   ];
 
   useEffect(() => {
@@ -70,14 +83,13 @@ const ProfilePage: React.FC = () => {
     }
   }, [user]);
 
-  // Recharger les stats quand les données Supabase changent
   useEffect(() => {
     if (user && checkinsData && journalsData) {
       loadUserStats();
+      loadCalendarData();
     }
   }, [user, checkinsData, journalsData, supabaseMeditationMinutes]);
 
-  // Update meditation stats when store data changes
   useEffect(() => {
     setStats(prev => ({
       ...prev,
@@ -130,6 +142,27 @@ const ProfilePage: React.FC = () => {
     }
   };
 
+  const loadCalendarData = async () => {
+    if (!user?.id) return;
+
+    try {
+      const { data: sessions } = await supabase
+        .from('meditation_sessions')
+        .select('created_at')
+        .eq('user_id', user.id);
+
+      const dates = new Set<string>();
+      sessions?.forEach(session => {
+        const date = new Date(session.created_at);
+        dates.add(date.toDateString());
+      });
+
+      setCalendarData(dates);
+    } catch (error) {
+      console.error('Error loading calendar data:', error);
+    }
+  };
+
   const loadUserStats = async () => {
     try {
       if (!user?.id) {
@@ -145,12 +178,10 @@ const ProfilePage: React.FC = () => {
       const oneWeekAgo = new Date();
       oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
 
-      // Check-ins cette semaine depuis Supabase
       const thisWeekCheckins = checkinsData.filter(entry =>
         new Date(entry.created_at) > oneWeekAgo
       ).length;
 
-      // Journaux écrits CETTE SEMAINE depuis Supabase - exclure les méditations et rêves
       const journalEntriesOnly = journalsData.filter(entry => {
         const entryDate = new Date(entry.created_at);
         return entry.type === 'journal' &&
@@ -163,7 +194,6 @@ const ProfilePage: React.FC = () => {
                  !entry.metadata.duration_minutes));
       });
 
-      // Rêves cette semaine depuis Supabase
       const { data: dreamEntries, error: dreamError } = await supabase
         .from('journals')
         .select('*')
@@ -177,33 +207,40 @@ const ProfilePage: React.FC = () => {
 
       const thisWeekDreams = dreamEntries?.length || 0;
 
-      // Minutes de méditation cette semaine depuis Supabase
-      const thisWeekMeditation = supabaseMeditationMinutes || Math.round(meditationWeekMinutes);
+      const { data: allSessions } = await supabase
+        .from('meditation_sessions')
+        .select('duration_minutes')
+        .eq('user_id', user.id);
 
-      // Calculer le streak de journaux depuis Supabase
+      const totalMinutes = allSessions?.reduce((sum, s) => sum + (s.duration_minutes || 0), 0) || 0;
+      const totalSessions = allSessions?.length || 0;
+
+      const thisWeekMeditation = supabaseMeditationMinutes || Math.round(meditationWeekMinutes);
       const currentStreak = await calculateJournalStreak();
 
       setStats({
         checkins: thisWeekCheckins,
         journals: journalEntriesOnly.length,
         meditationMinutes: thisWeekMeditation,
+        totalMeditationMinutes: totalMinutes,
+        totalSessions: totalSessions,
         currentStreak,
         dreams: thisWeekDreams
       });
     } catch (error) {
       console.error('Error loading user stats:', error);
-      // Ne pas crasher, juste logger l'erreur
       setStats({
         checkins: 0,
         journals: 0,
         meditationMinutes: 0,
+        totalMeditationMinutes: 0,
+        totalSessions: 0,
         currentStreak: 0,
         dreams: 0
       });
     }
   };
 
-  // Calculer le streak de journaux depuis Supabase
   const calculateJournalStreak = async (): Promise<number> => {
     try {
       if (!user?.id) return 0;
@@ -218,12 +255,10 @@ const ProfilePage: React.FC = () => {
 
       if (!journals || journals.length === 0) return 0;
 
-      // Vérifier la continuité jour par jour
       let streak = 0;
       const today = new Date();
       today.setHours(0, 0, 0, 0);
 
-      // Grouper les journaux par date
       const journalsByDate = new Map<string, boolean>();
       journals.forEach(journal => {
         const date = new Date(journal.created_at);
@@ -231,15 +266,12 @@ const ProfilePage: React.FC = () => {
         journalsByDate.set(date.toDateString(), true);
       });
 
-      // Compter le streak à partir d'aujourd'hui ou hier
       let currentDate = new Date(today);
 
-      // Si pas de journal aujourd'hui, commencer à partir d'hier
       if (!journalsByDate.has(currentDate.toDateString())) {
         currentDate.setDate(currentDate.getDate() - 1);
       }
 
-      // Compter les jours consécutifs
       while (journalsByDate.has(currentDate.toDateString())) {
         streak++;
         currentDate.setDate(currentDate.getDate() - 1);
@@ -256,8 +288,7 @@ const ProfilePage: React.FC = () => {
     const file = event.target.files?.[0];
     if (!file || !user) return;
 
-    // Validation
-    if (file.size > 5 * 1024 * 1024) { // 5MB max
+    if (file.size > 5 * 1024 * 1024) {
       setPhotoError('La photo ne peut pas dépasser 5MB');
       return;
     }
@@ -271,12 +302,10 @@ const ProfilePage: React.FC = () => {
     setPhotoError('');
 
     try {
-      // Delete old photo if exists
       if (editForm.photo_url) {
         await deleteJournalPhoto(editForm.photo_url);
       }
 
-      // Upload new photo
       const photoUrl = await uploadJournalPhoto(file);
       setEditForm(prev => ({ ...prev, photo_url: photoUrl }));
     } catch (error: any) {
@@ -321,10 +350,9 @@ const ProfilePage: React.FC = () => {
 
       if (error) throw error;
 
-      // Recharger le profil après sauvegarde
       await loadProfile();
       setEditing(false);
-      
+
       console.log('Profile updated successfully');
     } catch (error) {
       console.error('Error updating profile:', error);
@@ -364,11 +392,11 @@ const ProfilePage: React.FC = () => {
 
   const getJoinDate = () => {
     if (!profile?.created_at) return 'Récemment';
-    
+
     const joinDate = new Date(profile.created_at);
     const now = new Date();
     const diffInDays = Math.floor((now.getTime() - joinDate.getTime()) / (1000 * 60 * 60 * 24));
-    
+
     if (diffInDays < 1) return "Aujourd'hui";
     if (diffInDays < 7) return `Il y a ${diffInDays} jour${diffInDays > 1 ? 's' : ''}`;
     if (diffInDays < 30) return `Il y a ${Math.floor(diffInDays / 7)} semaine${Math.floor(diffInDays / 7) > 1 ? 's' : ''}`;
@@ -376,16 +404,69 @@ const ProfilePage: React.FC = () => {
     return `Il y a ${Math.floor(diffInDays / 365)} an${Math.floor(diffInDays / 365) > 1 ? 's' : ''}`;
   };
 
-  // Si pas d'utilisateur connecté, le ProtectedRoute devrait rediriger
-  // Mais affichons quand même un message au cas où
+  const renderCalendar = () => {
+    const year = currentMonth.getFullYear();
+    const month = currentMonth.getMonth();
+
+    const firstDay = new Date(year, month, 1);
+    const lastDay = new Date(year, month + 1, 0);
+    const daysInMonth = lastDay.getDate();
+    const startingDayOfWeek = firstDay.getDay();
+
+    const days = [];
+    for (let i = 0; i < startingDayOfWeek; i++) {
+      days.push(<div key={`empty-${i}`} className="aspect-square" />);
+    }
+
+    for (let day = 1; day <= daysInMonth; day++) {
+      const date = new Date(year, month, day);
+      const dateStr = date.toDateString();
+      const hasActivity = calendarData.has(dateStr);
+      const isToday = date.toDateString() === new Date().toDateString();
+
+      days.push(
+        <div
+          key={day}
+          className={`aspect-square flex items-center justify-center text-sm rounded-lg transition-colors ${
+            isToday
+              ? 'bg-emerald-500 text-white font-bold'
+              : hasActivity
+              ? 'bg-emerald-100 text-emerald-700 font-medium'
+              : 'text-gray-400'
+          }`}
+        >
+          {day}
+        </div>
+      );
+    }
+
+    return days;
+  };
+
+  const previousMonth = () => {
+    setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1));
+  };
+
+  const nextMonth = () => {
+    setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1));
+  };
+
+  const monthNames = ['janvier', 'février', 'mars', 'avril', 'mai', 'juin', 'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre'];
+  const dayNames = ['dim.', 'lun.', 'mar.', 'mer.', 'jeu.', 'ven.', 'sam.'];
+
+  const unlockedBadges = achievementBadges.map(badge => ({
+    ...badge,
+    unlocked: stats.currentStreak >= badge.days
+  }));
+
   if (!user) {
     return (
-      <div className="min-h-screen bg-sand p-4 pb-24 flex items-center justify-center">
+      <div className="min-h-screen bg-gray-900 p-4 pb-24 flex items-center justify-center">
         <div className="text-center">
-          <p className="text-stone mb-4">Vous devez être connecté pour accéder à votre profil</p>
+          <p className="text-gray-400 mb-4">Vous devez être connecté pour accéder à votre profil</p>
           <a
             href="/"
-            className="px-6 py-3 bg-wasabi text-white rounded-xl hover:bg-wasabi/90 transition-colors duration-300 inline-block"
+            className="px-6 py-3 bg-emerald-600 text-white rounded-xl hover:bg-emerald-700 transition-colors duration-300 inline-block"
           >
             Retour à l'accueil
           </a>
@@ -394,41 +475,28 @@ const ProfilePage: React.FC = () => {
     );
   }
 
-  // États de chargement
   if (loading) {
     return (
-      <div className="min-h-screen bg-sand p-4 pb-24 flex items-center justify-center">
+      <div className="min-h-screen bg-gray-900 p-4 pb-24 flex items-center justify-center">
         <div className="text-center">
-          <div className="w-8 h-8 border-2 border-wasabi border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-stone mb-4">Chargement du profil...</p>
-          <button
-            onClick={() => {
-              console.log('🧹 Clearing cache and reloading...');
-              localStorage.clear();
-              window.location.href = '/';
-            }}
-            className="text-sm text-stone hover:text-ink underline"
-          >
-            Problème de chargement ? Nettoyer le cache
-          </button>
+          <div className="w-8 h-8 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-gray-400 mb-4">Chargement du profil...</p>
         </div>
       </div>
     );
   }
 
-  // Si toujours pas de profil après le chargement, c'est une vraie erreur
   if (!profile) {
     return (
-      <div className="min-h-screen bg-sand p-4 pb-24 flex items-center justify-center">
+      <div className="min-h-screen bg-gray-900 p-4 pb-24 flex items-center justify-center">
         <div className="text-center">
-          <p className="text-stone mb-2">Erreur lors du chargement du profil</p>
-          <p className="text-stone/60 text-sm mb-4">Impossible de charger vos informations</p>
+          <p className="text-gray-400 mb-2">Erreur lors du chargement du profil</p>
           <button
             onClick={() => {
               setLoading(true);
               loadProfile();
             }}
-            className="px-4 py-2 bg-wasabi text-white rounded-xl hover:bg-wasabi/90 transition-colors duration-300"
+            className="px-4 py-2 bg-emerald-600 text-white rounded-xl hover:bg-emerald-700 transition-colors duration-300"
           >
             Réessayer
           </button>
@@ -440,187 +508,156 @@ const ProfilePage: React.FC = () => {
   const subscriptionStatus = getSubscriptionStatus();
 
   return (
-    <div className="min-h-screen bg-sand">
-      {/* Header avec photo de profil */}
-      <div className="bg-gradient-to-br from-wasabi/10 via-jade/5 to-wasabi/5 p-6 pb-8">
-        <div className="text-center">
-          {/* Photo de profil */}
-          <div className="relative w-24 h-24 mx-auto mb-4">
-            {profile.photo_url ? (
-              <img
-                src={profile.photo_url}
-                alt="Photo de profil"
-                className="w-full h-full rounded-full object-cover border-4 border-white shadow-lg"
-              />
-            ) : (
-              <div className="w-full h-full bg-gradient-to-br from-wasabi to-jade rounded-full flex items-center justify-center border-4 border-white shadow-lg">
-                <User size={32} className="text-white" />
-              </div>
-            )}
-            
-            {/* Badge niveau */}
-            <div className="absolute -bottom-1 -right-1 w-8 h-8 bg-white rounded-full flex items-center justify-center shadow-lg border-2 border-wasabi/20">
-              <span className="text-wasabi font-bold text-xs">{profile.level}</span>
+    <div className="min-h-screen bg-gray-900 text-white pb-24">
+      {/* Header avec nom et édition */}
+      <div className="bg-gray-800 p-6">
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-3">
+            <div className="relative w-16 h-16">
+              {profile.photo_url ? (
+                <img
+                  src={profile.photo_url}
+                  alt="Photo"
+                  className="w-full h-full rounded-full object-cover border-2 border-emerald-500"
+                />
+              ) : (
+                <div className="w-full h-full bg-gradient-to-br from-emerald-600 to-teal-600 rounded-full flex items-center justify-center">
+                  <User size={24} className="text-white" />
+                </div>
+              )}
+            </div>
+            <div>
+              <h1 className="text-xl font-bold text-white">{profile.display_name}</h1>
+              <p className="text-sm text-gray-400">Membre depuis {getJoinDate()}</p>
             </div>
           </div>
-          
-          <h1 
-            className="text-2xl font-bold text-ink mb-1"
-            style={{ fontFamily: "'Shippori Mincho', serif" }}
-          >
-            {profile.display_name}
-          </h1>
-          
-          <div className="flex items-center justify-center text-stone text-sm mb-2">
-            <Calendar size={14} className="mr-1" />
-            Membre depuis {getJoinDate()}
-          </div>
-          
-          {profile.bio && (
-            <p className="text-stone text-sm italic max-w-xs mx-auto leading-relaxed">
-              "{profile.bio}"
-            </p>
-          )}
-          
-          {userProfile && (
-            <div className="mt-4 max-w-md mx-auto">
-              <XPBar
-                current={xpProgress.current}
-                max={xpProgress.needed}
-                label="Progression"
-                variant="level"
-                level={xpProgress.level}
-                compact={false}
-              />
-            </div>
-          )}
-
           <button
             onClick={() => setEditing(true)}
-            className="mt-4 bg-white/90 text-wasabi px-6 py-2 rounded-full text-sm font-medium hover:bg-white transition-colors duration-300 flex items-center mx-auto shadow-sm"
+            className="bg-gray-700 p-2 rounded-lg hover:bg-gray-600 transition-colors"
           >
-            <Edit3 size={16} className="mr-2" />
-            Modifier le profil
+            <Edit3 size={20} />
           </button>
         </div>
       </div>
 
-      <div className="p-4 pb-24 -mt-4">
-        {/* Statistiques utilisateur */}
-        <div className="bg-white/95 backdrop-blur-sm rounded-2xl p-6 shadow-soft border border-stone/10 mb-6">
-          <h2 className="text-lg font-bold text-ink mb-4 flex items-center" style={{ fontFamily: "'Shippori Mincho', serif" }}>
-            <Award className="w-5 h-5 mr-2 text-wasabi" />
-            Ma progression cette semaine
-          </h2>
-          
-          <div className="grid grid-cols-2 gap-3 mb-4">
-            <div className="text-center p-4 bg-jade/5 rounded-xl border border-jade/10">
-              <Heart className="w-6 h-6 text-jade mx-auto mb-2" />
-              <div className="text-2xl font-bold text-jade mb-1">{stats.checkins}</div>
-              <div className="text-xs text-stone">Check-ins</div>
+      <div className="p-4 space-y-4">
+        {/* Carte Série (Streak) */}
+        <div className="bg-gray-800 rounded-2xl p-6">
+          <div className="flex items-center gap-2 mb-4">
+            <div className="w-10 h-10 bg-emerald-500/20 rounded-full flex items-center justify-center">
+              <Flame className="w-5 h-5 text-emerald-400" />
             </div>
-            
-            <div className="text-center p-4 bg-vermilion/5 rounded-xl border border-vermilion/10">
-              <BookOpen className="w-6 h-6 text-vermilion mx-auto mb-2" />
-              <div className="text-2xl font-bold text-vermilion mb-1">{stats.journals}</div>
-              <div className="text-xs text-stone">Journaux</div>
-            </div>
-            
-            <div className="text-center p-4 bg-blue-50 rounded-xl border border-blue-100">
-              <Timer className="w-6 h-6 text-blue-600 mx-auto mb-2" />
-              <div className="text-2xl font-bold text-blue-600 mb-1">{stats.dreams}</div>
-              <div className="text-xs text-stone">Rêves</div>
-            </div>
-            
-            <div className="text-center p-4 bg-forest/5 rounded-xl border border-forest/10">
-              <Timer className="w-6 h-6 text-forest mx-auto mb-2" />
-              <div className="text-2xl font-bold text-forest mb-1">{stats.meditationMinutes}</div>
-              <div className="text-xs text-stone">Min méditation</div>
-            </div>
+            <h2 className="text-lg font-bold">Série</h2>
           </div>
-          
-          {/* Streak en bas */}
-          <div className="text-center p-4 bg-gradient-to-r from-sunset/5 to-vermilion/5 rounded-xl border border-sunset/10">
-            <div className="flex items-center justify-center mb-2">
-              <Flame className="w-6 h-6 text-sunset mr-2" />
-              <span className="text-2xl font-bold text-sunset">{stats.currentStreak}</span>
-            </div>
-            <div className="text-sm text-stone">Jours consécutifs de journaling</div>
+          <div className="flex items-baseline gap-2">
+            <span className="text-5xl font-bold">{stats.currentStreak}</span>
+            <span className="text-gray-400">Jour{stats.currentStreak > 1 ? 's' : ''}</span>
           </div>
         </div>
 
-        {/* Informations du compte */}
-        <div className="bg-white/95 backdrop-blur-sm rounded-2xl p-6 shadow-soft border border-stone/10 mb-6">
-          <h2 className="text-lg font-bold text-ink mb-4" style={{ fontFamily: "'Shippori Mincho', serif" }}>
-            Informations du compte
-          </h2>
-          
-          <div className="space-y-4">
-            <div className="flex items-center p-4 bg-stone/5 rounded-xl">
-              <Globe className="w-5 h-5 text-stone mr-3" />
-              <div className="flex-1">
-                <div className="font-medium text-ink">Email</div>
-                <div className="text-sm text-stone">{user?.email}</div>
-              </div>
+        {/* Temps total et Sessions */}
+        <div className="grid grid-cols-2 gap-3">
+          <div className="bg-gray-800 rounded-2xl p-5">
+            <div className="flex items-center gap-2 mb-3">
+              <Clock className="w-5 h-5 text-emerald-400" />
+              <h3 className="text-sm font-medium text-gray-300">Temps total</h3>
             </div>
-            
-            <div className="flex items-center p-4 bg-stone/5 rounded-xl">
-              <Shield className="w-5 h-5 text-stone mr-3" />
-              <div className="flex-1">
-                <div className="font-medium text-ink">Compte vérifié</div>
-                <div className="text-sm text-wasabi flex items-center">
-                  <Check size={14} className="mr-1" />
-                  Email confirmé
-                </div>
-              </div>
+            <div className="flex items-baseline gap-1">
+              <span className="text-3xl font-bold">{stats.totalMeditationMinutes}</span>
+              <span className="text-gray-400 text-sm">min</span>
+            </div>
+          </div>
+
+          <div className="bg-gray-800 rounded-2xl p-5">
+            <div className="flex items-center gap-2 mb-3">
+              <Target className="w-5 h-5 text-emerald-400" />
+              <h3 className="text-sm font-medium text-gray-300">Sessions</h3>
+            </div>
+            <div className="flex items-baseline gap-1">
+              <span className="text-3xl font-bold">{stats.totalSessions}</span>
+              <span className="text-gray-400 text-sm">Session{stats.totalSessions > 1 ? 's' : ''}</span>
             </div>
           </div>
         </div>
 
-        {/* Abonnement */}
-        <div className="bg-white/95 backdrop-blur-sm rounded-2xl p-6 shadow-soft border border-stone/10 mb-6">
+        {/* Succès */}
+        <div className="bg-gray-800 rounded-2xl p-6">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-bold text-ink flex items-center" style={{ fontFamily: "'Shippori Mincho', serif" }}>
-              <CreditCard className="w-5 h-5 mr-2" />
-              Abonnement
-            </h2>
+            <h2 className="text-lg font-bold">Succès</h2>
+            <button className="text-emerald-400 text-sm font-medium">Tout afficher</button>
           </div>
-
-          <div className="flex items-center justify-between">
-            <div>
-              <div className="font-medium text-ink">Statut actuel</div>
-              <div className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium mt-1 ${subscriptionStatus.bg} ${subscriptionStatus.color}`}>
-                {subscriptionStatus.text}
+          <div className="grid grid-cols-3 gap-4">
+            {unlockedBadges.map((badge, index) => (
+              <div key={index} className="text-center">
+                <div className={`w-20 h-20 mx-auto rounded-full flex items-center justify-center text-4xl mb-2 ${
+                  badge.unlocked ? 'bg-gray-700' : 'bg-gray-700/30 grayscale opacity-50'
+                }`}>
+                  {badge.icon}
+                </div>
+                <p className="text-xs text-gray-400 leading-tight">{badge.title}</p>
               </div>
-            </div>
+            ))}
+          </div>
+        </div>
 
-            <a
-              href="/pricing"
-              className="px-4 py-2 bg-wasabi text-white rounded-xl text-sm font-medium hover:bg-wasabi/90 transition-colors duration-300"
-            >
-              Voir les offres
-            </a>
+        {/* Bouton ajout manuel */}
+        <button className="w-full bg-transparent border border-emerald-500 text-emerald-400 py-4 rounded-xl font-medium hover:bg-emerald-500/10 transition-colors">
+          Ajouter une séance manuellement
+        </button>
+
+        {/* Calendrier */}
+        <div className="bg-gray-800 rounded-2xl p-6">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-lg font-bold">Calendrier</h2>
+            <button className="text-emerald-400 text-sm font-medium">Votre parcours</button>
           </div>
 
-          {profile?.subscription_status !== 'active' && (
-            <div className="mt-4 p-3 bg-gradient-to-r from-emerald-50 to-teal-50 rounded-xl border border-emerald-200">
-              <p className="text-emerald-900 text-sm font-medium">
-                🌟 Débloque tous les modules et fonctionnalités avec un abonnement premium
-              </p>
+          <div className="mb-4">
+            <div className="flex items-center justify-between mb-4">
+              <button onClick={previousMonth} className="p-2 hover:bg-gray-700 rounded-lg transition-colors">
+                <ChevronLeft size={20} />
+              </button>
+              <h3 className="font-medium capitalize">
+                {monthNames[currentMonth.getMonth()]} {currentMonth.getFullYear()}
+              </h3>
+              <button onClick={nextMonth} className="p-2 hover:bg-gray-700 rounded-lg transition-colors">
+                <ChevronRight size={20} />
+              </button>
             </div>
-          )}
+
+            <div className="grid grid-cols-7 gap-2 mb-2">
+              {dayNames.map(day => (
+                <div key={day} className="text-center text-xs text-gray-500 font-medium">
+                  {day}
+                </div>
+              ))}
+            </div>
+
+            <div className="grid grid-cols-7 gap-2">
+              {renderCalendar()}
+            </div>
+          </div>
         </div>
 
-        {/* Achievements Section */}
-        <div className="mb-6">
-          <Achievements />
-        </div>
+        {/* XP Bar */}
+        {userProfile && (
+          <div className="bg-gray-800 rounded-2xl p-6">
+            <XPBar
+              current={xpProgress.current}
+              max={xpProgress.needed}
+              label="Progression"
+              variant="level"
+              level={xpProgress.level}
+              compact={false}
+            />
+          </div>
+        )}
 
         {/* Actions */}
         <div className="space-y-3">
           <button
             onClick={handleReviewOnboarding}
-            className="w-full bg-emerald-50 border border-emerald-200 text-emerald-600 py-4 rounded-xl hover:bg-emerald-100 transition-colors duration-300 text-sm font-medium flex items-center justify-center min-h-[56px]"
+            className="w-full bg-emerald-600/20 border border-emerald-500 text-emerald-400 py-4 rounded-xl hover:bg-emerald-600/30 transition-colors text-sm font-medium flex items-center justify-center"
           >
             <PlayCircle size={18} className="mr-2" />
             Revoir l'introduction
@@ -628,68 +665,52 @@ const ProfilePage: React.FC = () => {
 
           <button
             onClick={() => setShowLogoutModal(true)}
-            className="w-full bg-red-50 border border-red-200 text-red-600 py-4 rounded-xl hover:bg-red-100 transition-colors duration-300 text-sm font-medium flex items-center justify-center min-h-[56px]"
+            className="w-full bg-red-600/20 border border-red-500 text-red-400 py-4 rounded-xl hover:bg-red-600/30 transition-colors text-sm font-medium flex items-center justify-center"
           >
             <LogOut size={18} className="mr-2" />
             Se déconnecter
           </button>
         </div>
-
-        {/* Message inspirant */}
-        <div className="mt-8 bg-gradient-to-br from-wasabi/5 to-jade/5 rounded-2xl p-6 text-center border border-wasabi/10">
-          <p className="text-ink font-medium mb-2" style={{ fontFamily: "'Shippori Mincho', serif" }}>
-            "Connais-toi toi-même"
-          </p>
-          <p className="text-stone text-sm">— Socrate</p>
-        </div>
       </div>
-      
-      {/* iOS Install Hint */}
+
       <IOSInstallHint />
 
-      {/* Modal d'édition du profil */}
+      {/* Modal d'édition (identique à l'original) */}
       {editing && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4 z-50">
-          <div className="bg-white rounded-t-3xl sm:rounded-2xl shadow-2xl w-full sm:max-w-md mx-0 sm:mx-2 max-h-[90vh] overflow-y-auto">
+          <div className="bg-gray-800 rounded-t-3xl sm:rounded-2xl shadow-2xl w-full sm:max-w-md mx-0 sm:mx-2 max-h-[90vh] overflow-y-auto">
             <div className="p-6">
-              {/* Header */}
               <div className="flex items-center justify-between mb-6">
-                <h2 className="text-xl font-bold text-ink" style={{ fontFamily: "'Shippori Mincho', serif" }}>
-                  Modifier mon profil
-                </h2>
+                <h2 className="text-xl font-bold">Modifier mon profil</h2>
                 <button
                   onClick={() => {
                     setEditing(false);
                     setPhotoError('');
                   }}
-                  className="w-10 h-10 rounded-full bg-stone/10 flex items-center justify-center text-stone hover:text-vermilion transition-colors duration-300"
+                  className="w-10 h-10 rounded-full bg-gray-700 flex items-center justify-center hover:bg-gray-600 transition-colors"
                 >
                   <X size={20} />
                 </button>
               </div>
 
               <div className="space-y-6">
-                {/* Photo de profil */}
                 <div className="text-center">
-                  <label className="block text-sm font-medium text-ink mb-3">
-                    Photo de profil
-                  </label>
-                  
+                  <label className="block text-sm font-medium mb-3">Photo de profil</label>
+
                   <div className="relative w-24 h-24 mx-auto mb-4">
                     {editForm.photo_url ? (
                       <img
                         src={editForm.photo_url}
-                        alt="Photo de profil"
-                        className="w-full h-full rounded-full object-cover border-4 border-wasabi/20 shadow-lg"
+                        alt="Photo"
+                        className="w-full h-full rounded-full object-cover border-4 border-emerald-500/20"
                       />
                     ) : (
-                      <div className="w-full h-full bg-gradient-to-br from-wasabi/20 to-jade/20 rounded-full flex items-center justify-center border-4 border-wasabi/20 shadow-lg">
-                        <User size={32} className="text-wasabi" />
+                      <div className="w-full h-full bg-gradient-to-br from-emerald-600/20 to-teal-600/20 rounded-full flex items-center justify-center border-4 border-emerald-500/20">
+                        <User size={32} className="text-emerald-400" />
                       </div>
                     )}
-                    
-                    {/* Bouton upload */}
-                    <label className="absolute -bottom-1 -right-1 w-8 h-8 bg-wasabi text-white rounded-full flex items-center justify-center shadow-lg cursor-pointer hover:bg-wasabi/90 transition-colors duration-300">
+
+                    <label className="absolute -bottom-1 -right-1 w-8 h-8 bg-emerald-600 text-white rounded-full flex items-center justify-center shadow-lg cursor-pointer hover:bg-emerald-700 transition-colors">
                       <input
                         type="file"
                         accept="image/*"
@@ -704,141 +725,64 @@ const ProfilePage: React.FC = () => {
                       )}
                     </label>
                   </div>
-                  
+
                   {editForm.photo_url && (
                     <button
                       onClick={handleRemovePhoto}
-                      className="text-red-600 hover:text-red-700 text-sm transition-colors duration-300"
+                      className="text-red-400 hover:text-red-300 text-sm transition-colors"
                     >
                       Supprimer la photo
                     </button>
                   )}
-                  
+
                   {photoError && (
-                    <div className="flex items-center justify-center text-red-600 text-sm mt-2">
+                    <div className="flex items-center justify-center text-red-400 text-sm mt-2">
                       <AlertCircle size={16} className="mr-2" />
                       {photoError}
                     </div>
                   )}
                 </div>
 
-                {/* Nom d'affichage */}
                 <div>
-                  <label className="block text-sm font-medium text-ink mb-2">
-                    Nom d'affichage
-                  </label>
+                  <label className="block text-sm font-medium mb-2">Nom d'affichage</label>
                   <input
                     type="text"
                     value={editForm.display_name}
                     onChange={(e) => setEditForm({ ...editForm, display_name: e.target.value })}
-                    placeholder="Ton nom d'affichage"
-                    className="w-full px-4 py-4 bg-stone/5 border border-stone/20 rounded-xl focus:border-wasabi focus:ring-2 focus:ring-wasabi/20 transition-all duration-300 text-base"
+                    placeholder="Ton nom"
+                    className="w-full px-4 py-4 bg-gray-700 border border-gray-600 rounded-xl focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition-all text-base"
                     maxLength={50}
                   />
-                  <div className="text-xs text-stone mt-1 text-right">
-                    {editForm.display_name.length}/50
-                  </div>
+                  <div className="text-xs text-gray-500 mt-1 text-right">{editForm.display_name.length}/50</div>
                 </div>
 
-                {/* Bio */}
                 <div>
-                  <label className="block text-sm font-medium text-ink mb-2">
-                    Bio
-                  </label>
+                  <label className="block text-sm font-medium mb-2">Bio</label>
                   <textarea
                     value={editForm.bio}
                     onChange={(e) => setEditForm({ ...editForm, bio: e.target.value })}
-                    placeholder="Parle-nous de ton parcours, tes passions..."
+                    placeholder="Parle-nous de toi..."
                     rows={4}
-                    className="w-full px-4 py-4 bg-stone/5 border border-stone/20 rounded-xl focus:border-wasabi focus:ring-2 focus:ring-wasabi/20 transition-all duration-300 resize-none text-base"
+                    className="w-full px-4 py-4 bg-gray-700 border border-gray-600 rounded-xl focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition-all resize-none text-base"
                     maxLength={200}
                   />
-                  <div className="text-xs text-stone mt-1 text-right">
-                    {editForm.bio.length}/200
-                  </div>
+                  <div className="text-xs text-gray-500 mt-1 text-right">{editForm.bio.length}/200</div>
                 </div>
 
-                {/* Niveau */}
-                <div>
-                  <label className="block text-sm font-medium text-ink mb-3">
-                    Niveau actuel
-                  </label>
-                  <div className="space-y-2">
-                    {levels.map(level => (
-                      <label
-                        key={level.value}
-                        className={`flex items-start p-4 rounded-xl border cursor-pointer transition-all duration-300 ${
-                          editForm.level === level.value
-                            ? 'bg-wasabi/10 border-wasabi/30'
-                            : 'bg-stone/5 border-stone/20 hover:border-wasabi/20'
-                        }`}
-                      >
-                        <input
-                          type="radio"
-                          name="level"
-                          value={level.value}
-                          checked={editForm.level === level.value}
-                          onChange={(e) => setEditForm({ ...editForm, level: e.target.value })}
-                          className="sr-only"
-                        />
-                        <div className={`w-6 h-6 rounded-full border-2 mr-3 mt-0.5 flex items-center justify-center transition-colors duration-300 ${
-                          editForm.level === level.value
-                            ? 'bg-wasabi border-wasabi'
-                            : 'border-stone/30'
-                        }`}>
-                          {editForm.level === level.value && (
-                            <div className="w-2 h-2 bg-white rounded-full"></div>
-                          )}
-                        </div>
-                        <div className="flex-1">
-                          <div className="font-medium text-ink">{level.label}</div>
-                          <div className="text-sm text-stone leading-relaxed">{level.description}</div>
-                        </div>
-                      </label>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Partage de progression */}
-                <div className="flex items-start p-4 bg-stone/5 rounded-xl">
-                  <div className="flex-1 mr-4">
-                    <div className="font-medium text-ink mb-1">Partager ma progression</div>
-                    <div className="text-sm text-stone leading-relaxed">
-                      Permet aux autres membres de voir tes statistiques dans la communauté
-                    </div>
-                  </div>
-                  <label className="relative inline-flex items-center cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={editForm.share_progress}
-                      onChange={(e) => setEditForm({ ...editForm, share_progress: e.target.checked })}
-                      className="sr-only"
-                    />
-                    <div className={`w-12 h-6 rounded-full transition-colors duration-200 ${
-                      editForm.share_progress ? 'bg-wasabi' : 'bg-stone/30'
-                    }`}>
-                      <div className={`w-5 h-5 bg-white rounded-full shadow-sm transition-transform duration-200 mt-0.5 ${
-                        editForm.share_progress ? 'translate-x-6' : 'translate-x-0.5'
-                      }`}></div>
-                    </div>
-                  </label>
-                </div>
-
-                {/* Actions */}
                 <div className="flex gap-3 pt-4">
                   <button
                     onClick={() => {
                       setEditing(false);
                       setPhotoError('');
                     }}
-                    className="flex-1 px-4 py-4 border border-stone/20 text-stone rounded-xl hover:bg-stone/5 transition-colors duration-300 font-medium"
+                    className="flex-1 px-4 py-4 border border-gray-600 text-gray-300 rounded-xl hover:bg-gray-700 transition-colors font-medium"
                   >
                     Annuler
                   </button>
                   <button
                     onClick={handleSave}
                     disabled={saving || uploadingPhoto}
-                    className="flex-1 px-4 py-4 bg-wasabi text-white rounded-xl hover:bg-wasabi/90 transition-colors duration-300 flex items-center justify-center disabled:opacity-50 font-medium"
+                    className="flex-1 px-4 py-4 bg-emerald-600 text-white rounded-xl hover:bg-emerald-700 transition-colors flex items-center justify-center disabled:opacity-50 font-medium"
                   >
                     {saving ? (
                       <>
@@ -862,29 +806,25 @@ const ProfilePage: React.FC = () => {
       {/* Modal de déconnexion */}
       {showLogoutModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl p-6 max-w-sm w-full shadow-2xl">
+          <div className="bg-gray-800 rounded-2xl p-6 max-w-sm w-full">
             <div className="text-center mb-6">
-              <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <LogOut className="w-8 h-8 text-red-600" />
+              <div className="w-16 h-16 bg-red-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
+                <LogOut className="w-8 h-8 text-red-400" />
               </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-2">
-                Déconnexion
-              </h3>
-              <p className="text-gray-600">
-                Es-tu sûr(e) de vouloir te déconnecter ?
-              </p>
+              <h3 className="text-xl font-bold mb-2">Déconnexion</h3>
+              <p className="text-gray-400">Es-tu sûr(e) de vouloir te déconnecter ?</p>
             </div>
 
             <div className="flex gap-3">
               <button
                 onClick={() => setShowLogoutModal(false)}
-                className="flex-1 px-4 py-3 border border-gray-300 text-gray-700 rounded-xl hover:bg-gray-50 transition-colors duration-300 font-medium"
+                className="flex-1 px-4 py-3 border border-gray-600 text-gray-300 rounded-xl hover:bg-gray-700 transition-colors font-medium"
               >
                 Annuler
               </button>
               <button
                 onClick={handleSignOut}
-                className="flex-1 px-4 py-3 bg-red-600 text-white rounded-xl hover:bg-red-700 transition-colors duration-300 font-medium"
+                className="flex-1 px-4 py-3 bg-red-600 text-white rounded-xl hover:bg-red-700 transition-colors font-medium"
               >
                 Se déconnecter
               </button>
