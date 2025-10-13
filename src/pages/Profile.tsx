@@ -541,28 +541,8 @@ const ProfilePage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-sand pb-24">
-      {/* Emergency Logout */}
-      <div className="p-4 bg-red-50">
-        <a
-          href="#"
-          onClick={(e) => {
-            e.preventDefault();
-            const confirmed = confirm('Voulez-vous vous déconnecter et effacer toutes les données locales ?');
-            if (confirmed) {
-              console.log('🔴 EMERGENCY LOGOUT');
-              localStorage.clear();
-              sessionStorage.clear();
-              window.location.href = '/';
-            }
-          }}
-          className="block w-full max-w-md mx-auto bg-red-600 text-white py-3 px-4 rounded-xl text-center font-medium hover:bg-red-700 transition-colors"
-        >
-          🚨 Déconnexion d'urgence
-        </a>
-      </div>
-
-      {/* Header avec nom et édition */}
-      <div className="bg-gradient-to-br from-wasabi/10 via-jade/5 to-wasabi/5 p-6">
+      {/* Header zen avec nom */}
+      <div className="bg-gradient-to-br from-wasabi/5 via-transparent to-jade/5 p-6 border-b border-stone/10">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-3">
             <div className="relative w-16 h-16">
@@ -570,73 +550,120 @@ const ProfilePage: React.FC = () => {
                 <img
                   src={profile.photo_url}
                   alt="Photo"
-                  className="w-full h-full rounded-full object-cover border-2 border-emerald-500"
+                  className="w-full h-full rounded-full object-cover border-2 border-wasabi/30 shadow-soft"
                 />
               ) : (
-                <div className="w-full h-full bg-gradient-to-br from-emerald-600 to-teal-600 rounded-full flex items-center justify-center">
-                  <User size={24} className="text-white" />
+                <div className="w-full h-full bg-gradient-to-br from-wasabi via-jade to-emerald-600 rounded-full flex items-center justify-center shadow-soft">
+                  <User size={26} className="text-white" />
                 </div>
               )}
             </div>
             <div>
-              <h1 className="text-xl font-bold text-ink">{profile.display_name}</h1>
-              <p className="text-sm text-stone">Membre depuis {getJoinDate()}</p>
+              <h1
+                className="text-2xl font-bold text-ink mb-1"
+                style={{ fontFamily: "'Shippori Mincho', serif" }}
+              >
+                {profile.display_name}
+              </h1>
+              <p className="text-sm text-stone/70">Membre depuis {getJoinDate()}</p>
             </div>
           </div>
           <button
+            type="button"
             onClick={() => setEditing(true)}
-            className="bg-white/80 p-2 rounded-lg hover:bg-white transition-colors text-ink"
+            className="bg-white/60 backdrop-blur-sm p-2.5 rounded-xl hover:bg-white/80 transition-all duration-300 text-ink border border-stone/10 shadow-soft"
           >
-            <Edit3 size={20} />
+            <Edit3 size={18} />
           </button>
         </div>
       </div>
 
       <div className="p-4 space-y-4">
-        {/* Carte Série (Streak) */}
-        <div className="bg-white/95 backdrop-blur-sm rounded-2xl p-6 shadow-soft border border-stone/10">
-          <div className="flex items-center gap-2 mb-4">
-            <div className="w-10 h-10 bg-sunset/10 rounded-full flex items-center justify-center">
-              <Flame className="w-5 h-5 text-sunset" />
+        {/* Carte Série (Streak) - Style zen */}
+        <div className="bg-white/80 backdrop-blur rounded-2xl p-6 shadow-soft border border-stone/10">
+          <div className="flex items-center gap-3 mb-4">
+            <div className="w-12 h-12 bg-gradient-to-br from-sunset/20 to-vermilion/10 rounded-full flex items-center justify-center">
+              <Flame className="w-6 h-6 text-sunset" />
             </div>
-            <h2 className="text-lg font-bold text-ink">Série</h2>
+            <h2
+              className="text-xl font-medium text-ink"
+              style={{ fontFamily: "'Shippori Mincho', serif" }}
+            >
+              Série
+            </h2>
           </div>
           <div className="flex items-baseline gap-2">
-            <span className="text-5xl font-bold text-ink">{stats.currentStreak}</span>
-            <span className="text-stone">Jour{stats.currentStreak > 1 ? 's' : ''}</span>
+            <span
+              className="text-5xl font-bold text-ink"
+              style={{ fontFamily: "'Shippori Mincho', serif" }}
+            >
+              {stats.currentStreak}
+            </span>
+            <span className="text-stone/70 text-lg">jour{stats.currentStreak > 1 ? 's' : ''}</span>
           </div>
         </div>
 
-        {/* Temps total et Sessions */}
+        {/* Temps total et Sessions - Style zen épuré */}
         <div className="grid grid-cols-2 gap-3">
-          <div className="bg-white/95 backdrop-blur-sm rounded-2xl p-5 shadow-soft border border-stone/10">
+          <div className="bg-white/80 backdrop-blur rounded-2xl p-5 shadow-soft border border-stone/10">
             <div className="flex items-center gap-2 mb-3">
               <Clock className="w-5 h-5 text-wasabi" />
-              <h3 className="text-sm font-medium text-stone">Temps total</h3>
+              <h3
+                className="text-sm font-medium text-stone/80"
+                style={{ fontFamily: "'Shippori Mincho', serif" }}
+              >
+                Temps total
+              </h3>
             </div>
-            <div className="flex items-baseline gap-1">
-              <span className="text-3xl font-bold text-ink">{stats.totalMeditationMinutes}</span>
-              <span className="text-stone text-sm">min</span>
+            <div className="flex items-baseline gap-1.5">
+              <span
+                className="text-3xl font-bold text-ink"
+                style={{ fontFamily: "'Shippori Mincho', serif" }}
+              >
+                {stats.totalMeditationMinutes}
+              </span>
+              <span className="text-stone/60 text-sm">min</span>
             </div>
           </div>
 
-          <div className="bg-white/95 backdrop-blur-sm rounded-2xl p-5 shadow-soft border border-stone/10">
+          <div className="bg-white/80 backdrop-blur rounded-2xl p-5 shadow-soft border border-stone/10">
             <div className="flex items-center gap-2 mb-3">
               <Target className="w-5 h-5 text-jade" />
-              <h3 className="text-sm font-medium text-stone">Sessions</h3>
+              <h3
+                className="text-sm font-medium text-stone/80"
+                style={{ fontFamily: "'Shippori Mincho', serif" }}
+              >
+                Sessions
+              </h3>
             </div>
-            <div className="flex items-baseline gap-1">
-              <span className="text-3xl font-bold text-ink">{stats.totalSessions}</span>
-              <span className="text-stone text-sm">Session{stats.totalSessions > 1 ? 's' : ''}</span>
+            <div className="flex items-baseline gap-1.5">
+              <span
+                className="text-3xl font-bold text-ink"
+                style={{ fontFamily: "'Shippori Mincho', serif" }}
+              >
+                {stats.totalSessions}
+              </span>
+              <span className="text-stone/60 text-sm">session{stats.totalSessions > 1 ? 's' : ''}</span>
             </div>
           </div>
         </div>
 
-        {/* Succès */}
-        <div className="bg-gray-800 rounded-2xl p-6">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-bold text-ink">Succès</h2>
-            <button className="text-wasabi text-sm font-medium">Tout afficher</button>
+        {/* Succès - fond clair */}
+        <div className="bg-white/80 backdrop-blur rounded-2xl p-6 shadow-soft border border-stone/10">
+          <div className="flex items-center justify-between mb-5">
+            <h2
+              className="text-xl font-medium text-ink"
+              style={{ fontFamily: "'Shippori Mincho', serif" }}
+            >
+              Succès
+            </h2>
+            <button
+              type="button"
+              className="text-wasabi text-sm font-medium hover:text-jade transition-colors"
+              style={{ fontFamily: "'Shippori Mincho', serif" }}
+            >
+              Tout afficher
+            </button>
           </div>
           <div className="grid grid-cols-3 gap-4">
             {unlockedBadges.map((badge, index) => (
@@ -653,26 +680,52 @@ const ProfilePage: React.FC = () => {
         </div>
 
         {/* Bouton ajout manuel */}
-        <button className="w-full bg-white/95 border border-wasabi/30 text-wasabi py-4 rounded-xl font-medium hover:bg-wasabi/5 transition-colors shadow-soft">
+        <button
+          type="button"
+          className="w-full bg-white/80 backdrop-blur border border-wasabi/30 text-wasabi py-4 rounded-xl font-medium hover:bg-wasabi/10 transition-all duration-300 shadow-soft"
+          style={{ fontFamily: "'Shippori Mincho', serif" }}
+        >
           Ajouter une séance manuellement
         </button>
 
         {/* Calendrier */}
-        <div className="bg-gray-800 rounded-2xl p-6">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-bold text-ink">Calendrier</h2>
-            <button className="text-wasabi text-sm font-medium">Votre parcours</button>
+        <div className="bg-white/80 backdrop-blur rounded-2xl p-6 shadow-soft border border-stone/10">
+          <div className="flex items-center justify-between mb-5">
+            <h2
+              className="text-xl font-medium text-ink"
+              style={{ fontFamily: "'Shippori Mincho', serif" }}
+            >
+              Calendrier
+            </h2>
+            <button
+              type="button"
+              className="text-wasabi text-sm font-medium hover:text-jade transition-colors"
+              style={{ fontFamily: "'Shippori Mincho', serif" }}
+            >
+              Votre parcours
+            </button>
           </div>
 
           <div className="mb-4">
             <div className="flex items-center justify-between mb-4">
-              <button onClick={previousMonth} className="p-2 hover:bg-stone/5 rounded-lg transition-colors text-ink">
+              <button
+                type="button"
+                onClick={previousMonth}
+                className="p-2 hover:bg-wasabi/10 rounded-xl transition-all duration-300 text-ink"
+              >
                 <ChevronLeft size={20} />
               </button>
-              <h3 className="font-medium capitalize text-ink">
+              <h3
+                className="font-medium capitalize text-ink"
+                style={{ fontFamily: "'Shippori Mincho', serif" }}
+              >
                 {monthNames[currentMonth.getMonth()]} {currentMonth.getFullYear()}
               </h3>
-              <button onClick={nextMonth} className="p-2 hover:bg-stone/5 rounded-lg transition-colors text-ink">
+              <button
+                type="button"
+                onClick={nextMonth}
+                className="p-2 hover:bg-wasabi/10 rounded-xl transition-all duration-300 text-ink"
+              >
                 <ChevronRight size={20} />
               </button>
             </div>
@@ -693,7 +746,7 @@ const ProfilePage: React.FC = () => {
 
         {/* XP Bar */}
         {userProfile && (
-          <div className="bg-white/95 backdrop-blur-sm rounded-2xl p-6 shadow-soft border border-stone/10">
+          <div className="bg-white/80 backdrop-blur rounded-2xl p-6 shadow-soft border border-stone/10">
             <XPBar
               current={xpProgress.current}
               max={xpProgress.needed}
@@ -710,7 +763,8 @@ const ProfilePage: React.FC = () => {
           <button
             type="button"
             onClick={handleReviewOnboarding}
-            className="w-full bg-emerald-50 border border-emerald-200 text-emerald-600 py-4 rounded-xl hover:bg-emerald-100 transition-colors text-sm font-medium flex items-center justify-center"
+            className="w-full bg-wasabi/10 backdrop-blur border border-wasabi/30 text-wasabi py-4 rounded-xl hover:bg-wasabi/20 transition-all duration-300 text-sm font-medium flex items-center justify-center shadow-soft"
+            style={{ fontFamily: "'Shippori Mincho', serif" }}
           >
             <PlayCircle size={18} className="mr-2" />
             Revoir l'introduction
@@ -719,14 +773,18 @@ const ProfilePage: React.FC = () => {
           <button
             type="button"
             onClick={() => setShowLogoutModal(true)}
-            className="w-full bg-red-50 border border-red-200 text-red-600 py-4 rounded-xl hover:bg-red-100 transition-colors text-sm font-medium flex items-center justify-center"
+            className="w-full bg-white/80 backdrop-blur border border-stone/20 text-stone py-4 rounded-xl hover:bg-stone/5 transition-all duration-300 text-sm font-medium flex items-center justify-center shadow-soft"
+            style={{ fontFamily: "'Shippori Mincho', serif" }}
           >
             <LogOut size={18} className="mr-2" />
             Se déconnecter
           </button>
 
-          <div className="bg-orange-50/50 border border-orange-200/50 rounded-xl p-4">
-            <p className="text-xs text-stone mb-3 text-center">
+          <div className="bg-stone/5 backdrop-blur border border-stone/20 rounded-xl p-4">
+            <p
+              className="text-xs text-stone/70 mb-3 text-center"
+              style={{ fontFamily: "'Shippori Mincho', serif" }}
+            >
               Problème de synchronisation ou de chargement ?
             </p>
             <a
@@ -738,7 +796,8 @@ const ProfilePage: React.FC = () => {
                 sessionStorage.clear();
                 window.location.href = '/';
               }}
-              className="block w-full bg-orange-600 text-white py-3 rounded-lg hover:bg-orange-700 transition-colors text-sm font-medium text-center cursor-pointer"
+              className="block w-full bg-white/80 backdrop-blur border border-stone/30 text-stone py-3 rounded-xl hover:bg-stone/10 transition-all duration-300 text-sm font-medium text-center cursor-pointer shadow-soft"
+              style={{ fontFamily: "'Shippori Mincho', serif" }}
             >
               Déconnexion forcée
             </a>
@@ -754,13 +813,19 @@ const ProfilePage: React.FC = () => {
           <div className="bg-white rounded-t-3xl sm:rounded-2xl shadow-2xl w-full sm:max-w-md mx-0 sm:mx-2 max-h-[90vh] overflow-y-auto">
             <div className="p-6">
               <div className="flex items-center justify-between mb-6">
-                <h2 className="text-xl font-bold text-ink">Modifier mon profil</h2>
+                <h2
+                  className="text-xl font-bold text-ink"
+                  style={{ fontFamily: "'Shippori Mincho', serif" }}
+                >
+                  Modifier mon profil
+                </h2>
                 <button
+                  type="button"
                   onClick={() => {
                     setEditing(false);
                     setPhotoError('');
                   }}
-                  className="w-10 h-10 rounded-full bg-stone/10 flex items-center justify-center text-stone hover:text-vermilion transition-colors"
+                  className="w-10 h-10 rounded-full bg-stone/10 flex items-center justify-center text-stone hover:text-vermilion transition-all duration-300"
                 >
                   <X size={20} />
                 </button>
@@ -768,7 +833,12 @@ const ProfilePage: React.FC = () => {
 
               <div className="space-y-6">
                 <div className="text-center">
-                  <label className="block text-sm font-medium text-ink mb-3">Photo de profil</label>
+                  <label
+                    className="block text-sm font-medium text-ink mb-3"
+                    style={{ fontFamily: "'Shippori Mincho', serif" }}
+                  >
+                    Photo de profil
+                  </label>
 
                   <div className="relative w-24 h-24 mx-auto mb-4">
                     {editForm.photo_url ? (
@@ -878,26 +948,40 @@ const ProfilePage: React.FC = () => {
 
       {/* Modal de déconnexion */}
       {showLogoutModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl p-6 max-w-sm w-full">
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl p-6 max-w-sm w-full shadow-2xl border border-stone/10">
             <div className="text-center mb-6">
-              <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <LogOut className="w-8 h-8 text-red-600" />
+              <div className="w-16 h-16 bg-stone/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                <LogOut className="w-8 h-8 text-stone" />
               </div>
-              <h3 className="text-xl font-bold text-ink mb-2">Déconnexion</h3>
-              <p className="text-stone">Es-tu sûr(e) de vouloir te déconnecter ?</p>
+              <h3
+                className="text-xl font-bold text-ink mb-2"
+                style={{ fontFamily: "'Shippori Mincho', serif" }}
+              >
+                Déconnexion
+              </h3>
+              <p
+                className="text-stone/70"
+                style={{ fontFamily: "'Shippori Mincho', serif" }}
+              >
+                Es-tu sûr(e) de vouloir te déconnecter ?
+              </p>
             </div>
 
             <div className="flex gap-3">
               <button
+                type="button"
                 onClick={() => setShowLogoutModal(false)}
-                className="flex-1 px-4 py-3 border border-stone/30 text-stone rounded-xl hover:bg-stone/5 transition-colors font-medium"
+                className="flex-1 px-4 py-3 border border-stone/30 text-stone rounded-xl hover:bg-stone/5 transition-all duration-300 font-medium shadow-soft"
+                style={{ fontFamily: "'Shippori Mincho', serif" }}
               >
                 Annuler
               </button>
               <button
+                type="button"
                 onClick={handleSignOut}
-                className="flex-1 px-4 py-3 bg-red-600 text-white rounded-xl hover:bg-red-700 transition-colors font-medium"
+                className="flex-1 px-4 py-3 bg-wasabi text-white rounded-xl hover:bg-jade transition-all duration-300 font-medium shadow-soft"
+                style={{ fontFamily: "'Shippori Mincho', serif" }}
               >
                 Se déconnecter
               </button>
