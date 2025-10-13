@@ -6,6 +6,7 @@ import ProtectedRoute from './components/ProtectedRoute';
 import OnboardingGuard from './components/OnboardingGuard';
 import GlobalAudioController from './components/GlobalAudioController';
 import MiniPlayer from './components/MiniPlayer';
+import ConnectivityIndicator from './components/ConnectivityIndicator';
 import { migrateLocalStorageToSupabase } from './utils/migrateLocalStorage';
 import { supabase } from './lib/supabase';
 import { useAuthStore } from './stores/authStore';
@@ -75,6 +76,7 @@ function App() {
     <Router>
       <ScrollToTop />
       <GlobalAudioController />
+      <ConnectivityIndicator />
       <OnboardingGuard>
         <MobileLayout>
           <Routes>
