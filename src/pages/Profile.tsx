@@ -429,10 +429,10 @@ const ProfilePage: React.FC = () => {
           key={day}
           className={`aspect-square flex items-center justify-center text-sm rounded-lg transition-colors ${
             isToday
-              ? 'bg-emerald-500 text-white font-bold'
+              ? 'bg-wasabi text-white font-bold'
               : hasActivity
-              ? 'bg-emerald-100 text-emerald-700 font-medium'
-              : 'text-gray-400'
+              ? 'bg-wasabi/20 text-wasabi font-medium'
+              : 'text-stone/40'
           }`}
         >
           {day}
@@ -461,12 +461,12 @@ const ProfilePage: React.FC = () => {
 
   if (!user) {
     return (
-      <div className="min-h-screen bg-gray-900 p-4 pb-24 flex items-center justify-center">
+      <div className="min-h-screen bg-sand p-4 pb-24 flex items-center justify-center">
         <div className="text-center">
-          <p className="text-gray-400 mb-4">Vous devez être connecté pour accéder à votre profil</p>
+          <p className="text-stone mb-4">Vous devez être connecté pour accéder à votre profil</p>
           <a
             href="/"
-            className="px-6 py-3 bg-emerald-600 text-white rounded-xl hover:bg-emerald-700 transition-colors duration-300 inline-block"
+            className="px-6 py-3 bg-wasabi text-white rounded-xl hover:bg-wasabi/90 transition-colors duration-300 inline-block"
           >
             Retour à l'accueil
           </a>
@@ -477,10 +477,10 @@ const ProfilePage: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-900 p-4 pb-24 flex items-center justify-center">
+      <div className="min-h-screen bg-sand p-4 pb-24 flex items-center justify-center">
         <div className="text-center">
-          <div className="w-8 h-8 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-gray-400 mb-4">Chargement du profil...</p>
+          <div className="w-8 h-8 border-2 border-wasabi border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-stone mb-4">Chargement du profil...</p>
         </div>
       </div>
     );
@@ -488,15 +488,15 @@ const ProfilePage: React.FC = () => {
 
   if (!profile) {
     return (
-      <div className="min-h-screen bg-gray-900 p-4 pb-24 flex items-center justify-center">
+      <div className="min-h-screen bg-sand p-4 pb-24 flex items-center justify-center">
         <div className="text-center">
-          <p className="text-gray-400 mb-2">Erreur lors du chargement du profil</p>
+          <p className="text-stone mb-2">Erreur lors du chargement du profil</p>
           <button
             onClick={() => {
               setLoading(true);
               loadProfile();
             }}
-            className="px-4 py-2 bg-emerald-600 text-white rounded-xl hover:bg-emerald-700 transition-colors duration-300"
+            className="px-4 py-2 bg-wasabi text-white rounded-xl hover:bg-wasabi/90 transition-colors duration-300"
           >
             Réessayer
           </button>
@@ -508,9 +508,9 @@ const ProfilePage: React.FC = () => {
   const subscriptionStatus = getSubscriptionStatus();
 
   return (
-    <div className="min-h-screen bg-gray-900 text-white pb-24">
+    <div className="min-h-screen bg-sand pb-24">
       {/* Header avec nom et édition */}
-      <div className="bg-gray-800 p-6">
+      <div className="bg-gradient-to-br from-wasabi/10 via-jade/5 to-wasabi/5 p-6">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-3">
             <div className="relative w-16 h-16">
@@ -527,13 +527,13 @@ const ProfilePage: React.FC = () => {
               )}
             </div>
             <div>
-              <h1 className="text-xl font-bold text-white">{profile.display_name}</h1>
-              <p className="text-sm text-gray-400">Membre depuis {getJoinDate()}</p>
+              <h1 className="text-xl font-bold text-ink">{profile.display_name}</h1>
+              <p className="text-sm text-stone">Membre depuis {getJoinDate()}</p>
             </div>
           </div>
           <button
             onClick={() => setEditing(true)}
-            className="bg-gray-700 p-2 rounded-lg hover:bg-gray-600 transition-colors"
+            className="bg-white/80 p-2 rounded-lg hover:bg-white transition-colors text-ink"
           >
             <Edit3 size={20} />
           </button>
@@ -542,40 +542,40 @@ const ProfilePage: React.FC = () => {
 
       <div className="p-4 space-y-4">
         {/* Carte Série (Streak) */}
-        <div className="bg-gray-800 rounded-2xl p-6">
+        <div className="bg-white/95 backdrop-blur-sm rounded-2xl p-6 shadow-soft border border-stone/10">
           <div className="flex items-center gap-2 mb-4">
-            <div className="w-10 h-10 bg-emerald-500/20 rounded-full flex items-center justify-center">
-              <Flame className="w-5 h-5 text-emerald-400" />
+            <div className="w-10 h-10 bg-sunset/10 rounded-full flex items-center justify-center">
+              <Flame className="w-5 h-5 text-sunset" />
             </div>
-            <h2 className="text-lg font-bold">Série</h2>
+            <h2 className="text-lg font-bold text-ink">Série</h2>
           </div>
           <div className="flex items-baseline gap-2">
-            <span className="text-5xl font-bold">{stats.currentStreak}</span>
-            <span className="text-gray-400">Jour{stats.currentStreak > 1 ? 's' : ''}</span>
+            <span className="text-5xl font-bold text-ink">{stats.currentStreak}</span>
+            <span className="text-stone">Jour{stats.currentStreak > 1 ? 's' : ''}</span>
           </div>
         </div>
 
         {/* Temps total et Sessions */}
         <div className="grid grid-cols-2 gap-3">
-          <div className="bg-gray-800 rounded-2xl p-5">
+          <div className="bg-white/95 backdrop-blur-sm rounded-2xl p-5 shadow-soft border border-stone/10">
             <div className="flex items-center gap-2 mb-3">
-              <Clock className="w-5 h-5 text-emerald-400" />
-              <h3 className="text-sm font-medium text-gray-300">Temps total</h3>
+              <Clock className="w-5 h-5 text-wasabi" />
+              <h3 className="text-sm font-medium text-stone">Temps total</h3>
             </div>
             <div className="flex items-baseline gap-1">
-              <span className="text-3xl font-bold">{stats.totalMeditationMinutes}</span>
-              <span className="text-gray-400 text-sm">min</span>
+              <span className="text-3xl font-bold text-ink">{stats.totalMeditationMinutes}</span>
+              <span className="text-stone text-sm">min</span>
             </div>
           </div>
 
-          <div className="bg-gray-800 rounded-2xl p-5">
+          <div className="bg-white/95 backdrop-blur-sm rounded-2xl p-5 shadow-soft border border-stone/10">
             <div className="flex items-center gap-2 mb-3">
-              <Target className="w-5 h-5 text-emerald-400" />
-              <h3 className="text-sm font-medium text-gray-300">Sessions</h3>
+              <Target className="w-5 h-5 text-jade" />
+              <h3 className="text-sm font-medium text-stone">Sessions</h3>
             </div>
             <div className="flex items-baseline gap-1">
-              <span className="text-3xl font-bold">{stats.totalSessions}</span>
-              <span className="text-gray-400 text-sm">Session{stats.totalSessions > 1 ? 's' : ''}</span>
+              <span className="text-3xl font-bold text-ink">{stats.totalSessions}</span>
+              <span className="text-stone text-sm">Session{stats.totalSessions > 1 ? 's' : ''}</span>
             </div>
           </div>
         </div>
@@ -583,51 +583,51 @@ const ProfilePage: React.FC = () => {
         {/* Succès */}
         <div className="bg-gray-800 rounded-2xl p-6">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-bold">Succès</h2>
-            <button className="text-emerald-400 text-sm font-medium">Tout afficher</button>
+            <h2 className="text-lg font-bold text-ink">Succès</h2>
+            <button className="text-wasabi text-sm font-medium">Tout afficher</button>
           </div>
           <div className="grid grid-cols-3 gap-4">
             {unlockedBadges.map((badge, index) => (
               <div key={index} className="text-center">
                 <div className={`w-20 h-20 mx-auto rounded-full flex items-center justify-center text-4xl mb-2 ${
-                  badge.unlocked ? 'bg-gray-700' : 'bg-gray-700/30 grayscale opacity-50'
+                  badge.unlocked ? 'bg-gradient-to-br from-wasabi/10 to-jade/10' : 'bg-stone/5 grayscale opacity-40'
                 }`}>
                   {badge.icon}
                 </div>
-                <p className="text-xs text-gray-400 leading-tight">{badge.title}</p>
+                <p className="text-xs text-stone leading-tight">{badge.title}</p>
               </div>
             ))}
           </div>
         </div>
 
         {/* Bouton ajout manuel */}
-        <button className="w-full bg-transparent border border-emerald-500 text-emerald-400 py-4 rounded-xl font-medium hover:bg-emerald-500/10 transition-colors">
+        <button className="w-full bg-white/95 border border-wasabi/30 text-wasabi py-4 rounded-xl font-medium hover:bg-wasabi/5 transition-colors shadow-soft">
           Ajouter une séance manuellement
         </button>
 
         {/* Calendrier */}
         <div className="bg-gray-800 rounded-2xl p-6">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-bold">Calendrier</h2>
-            <button className="text-emerald-400 text-sm font-medium">Votre parcours</button>
+            <h2 className="text-lg font-bold text-ink">Calendrier</h2>
+            <button className="text-wasabi text-sm font-medium">Votre parcours</button>
           </div>
 
           <div className="mb-4">
             <div className="flex items-center justify-between mb-4">
-              <button onClick={previousMonth} className="p-2 hover:bg-gray-700 rounded-lg transition-colors">
+              <button onClick={previousMonth} className="p-2 hover:bg-stone/5 rounded-lg transition-colors text-ink">
                 <ChevronLeft size={20} />
               </button>
-              <h3 className="font-medium capitalize">
+              <h3 className="font-medium capitalize text-ink">
                 {monthNames[currentMonth.getMonth()]} {currentMonth.getFullYear()}
               </h3>
-              <button onClick={nextMonth} className="p-2 hover:bg-gray-700 rounded-lg transition-colors">
+              <button onClick={nextMonth} className="p-2 hover:bg-stone/5 rounded-lg transition-colors text-ink">
                 <ChevronRight size={20} />
               </button>
             </div>
 
             <div className="grid grid-cols-7 gap-2 mb-2">
               {dayNames.map(day => (
-                <div key={day} className="text-center text-xs text-gray-500 font-medium">
+                <div key={day} className="text-center text-xs text-stone/60 font-medium">
                   {day}
                 </div>
               ))}
@@ -657,7 +657,7 @@ const ProfilePage: React.FC = () => {
         <div className="space-y-3">
           <button
             onClick={handleReviewOnboarding}
-            className="w-full bg-emerald-600/20 border border-emerald-500 text-emerald-400 py-4 rounded-xl hover:bg-emerald-600/30 transition-colors text-sm font-medium flex items-center justify-center"
+            className="w-full bg-emerald-50 border border-emerald-200 text-emerald-600 py-4 rounded-xl hover:bg-emerald-100 transition-colors text-sm font-medium flex items-center justify-center"
           >
             <PlayCircle size={18} className="mr-2" />
             Revoir l'introduction
@@ -665,7 +665,7 @@ const ProfilePage: React.FC = () => {
 
           <button
             onClick={() => setShowLogoutModal(true)}
-            className="w-full bg-red-600/20 border border-red-500 text-red-400 py-4 rounded-xl hover:bg-red-600/30 transition-colors text-sm font-medium flex items-center justify-center"
+            className="w-full bg-red-50 border border-red-200 text-red-600 py-4 rounded-xl hover:bg-red-100 transition-colors text-sm font-medium flex items-center justify-center"
           >
             <LogOut size={18} className="mr-2" />
             Se déconnecter
@@ -678,16 +678,16 @@ const ProfilePage: React.FC = () => {
       {/* Modal d'édition (identique à l'original) */}
       {editing && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4 z-50">
-          <div className="bg-gray-800 rounded-t-3xl sm:rounded-2xl shadow-2xl w-full sm:max-w-md mx-0 sm:mx-2 max-h-[90vh] overflow-y-auto">
+          <div className="bg-white rounded-t-3xl sm:rounded-2xl shadow-2xl w-full sm:max-w-md mx-0 sm:mx-2 max-h-[90vh] overflow-y-auto">
             <div className="p-6">
               <div className="flex items-center justify-between mb-6">
-                <h2 className="text-xl font-bold">Modifier mon profil</h2>
+                <h2 className="text-xl font-bold text-ink">Modifier mon profil</h2>
                 <button
                   onClick={() => {
                     setEditing(false);
                     setPhotoError('');
                   }}
-                  className="w-10 h-10 rounded-full bg-gray-700 flex items-center justify-center hover:bg-gray-600 transition-colors"
+                  className="w-10 h-10 rounded-full bg-stone/10 flex items-center justify-center text-stone hover:text-vermilion transition-colors"
                 >
                   <X size={20} />
                 </button>
@@ -695,22 +695,22 @@ const ProfilePage: React.FC = () => {
 
               <div className="space-y-6">
                 <div className="text-center">
-                  <label className="block text-sm font-medium mb-3">Photo de profil</label>
+                  <label className="block text-sm font-medium text-ink mb-3">Photo de profil</label>
 
                   <div className="relative w-24 h-24 mx-auto mb-4">
                     {editForm.photo_url ? (
                       <img
                         src={editForm.photo_url}
                         alt="Photo"
-                        className="w-full h-full rounded-full object-cover border-4 border-emerald-500/20"
+                        className="w-full h-full rounded-full object-cover border-4 border-wasabi/20"
                       />
                     ) : (
-                      <div className="w-full h-full bg-gradient-to-br from-emerald-600/20 to-teal-600/20 rounded-full flex items-center justify-center border-4 border-emerald-500/20">
-                        <User size={32} className="text-emerald-400" />
+                      <div className="w-full h-full bg-gradient-to-br from-wasabi/20 to-jade/20 rounded-full flex items-center justify-center border-4 border-wasabi/20">
+                        <User size={32} className="text-wasabi" />
                       </div>
                     )}
 
-                    <label className="absolute -bottom-1 -right-1 w-8 h-8 bg-emerald-600 text-white rounded-full flex items-center justify-center shadow-lg cursor-pointer hover:bg-emerald-700 transition-colors">
+                    <label className="absolute -bottom-1 -right-1 w-8 h-8 bg-wasabi text-white rounded-full flex items-center justify-center shadow-lg cursor-pointer hover:bg-wasabi/90 transition-colors">
                       <input
                         type="file"
                         accept="image/*"
@@ -729,14 +729,14 @@ const ProfilePage: React.FC = () => {
                   {editForm.photo_url && (
                     <button
                       onClick={handleRemovePhoto}
-                      className="text-red-400 hover:text-red-300 text-sm transition-colors"
+                      className="text-red-600 hover:text-red-700 text-sm transition-colors"
                     >
                       Supprimer la photo
                     </button>
                   )}
 
                   {photoError && (
-                    <div className="flex items-center justify-center text-red-400 text-sm mt-2">
+                    <div className="flex items-center justify-center text-red-600 text-sm mt-2">
                       <AlertCircle size={16} className="mr-2" />
                       {photoError}
                     </div>
@@ -744,29 +744,29 @@ const ProfilePage: React.FC = () => {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium mb-2">Nom d'affichage</label>
+                  <label className="block text-sm font-medium text-ink mb-2">Nom d'affichage</label>
                   <input
                     type="text"
                     value={editForm.display_name}
                     onChange={(e) => setEditForm({ ...editForm, display_name: e.target.value })}
                     placeholder="Ton nom"
-                    className="w-full px-4 py-4 bg-gray-700 border border-gray-600 rounded-xl focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition-all text-base"
+                    className="w-full px-4 py-4 bg-stone/5 border border-stone/20 rounded-xl focus:border-wasabi focus:ring-2 focus:ring-wasabi/20 transition-all text-base"
                     maxLength={50}
                   />
-                  <div className="text-xs text-gray-500 mt-1 text-right">{editForm.display_name.length}/50</div>
+                  <div className="text-xs text-stone mt-1 text-right">{editForm.display_name.length}/50</div>
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium mb-2">Bio</label>
+                  <label className="block text-sm font-medium text-ink mb-2">Bio</label>
                   <textarea
                     value={editForm.bio}
                     onChange={(e) => setEditForm({ ...editForm, bio: e.target.value })}
                     placeholder="Parle-nous de toi..."
                     rows={4}
-                    className="w-full px-4 py-4 bg-gray-700 border border-gray-600 rounded-xl focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition-all resize-none text-base"
+                    className="w-full px-4 py-4 bg-stone/5 border border-stone/20 rounded-xl focus:border-wasabi focus:ring-2 focus:ring-wasabi/20 transition-all resize-none text-base"
                     maxLength={200}
                   />
-                  <div className="text-xs text-gray-500 mt-1 text-right">{editForm.bio.length}/200</div>
+                  <div className="text-xs text-stone mt-1 text-right">{editForm.bio.length}/200</div>
                 </div>
 
                 <div className="flex gap-3 pt-4">
@@ -775,14 +775,14 @@ const ProfilePage: React.FC = () => {
                       setEditing(false);
                       setPhotoError('');
                     }}
-                    className="flex-1 px-4 py-4 border border-gray-600 text-gray-300 rounded-xl hover:bg-gray-700 transition-colors font-medium"
+                    className="flex-1 px-4 py-4 border border-stone/20 text-stone rounded-xl hover:bg-stone/5 transition-colors font-medium"
                   >
                     Annuler
                   </button>
                   <button
                     onClick={handleSave}
                     disabled={saving || uploadingPhoto}
-                    className="flex-1 px-4 py-4 bg-emerald-600 text-white rounded-xl hover:bg-emerald-700 transition-colors flex items-center justify-center disabled:opacity-50 font-medium"
+                    className="flex-1 px-4 py-4 bg-wasabi text-white rounded-xl hover:bg-wasabi/90 transition-colors flex items-center justify-center disabled:opacity-50 font-medium"
                   >
                     {saving ? (
                       <>
@@ -806,19 +806,19 @@ const ProfilePage: React.FC = () => {
       {/* Modal de déconnexion */}
       {showLogoutModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-gray-800 rounded-2xl p-6 max-w-sm w-full">
+          <div className="bg-white rounded-2xl p-6 max-w-sm w-full">
             <div className="text-center mb-6">
-              <div className="w-16 h-16 bg-red-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
-                <LogOut className="w-8 h-8 text-red-400" />
+              <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <LogOut className="w-8 h-8 text-red-600" />
               </div>
-              <h3 className="text-xl font-bold mb-2">Déconnexion</h3>
-              <p className="text-gray-400">Es-tu sûr(e) de vouloir te déconnecter ?</p>
+              <h3 className="text-xl font-bold text-ink mb-2">Déconnexion</h3>
+              <p className="text-stone">Es-tu sûr(e) de vouloir te déconnecter ?</p>
             </div>
 
             <div className="flex gap-3">
               <button
                 onClick={() => setShowLogoutModal(false)}
-                className="flex-1 px-4 py-3 border border-gray-600 text-gray-300 rounded-xl hover:bg-gray-700 transition-colors font-medium"
+                className="flex-1 px-4 py-3 border border-stone/30 text-stone rounded-xl hover:bg-stone/5 transition-colors font-medium"
               >
                 Annuler
               </button>
