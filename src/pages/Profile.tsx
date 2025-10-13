@@ -29,6 +29,8 @@ const ProfilePage: React.FC = () => {
   const [uploadingPhoto, setUploadingPhoto] = useState(false);
   const [photoError, setPhotoError] = useState('');
   const [showLogoutModal, setShowLogoutModal] = useState(false);
+  const [showAllAchievements, setShowAllAchievements] = useState(false);
+  const [showJourneyModal, setShowJourneyModal] = useState(false);
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [stats, setStats] = useState({
     checkins: 0,
@@ -55,13 +57,19 @@ const ProfilePage: React.FC = () => {
     { value: 'N4', label: 'N4 - Service', description: 'Accompagnement et transmission' }
   ];
 
-  const achievementBadges = [
-    { days: 3, title: '3 jours - Éveilleur en m...', icon: '🌅', unlocked: false },
-    { days: 7, title: '7 jours - Porteur d\'intention', icon: '🌱', unlocked: false },
-    { days: 10, title: '10 jours - Artisan du sou...', icon: '🌺', unlocked: false },
-    { days: 30, title: '30 jours - Maître du calme', icon: '🌳', unlocked: false },
-    { days: 50, title: '50 jours - Voyageur pais...', icon: '🪷', unlocked: false },
-    { days: 100, title: '100 jours - Artisan de lu...', icon: '💖', unlocked: false },
+  const allAchievements = [
+    { days: 1, title: '1er jour - Éveil', fullTitle: 'Premier pas vers la conscience', icon: '🌅', description: 'Vous avez commencé votre voyage', unlocked: false },
+    { days: 3, title: '3 jours - Constance', fullTitle: 'L\'art de la régularité', icon: '🌱', description: 'Trois jours de pratique consécutifs', unlocked: false },
+    { days: 7, title: '7 jours - Ancrage', fullTitle: 'Porteur d\'intention', icon: '🌺', description: 'Une semaine de présence à soi', unlocked: false },
+    { days: 14, title: '14 jours - Rituel', fullTitle: 'Le rythme s\'installe', icon: '🌸', description: 'Deux semaines de pratique', unlocked: false },
+    { days: 21, title: '21 jours - Habitude', fullTitle: 'L\'intégration profonde', icon: '🌻', description: 'Le nouveau devient naturel', unlocked: false },
+    { days: 30, title: '30 jours - Maîtrise', fullTitle: 'Maître du calme', icon: '🌳', description: 'Un mois d\'engagement', unlocked: false },
+    { days: 50, title: '50 jours - Sagesse', fullTitle: 'Voyageur paisible', icon: '🪷', description: 'La sérénité s\'ancre', unlocked: false },
+    { days: 75, title: '75 jours - Rayonnement', fullTitle: 'Source de lumière', icon: '✨', description: 'Votre pratique inspire', unlocked: false },
+    { days: 100, title: '100 jours - Transformation', fullTitle: 'Artisan de lumière', icon: '💖', description: 'Vous êtes devenu la pratique', unlocked: false },
+    { days: 150, title: '150 jours - Maître', fullTitle: 'Gardien de l\'équilibre', icon: '🔮', description: 'La présence est votre nature', unlocked: false },
+    { days: 200, title: '200 jours - Légende', fullTitle: 'Être de conscience', icon: '🌟', description: 'Vous incarnez la paix', unlocked: false },
+    { days: 365, title: '365 jours - Illumination', fullTitle: 'Une année de pratique', icon: '🌈', description: 'Vous avez complété le cycle', unlocked: false },
   ];
 
   useEffect(() => {
@@ -454,10 +462,12 @@ const ProfilePage: React.FC = () => {
   const monthNames = ['janvier', 'février', 'mars', 'avril', 'mai', 'juin', 'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre'];
   const dayNames = ['dim.', 'lun.', 'mar.', 'mer.', 'jeu.', 'ven.', 'sam.'];
 
-  const unlockedBadges = achievementBadges.map(badge => ({
+  const unlockedBadges = allAchievements.map(badge => ({
     ...badge,
     unlocked: stats.currentStreak >= badge.days
   }));
+
+  const displayedBadges = unlockedBadges.slice(0, 6);
 
   if (!user) {
     return (
@@ -659,6 +669,7 @@ const ProfilePage: React.FC = () => {
             </h2>
             <button
               type="button"
+              onClick={() => setShowAllAchievements(true)}
               className="text-wasabi text-sm font-medium hover:text-jade transition-colors"
               style={{ fontFamily: "'Shippori Mincho', serif" }}
             >
@@ -666,7 +677,7 @@ const ProfilePage: React.FC = () => {
             </button>
           </div>
           <div className="grid grid-cols-3 gap-4">
-            {unlockedBadges.map((badge, index) => (
+            {displayedBadges.map((badge, index) => (
               <div key={index} className="text-center">
                 <div className={`w-20 h-20 mx-auto rounded-full flex items-center justify-center text-4xl mb-2 ${
                   badge.unlocked ? 'bg-gradient-to-br from-wasabi/10 to-jade/10' : 'bg-stone/5 grayscale opacity-40'
@@ -699,6 +710,7 @@ const ProfilePage: React.FC = () => {
             </h2>
             <button
               type="button"
+              onClick={() => setShowJourneyModal(true)}
               className="text-wasabi text-sm font-medium hover:text-jade transition-colors"
               style={{ fontFamily: "'Shippori Mincho', serif" }}
             >
@@ -985,6 +997,348 @@ const ProfilePage: React.FC = () => {
               >
                 Se déconnecter
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal Tous les Succès */}
+      {showAllAchievements && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4 z-50 animate-in fade-in duration-300">
+          <div className="bg-gradient-to-b from-sand via-white to-sand rounded-t-3xl sm:rounded-2xl shadow-2xl w-full sm:max-w-2xl mx-0 sm:mx-2 max-h-[85vh] overflow-hidden animate-in slide-in-from-bottom duration-300">
+            <div className="sticky top-0 bg-gradient-to-r from-wasabi to-jade text-white p-6 z-10">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2
+                    className="text-2xl font-bold mb-1"
+                    style={{ fontFamily: "'Shippori Mincho', serif" }}
+                  >
+                    Tous les Succès
+                  </h2>
+                  <p className="text-white/90 text-sm">
+                    {unlockedBadges.filter(b => b.unlocked).length} / {unlockedBadges.length} débloqués
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setShowAllAchievements(false)}
+                  className="w-10 h-10 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center transition-all duration-300"
+                >
+                  <X size={20} />
+                </button>
+              </div>
+            </div>
+
+            <div className="overflow-y-auto max-h-[calc(85vh-120px)] p-6 space-y-4">
+              {unlockedBadges.map((badge, index) => (
+                <div
+                  key={index}
+                  className={`relative overflow-hidden rounded-2xl border-2 transition-all duration-500 ${
+                    badge.unlocked
+                      ? 'bg-gradient-to-br from-wasabi/10 via-white to-jade/10 border-wasabi/30 shadow-lg'
+                      : 'bg-stone/5 border-stone/20 opacity-60'
+                  }`}
+                  style={{
+                    animation: `fadeInUp 0.5s ease-out ${index * 0.05}s both`
+                  }}
+                >
+                  {badge.unlocked && (
+                    <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-wasabi/20 to-jade/20 rounded-full blur-3xl animate-pulse" />
+                  )}
+
+                  <div className="relative p-5 flex items-center gap-4">
+                    <div
+                      className={`flex-shrink-0 w-16 h-16 rounded-2xl flex items-center justify-center text-3xl transition-all duration-300 ${
+                        badge.unlocked
+                          ? 'bg-gradient-to-br from-wasabi to-jade shadow-lg scale-100'
+                          : 'bg-stone/10 grayscale scale-90'
+                      }`}
+                    >
+                      {badge.icon}
+                    </div>
+
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-1">
+                        <h3
+                          className={`font-bold text-lg ${
+                            badge.unlocked ? 'text-ink' : 'text-stone/60'
+                          }`}
+                          style={{ fontFamily: "'Shippori Mincho', serif" }}
+                        >
+                          {badge.fullTitle || badge.title}
+                        </h3>
+                        {badge.unlocked && (
+                          <div className="flex-shrink-0 w-6 h-6 rounded-full bg-jade flex items-center justify-center animate-bounce-subtle">
+                            <Check size={14} className="text-white" />
+                          </div>
+                        )}
+                      </div>
+
+                      <p
+                        className={`text-sm mb-2 ${
+                          badge.unlocked ? 'text-stone' : 'text-stone/50'
+                        }`}
+                      >
+                        {badge.description}
+                      </p>
+
+                      <div className="flex items-center gap-2">
+                        <div className="flex-1 h-2 bg-stone/10 rounded-full overflow-hidden">
+                          <div
+                            className={`h-full transition-all duration-1000 ease-out ${
+                              badge.unlocked
+                                ? 'bg-gradient-to-r from-wasabi to-jade'
+                                : 'bg-stone/30'
+                            }`}
+                            style={{
+                              width: badge.unlocked
+                                ? '100%'
+                                : `${Math.min((stats.currentStreak / badge.days) * 100, 100)}%`
+                            }}
+                          />
+                        </div>
+                        <span
+                          className={`text-xs font-medium ${
+                            badge.unlocked ? 'text-jade' : 'text-stone/60'
+                          }`}
+                        >
+                          {badge.unlocked
+                            ? `${badge.days} jours`
+                            : `${stats.currentStreak}/${badge.days}`}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {badge.unlocked && (
+                    <div className="absolute inset-0 pointer-events-none">
+                      <div className="absolute top-2 right-2 w-2 h-2 bg-jade rounded-full animate-ping opacity-75" />
+                      <div className="absolute top-2 right-2 w-2 h-2 bg-jade rounded-full" />
+                    </div>
+                  )}
+                </div>
+              ))}
+
+              {stats.currentStreak === 0 && (
+                <div className="text-center py-8">
+                  <div className="w-20 h-20 mx-auto mb-4 bg-gradient-to-br from-wasabi/20 to-jade/20 rounded-full flex items-center justify-center">
+                    <Target size={32} className="text-wasabi" />
+                  </div>
+                  <p
+                    className="text-stone text-lg mb-2"
+                    style={{ fontFamily: "'Shippori Mincho', serif" }}
+                  >
+                    Votre voyage commence maintenant
+                  </p>
+                  <p className="text-stone/70 text-sm">
+                    Complétez une activité pour débloquer votre premier succès
+                  </p>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal Votre Parcours */}
+      {showJourneyModal && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4 z-50 animate-in fade-in duration-300">
+          <div className="bg-gradient-to-b from-sand via-white to-sand rounded-t-3xl sm:rounded-2xl shadow-2xl w-full sm:max-w-2xl mx-0 sm:mx-2 max-h-[85vh] overflow-hidden animate-in slide-in-from-bottom duration-300">
+            <div className="sticky top-0 bg-gradient-to-r from-jade to-wasabi text-white p-6 z-10">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2
+                    className="text-2xl font-bold mb-1"
+                    style={{ fontFamily: "'Shippori Mincho', serif" }}
+                  >
+                    Votre Parcours
+                  </h2>
+                  <p className="text-white/90 text-sm">
+                    {stats.currentStreak} jours de pratique
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setShowJourneyModal(false)}
+                  className="w-10 h-10 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center transition-all duration-300"
+                >
+                  <X size={20} />
+                </button>
+              </div>
+            </div>
+
+            <div className="overflow-y-auto max-h-[calc(85vh-120px)] p-6">
+              {/* Timeline visuelle */}
+              <div className="relative">
+                {/* Ligne verticale centrale */}
+                <div className="absolute left-8 top-0 bottom-0 w-0.5 bg-gradient-to-b from-wasabi via-jade to-stone/20" />
+
+                {/* Statistiques en timeline */}
+                <div className="space-y-6">
+                  {/* Check-ins */}
+                  <div className="relative pl-20 animate-in slide-in-from-left duration-500">
+                    <div className="absolute left-4 w-8 h-8 bg-gradient-to-br from-wasabi to-jade rounded-full flex items-center justify-center shadow-lg border-4 border-white z-10">
+                      <Heart size={16} className="text-white" />
+                    </div>
+                    <div className="bg-white rounded-2xl p-5 shadow-soft border border-stone/10">
+                      <div className="flex items-center justify-between mb-2">
+                        <h3
+                          className="font-bold text-ink"
+                          style={{ fontFamily: "'Shippori Mincho', serif" }}
+                        >
+                          Check-ins émotionnels
+                        </h3>
+                        <span className="text-2xl font-bold text-wasabi">{stats.checkins}</span>
+                      </div>
+                      <p className="text-sm text-stone">
+                        Moments de connexion avec vos émotions
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Méditations */}
+                  <div className="relative pl-20 animate-in slide-in-from-left duration-500 delay-100">
+                    <div className="absolute left-4 w-8 h-8 bg-gradient-to-br from-jade to-wasabi rounded-full flex items-center justify-center shadow-lg border-4 border-white z-10">
+                      <Timer size={16} className="text-white" />
+                    </div>
+                    <div className="bg-white rounded-2xl p-5 shadow-soft border border-stone/10">
+                      <div className="flex items-center justify-between mb-2">
+                        <h3
+                          className="font-bold text-ink"
+                          style={{ fontFamily: "'Shippori Mincho', serif" }}
+                        >
+                          Temps de méditation
+                        </h3>
+                        <span className="text-2xl font-bold text-jade">{stats.totalMeditationMinutes}min</span>
+                      </div>
+                      <p className="text-sm text-stone">
+                        {stats.totalSessions} séances de pratique guidée
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Écrits */}
+                  <div className="relative pl-20 animate-in slide-in-from-left duration-500 delay-200">
+                    <div className="absolute left-4 w-8 h-8 bg-gradient-to-br from-wasabi to-jade rounded-full flex items-center justify-center shadow-lg border-4 border-white z-10">
+                      <BookOpen size={16} className="text-white" />
+                    </div>
+                    <div className="bg-white rounded-2xl p-5 shadow-soft border border-stone/10">
+                      <div className="flex items-center justify-between mb-2">
+                        <h3
+                          className="font-bold text-ink"
+                          style={{ fontFamily: "'Shippori Mincho', serif" }}
+                        >
+                          Écrits & Rêves
+                        </h3>
+                        <span className="text-2xl font-bold text-wasabi">{stats.journals + stats.dreams}</span>
+                      </div>
+                      <p className="text-sm text-stone">
+                        {stats.journals} écrits · {stats.dreams} rêves partagés
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Série actuelle */}
+                  <div className="relative pl-20 animate-in slide-in-from-left duration-500 delay-300">
+                    <div className="absolute left-4 w-8 h-8 bg-gradient-to-br from-jade to-wasabi rounded-full flex items-center justify-center shadow-lg border-4 border-white z-10">
+                      <Flame size={16} className="text-white" />
+                    </div>
+                    <div className="bg-gradient-to-br from-wasabi/10 to-jade/10 rounded-2xl p-5 shadow-soft border-2 border-wasabi/30">
+                      <div className="flex items-center justify-between mb-2">
+                        <h3
+                          className="font-bold text-ink"
+                          style={{ fontFamily: "'Shippori Mincho', serif" }}
+                        >
+                          Série actuelle
+                        </h3>
+                        <span className="text-3xl font-bold bg-gradient-to-r from-wasabi to-jade bg-clip-text text-transparent">
+                          {stats.currentStreak}
+                        </span>
+                      </div>
+                      <p className="text-sm text-stone mb-3">
+                        Jours consécutifs de pratique
+                      </p>
+                      <div className="flex gap-1">
+                        {Array.from({ length: Math.min(stats.currentStreak, 7) }).map((_, i) => (
+                          <div
+                            key={i}
+                            className="flex-1 h-2 bg-gradient-to-r from-wasabi to-jade rounded-full animate-in zoom-in duration-300"
+                            style={{ animationDelay: `${i * 50}ms` }}
+                          />
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Prochain objectif */}
+                  {stats.currentStreak > 0 && (
+                    <div className="relative pl-20 animate-in slide-in-from-left duration-500 delay-400">
+                      <div className="absolute left-4 w-8 h-8 bg-gradient-to-br from-stone/30 to-stone/50 rounded-full flex items-center justify-center shadow-lg border-4 border-white z-10">
+                        <Target size={16} className="text-white" />
+                      </div>
+                      <div className="bg-white rounded-2xl p-5 shadow-soft border border-stone/10">
+                        <h3
+                          className="font-bold text-ink mb-2"
+                          style={{ fontFamily: "'Shippori Mincho', serif" }}
+                        >
+                          Prochain objectif
+                        </h3>
+                        {(() => {
+                          const nextBadge = unlockedBadges.find(b => !b.unlocked);
+                          if (nextBadge) {
+                            const daysLeft = nextBadge.days - stats.currentStreak;
+                            return (
+                              <>
+                                <p className="text-sm text-stone mb-3">
+                                  <span className="font-medium text-wasabi">{nextBadge.fullTitle || nextBadge.title}</span> dans {daysLeft} jour{daysLeft > 1 ? 's' : ''}
+                                </p>
+                                <div className="flex items-center gap-2">
+                                  <div className="flex-1 h-2 bg-stone/10 rounded-full overflow-hidden">
+                                    <div
+                                      className="h-full bg-gradient-to-r from-wasabi to-jade transition-all duration-1000"
+                                      style={{
+                                        width: `${(stats.currentStreak / nextBadge.days) * 100}%`
+                                      }}
+                                    />
+                                  </div>
+                                  <span className="text-xs text-stone font-medium">
+                                    {stats.currentStreak}/{nextBadge.days}
+                                  </span>
+                                </div>
+                              </>
+                            );
+                          }
+                          return (
+                            <p className="text-sm text-stone">
+                              Vous avez débloqué tous les succès ! 🎉
+                            </p>
+                          );
+                        })()}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Message d'encouragement */}
+                  {stats.currentStreak === 0 && (
+                    <div className="relative pl-20 animate-in slide-in-from-left duration-500 delay-400">
+                      <div className="absolute left-4 w-8 h-8 bg-gradient-to-br from-wasabi/50 to-jade/50 rounded-full flex items-center justify-center shadow-lg border-4 border-white z-10">
+                        <Target size={16} className="text-white" />
+                      </div>
+                      <div className="bg-gradient-to-br from-sand to-white rounded-2xl p-5 shadow-soft border border-stone/10">
+                        <h3
+                          className="font-bold text-ink mb-2"
+                          style={{ fontFamily: "'Shippori Mincho', serif" }}
+                        >
+                          Commencez votre voyage
+                        </h3>
+                        <p className="text-sm text-stone">
+                          Faites un check-in, écrivez dans votre journal ou pratiquez une méditation pour commencer votre série.
+                        </p>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
             </div>
           </div>
         </div>
