@@ -9,31 +9,81 @@ export const useAuth = () => {
 
   useEffect(() => {
     let mounted = true;
+    let refreshTimer: NodeJS.Timeout;
 
     // 1. Récupérer la session initiale au chargement de l'app
-    supabase.auth.getSession()
-      .then(({ data: { session } }) => {
+    const initSession = async () => {
+      try {
+        const { data: { session }, error } = await supabase.auth.getSession();
+
         if (!mounted) return;
 
-        console.log('✅ Initial session loaded:', session?.user?.email || 'No session');
-        setSession(session);
-        setUser(session?.user ?? null);
+        if (error) {
+          console.error('❌ Error loading session:', error);
+          setSession(null);
+          setUser(null);
+          setLoading(false);
+          return;
+        }
 
-        // Si l'utilisateur est connecté, créer/mettre à jour son profil
-        if (session?.user) {
-          createOrUpdateProfile(session.user);
+        console.log('✅ Initial session loaded:', session?.user?.email || 'No session');
+
+        if (session) {
+          setSession(session);
+          setUser(session.user);
+
+          // Si l'utilisateur est connecté, créer/mettre à jour son profil
+          await createOrUpdateProfile(session.user);
+
+          // Planifier le refresh automatique du token
+          scheduleTokenRefresh(session);
+        } else {
+          setSession(null);
+          setUser(null);
         }
 
         setLoading(false);
-      })
-      .catch((error) => {
+      } catch (error) {
         if (!mounted) return;
 
-        console.error('❌ Error loading session:', error);
+        console.error('❌ Error in initSession:', error);
         setSession(null);
         setUser(null);
         setLoading(false);
-      });
+      }
+    };
+
+    // Fonction pour planifier le refresh du token
+    const scheduleTokenRefresh = (session: Session) => {
+      if (!session.expires_at) return;
+
+      const expiresAt = session.expires_at * 1000;
+      const now = Date.now();
+      const timeUntilExpiry = expiresAt - now;
+
+      // Refresh 5 minutes avant expiration
+      const refreshTime = Math.max(timeUntilExpiry - (5 * 60 * 1000), 0);
+
+      console.log(`📅 Token expires in ${Math.round(timeUntilExpiry / 60000)}min, will refresh in ${Math.round(refreshTime / 60000)}min`);
+
+      if (refreshTimer) clearTimeout(refreshTimer);
+
+      refreshTimer = setTimeout(async () => {
+        console.log('🔄 Auto-refreshing token...');
+        const { data, error } = await supabase.auth.refreshSession();
+
+        if (error) {
+          console.error('❌ Error refreshing token:', error);
+        } else if (data.session) {
+          console.log('✅ Token refreshed successfully');
+          setSession(data.session);
+          setUser(data.session.user);
+          scheduleTokenRefresh(data.session);
+        }
+      }, refreshTime);
+    };
+
+    initSession();
 
     // 2. Écouter les changements d'authentification (connexion/déconnexion)
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
@@ -51,13 +101,18 @@ export const useAuth = () => {
           // Utilisateur connecté : créer/mettre à jour le profil
           console.log('User signed in, creating/updating profile...');
           await createOrUpdateProfile(session.user);
+          scheduleTokenRefresh(session);
           console.log('User signed in successfully');
         } else if (event === 'SIGNED_OUT') {
           // Utilisateur déconnecté : nettoyer les données locales
+          if (refreshTimer) clearTimeout(refreshTimer);
           localStorage.removeItem('user-profile');
           // Vider le cache React Query
           queryClient.clear();
           console.log('User signed out, cache cleared');
+        } else if (event === 'TOKEN_REFRESHED' && session) {
+          console.log('🔄 Token refreshed via auth state change');
+          scheduleTokenRefresh(session);
         } else if (event === 'PASSWORD_RECOVERY') {
           console.log('Password recovery initiated');
         }
@@ -66,6 +121,7 @@ export const useAuth = () => {
 
     return () => {
       mounted = false;
+      if (refreshTimer) clearTimeout(refreshTimer);
       subscription.unsubscribe();
     };
   }, [setUser, setSession, setLoading]);
