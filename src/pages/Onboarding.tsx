@@ -45,7 +45,7 @@ export default function Onboarding() {
   const currentGradient = currentSlideData.gradient;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100 flex flex-col relative overflow-hidden">
+    <div className="h-screen w-screen bg-gradient-to-br from-slate-50 via-white to-slate-100 flex flex-col relative overflow-hidden">
       <motion.div
         key={currentSlide}
         initial={{ opacity: 0 }}
@@ -57,13 +57,13 @@ export default function Onboarding() {
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(255,255,255,0.8),transparent_50%)] pointer-events-none"></div>
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_80%,rgba(255,255,255,0.6),transparent_50%)] pointer-events-none"></div>
 
-      <div className="flex-1 flex flex-col items-center justify-center py-12 px-4 relative z-10">
+      <div className="flex-1 flex flex-col items-center justify-center py-6 sm:py-12 px-4 relative z-10">
         <div className="w-full max-w-4xl">
           <motion.div
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
-            className="mb-12"
+            className="mb-6 sm:mb-12"
           >
             <div className="flex gap-3 justify-center items-center">
               {onboardingSlides.map((slide, index) => (
@@ -112,13 +112,13 @@ export default function Onboarding() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.8 }}
-              className="mt-16 flex flex-col gap-4 justify-center items-center max-w-xl mx-auto"
+              className="mt-8 sm:mt-16 flex flex-col gap-3 sm:gap-4 justify-center items-center max-w-xl mx-auto px-4"
             >
               <motion.button
                 whileHover={{ scale: 1.02, y: -2 }}
                 whileTap={{ scale: 0.98 }}
                 onClick={handleFreeAccess}
-                className="group relative px-10 py-5 bg-white text-gray-800 rounded-2xl font-semibold text-lg shadow-2xl hover:shadow-3xl transition-all duration-300 w-full overflow-hidden"
+                className="group relative px-6 sm:px-10 py-4 sm:py-5 bg-white text-gray-800 rounded-2xl font-semibold text-base sm:text-lg shadow-2xl hover:shadow-3xl transition-all duration-300 w-full overflow-hidden"
               >
                 <div className="absolute inset-0 bg-gradient-to-r from-emerald-400 to-teal-400 opacity-0 group-hover:opacity-10 transition-opacity duration-300"></div>
                 <div className="relative flex items-center justify-center gap-3">
@@ -131,7 +131,7 @@ export default function Onboarding() {
                 whileHover={{ scale: 1.02, y: -2 }}
                 whileTap={{ scale: 0.98 }}
                 onClick={handleFullAccess}
-                className="group relative px-10 py-5 bg-gradient-to-r from-rose-500 via-pink-500 to-fuchsia-500 text-white rounded-2xl font-semibold text-lg shadow-2xl hover:shadow-3xl transition-all duration-300 w-full overflow-hidden"
+                className="group relative px-6 sm:px-10 py-4 sm:py-5 bg-gradient-to-r from-rose-500 via-pink-500 to-fuchsia-500 text-white rounded-2xl font-semibold text-base sm:text-lg shadow-2xl hover:shadow-3xl transition-all duration-300 w-full overflow-hidden"
               >
                 <div className="absolute inset-0 bg-white opacity-0 group-hover:opacity-20 transition-opacity duration-300"></div>
                 <div className="relative flex items-center justify-center gap-3">
@@ -145,7 +145,7 @@ export default function Onboarding() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.8 }}
-              className="mt-16 flex justify-between items-center max-w-3xl mx-auto px-6"
+              className="mt-8 sm:mt-16 flex justify-between items-center max-w-3xl mx-auto px-4 sm:px-6"
             >
               <motion.button
                 onClick={handlePrevious}
@@ -166,7 +166,7 @@ export default function Onboarding() {
                   whileHover={{ scale: 1.05, y: -3 }}
                   whileTap={{ scale: 0.95 }}
                   onClick={handleNext}
-                  className={`px-10 py-5 bg-gradient-to-r ${currentGradient} text-white rounded-2xl font-bold text-lg shadow-2xl hover:shadow-3xl transition-all duration-300 flex items-center gap-3`}
+                  className={`px-6 sm:px-10 py-4 sm:py-5 bg-gradient-to-r ${currentGradient} text-white rounded-2xl font-bold text-base sm:text-lg shadow-2xl hover:shadow-3xl transition-all duration-300 flex items-center gap-2 sm:gap-3`}
                 >
                   <span>{currentSlideData.ctaText || 'Suivant'}</span>
                   <ChevronRight className="w-6 h-6" />
@@ -191,7 +191,7 @@ export default function Onboarding() {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 1.2 }}
-          className="py-6 text-center relative z-10"
+          className="py-4 sm:py-6 text-center relative z-10"
         >
           <button
             onClick={handleSkip}

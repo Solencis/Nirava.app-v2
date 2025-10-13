@@ -93,9 +93,9 @@ const AuthPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-sand via-jade/5 to-wasabi/5 flex items-center justify-center p-4">
-      <div className="w-full max-w-md">
-        <div className="bg-white/95 backdrop-blur-sm rounded-3xl shadow-2xl p-8 border border-stone/10">
+    <div className="h-screen w-screen bg-gradient-to-br from-sand via-jade/5 to-wasabi/5 flex items-center justify-center p-4 overflow-y-auto">
+      <div className="w-full max-w-md my-auto">
+        <div className="bg-white/95 backdrop-blur-sm rounded-2xl sm:rounded-3xl shadow-2xl p-6 sm:p-8 border border-stone/10">
           {/* Header */}
           <div className="text-center mb-8">
             <h1

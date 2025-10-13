@@ -14,7 +14,7 @@ interface OnboardingCache {
 
 export function useOnboarding() {
   const { user, loading: authLoading } = useAuth();
-  const [needsOnboarding, setNeedsOnboarding] = useState<boolean>(false);
+  const [needsOnboarding, setNeedsOnboarding] = useState<boolean>(true);
   const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
