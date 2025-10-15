@@ -356,6 +356,9 @@ export const useAudioStore = create<AudioState & AudioActions>()(
 
       playCompletionGong: () => {
         // Son de gong de fin - audible même si modal fermé
+        const state = get();
+        if (!state.soundEnabled) return; // Ne pas jouer si sons désactivés
+
         try {
           const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
           

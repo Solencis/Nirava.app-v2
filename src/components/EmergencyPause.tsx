@@ -8,7 +8,7 @@ interface EmergencyPauseProps {
 }
 
 const EmergencyPause: React.FC<EmergencyPauseProps> = ({ isOpen, onClose }) => {
-  const { current: currentAmbience, isPlaying: ambienceIsPlaying, pause: pauseAmbience, play: playAmbience } = useAudioStore();
+  const { current: currentAmbience, isPlaying: ambienceIsPlaying, pause: pauseAmbience, play: playAmbience, soundEnabled } = useAudioStore();
   const [activeExercise, setActiveExercise] = React.useState<string | null>(null);
   const [breathCount, setBreathCount] = React.useState(0);
   const [totalBreaths, setTotalBreaths] = React.useState(0);
@@ -48,6 +48,8 @@ const EmergencyPause: React.FC<EmergencyPauseProps> = ({ isOpen, onClose }) => {
   if (!isOpen) return null;
 
   const playPhaseSound = (phaseType: 'inhale' | 'hold' | 'exhale' | 'cycle') => {
+    if (!soundEnabled) return; // Ne pas jouer si sons désactivés
+
     if ('AudioContext' in window || 'webkitAudioContext' in window) {
       const AudioContext = window.AudioContext || (window as any).webkitAudioContext;
       if (!audioContextRef.current) {

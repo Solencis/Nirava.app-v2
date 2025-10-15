@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { X, Wind, Play, Pause, RotateCcw, Plus } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 import { supabase } from '../lib/supabase';
+import { useAudioStore } from '../stores/audioStore';
 
 interface BreathingMobileProps {
   onClose: () => void;
@@ -23,6 +24,7 @@ interface BreathingExercise {
 
 const BreathingMobile: React.FC<BreathingMobileProps> = ({ onClose, onComplete }) => {
   const { user } = useAuth();
+  const soundEnabled = useAudioStore(state => state.soundEnabled);
   const [selectedExercise, setSelectedExercise] = useState<BreathingExercise | null>(null);
   const [isActive, setIsActive] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
@@ -84,6 +86,9 @@ const BreathingMobile: React.FC<BreathingMobileProps> = ({ onClose, onComplete }
   ];
 
   const playPhaseSound = (phaseType: 'inhale' | 'hold' | 'exhale' | 'pause' | 'cycle') => {
+    // Ne pas jouer de son si les sons sont désactivés
+    if (!soundEnabled) return;
+
     if ('AudioContext' in window || 'webkitAudioContext' in window) {
       const AudioContext = window.AudioContext || (window as any).webkitAudioContext;
       if (!audioContextRef.current) {

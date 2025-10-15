@@ -28,7 +28,8 @@ const MeditationModal: React.FC<MeditationModalProps> = ({ isOpen, onClose, onSa
     stopMeditation,
     resetMeditation,
     getMeditationState,
-    reduceMeditationTime
+    reduceMeditationTime,
+    soundEnabled
   } = useAudioStore();
   
   const [duration, setDuration] = useState(5);
@@ -55,6 +56,8 @@ const MeditationModal: React.FC<MeditationModalProps> = ({ isOpen, onClose, onSa
 
   const playGong = () => {
     // Son de gong amélioré - plus audible et réaliste
+    if (!soundEnabled) return; // Ne pas jouer si sons désactivés
+
     const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
     
     // Créer plusieurs oscillateurs pour un son plus riche

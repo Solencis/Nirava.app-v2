@@ -25,7 +25,8 @@ const MeditationMobile: React.FC<MeditationMobileProps> = ({ onClose }) => {
     pause: pauseAmbience,
     play: playAmbience,
     playNext,
-    playCompletionGong
+    playCompletionGong,
+    soundEnabled
   } = useAudioStore();
 
   const [selectedDuration, setSelectedDuration] = useState<number | null>(null);
@@ -48,6 +49,8 @@ const MeditationMobile: React.FC<MeditationMobileProps> = ({ onClose }) => {
 
   // Gong de début
   const playStartGong = () => {
+    if (!soundEnabled) return; // Ne pas jouer si sons désactivés
+
     try {
       const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
 
