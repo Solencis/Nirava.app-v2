@@ -53,6 +53,7 @@ const ProfilePage: React.FC = () => {
     level: 'N1'
   });
   const [calendarData, setCalendarData] = useState<Set<string>>(new Set());
+  const [activityDates, setActivityDates] = useState<Date[]>([]);
 
   const levels = [
     { value: 'N1', label: 'N1 - Découverte', description: 'Premiers pas dans l\'intégration émotionnelle' },
@@ -290,7 +291,7 @@ const ProfilePage: React.FC = () => {
 
       const { data: allSessions } = await supabase
         .from('meditation_sessions')
-        .select('duration_minutes')
+        .select('duration_minutes, created_at')
         .eq('user_id', user.id);
 
       const totalMinutes = allSessions?.reduce((sum, s) => sum + (s.duration_minutes || 0), 0) || 0;
@@ -298,6 +299,37 @@ const ProfilePage: React.FC = () => {
 
       const thisWeekMeditation = supabaseMeditationMinutes || Math.round(meditationWeekMinutes);
       const currentStreak = await calculateJournalStreak();
+
+      // Calculer toutes les dates avec activités pour le calendrier
+      const allActivityDates: Date[] = [];
+
+      // Dates de check-ins
+      checkinsData?.forEach(c => {
+        const date = new Date(c.created_at);
+        date.setHours(0, 0, 0, 0);
+        allActivityDates.push(date);
+      });
+
+      // Dates de journals
+      journalsData?.forEach(j => {
+        const date = new Date(j.created_at);
+        date.setHours(0, 0, 0, 0);
+        allActivityDates.push(date);
+      });
+
+      // Dates de méditations
+      allSessions?.forEach(s => {
+        const date = new Date((s as any).created_at);
+        date.setHours(0, 0, 0, 0);
+        allActivityDates.push(date);
+      });
+
+      // Dédupliquer les dates (même jour = une seule date)
+      const uniqueDates = Array.from(
+        new Set(allActivityDates.map(d => d.toISOString()))
+      ).map(iso => new Date(iso));
+
+      setActivityDates(uniqueDates);
 
       setStats({
         checkins: thisWeekCheckins,
