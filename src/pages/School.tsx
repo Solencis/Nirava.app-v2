@@ -156,9 +156,18 @@ const LevelSection: React.FC<LevelSectionProps> = ({ group, allProgress, isPremi
   };
 
   return (
-    <div className={`bg-white/60 dark:bg-gray-800/60 backdrop-blur rounded-2xl sm:rounded-3xl p-5 sm:p-8 shadow-soft border-2 ${
+    <div className={`bg-white/60 dark:bg-gray-800/60 backdrop-blur rounded-2xl sm:rounded-3xl p-5 sm:p-8 shadow-soft border-2 relative ${
       isLocked ? 'border-stone/20 dark:border-gray-700' : 'border-jade/20 dark:border-jade/30'
     } transition-all hover:shadow-lg duration-300`}>
+      {isLocked && (
+        <div className="absolute inset-0 backdrop-blur-2xl bg-white/90 dark:bg-gray-900/90 rounded-2xl sm:rounded-3xl z-10 flex items-center justify-center">
+          <div className="text-center">
+            <Lock className="w-12 h-12 text-stone dark:text-gray-400 mx-auto mb-3" />
+            <p className="text-lg font-semibold text-stone dark:text-gray-400">Contenu Premium</p>
+            <p className="text-sm text-stone/70 dark:text-gray-500 mt-1">Accès complet en 2026</p>
+          </div>
+        </div>
+      )}
       {/* Header du niveau */}
       <div className="flex flex-col sm:flex-row items-start justify-between mb-6 sm:mb-8 gap-4">
         <div className="flex items-center gap-4 sm:gap-6 w-full sm:w-auto">
@@ -168,11 +177,6 @@ const LevelSection: React.FC<LevelSectionProps> = ({ group, allProgress, isPremi
               : 'bg-gradient-to-br from-jade to-forest shadow-soft'
           }`}>
             <span className="text-3xl sm:text-4xl">{levelEmojis[group.level]}</span>
-            {isLocked && (
-              <div className="absolute inset-0 bg-white/40 backdrop-blur-sm rounded-2xl flex items-center justify-center">
-                <Lock className="w-8 h-8 text-stone" />
-              </div>
-            )}
           </div>
           <div>
             <h2 className="font-shippori text-xl sm:text-3xl font-bold text-ink dark:text-white mb-1 flex flex-wrap items-center gap-2 sm:gap-3 transition-colors duration-300">

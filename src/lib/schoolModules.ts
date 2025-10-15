@@ -52,7 +52,7 @@ export function getModulesByLevel(): LevelGroup[] {
   return levels.map(level => ({
     level,
     levelNumber: parseInt(level.replace('N', '')),
-    isFree: level === 'N1', // Seulement N1 gratuit
+    isFree: false, // Tous les niveaux sont premium
     modules: grouped[level]
   }));
 }
@@ -65,7 +65,7 @@ export function getModuleBySlug(slug: string): SchoolModule | undefined {
 
 // Vérifier si un niveau est gratuit
 export function isLevelFree(level: string): boolean {
-  return level === 'N1';
+  return false; // Tous les niveaux sont premium
 }
 
 // Obtenir la progression d'un module pour l'utilisateur connecté
