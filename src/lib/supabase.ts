@@ -109,6 +109,7 @@ export interface Profile {
   share_progress: boolean;
   subscription_status: 'none' | 'active' | 'cancelled';
   is_premium: boolean;
+  is_admin?: boolean;
   created_at: string;
   updated_at: string;
 }

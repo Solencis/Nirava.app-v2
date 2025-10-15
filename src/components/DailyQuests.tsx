@@ -315,6 +315,12 @@ const DailyQuests: React.FC<DailyQuestsProps> = ({
       queryClient.invalidateQueries({ queryKey: ['weekly-xp', user.id] });
       queryClient.invalidateQueries({ queryKey: ['profile', user.id] });
 
+      // Mettre à jour immédiatement le state local
+      setClaimed(prev => ({
+        ...prev,
+        [quest.id]: true
+      }));
+
       await loadClaimedStatus();
 
       setTimeout(() => {
