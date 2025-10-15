@@ -627,13 +627,13 @@ const Community: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-sand via-pearl to-sand/50 relative overflow-hidden">
+    <div className="min-h-screen bg-gradient-to-br from-sand via-pearl to-sand/50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900/50 relative overflow-hidden transition-colors duration-300">
       {/* Particules flottantes d'arrière-plan */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         {Array.from({ length: 12 }).map((_, i) => (
           <div
             key={i}
-            className="absolute w-1.5 h-1.5 bg-wasabi/20 rounded-full animate-float"
+            className="absolute w-1.5 h-1.5 bg-wasabi/20 dark:bg-wasabi/30 rounded-full animate-float"
             style={{
               left: `${10 + i * 8}%`,
               top: `${15 + i * 7}%`,
@@ -646,7 +646,7 @@ const Community: React.FC = () => {
 
       <div className={`relative z-10 transition-all duration-1000 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
         {/* Header simplifié */}
-        <div className="bg-gradient-to-br from-wasabi/10 via-jade/5 to-wasabi/5 p-6 pb-8 relative overflow-hidden">
+        <div className="bg-gradient-to-br from-wasabi/10 via-jade/5 to-wasabi/5 dark:from-gray-800/50 dark:via-gray-700/30 dark:to-gray-800/20 p-6 pb-8 relative overflow-hidden transition-colors duration-300">
           <div className="text-center relative z-10">
             <motion.div
               initial={{ scale: 0.8, opacity: 0 }}
@@ -665,7 +665,7 @@ const Community: React.FC = () => {
             </motion.div>
 
             <h1
-              className="text-3xl font-bold text-ink mb-6 leading-tight"
+              className="text-3xl font-bold text-ink dark:text-white mb-6 leading-tight transition-colors duration-300"
               style={{ fontFamily: "'Shippori Mincho', serif" }}
             >
               Communauté
@@ -676,7 +676,7 @@ const Community: React.FC = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.2 }}
-              className="bg-white/95 backdrop-blur-md rounded-3xl p-5 shadow-lg border border-stone/10"
+              className="bg-white/95 dark:bg-gray-800/95 backdrop-blur-md rounded-3xl p-5 shadow-lg border border-stone/10 dark:border-gray-700 transition-colors duration-300"
             >
               <div className="grid grid-cols-3 gap-4">
                 <div className="text-center">
@@ -721,26 +721,26 @@ const Community: React.FC = () => {
         <div className="p-4 pb-24 -mt-4">
           {/* Profile settings avec design premium */}
           {showSettings && profile && (
-            <div className="bg-white/95 backdrop-blur-md rounded-3xl p-6 shadow-2xl border border-stone/10 mb-6 animate-fade-in-up relative overflow-hidden">
+            <div className="bg-white/95 dark:bg-gray-800/95 backdrop-blur-md rounded-3xl p-6 shadow-2xl border border-stone/10 dark:border-gray-700 mb-6 animate-fade-in-up relative overflow-hidden transition-colors duration-300">
               {/* Effet de brillance */}
               <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-shimmer-slow"></div>
               
               <div className="relative z-10">
                 <div className="flex items-center mb-6">
                   <Settings className="w-6 h-6 text-wasabi mr-3 animate-spin-slow" />
-                  <h3 className="text-xl font-bold text-ink" style={{ fontFamily: "'Shippori Mincho', serif" }}>
+                  <h3 className="text-xl font-bold text-ink dark:text-white transition-colors duration-300" style={{ fontFamily: "'Shippori Mincho', serif" }}>
                     Mes informations
                   </h3>
                 </div>
                 
                 <div className="space-y-6">
                   <div>
-                    <label className="block text-sm font-medium text-ink mb-3">Pseudo</label>
+                    <label className="block text-sm font-medium text-ink dark:text-white mb-3 transition-colors duration-300">Pseudo</label>
                     <input
                       type="text"
                       value={profile.display_name}
                       onChange={(e) => setProfile({ ...profile, display_name: e.target.value })}
-                      className="w-full px-4 py-4 bg-stone/5 border border-stone/20 rounded-2xl focus:border-wasabi focus:ring-2 focus:ring-wasabi/20 transition-all duration-300 text-base"
+                      className="w-full px-4 py-4 bg-stone/5 dark:bg-gray-700 border border-stone/20 dark:border-gray-600 rounded-2xl focus:border-wasabi dark:focus:border-jade focus:ring-2 focus:ring-wasabi/20 dark:focus:ring-jade/20 transition-all duration-300 text-base text-ink dark:text-white"
                       maxLength={20}
                       style={{ fontSize: '16px' }}
                     />
@@ -1453,7 +1453,7 @@ const Community: React.FC = () => {
                   <Trash2 className="w-8 h-8 text-red-600" />
                 </div>
                 <div>
-                  <h3 className="text-xl font-bold text-ink" style={{ fontFamily: "'Shippori Mincho', serif" }}>
+                  <h3 className="text-xl font-bold text-ink dark:text-white transition-colors duration-300" style={{ fontFamily: "'Shippori Mincho', serif" }}>
                     Supprimer le message
                   </h3>
                   <p className="text-stone text-sm">Cette action est irréversible</p>
@@ -1499,7 +1499,7 @@ const Community: React.FC = () => {
                   <MessageCircle className="w-8 h-8 text-red-600" />
                 </div>
                 <div>
-                  <h3 className="text-xl font-bold text-ink" style={{ fontFamily: "'Shippori Mincho', serif" }}>
+                  <h3 className="text-xl font-bold text-ink dark:text-white transition-colors duration-300" style={{ fontFamily: "'Shippori Mincho', serif" }}>
                     Supprimer le commentaire
                   </h3>
                   <p className="text-stone text-sm">Cette action est irréversible</p>

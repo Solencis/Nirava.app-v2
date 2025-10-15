@@ -342,7 +342,7 @@ const DailyQuests: React.FC<DailyQuestsProps> = ({
             {completedQuests}/{quests.length} complétées
           </p>
         </div>
-        <div className="flex items-center gap-2 text-sm text-charcoal/60 bg-white/80 px-3 py-2 rounded-full">
+        <div className="flex items-center gap-2 text-sm text-charcoal/60 dark:text-gray-400 bg-white/80 dark:bg-gray-800/80 px-3 py-2 rounded-full transition-colors duration-300">
           <Timer className="w-4 h-4" />
           {timeLeft}
         </div>
@@ -367,7 +367,7 @@ const DailyQuests: React.FC<DailyQuestsProps> = ({
           return (
             <div
               key={quest.id}
-              className={`bg-white rounded-2xl overflow-hidden transition-all duration-300 relative ${
+              className={`bg-white dark:bg-gray-800 rounded-2xl overflow-hidden transition-all duration-300 relative ${
                 quest.completed ? 'shadow-lg' : 'shadow-md hover:shadow-lg'
               } ${isAnimating ? 'ring-2 ring-jade animate-pulse' : ''}`}
               style={{
@@ -391,7 +391,7 @@ const DailyQuests: React.FC<DailyQuestsProps> = ({
                 </div>
 
                 <div className="flex-1 min-w-0">
-                  <h3 className="font-semibold text-charcoal flex items-center gap-2">
+                  <h3 className="font-semibold text-charcoal dark:text-white flex items-center gap-2 transition-colors duration-300">
                     {quest.title}
                     {quest.completed && (
                       <Check className="w-4 h-4 text-jade" />
@@ -434,7 +434,7 @@ const DailyQuests: React.FC<DailyQuestsProps> = ({
                 ) : (
                   <button
                     onClick={quest.action}
-                    className="p-2 bg-pearl hover:bg-sand rounded-xl transition-colors"
+                    className="p-2 bg-pearl dark:bg-gray-700 hover:bg-sand dark:hover:bg-gray-600 rounded-xl transition-colors"
                   >
                     <ChevronRight className="w-5 h-5 text-charcoal/60" />
                   </button>
@@ -446,7 +446,7 @@ const DailyQuests: React.FC<DailyQuestsProps> = ({
       </div>
 
       {completedQuests > 0 && !allCompleted && (
-        <div className="text-center text-sm text-charcoal/60 bg-sand/50 p-3 rounded-xl">
+        <div className="text-center text-sm text-charcoal/60 dark:text-gray-400 bg-sand/50 dark:bg-gray-800/50 p-3 rounded-xl transition-colors duration-300">
           <Zap className="w-4 h-4 inline mr-1" />
           Continue! Plus que {quests.length - completedQuests} quête{quests.length - completedQuests > 1 ? 's' : ''}
         </div>
@@ -542,7 +542,7 @@ const DailyQuests: React.FC<DailyQuestsProps> = ({
                       </div>
 
                       <div className="flex-1 min-w-0">
-                        <h3 className="font-semibold text-charcoal flex items-center gap-2">
+                        <h3 className="font-semibold text-charcoal dark:text-white flex items-center gap-2 transition-colors duration-300">
                           {advQuest.title}
                           {completed && !isLocked && (
                             <Check className="w-4 h-4 text-jade" />

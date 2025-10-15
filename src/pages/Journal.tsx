@@ -292,13 +292,13 @@ const Journal: React.FC = () => {
   const engagement = getEngagementLevel();
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-sand via-pearl to-sand/50 relative overflow-hidden">
+    <div className="min-h-screen bg-gradient-to-br from-sand via-pearl to-sand/50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900/50 relative overflow-hidden transition-colors duration-300">
       {/* Particules flottantes d'arrière-plan */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         {Array.from({ length: 12 }).map((_, i) => (
           <div
             key={i}
-            className="absolute w-1.5 h-1.5 bg-jade/20 rounded-full animate-float"
+            className="absolute w-1.5 h-1.5 bg-jade/20 dark:bg-jade/30 rounded-full animate-float"
             style={{
               left: `${10 + i * 8}%`,
               top: `${15 + i * 7}%`,
@@ -311,7 +311,7 @@ const Journal: React.FC = () => {
 
       <div className={`relative z-10 transition-all duration-1000 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
         {/* Header héroïque avec stats gamifiées */}
-        <div className="bg-gradient-to-br from-jade/15 via-wasabi/10 to-jade/5 p-6 pb-8 relative overflow-hidden">
+        <div className="bg-gradient-to-br from-jade/15 via-wasabi/10 to-jade/5 dark:from-gray-800/50 dark:via-gray-700/30 dark:to-gray-800/20 p-6 pb-8 relative overflow-hidden transition-colors duration-300">
           {/* Ornements décoratifs animés */}
           <div className="absolute top-4 right-4 opacity-20">
             <svg width="80" height="80" viewBox="0 0 80 80" className="text-jade animate-spin-slow">
@@ -372,7 +372,7 @@ const Journal: React.FC = () => {
             </button>
             
             <h1
-              className="text-3xl md:text-4xl font-bold text-ink mb-3 leading-tight"
+              className="text-3xl md:text-4xl font-bold text-ink dark:text-white mb-3 leading-tight transition-colors duration-300"
               style={{ fontFamily: "'Shippori Mincho', serif" }}
             >
               Ton Espace Sacré
@@ -380,7 +380,7 @@ const Journal: React.FC = () => {
             <p className="text-stone text-base mb-6 leading-relaxed italic opacity-90">{currentMessage}</p>
             
             {/* Stats dashboard premium */}
-            <div className="bg-white/95 backdrop-blur-md rounded-3xl p-6 shadow-2xl border border-stone/10 relative overflow-hidden">
+            <div className="bg-white/95 dark:bg-gray-800/95 backdrop-blur-md rounded-3xl p-6 shadow-2xl border border-stone/10 dark:border-gray-700 relative overflow-hidden transition-colors duration-300">
               {/* Effet de brillance */}
               <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-shimmer-slow"></div>
               
@@ -519,7 +519,7 @@ const Journal: React.FC = () => {
                     </div>
                     <div className="text-center">
                       <div className="text-3xl font-bold text-sunset mb-1 animate-count-up">{stats.streak}</div>
-                      <div className="text-sm font-medium text-ink">Jours consécutifs de journaling</div>
+                      <div className="text-sm font-medium text-ink dark:text-white transition-colors duration-300">Jours consécutifs de journaling</div>
                       {stats.streak > 0 && (
                         <div className="text-xs text-sunset/80 mt-1">
                           {stats.streak >= 30 ? '🏆 Maître du journaling !' :
@@ -542,7 +542,7 @@ const Journal: React.FC = () => {
             {/* Check-in émotionnel */}
             <button
               onClick={() => handleActionClick('checkin', () => setShowCheckin(true))}
-              className="group bg-white/95 backdrop-blur-md rounded-3xl p-6 shadow-2xl border border-stone/10 text-center transition-all duration-300 hover:scale-[1.02] hover:shadow-3xl hover:bg-jade/5 min-h-[160px] flex flex-col justify-center btn-addictive magnetic-hover relative overflow-hidden"
+              className="group bg-white/95 dark:bg-gray-800/95 backdrop-blur-md rounded-3xl p-6 shadow-2xl border border-stone/10 dark:border-gray-700 text-center transition-all duration-300 hover:scale-[1.02] hover:shadow-3xl hover:bg-jade/5 dark:hover:bg-jade/10 min-h-[160px] flex flex-col justify-center btn-addictive magnetic-hover relative overflow-hidden"
             >
               {/* Effet de vague au hover */}
               <div className="absolute inset-0 bg-gradient-to-r from-transparent via-jade/10 to-transparent transform -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
@@ -551,7 +551,7 @@ const Journal: React.FC = () => {
                 <div className="w-14 h-14 mx-auto mb-4 bg-gradient-to-br from-jade/20 to-jade/10 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-all duration-300 shadow-lg group-hover:shadow-jade/30">
                   <Heart size={28} strokeWidth={1.5} className="text-jade animate-pulse-glow" />
                 </div>
-                <h3 className="font-bold text-ink mb-2 text-base" style={{ fontFamily: "'Shippori Mincho', serif" }}>
+                <h3 className="font-bold text-ink dark:text-white mb-2 text-base transition-colors duration-300" style={{ fontFamily: "'Shippori Mincho', serif" }}>
                   Check-in émotionnel
                 </h3>
                 <p className="text-xs text-stone/80 mb-3 leading-relaxed">Prends un instant pour accueillir ce que tu ressens, ici et maintenant</p>
@@ -594,7 +594,7 @@ const Journal: React.FC = () => {
                 <div className="w-14 h-14 mx-auto mb-4 bg-gradient-to-br from-blue-100 to-blue-50 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-all duration-300 shadow-lg group-hover:shadow-blue-300">
                   <Cloud size={28} strokeWidth={1.5} className="text-blue-600 animate-float-gentle" />
                 </div>
-                <h3 className="font-bold text-ink mb-2 text-base" style={{ fontFamily: "'Shippori Mincho', serif" }}>
+                <h3 className="font-bold text-ink dark:text-white mb-2 text-base transition-colors duration-300" style={{ fontFamily: "'Shippori Mincho', serif" }}>
                   Journal de rêves
                 </h3>
                 <p className="text-xs text-stone/80 mb-3 leading-relaxed">Tes rêves contiennent des messages. Note-les avant qu'ils ne s'évanouissent</p>
@@ -620,7 +620,7 @@ const Journal: React.FC = () => {
                 <div className="w-14 h-14 mx-auto mb-4 bg-gradient-to-br from-vermilion/20 to-vermilion/10 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-all duration-300 shadow-lg group-hover:shadow-vermilion/30">
                   <Moon size={28} strokeWidth={1.5} className="text-vermilion animate-glow-pulse" />
                 </div>
-                <h3 className="font-bold text-ink mb-2 text-base" style={{ fontFamily: "'Shippori Mincho', serif" }}>
+                <h3 className="font-bold text-ink dark:text-white mb-2 text-base transition-colors duration-300" style={{ fontFamily: "'Shippori Mincho', serif" }}>
                   Journal du soir
                 </h3>
                 <p className="text-xs text-stone/80 mb-3 leading-relaxed">Le rituel qui ancre ta journée. Pose tes mots, libère ton esprit</p>
@@ -659,7 +659,7 @@ const Journal: React.FC = () => {
                     <Timer size={28} strokeWidth={1.5} className="text-forest" />
                   </div>
                 </div>
-                <h3 className="font-bold text-ink mb-2 text-base" style={{ fontFamily: "'Shippori Mincho', serif" }}>
+                <h3 className="font-bold text-ink dark:text-white mb-2 text-base transition-colors duration-300" style={{ fontFamily: "'Shippori Mincho', serif" }}>
                   Méditation
                 </h3>
                 <p className="text-xs text-stone/60 leading-relaxed">Un espace de silence pour observer</p>

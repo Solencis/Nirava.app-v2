@@ -58,7 +58,7 @@ const XPBar: React.FC<XPBarProps> = ({
             style={{ width: `${percentage}%` }}
           />
         </div>
-        <span className="text-xs text-stone/70 font-medium whitespace-nowrap">
+        <span className="text-xs text-stone/70 dark:text-gray-400 font-medium whitespace-nowrap transition-colors duration-300">
           {displayXP}/{max}
         </span>
       </div>
@@ -92,8 +92,8 @@ const XPBar: React.FC<XPBarProps> = ({
                   {level || 1}
                 </div>
                 <div>
-                  <div className="text-xs text-stone/60 font-medium">{label}</div>
-                  <div className="text-lg font-bold text-ink">Niveau {level || 1}</div>
+                  <div className="text-xs text-stone/60 dark:text-gray-400 font-medium transition-colors duration-300">{label}</div>
+                  <div className="text-lg font-bold text-ink dark:text-white transition-colors duration-300">Niveau {level || 1}</div>
                 </div>
               </div>
             ) : (
@@ -102,8 +102,8 @@ const XPBar: React.FC<XPBarProps> = ({
                   <TrendingUp className="w-5 h-5" />
                 </div>
                 <div>
-                  <div className="text-xs text-stone/60 font-medium">{label}</div>
-                  <div className="text-base font-bold text-ink">Cette semaine</div>
+                  <div className="text-xs text-stone/60 dark:text-gray-400 font-medium transition-colors duration-300">{label}</div>
+                  <div className="text-base font-bold text-ink dark:text-white transition-colors duration-300">Cette semaine</div>
                 </div>
               </div>
             )}
@@ -117,12 +117,12 @@ const XPBar: React.FC<XPBarProps> = ({
             >
               {displayXP}
             </div>
-            <div className="text-xs text-stone/60">/ {max} XP</div>
+            <div className="text-xs text-stone/60 dark:text-gray-400 transition-colors duration-300">/ {max} XP</div>
           </div>
         </div>
 
         <div className="relative">
-          <div className="h-3 bg-white/50 rounded-full overflow-hidden shadow-inner">
+          <div className="h-3 bg-white/50 dark:bg-gray-700 rounded-full overflow-hidden shadow-inner transition-colors duration-300">
             <div
               className={`h-full transition-all duration-700 ease-out relative ${
                 variant === 'level'
@@ -144,7 +144,7 @@ const XPBar: React.FC<XPBarProps> = ({
         </div>
 
         <div className="flex items-center justify-between mt-2 text-xs">
-          <span className="text-stone/60">
+          <span className="text-stone/60 dark:text-gray-400 transition-colors duration-300">
             {Math.round(percentage)}% complété
           </span>
           <span className="text-stone/60 font-medium">

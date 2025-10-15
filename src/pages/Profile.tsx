@@ -861,7 +861,7 @@ const ProfilePage: React.FC = () => {
             <div className="flex items-center gap-2 mb-3">
               <Clock className="w-5 h-5 text-wasabi" />
               <h3
-                className="text-sm font-medium text-stone/80"
+                className="text-sm font-medium text-stone/80 dark:text-gray-400 transition-colors duration-300"
                 style={{ fontFamily: "'Shippori Mincho', serif" }}
               >
                 Temps total
@@ -869,12 +869,12 @@ const ProfilePage: React.FC = () => {
             </div>
             <div className="flex items-baseline gap-1.5">
               <span
-                className="text-3xl font-bold text-ink"
+                className="text-3xl font-bold text-ink dark:text-white transition-colors duration-300"
                 style={{ fontFamily: "'Shippori Mincho', serif" }}
               >
                 {stats.totalMeditationMinutes}
               </span>
-              <span className="text-stone/60 text-sm">min</span>
+              <span className="text-stone/60 dark:text-gray-400 text-sm transition-colors duration-300">min</span>
             </div>
           </div>
 
@@ -882,7 +882,7 @@ const ProfilePage: React.FC = () => {
             <div className="flex items-center gap-2 mb-3">
               <Target className="w-5 h-5 text-jade" />
               <h3
-                className="text-sm font-medium text-stone/80"
+                className="text-sm font-medium text-stone/80 dark:text-gray-400 transition-colors duration-300"
                 style={{ fontFamily: "'Shippori Mincho', serif" }}
               >
                 Sessions
@@ -890,12 +890,12 @@ const ProfilePage: React.FC = () => {
             </div>
             <div className="flex items-baseline gap-1.5">
               <span
-                className="text-3xl font-bold text-ink"
+                className="text-3xl font-bold text-ink dark:text-white transition-colors duration-300"
                 style={{ fontFamily: "'Shippori Mincho', serif" }}
               >
                 {stats.totalSessions}
               </span>
-              <span className="text-stone/60 text-sm">session{stats.totalSessions > 1 ? 's' : ''}</span>
+              <span className="text-stone/60 dark:text-gray-400 text-sm transition-colors duration-300">session{stats.totalSessions > 1 ? 's' : ''}</span>
             </div>
           </div>
         </div>
@@ -935,7 +935,7 @@ const ProfilePage: React.FC = () => {
         {/* Bouton ajout manuel */}
         <button
           type="button"
-          className="w-full bg-white/80 backdrop-blur border border-wasabi/30 text-wasabi py-4 rounded-xl font-medium hover:bg-wasabi/10 transition-all duration-300 shadow-soft"
+          className="w-full bg-white/80 dark:bg-gray-800/80 backdrop-blur border border-wasabi/30 dark:border-jade/30 text-wasabi dark:text-jade py-4 rounded-xl font-medium hover:bg-wasabi/10 dark:hover:bg-jade/20 transition-all duration-300 shadow-soft"
           style={{ fontFamily: "'Shippori Mincho', serif" }}
         >
           Ajouter une séance manuellement
@@ -965,12 +965,12 @@ const ProfilePage: React.FC = () => {
               <button
                 type="button"
                 onClick={previousMonth}
-                className="p-2 hover:bg-wasabi/10 rounded-xl transition-all duration-300 text-ink"
+                className="p-2 hover:bg-wasabi/10 dark:hover:bg-jade/20 rounded-xl transition-all duration-300 text-ink dark:text-white"
               >
                 <ChevronLeft size={20} />
               </button>
               <h3
-                className="font-medium capitalize text-ink"
+                className="font-medium capitalize text-ink dark:text-white transition-colors duration-300"
                 style={{ fontFamily: "'Shippori Mincho', serif" }}
               >
                 {monthNames[currentMonth.getMonth()]} {currentMonth.getFullYear()}
@@ -978,7 +978,7 @@ const ProfilePage: React.FC = () => {
               <button
                 type="button"
                 onClick={nextMonth}
-                className="p-2 hover:bg-wasabi/10 rounded-xl transition-all duration-300 text-ink"
+                className="p-2 hover:bg-wasabi/10 dark:hover:bg-jade/20 rounded-xl transition-all duration-300 text-ink dark:text-white"
               >
                 <ChevronRight size={20} />
               </button>
@@ -1027,7 +1027,7 @@ const ProfilePage: React.FC = () => {
           <button
             type="button"
             onClick={() => setShowLogoutModal(true)}
-            className="w-full bg-white/80 backdrop-blur border border-stone/20 text-stone py-4 rounded-xl hover:bg-stone/5 transition-all duration-300 text-sm font-medium flex items-center justify-center shadow-soft"
+            className="w-full bg-white/80 dark:bg-gray-800/80 backdrop-blur border border-stone/20 dark:border-gray-600 text-stone dark:text-gray-300 py-4 rounded-xl hover:bg-stone/5 dark:hover:bg-gray-700 transition-all duration-300 text-sm font-medium flex items-center justify-center shadow-soft"
             style={{ fontFamily: "'Shippori Mincho', serif" }}
           >
             <LogOut size={18} className="mr-2" />
@@ -1064,11 +1064,11 @@ const ProfilePage: React.FC = () => {
       {/* Modal d'édition (identique à l'original) */}
       {editing && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4 z-50">
-          <div className="bg-white rounded-t-3xl sm:rounded-2xl shadow-2xl w-full sm:max-w-md mx-0 sm:mx-2 max-h-[90vh] overflow-y-auto">
+          <div className="bg-white dark:bg-gray-800 rounded-t-3xl sm:rounded-2xl shadow-2xl w-full sm:max-w-md mx-0 sm:mx-2 max-h-[90vh] overflow-y-auto transition-colors duration-300">
             <div className="p-6">
               <div className="flex items-center justify-between mb-6">
                 <h2
-                  className="text-xl font-bold text-ink"
+                  className="text-xl font-bold text-ink dark:text-white transition-colors duration-300"
                   style={{ fontFamily: "'Shippori Mincho', serif" }}
                 >
                   Modifier mon profil
@@ -1079,7 +1079,7 @@ const ProfilePage: React.FC = () => {
                     setEditing(false);
                     setPhotoError('');
                   }}
-                  className="w-10 h-10 rounded-full bg-stone/10 flex items-center justify-center text-stone hover:text-vermilion transition-all duration-300"
+                  className="w-10 h-10 rounded-full bg-stone/10 dark:bg-gray-700 flex items-center justify-center text-stone dark:text-gray-300 hover:text-vermilion dark:hover:text-red-400 transition-all duration-300"
                 >
                   <X size={20} />
                 </button>
@@ -1088,7 +1088,7 @@ const ProfilePage: React.FC = () => {
               <div className="space-y-6">
                 <div className="text-center">
                   <label
-                    className="block text-sm font-medium text-ink mb-3"
+                    className="block text-sm font-medium text-ink dark:text-white mb-3 transition-colors duration-300"
                     style={{ fontFamily: "'Shippori Mincho', serif" }}
                   >
                     Photo de profil
@@ -1141,29 +1141,29 @@ const ProfilePage: React.FC = () => {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-ink mb-2">Nom d'affichage</label>
+                  <label className="block text-sm font-medium text-ink dark:text-white mb-2 transition-colors duration-300">Nom d'affichage</label>
                   <input
                     type="text"
                     value={editForm.display_name}
                     onChange={(e) => setEditForm({ ...editForm, display_name: e.target.value })}
                     placeholder="Ton nom"
-                    className="w-full px-4 py-4 bg-stone/5 border border-stone/20 rounded-xl focus:border-wasabi focus:ring-2 focus:ring-wasabi/20 transition-all text-base"
+                    className="w-full px-4 py-4 bg-stone/5 dark:bg-gray-700 border border-stone/20 dark:border-gray-600 rounded-xl focus:border-wasabi dark:focus:border-jade focus:ring-2 focus:ring-wasabi/20 dark:focus:ring-jade/20 transition-all text-base text-ink dark:text-white"
                     maxLength={50}
                   />
-                  <div className="text-xs text-stone mt-1 text-right">{editForm.display_name.length}/50</div>
+                  <div className="text-xs text-stone dark:text-gray-400 mt-1 text-right transition-colors duration-300">{editForm.display_name.length}/50</div>
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-ink mb-2">Bio</label>
+                  <label className="block text-sm font-medium text-ink dark:text-white mb-2 transition-colors duration-300">Bio</label>
                   <textarea
                     value={editForm.bio}
                     onChange={(e) => setEditForm({ ...editForm, bio: e.target.value })}
                     placeholder="Parle-nous de toi..."
                     rows={4}
-                    className="w-full px-4 py-4 bg-stone/5 border border-stone/20 rounded-xl focus:border-wasabi focus:ring-2 focus:ring-wasabi/20 transition-all resize-none text-base"
+                    className="w-full px-4 py-4 bg-stone/5 dark:bg-gray-700 border border-stone/20 dark:border-gray-600 rounded-xl focus:border-wasabi dark:focus:border-jade focus:ring-2 focus:ring-wasabi/20 dark:focus:ring-jade/20 transition-all resize-none text-base text-ink dark:text-white"
                     maxLength={200}
                   />
-                  <div className="text-xs text-stone mt-1 text-right">{editForm.bio.length}/200</div>
+                  <div className="text-xs text-stone dark:text-gray-400 mt-1 text-right transition-colors duration-300">{editForm.bio.length}/200</div>
                 </div>
 
                 <div className="flex gap-3 pt-4">
@@ -1172,7 +1172,7 @@ const ProfilePage: React.FC = () => {
                       setEditing(false);
                       setPhotoError('');
                     }}
-                    className="flex-1 px-4 py-4 border border-stone/20 text-stone rounded-xl hover:bg-stone/5 transition-colors font-medium"
+                    className="flex-1 px-4 py-4 border border-stone/20 dark:border-gray-600 text-stone dark:text-gray-300 rounded-xl hover:bg-stone/5 dark:hover:bg-gray-700 transition-colors font-medium"
                   >
                     Annuler
                   </button>
@@ -1203,19 +1203,19 @@ const ProfilePage: React.FC = () => {
       {/* Modal de déconnexion */}
       {showLogoutModal && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl p-6 max-w-sm w-full shadow-2xl border border-stone/10">
+          <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 max-w-sm w-full shadow-2xl border border-stone/10 dark:border-gray-700 transition-colors duration-300">
             <div className="text-center mb-6">
-              <div className="w-16 h-16 bg-stone/10 rounded-full flex items-center justify-center mx-auto mb-4">
-                <LogOut className="w-8 h-8 text-stone" />
+              <div className="w-16 h-16 bg-stone/10 dark:bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-4">
+                <LogOut className="w-8 h-8 text-stone dark:text-gray-300" />
               </div>
               <h3
-                className="text-xl font-bold text-ink mb-2"
+                className="text-xl font-bold text-ink dark:text-white mb-2 transition-colors duration-300"
                 style={{ fontFamily: "'Shippori Mincho', serif" }}
               >
                 Déconnexion
               </h3>
               <p
-                className="text-stone/70"
+                className="text-stone/70 dark:text-gray-300 transition-colors duration-300"
                 style={{ fontFamily: "'Shippori Mincho', serif" }}
               >
                 Es-tu sûr(e) de vouloir te déconnecter ?
@@ -1226,7 +1226,7 @@ const ProfilePage: React.FC = () => {
               <button
                 type="button"
                 onClick={() => setShowLogoutModal(false)}
-                className="flex-1 px-4 py-3 border border-stone/30 text-stone rounded-xl hover:bg-stone/5 transition-all duration-300 font-medium shadow-soft"
+                className="flex-1 px-4 py-3 border border-stone/30 dark:border-gray-600 text-stone dark:text-gray-300 rounded-xl hover:bg-stone/5 dark:hover:bg-gray-700 transition-all duration-300 font-medium shadow-soft"
                 style={{ fontFamily: "'Shippori Mincho', serif" }}
               >
                 Annuler
@@ -1251,7 +1251,7 @@ const ProfilePage: React.FC = () => {
           onClick={() => setShowAllAchievements(false)}
         >
           <div
-            className="absolute inset-x-0 bottom-0 sm:bottom-auto sm:top-1/2 sm:left-1/2 sm:-translate-x-1/2 sm:-translate-y-1/2 bg-white rounded-t-3xl sm:rounded-3xl shadow-2xl w-full sm:max-w-lg max-h-[90vh] sm:max-h-[85vh] overflow-hidden animate-in slide-in-from-bottom sm:zoom-in duration-300"
+            className="absolute inset-x-0 bottom-0 sm:bottom-auto sm:top-1/2 sm:left-1/2 sm:-translate-x-1/2 sm:-translate-y-1/2 bg-white dark:bg-gray-800 rounded-t-3xl sm:rounded-3xl shadow-2xl w-full sm:max-w-lg max-h-[90vh] sm:max-h-[85vh] overflow-hidden animate-in slide-in-from-bottom sm:zoom-in duration-300 transition-colors"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Header avec swipe indicator */}
@@ -1289,13 +1289,13 @@ const ProfilePage: React.FC = () => {
               </div>
 
               {/* Tabs de filtrage */}
-              <div className="flex gap-2 bg-white/10 backdrop-blur p-1 rounded-xl">
+              <div className="flex gap-2 bg-white/10 dark:bg-black/20 backdrop-blur p-1 rounded-xl">
                 <button
                   type="button"
                   onClick={() => setAchievementsFilter('all')}
                   className={`flex-1 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 ${
                     achievementsFilter === 'all'
-                      ? 'bg-white text-jade shadow-lg'
+                      ? 'bg-white dark:bg-gray-700 text-jade dark:text-jade shadow-lg'
                       : 'text-white/80 hover:text-white active:scale-95'
                   }`}
                 >
@@ -1306,7 +1306,7 @@ const ProfilePage: React.FC = () => {
                   onClick={() => setAchievementsFilter('unlocked')}
                   className={`flex-1 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 ${
                     achievementsFilter === 'unlocked'
-                      ? 'bg-white text-jade shadow-lg'
+                      ? 'bg-white dark:bg-gray-700 text-jade dark:text-jade shadow-lg'
                       : 'text-white/80 hover:text-white active:scale-95'
                   }`}
                 >
@@ -1317,7 +1317,7 @@ const ProfilePage: React.FC = () => {
                   onClick={() => setAchievementsFilter('locked')}
                   className={`flex-1 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 ${
                     achievementsFilter === 'locked'
-                      ? 'bg-white text-jade shadow-lg'
+                      ? 'bg-white dark:bg-gray-700 text-jade dark:text-jade shadow-lg'
                       : 'text-white/80 hover:text-white active:scale-95'
                   }`}
                 >
@@ -1347,12 +1347,12 @@ const ProfilePage: React.FC = () => {
                       <span className="text-2xl">{category.icon}</span>
                       <div className="flex-1">
                         <h3
-                          className="text-lg font-bold text-ink"
+                          className="text-lg font-bold text-ink dark:text-white transition-colors duration-300"
                           style={{ fontFamily: "'Shippori Mincho', serif" }}
                         >
                           {category.name}
                         </h3>
-                        <p className="text-xs text-stone/60">{category.description}</p>
+                        <p className="text-xs text-stone/60 dark:text-gray-400 transition-colors duration-300">{category.description}</p>
                       </div>
                       <div className="text-xs font-medium text-jade">
                         {categoryAchievements.filter(a => a.unlocked).length}/{categoryAchievements.length}
@@ -1395,8 +1395,8 @@ const ProfilePage: React.FC = () => {
                             key={badge.id}
                             className={`relative overflow-hidden rounded-2xl transition-all duration-300 active:scale-98 ${
                               badge.unlocked
-                                ? 'bg-gradient-to-br from-wasabi/5 via-white to-jade/5 border-2 border-wasabi/20 shadow-md'
-                                : 'bg-white border-2 border-stone/10'
+                                ? 'bg-gradient-to-br from-wasabi/5 via-white to-jade/5 dark:from-wasabi/10 dark:via-gray-800 dark:to-jade/10 border-2 border-wasabi/20 dark:border-jade/30 shadow-md'
+                                : 'bg-white dark:bg-gray-700 border-2 border-stone/10 dark:border-gray-600'
                             }`}
                             style={{
                               animation: `fadeInUp 0.4s ease-out ${index * 0.02}s both`
@@ -1425,14 +1425,14 @@ const ProfilePage: React.FC = () => {
 
                                 <div className="flex-1 min-w-0">
                                   <h4
-                                    className={`font-bold text-sm leading-tight mb-1 ${
-                                      badge.unlocked ? 'text-ink' : 'text-stone/60'
+                                    className={`font-bold text-sm leading-tight mb-1 transition-colors duration-300 ${
+                                      badge.unlocked ? 'text-ink dark:text-white' : 'text-stone/60 dark:text-gray-500'
                                     }`}
                                     style={{ fontFamily: "'Shippori Mincho', serif" }}
                                   >
                                     {badge.title}
                                   </h4>
-                                  <p className={`text-xs leading-relaxed ${badge.unlocked ? 'text-stone/80' : 'text-stone/50'}`}>
+                                  <p className={`text-xs leading-relaxed transition-colors duration-300 ${badge.unlocked ? 'text-stone/80 dark:text-gray-300' : 'text-stone/50 dark:text-gray-500'}`}>
                                     {badge.description}
                                   </p>
                                 </div>
