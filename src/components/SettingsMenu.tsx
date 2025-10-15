@@ -2,6 +2,7 @@ import { X, LogOut, Moon, Sun, Volume2, VolumeX, CreditCard, Bell, BellOff, Shie
 import { useState, useEffect } from 'react';
 import { useAuth } from '../hooks/useAuth';
 import { supabase } from '../lib/supabase';
+import { useAudioStore } from '../stores/audioStore';
 
 interface SettingsMenuProps {
   show: boolean;
@@ -10,19 +11,17 @@ interface SettingsMenuProps {
 
 export default function SettingsMenu({ show, onClose }: SettingsMenuProps) {
   const { user, signOut } = useAuth();
+  const { soundEnabled: storeSoundEnabled, setSoundEnabled: setStoreSoundEnabled } = useAudioStore();
   const [theme, setTheme] = useState<'light' | 'dark'>('light');
-  const [soundEnabled, setSoundEnabled] = useState(true);
   const [notificationsEnabled, setNotificationsEnabled] = useState(false);
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
 
   // Charger les préférences depuis localStorage
   useEffect(() => {
     const savedTheme = localStorage.getItem('theme') as 'light' | 'dark' || 'light';
-    const savedSound = localStorage.getItem('soundEnabled') !== 'false';
     const savedNotif = localStorage.getItem('notificationsEnabled') === 'true';
 
     setTheme(savedTheme);
-    setSoundEnabled(savedSound);
     setNotificationsEnabled(savedNotif);
 
     // Appliquer le thème
@@ -46,12 +45,9 @@ export default function SettingsMenu({ show, onClose }: SettingsMenuProps) {
   };
 
   const toggleSound = () => {
-    const newValue = !soundEnabled;
-    setSoundEnabled(newValue);
-    localStorage.setItem('soundEnabled', String(newValue));
-
-    // Dispatch un événement custom pour que les autres composants soient notifiés
-    window.dispatchEvent(new CustomEvent('soundSettingChanged', { detail: { enabled: newValue } }));
+    const newValue = !storeSoundEnabled;
+    setStoreSoundEnabled(newValue);
+    console.log('🔊 Sound setting changed to:', newValue);
   };
 
   const toggleNotifications = () => {
@@ -165,7 +161,7 @@ export default function SettingsMenu({ show, onClose }: SettingsMenuProps) {
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-wasabi/20 to-jade/20 flex items-center justify-center">
-                      {soundEnabled ? (
+                      {storeSoundEnabled ? (
                         <Volume2 size={20} className="text-wasabi" />
                       ) : (
                         <VolumeX size={20} className="text-stone/60" />
@@ -176,15 +172,15 @@ export default function SettingsMenu({ show, onClose }: SettingsMenuProps) {
                         Sons
                       </p>
                       <p className="text-xs text-stone/60 dark:text-gray-400">
-                        {soundEnabled ? 'Activés' : 'Désactivés'}
+                        {storeSoundEnabled ? 'Activés' : 'Désactivés'}
                       </p>
                     </div>
                   </div>
                   <div className={`w-12 h-7 rounded-full relative transition-colors duration-300 ${
-                    soundEnabled ? 'bg-jade' : 'bg-stone/20'
+                    storeSoundEnabled ? 'bg-jade' : 'bg-stone/20'
                   }`}>
                     <div className={`absolute top-1 w-5 h-5 bg-white rounded-full shadow-md transition-transform duration-300 ${
-                      soundEnabled ? 'translate-x-6' : 'translate-x-1'
+                      storeSoundEnabled ? 'translate-x-6' : 'translate-x-1'
                     }`} />
                   </div>
                 </div>

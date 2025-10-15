@@ -42,10 +42,19 @@ const GlobalAudioController: React.FC = () => {
     const audio = audioRef.current;
     if (!audio || !current) return;
 
-    if (isPlaying && soundEnabled) {
+    // Si les sons sont désactivés, toujours mettre en pause
+    if (!soundEnabled) {
+      audio.pause();
+      audio.muted = true;
+      audio.volume = 0;
+      console.log('🔇 Audio muted (sounds disabled):', current?.title);
+      return;
+    }
+
+    if (isPlaying) {
       audio.volume = volume;
       audio.muted = false;
-      
+
       const playPromise = audio.play();
       if (playPromise !== undefined) {
         playPromise.then(() => {
@@ -58,23 +67,30 @@ const GlobalAudioController: React.FC = () => {
       audio.pause();
       console.log('⏸️ Audio paused:', current?.title);
     }
-  }, [isPlaying, current, soundEnabled]);
+  }, [isPlaying, current, soundEnabled, volume]);
 
   // Handle volume changes
   useEffect(() => {
     const audio = audioRef.current;
-    if (audio) {
+    if (audio && soundEnabled) {
       audio.volume = volume;
+    } else if (audio) {
+      audio.volume = 0;
     }
   }, [volume, soundEnabled]);
 
-  // Handle mute/unmute
+  // Handle mute/unmute when soundEnabled changes
   useEffect(() => {
     const audio = audioRef.current;
     if (audio) {
       audio.muted = !soundEnabled;
+      if (!soundEnabled) {
+        audio.pause();
+        audio.volume = 0;
+        console.log('🔇 Sounds disabled - audio stopped');
+      }
     }
-  }, [soundEnabled, volume]);
+  }, [soundEnabled]);
 
   // Handle loop changes
   useEffect(() => {
