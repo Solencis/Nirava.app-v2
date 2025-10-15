@@ -31,6 +31,7 @@ const ProfilePage: React.FC = () => {
   const [showLogoutModal, setShowLogoutModal] = useState(false);
   const [showAllAchievements, setShowAllAchievements] = useState(false);
   const [showJourneyModal, setShowJourneyModal] = useState(false);
+  const [achievementsFilter, setAchievementsFilter] = useState<'all' | 'unlocked' | 'locked'>('all');
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [stats, setStats] = useState({
     checkins: 0,
@@ -1002,139 +1003,235 @@ const ProfilePage: React.FC = () => {
         </div>
       )}
 
-      {/* Modal Tous les Succès */}
+      {/* Modal Tous les Succès - Version Mobile Optimisée */}
       {showAllAchievements && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4 z-50 animate-in fade-in duration-300">
-          <div className="bg-gradient-to-b from-sand via-white to-sand rounded-t-3xl sm:rounded-2xl shadow-2xl w-full sm:max-w-2xl mx-0 sm:mx-2 max-h-[85vh] overflow-hidden animate-in slide-in-from-bottom duration-300">
-            <div className="sticky top-0 bg-gradient-to-r from-wasabi to-jade text-white p-6 z-10">
-              <div className="flex items-center justify-between">
-                <div>
+        <div
+          className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 animate-in fade-in duration-300"
+          onClick={() => setShowAllAchievements(false)}
+        >
+          <div
+            className="absolute inset-x-0 bottom-0 sm:bottom-auto sm:top-1/2 sm:left-1/2 sm:-translate-x-1/2 sm:-translate-y-1/2 bg-white rounded-t-3xl sm:rounded-3xl shadow-2xl w-full sm:max-w-lg max-h-[90vh] sm:max-h-[85vh] overflow-hidden animate-in slide-in-from-bottom sm:zoom-in duration-300"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Header avec swipe indicator */}
+            <div className="sticky top-0 bg-gradient-to-br from-wasabi via-jade to-wasabi/80 text-white px-6 pt-3 pb-5 z-10">
+              {/* Swipe indicator mobile */}
+              <div className="flex justify-center mb-3 sm:hidden">
+                <div className="w-12 h-1 bg-white/30 rounded-full" />
+              </div>
+
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex-1">
                   <h2
                     className="text-2xl font-bold mb-1"
                     style={{ fontFamily: "'Shippori Mincho', serif" }}
                   >
-                    Tous les Succès
+                    🏆 Vos Succès
                   </h2>
-                  <p className="text-white/90 text-sm">
-                    {unlockedBadges.filter(b => b.unlocked).length} / {unlockedBadges.length} débloqués
-                  </p>
+                  <div className="flex items-center gap-2 text-white/90 text-sm">
+                    <div className="flex items-center gap-1">
+                      <Award size={14} />
+                      <span className="font-medium">{unlockedBadges.filter(b => b.unlocked).length}</span>
+                    </div>
+                    <span>/</span>
+                    <span>{unlockedBadges.length}</span>
+                    <span className="text-white/70">débloqués</span>
+                  </div>
                 </div>
                 <button
                   type="button"
                   onClick={() => setShowAllAchievements(false)}
-                  className="w-10 h-10 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center transition-all duration-300"
+                  className="w-10 h-10 rounded-full bg-white/20 backdrop-blur hover:bg-white/30 active:scale-95 flex items-center justify-center transition-all duration-200"
                 >
                   <X size={20} />
                 </button>
               </div>
+
+              {/* Tabs de filtrage */}
+              <div className="flex gap-2 bg-white/10 backdrop-blur p-1 rounded-xl">
+                <button
+                  type="button"
+                  onClick={() => setAchievementsFilter('all')}
+                  className={`flex-1 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 ${
+                    achievementsFilter === 'all'
+                      ? 'bg-white text-jade shadow-lg'
+                      : 'text-white/80 hover:text-white active:scale-95'
+                  }`}
+                >
+                  Tous ({unlockedBadges.length})
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setAchievementsFilter('unlocked')}
+                  className={`flex-1 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 ${
+                    achievementsFilter === 'unlocked'
+                      ? 'bg-white text-jade shadow-lg'
+                      : 'text-white/80 hover:text-white active:scale-95'
+                  }`}
+                >
+                  ✓ Obtenus ({unlockedBadges.filter(b => b.unlocked).length})
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setAchievementsFilter('locked')}
+                  className={`flex-1 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 ${
+                    achievementsFilter === 'locked'
+                      ? 'bg-white text-jade shadow-lg'
+                      : 'text-white/80 hover:text-white active:scale-95'
+                  }`}
+                >
+                  À venir ({unlockedBadges.filter(b => !b.unlocked).length})
+                </button>
+              </div>
             </div>
 
-            <div className="overflow-y-auto max-h-[calc(85vh-120px)] p-6 space-y-4">
-              {unlockedBadges.map((badge, index) => (
-                <div
-                  key={index}
-                  className={`relative overflow-hidden rounded-2xl border-2 transition-all duration-500 ${
-                    badge.unlocked
-                      ? 'bg-gradient-to-br from-wasabi/10 via-white to-jade/10 border-wasabi/30 shadow-lg'
-                      : 'bg-stone/5 border-stone/20 opacity-60'
-                  }`}
-                  style={{
-                    animation: `fadeInUp 0.5s ease-out ${index * 0.05}s both`
-                  }}
-                >
-                  {badge.unlocked && (
-                    <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-wasabi/20 to-jade/20 rounded-full blur-3xl animate-pulse" />
-                  )}
+            {/* Liste des succès */}
+            <div className="overflow-y-auto max-h-[calc(90vh-200px)] sm:max-h-[calc(85vh-200px)] px-4 py-4">
+              <div className="space-y-3">
+                {unlockedBadges
+                  .filter(badge => {
+                    if (achievementsFilter === 'unlocked') return badge.unlocked;
+                    if (achievementsFilter === 'locked') return !badge.unlocked;
+                    return true;
+                  })
+                  .map((badge, index) => {
+                    const progress = Math.min((stats.currentStreak / badge.days) * 100, 100);
+                    const daysLeft = Math.max(badge.days - stats.currentStreak, 0);
 
-                  <div className="relative p-5 flex items-center gap-4">
-                    <div
-                      className={`flex-shrink-0 w-16 h-16 rounded-2xl flex items-center justify-center text-3xl transition-all duration-300 ${
-                        badge.unlocked
-                          ? 'bg-gradient-to-br from-wasabi to-jade shadow-lg scale-100'
-                          : 'bg-stone/10 grayscale scale-90'
-                      }`}
-                    >
-                      {badge.icon}
-                    </div>
-
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 mb-1">
-                        <h3
-                          className={`font-bold text-lg ${
-                            badge.unlocked ? 'text-ink' : 'text-stone/60'
-                          }`}
-                          style={{ fontFamily: "'Shippori Mincho', serif" }}
-                        >
-                          {badge.fullTitle || badge.title}
-                        </h3>
-                        {badge.unlocked && (
-                          <div className="flex-shrink-0 w-6 h-6 rounded-full bg-jade flex items-center justify-center animate-bounce-subtle">
-                            <Check size={14} className="text-white" />
-                          </div>
-                        )}
-                      </div>
-
-                      <p
-                        className={`text-sm mb-2 ${
-                          badge.unlocked ? 'text-stone' : 'text-stone/50'
+                    return (
+                      <div
+                        key={index}
+                        className={`relative overflow-hidden rounded-2xl transition-all duration-300 active:scale-98 ${
+                          badge.unlocked
+                            ? 'bg-gradient-to-br from-wasabi/5 via-white to-jade/5 border-2 border-wasabi/20 shadow-md'
+                            : 'bg-white border-2 border-stone/10'
                         }`}
+                        style={{
+                          animation: `fadeInUp 0.4s ease-out ${index * 0.03}s both`
+                        }}
                       >
-                        {badge.description}
-                      </p>
+                        {/* Effet glow pour succès débloqués */}
+                        {badge.unlocked && (
+                          <div className="absolute inset-0 bg-gradient-to-br from-wasabi/10 via-transparent to-jade/10 pointer-events-none" />
+                        )}
 
-                      <div className="flex items-center gap-2">
-                        <div className="flex-1 h-2 bg-stone/10 rounded-full overflow-hidden">
-                          <div
-                            className={`h-full transition-all duration-1000 ease-out ${
-                              badge.unlocked
-                                ? 'bg-gradient-to-r from-wasabi to-jade'
-                                : 'bg-stone/30'
-                            }`}
-                            style={{
-                              width: badge.unlocked
-                                ? '100%'
-                                : `${Math.min((stats.currentStreak / badge.days) * 100, 100)}%`
-                            }}
-                          />
+                        <div className="relative p-4">
+                          {/* Header avec icône et badge */}
+                          <div className="flex items-start gap-3 mb-3">
+                            <div
+                              className={`relative flex-shrink-0 w-14 h-14 rounded-2xl flex items-center justify-center text-3xl transition-all duration-300 ${
+                                badge.unlocked
+                                  ? 'bg-gradient-to-br from-wasabi to-jade shadow-lg rotate-0'
+                                  : 'bg-stone/5 grayscale opacity-50'
+                              }`}
+                            >
+                              {badge.icon}
+                              {badge.unlocked && (
+                                <div className="absolute -top-1 -right-1 w-5 h-5 bg-jade rounded-full flex items-center justify-center shadow-lg">
+                                  <Check size={12} className="text-white" />
+                                </div>
+                              )}
+                            </div>
+
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-start justify-between gap-2 mb-1">
+                                <h3
+                                  className={`font-bold text-base leading-tight ${
+                                    badge.unlocked ? 'text-ink' : 'text-stone/60'
+                                  }`}
+                                  style={{ fontFamily: "'Shippori Mincho', serif" }}
+                                >
+                                  {badge.fullTitle || badge.title}
+                                </h3>
+                                {badge.unlocked && (
+                                  <div className="flex-shrink-0 px-2 py-0.5 bg-jade/10 rounded-full">
+                                    <span className="text-xs font-bold text-jade">{badge.days}j</span>
+                                  </div>
+                                )}
+                              </div>
+                              <p
+                                className={`text-xs leading-relaxed ${
+                                  badge.unlocked ? 'text-stone/80' : 'text-stone/50'
+                                }`}
+                              >
+                                {badge.description}
+                              </p>
+                            </div>
+                          </div>
+
+                          {/* Barre de progression */}
+                          <div className="space-y-1.5">
+                            <div className="flex items-center justify-between text-xs">
+                              {badge.unlocked ? (
+                                <span className="text-jade font-medium flex items-center gap-1">
+                                  <Check size={12} />
+                                  Débloqué
+                                </span>
+                              ) : (
+                                <>
+                                  <span className="text-stone/60">
+                                    {stats.currentStreak} / {badge.days} jours
+                                  </span>
+                                  <span className="text-wasabi font-medium">
+                                    {daysLeft > 0 ? `Encore ${daysLeft}j` : 'Bientôt !'}
+                                  </span>
+                                </>
+                              )}
+                            </div>
+                            <div className="relative h-2 bg-stone/10 rounded-full overflow-hidden">
+                              <div
+                                className={`absolute inset-y-0 left-0 rounded-full transition-all duration-1000 ease-out ${
+                                  badge.unlocked
+                                    ? 'bg-gradient-to-r from-jade via-wasabi to-jade'
+                                    : 'bg-gradient-to-r from-wasabi/40 to-jade/40'
+                                }`}
+                                style={{
+                                  width: badge.unlocked ? '100%' : `${progress}%`
+                                }}
+                              />
+                              {badge.unlocked && (
+                                <div className="absolute inset-0 bg-white/20 animate-shimmer" />
+                              )}
+                            </div>
+                          </div>
+
+                          {/* Badge "Prochain objectif" */}
+                          {!badge.unlocked && index === unlockedBadges.findIndex(b => !b.unlocked) && (
+                            <div className="mt-3 px-3 py-2 bg-gradient-to-r from-wasabi/10 to-jade/10 rounded-xl border border-wasabi/20">
+                              <div className="flex items-center gap-2">
+                                <Target size={14} className="text-wasabi flex-shrink-0" />
+                                <span className="text-xs font-medium text-wasabi">
+                                  Prochain objectif
+                                </span>
+                              </div>
+                            </div>
+                          )}
                         </div>
-                        <span
-                          className={`text-xs font-medium ${
-                            badge.unlocked ? 'text-jade' : 'text-stone/60'
-                          }`}
-                        >
-                          {badge.unlocked
-                            ? `${badge.days} jours`
-                            : `${stats.currentStreak}/${badge.days}`}
-                        </span>
                       </div>
-                    </div>
-                  </div>
+                    );
+                  })}
+              </div>
 
-                  {badge.unlocked && (
-                    <div className="absolute inset-0 pointer-events-none">
-                      <div className="absolute top-2 right-2 w-2 h-2 bg-jade rounded-full animate-ping opacity-75" />
-                      <div className="absolute top-2 right-2 w-2 h-2 bg-jade rounded-full" />
-                    </div>
-                  )}
-                </div>
-              ))}
-
-              {stats.currentStreak === 0 && (
-                <div className="text-center py-8">
-                  <div className="w-20 h-20 mx-auto mb-4 bg-gradient-to-br from-wasabi/20 to-jade/20 rounded-full flex items-center justify-center">
+              {/* Message si aucun succès */}
+              {achievementsFilter === 'unlocked' && unlockedBadges.filter(b => b.unlocked).length === 0 && (
+                <div className="text-center py-12">
+                  <div className="w-20 h-20 mx-auto mb-4 bg-gradient-to-br from-wasabi/10 to-jade/10 rounded-full flex items-center justify-center">
                     <Target size={32} className="text-wasabi" />
                   </div>
                   <p
-                    className="text-stone text-lg mb-2"
+                    className="text-ink text-lg font-medium mb-2"
                     style={{ fontFamily: "'Shippori Mincho', serif" }}
                   >
-                    Votre voyage commence maintenant
+                    Aucun succès débloqué
                   </p>
                   <p className="text-stone/70 text-sm">
-                    Complétez une activité pour débloquer votre premier succès
+                    Pratiquez régulièrement pour débloquer vos premiers succès
                   </p>
                 </div>
               )}
+
+              {/* Padding bottom pour swipe */}
+              <div className="h-4" />
             </div>
           </div>
         </div>

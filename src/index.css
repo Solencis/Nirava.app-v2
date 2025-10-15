@@ -297,6 +297,11 @@
     animation: bounce-subtle 2s ease-in-out infinite;
   }
 
+  /* Active scale pour feedback tactile mobile */
+  .active\:scale-98:active {
+    transform: scale(0.98);
+  }
+
   /* Pulse glow effect */
   @keyframes pulse-glow {
     0%, 100% {
