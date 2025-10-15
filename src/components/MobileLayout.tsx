@@ -17,7 +17,7 @@ const MobileLayout: React.FC<MobileLayoutProps> = ({ children }) => {
   );
 
   return (
-    <div className="min-h-screen bg-sand flex flex-col">
+    <div className="min-h-screen bg-sand dark:bg-gray-900 flex flex-col transition-colors duration-300">
       {/* Sound bubble - fixed top-right (sauf onboarding/auth) */}
       {!shouldHideNavigation && <SoundBubble />}
 

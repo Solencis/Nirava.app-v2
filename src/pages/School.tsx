@@ -27,7 +27,7 @@ const School: React.FC = () => {
     : 0;
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-sand via-pearl to-sand pb-24">
+    <div className="min-h-screen bg-gradient-to-b from-sand via-pearl to-sand dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 pb-24 transition-colors duration-300">
       {/* Motif décoratif en arrière-plan */}
       <div className="fixed inset-0 opacity-5 pointer-events-none" style={{
         backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23059669' fill-opacity='0.4'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v6h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
@@ -37,17 +37,17 @@ const School: React.FC = () => {
         {/* Header avec calligraphie inspirée */}
         <div className="text-center mb-8 sm:mb-12">
           <div className="inline-block mb-4">
-            <div className="w-16 h-16 sm:w-20 sm:h-20 mx-auto mb-3 sm:mb-4 rounded-full bg-gradient-to-br from-jade to-forest flex items-center justify-center shadow-soft">
+            <div className="w-16 h-16 sm:w-20 sm:h-20 mx-auto mb-3 sm:mb-4 rounded-full bg-gradient-to-br from-jade to-forest flex items-center justify-center shadow-soft dark:shadow-jade/30">
               <Mountain className="w-8 h-8 sm:w-10 sm:h-10 text-white" />
             </div>
           </div>
-          <h1 className="font-shippori text-3xl sm:text-5xl font-bold text-ink mb-2 sm:mb-3 px-4">
+          <h1 className="font-shippori text-3xl sm:text-5xl font-bold text-ink dark:text-white mb-2 sm:mb-3 px-4 transition-colors duration-300">
             L'École Nirava
           </h1>
-          <p className="text-base sm:text-xl text-stone max-w-2xl mx-auto font-inter px-6">
+          <p className="text-base sm:text-xl text-stone dark:text-gray-300 max-w-2xl mx-auto font-inter px-6 transition-colors duration-300">
             Le chemin de l'intégration en sept étapes
           </p>
-          <div className="mt-4 sm:mt-6 flex items-center justify-center gap-2 text-sm text-stone">
+          <div className="mt-4 sm:mt-6 flex items-center justify-center gap-2 text-sm text-stone dark:text-gray-400 transition-colors duration-300">
             <div className="w-6 sm:w-8 h-px bg-jade"></div>
             <span className="font-shippori text-xs sm:text-sm">修行の道</span>
             <div className="w-6 sm:w-8 h-px bg-jade"></div>
@@ -56,22 +56,22 @@ const School: React.FC = () => {
 
         {/* Progression globale */}
         {user && globalStats.total > 0 && (
-          <div className="bg-white/80 backdrop-blur rounded-2xl p-6 shadow-soft mb-12 border border-jade/10">
+          <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur rounded-2xl p-6 shadow-soft mb-12 border border-jade/10 dark:border-gray-700 transition-colors duration-300">
             <div className="flex items-center justify-between mb-4">
-              <span className="font-shippori text-lg font-semibold text-ink">
+              <span className="font-shippori text-lg font-semibold text-ink dark:text-white transition-colors duration-300">
                 Ta progression
               </span>
               <span className="text-3xl font-bold bg-gradient-to-r from-jade to-forest bg-clip-text text-transparent">
                 {globalPercentage}%
               </span>
             </div>
-            <div className="h-3 bg-pearl rounded-full overflow-hidden">
+            <div className="h-3 bg-pearl dark:bg-gray-700 rounded-full overflow-hidden transition-colors duration-300">
               <div
                 className="h-full bg-gradient-to-r from-jade via-wasabi to-forest transition-all duration-1000 ease-out"
                 style={{ width: `${globalPercentage}%` }}
               />
             </div>
-            <p className="text-sm text-stone mt-3 text-center">
+            <p className="text-sm text-stone dark:text-gray-400 mt-3 text-center transition-colors duration-300">
               {globalStats.completed} module{globalStats.completed > 1 ? 's' : ''} complété{globalStats.completed > 1 ? 's' : ''} sur {globalStats.total}
             </p>
           </div>
@@ -156,9 +156,9 @@ const LevelSection: React.FC<LevelSectionProps> = ({ group, allProgress, isPremi
   };
 
   return (
-    <div className={`bg-white/60 backdrop-blur rounded-2xl sm:rounded-3xl p-5 sm:p-8 shadow-soft border-2 ${
-      isLocked ? 'border-stone/20' : 'border-jade/20'
-    } transition-all hover:shadow-lg`}>
+    <div className={`bg-white/60 dark:bg-gray-800/60 backdrop-blur rounded-2xl sm:rounded-3xl p-5 sm:p-8 shadow-soft border-2 ${
+      isLocked ? 'border-stone/20 dark:border-gray-700' : 'border-jade/20 dark:border-jade/30'
+    } transition-all hover:shadow-lg duration-300`}>
       {/* Header du niveau */}
       <div className="flex flex-col sm:flex-row items-start justify-between mb-6 sm:mb-8 gap-4">
         <div className="flex items-center gap-4 sm:gap-6 w-full sm:w-auto">
@@ -175,7 +175,7 @@ const LevelSection: React.FC<LevelSectionProps> = ({ group, allProgress, isPremi
             )}
           </div>
           <div>
-            <h2 className="font-shippori text-xl sm:text-3xl font-bold text-ink mb-1 flex flex-wrap items-center gap-2 sm:gap-3">
+            <h2 className="font-shippori text-xl sm:text-3xl font-bold text-ink dark:text-white mb-1 flex flex-wrap items-center gap-2 sm:gap-3 transition-colors duration-300">
               {levelTitles[group.level]}
               {!group.isFree && (
                 <span className="px-3 py-1 text-xs font-semibold rounded-full bg-gradient-to-r from-vermilion to-sunset text-white">
@@ -183,7 +183,7 @@ const LevelSection: React.FC<LevelSectionProps> = ({ group, allProgress, isPremi
                 </span>
               )}
             </h2>
-            <p className="text-sm sm:text-base text-stone font-inter">
+            <p className="text-sm sm:text-base text-stone dark:text-gray-400 font-inter transition-colors duration-300">
               {group.modules.length} module{group.modules.length > 1 ? 's' : ''}
             </p>
           </div>
@@ -194,7 +194,7 @@ const LevelSection: React.FC<LevelSectionProps> = ({ group, allProgress, isPremi
             <div className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-jade to-forest bg-clip-text text-transparent">
               {stats.percentage}%
             </div>
-            <p className="text-sm text-stone font-inter">
+            <p className="text-sm text-stone dark:text-gray-400 font-inter transition-colors duration-300">
               {stats.completedModules}/{stats.totalModules}
             </p>
           </div>

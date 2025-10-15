@@ -118,13 +118,13 @@ const Home: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-sand via-pearl to-sand/50 pb-24 relative overflow-hidden">
+    <div className="min-h-screen bg-gradient-to-br from-sand via-pearl to-sand/50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900/50 pb-24 relative overflow-hidden transition-colors duration-300">
       {/* Particules flottantes d'arrière-plan */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         {Array.from({ length: 6 }).map((_, i) => (
           <div
             key={i}
-            className="absolute w-2 h-2 bg-jade/10 rounded-full animate-float"
+            className="absolute w-2 h-2 bg-jade/10 dark:bg-jade/20 rounded-full animate-float"
             style={{
               left: `${20 + i * 15}%`,
               top: `${30 + i * 10}%`,
@@ -189,21 +189,21 @@ const Home: React.FC = () => {
           </button>
 
           <h1
-            className="text-5xl font-bold text-ink mb-3 leading-tight tracking-tight"
+            className="text-5xl font-bold text-ink dark:text-white mb-3 leading-tight tracking-tight transition-colors duration-300"
             style={{ fontFamily: "'Shippori Mincho', serif" }}
           >
             Nirava
           </h1>
 
           {user && userStreak > 0 && (
-            <div className="inline-flex items-center gap-2 bg-gradient-to-r from-vermilion to-sunset text-white px-4 py-2 rounded-full shadow-lg mb-4">
+            <div className="inline-flex items-center gap-2 bg-gradient-to-r from-vermilion to-sunset text-white px-4 py-2 rounded-full shadow-lg mb-4 dark:shadow-vermilion/30">
               <Flame className="w-5 h-5" />
               <span className="font-bold">{userStreak} jours</span>
             </div>
           )}
 
           <p
-            className="text-lg text-ink/80 font-light leading-relaxed mb-6"
+            className="text-lg text-ink/80 dark:text-gray-300 font-light leading-relaxed mb-6 transition-colors duration-300"
             style={{ fontFamily: "'Shippori Mincho', serif" }}
           >
             École d'intégration émotionnelle
@@ -212,7 +212,7 @@ const Home: React.FC = () => {
 
         {user ? (
           <>
-            <div className="bg-white/80 backdrop-blur rounded-2xl p-5 mb-6 shadow-soft border border-stone/10">
+            <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur rounded-2xl p-5 mb-6 shadow-soft border border-stone/10 dark:border-gray-700 transition-colors duration-300">
               <DailyQuests
                 onCheckinClick={() => setShowCheckin(true)}
                 onJournalClick={() => setShowJournal(true)}
@@ -221,26 +221,26 @@ const Home: React.FC = () => {
               />
             </div>
 
-            <div className="bg-white/80 backdrop-blur rounded-2xl p-5 shadow-soft border border-stone/10 mb-6">
-              <h3 className="text-lg font-semibold text-ink mb-3 flex items-center gap-2" style={{ fontFamily: "'Shippori Mincho', serif" }}>
+            <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur rounded-2xl p-5 shadow-soft border border-stone/10 dark:border-gray-700 mb-6 transition-colors duration-300">
+              <h3 className="text-lg font-semibold text-ink dark:text-white mb-3 flex items-center gap-2 transition-colors duration-300" style={{ fontFamily: "'Shippori Mincho', serif" }}>
                 <Sparkles className="w-5 h-5 text-jade" />
                 Cette semaine
               </h3>
               <div className="grid grid-cols-3 gap-3">
-                <div className="bg-gradient-to-br from-jade/10 to-forest/10 rounded-xl p-3 border border-jade/20">
+                <div className="bg-gradient-to-br from-jade/10 to-forest/10 dark:from-jade/20 dark:to-forest/20 rounded-xl p-3 border border-jade/20 dark:border-jade/30">
                   <Heart className="w-5 h-5 mb-2 text-jade" />
-                  <div className="text-2xl font-bold text-ink">{weeklyStats.checkins}</div>
-                  <div className="text-xs text-stone">Check-ins</div>
+                  <div className="text-2xl font-bold text-ink dark:text-white transition-colors duration-300">{weeklyStats.checkins}</div>
+                  <div className="text-xs text-stone dark:text-gray-400 transition-colors duration-300">Check-ins</div>
                 </div>
-                <div className="bg-gradient-to-br from-vermilion/10 to-sunset/10 rounded-xl p-3 border border-vermilion/20">
+                <div className="bg-gradient-to-br from-vermilion/10 to-sunset/10 dark:from-vermilion/20 dark:to-sunset/20 rounded-xl p-3 border border-vermilion/20 dark:border-vermilion/30">
                   <BookOpen className="w-5 h-5 mb-2 text-vermilion" />
-                  <div className="text-2xl font-bold text-ink">{weeklyStats.journals}</div>
-                  <div className="text-xs text-stone">Journaux</div>
+                  <div className="text-2xl font-bold text-ink dark:text-white transition-colors duration-300">{weeklyStats.journals}</div>
+                  <div className="text-xs text-stone dark:text-gray-400 transition-colors duration-300">Journaux</div>
                 </div>
-                <div className="bg-gradient-to-br from-wasabi/10 to-jade/10 rounded-xl p-3 border border-wasabi/20">
+                <div className="bg-gradient-to-br from-wasabi/10 to-jade/10 dark:from-wasabi/20 dark:to-jade/20 rounded-xl p-3 border border-wasabi/20 dark:border-wasabi/30">
                   <Timer className="w-5 h-5 mb-2 text-wasabi" />
-                  <div className="text-2xl font-bold text-ink">{weeklyStats.meditation}</div>
-                  <div className="text-xs text-stone">Minutes</div>
+                  <div className="text-2xl font-bold text-ink dark:text-white transition-colors duration-300">{weeklyStats.meditation}</div>
+                  <div className="text-xs text-stone dark:text-gray-400 transition-colors duration-300">Minutes</div>
                 </div>
               </div>
             </div>
@@ -275,7 +275,7 @@ const Home: React.FC = () => {
         ) : (
           <Link
             to="/auth"
-            className="group bg-white/90 backdrop-blur-sm text-wasabi px-8 py-4 rounded-full font-semibold transition-all duration-300 hover:bg-white hover:shadow-lg hover:scale-105 active:scale-95 flex items-center justify-center mx-auto border-2 border-wasabi/20"
+            className="group bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm text-wasabi dark:text-jade px-8 py-4 rounded-full font-semibold transition-all duration-300 hover:bg-white dark:hover:bg-gray-800 hover:shadow-lg hover:scale-105 active:scale-95 flex items-center justify-center mx-auto border-2 border-wasabi/20 dark:border-jade/30"
           >
             <span className="flex items-center">
               Se connecter

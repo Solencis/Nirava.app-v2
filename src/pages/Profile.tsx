@@ -781,9 +781,9 @@ const ProfilePage: React.FC = () => {
   const subscriptionStatus = getSubscriptionStatus();
 
   return (
-    <div className="min-h-screen bg-sand pb-24">
+    <div className="min-h-screen bg-sand dark:bg-gray-900 pb-24 transition-colors duration-300">
       {/* Header zen avec nom */}
-      <div className="bg-gradient-to-br from-wasabi/5 via-transparent to-jade/5 p-6 border-b border-stone/10">
+      <div className="bg-gradient-to-br from-wasabi/5 via-transparent to-jade/5 dark:from-gray-800/50 dark:via-transparent dark:to-gray-800/50 p-6 border-b border-stone/10 dark:border-gray-700 transition-colors duration-300">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-3">
             <div className="relative w-16 h-16">
@@ -801,19 +801,19 @@ const ProfilePage: React.FC = () => {
             </div>
             <div>
               <h1
-                className="text-2xl font-bold text-ink mb-1"
+                className="text-2xl font-bold text-ink dark:text-white mb-1 transition-colors duration-300"
                 style={{ fontFamily: "'Shippori Mincho', serif" }}
               >
                 {profile.display_name}
               </h1>
-              <p className="text-sm text-stone/70">Membre depuis {getJoinDate()}</p>
+              <p className="text-sm text-stone/70 dark:text-gray-400 transition-colors duration-300">Membre depuis {getJoinDate()}</p>
             </div>
           </div>
           <div className="flex items-center gap-2">
             <button
               type="button"
               onClick={() => setShowSettingsMenu(true)}
-              className="bg-white/60 backdrop-blur-sm p-2.5 rounded-xl hover:bg-white/80 active:scale-95 transition-all duration-300 text-ink border border-stone/10 shadow-soft"
+              className="bg-white/60 dark:bg-gray-800/60 backdrop-blur-sm p-2.5 rounded-xl hover:bg-white/80 dark:hover:bg-gray-800/80 active:scale-95 transition-all duration-300 text-ink dark:text-white border border-stone/10 dark:border-gray-700 shadow-soft"
               aria-label="Paramètres"
             >
               <Settings size={18} />
@@ -821,7 +821,7 @@ const ProfilePage: React.FC = () => {
             <button
               type="button"
               onClick={() => setEditing(true)}
-              className="bg-white/60 backdrop-blur-sm p-2.5 rounded-xl hover:bg-white/80 active:scale-95 transition-all duration-300 text-ink border border-stone/10 shadow-soft"
+              className="bg-white/60 dark:bg-gray-800/60 backdrop-blur-sm p-2.5 rounded-xl hover:bg-white/80 dark:hover:bg-gray-800/80 active:scale-95 transition-all duration-300 text-ink dark:text-white border border-stone/10 dark:border-gray-700 shadow-soft"
               aria-label="Modifier le profil"
             >
               <Edit3 size={18} />
@@ -832,13 +832,13 @@ const ProfilePage: React.FC = () => {
 
       <div className="p-4 space-y-4">
         {/* Carte Série (Streak) - Style zen */}
-        <div className="bg-white/80 backdrop-blur rounded-2xl p-6 shadow-soft border border-stone/10">
+        <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur rounded-2xl p-6 shadow-soft border border-stone/10 dark:border-gray-700 transition-colors duration-300">
           <div className="flex items-center gap-3 mb-4">
             <div className="w-12 h-12 bg-gradient-to-br from-sunset/20 to-vermilion/10 rounded-full flex items-center justify-center">
               <Flame className="w-6 h-6 text-sunset" />
             </div>
             <h2
-              className="text-xl font-medium text-ink"
+              className="text-xl font-medium text-ink dark:text-white transition-colors duration-300"
               style={{ fontFamily: "'Shippori Mincho', serif" }}
             >
               Série
@@ -846,18 +846,18 @@ const ProfilePage: React.FC = () => {
           </div>
           <div className="flex items-baseline gap-2">
             <span
-              className="text-5xl font-bold text-ink"
+              className="text-5xl font-bold text-ink dark:text-white transition-colors duration-300"
               style={{ fontFamily: "'Shippori Mincho', serif" }}
             >
               {stats.currentStreak}
             </span>
-            <span className="text-stone/70 text-lg">jour{stats.currentStreak > 1 ? 's' : ''}</span>
+            <span className="text-stone/70 dark:text-gray-400 text-lg transition-colors duration-300">jour{stats.currentStreak > 1 ? 's' : ''}</span>
           </div>
         </div>
 
         {/* Temps total et Sessions - Style zen épuré */}
         <div className="grid grid-cols-2 gap-3">
-          <div className="bg-white/80 backdrop-blur rounded-2xl p-5 shadow-soft border border-stone/10">
+          <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur rounded-2xl p-5 shadow-soft border border-stone/10 dark:border-gray-700 transition-colors duration-300">
             <div className="flex items-center gap-2 mb-3">
               <Clock className="w-5 h-5 text-wasabi" />
               <h3
@@ -878,7 +878,7 @@ const ProfilePage: React.FC = () => {
             </div>
           </div>
 
-          <div className="bg-white/80 backdrop-blur rounded-2xl p-5 shadow-soft border border-stone/10">
+          <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur rounded-2xl p-5 shadow-soft border border-stone/10 dark:border-gray-700 transition-colors duration-300">
             <div className="flex items-center gap-2 mb-3">
               <Target className="w-5 h-5 text-jade" />
               <h3
@@ -901,10 +901,10 @@ const ProfilePage: React.FC = () => {
         </div>
 
         {/* Succès - fond clair */}
-        <div className="bg-white/80 backdrop-blur rounded-2xl p-6 shadow-soft border border-stone/10">
+        <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur rounded-2xl p-6 shadow-soft border border-stone/10 dark:border-gray-700 transition-colors duration-300">
           <div className="flex items-center justify-between mb-5">
             <h2
-              className="text-xl font-medium text-ink"
+              className="text-xl font-medium text-ink dark:text-white transition-colors duration-300"
               style={{ fontFamily: "'Shippori Mincho', serif" }}
             >
               Succès
@@ -942,10 +942,10 @@ const ProfilePage: React.FC = () => {
         </button>
 
         {/* Calendrier */}
-        <div className="bg-white/80 backdrop-blur rounded-2xl p-6 shadow-soft border border-stone/10">
+        <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur rounded-2xl p-6 shadow-soft border border-stone/10 dark:border-gray-700 transition-colors duration-300">
           <div className="flex items-center justify-between mb-5">
             <h2
-              className="text-xl font-medium text-ink"
+              className="text-xl font-medium text-ink dark:text-white transition-colors duration-300"
               style={{ fontFamily: "'Shippori Mincho', serif" }}
             >
               Calendrier
@@ -1000,7 +1000,7 @@ const ProfilePage: React.FC = () => {
 
         {/* XP Bar */}
         {userProfile && (
-          <div className="bg-white/80 backdrop-blur rounded-2xl p-6 shadow-soft border border-stone/10">
+          <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur rounded-2xl p-6 shadow-soft border border-stone/10 dark:border-gray-700 transition-colors duration-300">
             <XPBar
               current={xpProgress.current}
               max={xpProgress.needed}

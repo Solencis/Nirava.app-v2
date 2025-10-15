@@ -98,7 +98,7 @@ const CheckinModal: React.FC<CheckinModalProps> = ({ isOpen, onClose, onSave }) 
 
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-2 z-50">
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm mx-2 max-h-[90vh] overflow-y-auto">
+      <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-sm mx-2 max-h-[90vh] overflow-y-auto transition-colors duration-300">
         <div className="p-6">
           {savedActivity ? (
             // Success state with sharing option
@@ -107,11 +107,11 @@ const CheckinModal: React.FC<CheckinModalProps> = ({ isOpen, onClose, onSave }) 
                 <Heart className="w-8 h-8 text-jade" />
               </div>
               
-              <h2 className="text-xl font-bold text-ink mb-2" style={{ fontFamily: "'Shippori Mincho', serif" }}>
+              <h2 className="text-xl font-bold text-ink dark:text-white mb-2 transition-colors duration-300" style={{ fontFamily: "'Shippori Mincho', serif" }}>
                 Check-in sauvegardé !
               </h2>
               
-              <p className="text-stone mb-6 leading-relaxed">
+              <p className="text-stone dark:text-gray-300 mb-6 leading-relaxed transition-colors duration-300">
                 Ton check-in émotionnel a été enregistré. Tu peux maintenant le partager avec la communauté si tu le souhaites.
               </p>
               
@@ -131,7 +131,7 @@ const CheckinModal: React.FC<CheckinModalProps> = ({ isOpen, onClose, onSave }) 
                     setSavedActivity(null);
                     onClose();
                   }}
-                  className="w-full px-4 py-3 border border-stone/20 text-stone rounded-xl hover:bg-stone/5 transition-colors duration-300"
+                  className="w-full px-4 py-3 border border-stone/20 dark:border-gray-600 text-stone dark:text-gray-300 rounded-xl hover:bg-stone/5 dark:hover:bg-gray-700 transition-colors duration-300"
                 >
                   Garder privé
                 </button>
