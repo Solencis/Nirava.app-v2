@@ -329,7 +329,7 @@ const Journal: React.FC = () => {
           {loading && !isReady() && (
             <div className="text-center py-4">
               <div className="w-8 h-8 border-2 border-jade border-t-transparent rounded-full animate-spin mx-auto mb-3"></div>
-              <p className="text-stone text-sm animate-pulse">Synchronisation de tes données...</p>
+              <p className="text-stone dark:text-gray-300 text-sm animate-pulse transition-colors duration-300">Synchronisation de tes données...</p>
             </div>
           )}
           
@@ -347,7 +347,7 @@ const Journal: React.FC = () => {
               </div>
               
               {/* Badge niveau d'engagement */}
-              <div className="absolute -top-2 -right-2 bg-white rounded-full px-2 py-1 shadow-lg border-2 border-jade/20">
+              <div className="absolute -top-2 -right-2 bg-white dark:bg-gray-700 rounded-full px-2 py-1 shadow-lg border-2 border-jade/20 dark:border-jade/30 transition-colors duration-300">
                 <span className={`text-xs font-bold ${engagement.color}`}>
                   {engagement.level}
                 </span>
@@ -377,7 +377,7 @@ const Journal: React.FC = () => {
             >
               Ton Espace Sacré
             </h1>
-            <p className="text-stone text-base mb-6 leading-relaxed italic opacity-90">{currentMessage}</p>
+            <p className="text-stone dark:text-gray-300 text-base mb-6 leading-relaxed italic opacity-90 transition-colors duration-300">{currentMessage}</p>
             
             {/* Stats dashboard premium */}
             <div className="bg-white/95 dark:bg-gray-800/95 backdrop-blur-md rounded-3xl p-6 shadow-2xl border border-stone/10 dark:border-gray-700 relative overflow-hidden transition-colors duration-300">
@@ -687,7 +687,7 @@ const Journal: React.FC = () => {
                   </div>
                 </div>
                 <div className="text-left">
-                  <h3 className="font-bold text-ink mb-1 text-base" style={{ fontFamily: "'Shippori Mincho', serif" }}>
+                  <h3 className="font-bold text-ink dark:text-white mb-1 text-base transition-colors duration-300" style={{ fontFamily: "'Shippori Mincho', serif" }}>
                     Respiration guidée
                   </h3>
                   <p className="text-xs text-stone/60 leading-relaxed">Reviens à ton souffle</p>
@@ -703,7 +703,7 @@ const Journal: React.FC = () => {
               whileHover={{ scale: 1.02, x: 4 }}
               whileTap={{ scale: 0.98 }}
               onClick={() => handleActionClick('emergency', () => setShowEmergencyPause(true))}
-              className="bg-gradient-to-r from-white to-sunset/5 backdrop-blur-md rounded-3xl p-5 shadow-lg border border-sunset/20 transition-all duration-300 relative overflow-hidden"
+              className="bg-gradient-to-r from-white to-sunset/5 dark:from-gray-800 dark:to-sunset/10 backdrop-blur-md rounded-3xl p-5 shadow-lg border border-sunset/20 dark:border-sunset/30 transition-all duration-300 relative overflow-hidden"
             >
               <div className="flex items-center">
                 <div className="w-14 h-14 relative mr-4 flex-shrink-0">
@@ -713,7 +713,7 @@ const Journal: React.FC = () => {
                   </div>
                 </div>
                 <div className="text-left">
-                  <h3 className="font-bold text-ink mb-1 text-base" style={{ fontFamily: "'Shippori Mincho', serif" }}>
+                  <h3 className="font-bold text-ink dark:text-white mb-1 text-base transition-colors duration-300" style={{ fontFamily: "'Shippori Mincho', serif" }}>
                     Pause d'urgence
                   </h3>
                   <p className="text-xs text-stone/60 leading-relaxed">Recentrage immédiat</p>
@@ -727,16 +727,16 @@ const Journal: React.FC = () => {
           <div className="mb-8">
             <button
               onClick={() => handleActionClick('history', () => setShowHistory(true))}
-              className="group w-full bg-white/95 backdrop-blur-md rounded-3xl p-5 shadow-xl border border-stone/10 text-center transition-all duration-300 hover:scale-[1.01] hover:shadow-2xl hover:bg-stone/5 flex items-center justify-center btn-addictive magnetic-hover relative overflow-hidden"
+              className="group w-full bg-white/95 dark:bg-gray-800/95 backdrop-blur-md rounded-3xl p-5 shadow-xl border border-stone/10 dark:border-gray-700 text-center transition-all duration-300 hover:scale-[1.01] hover:shadow-2xl hover:bg-stone/5 dark:hover:bg-gray-700 flex items-center justify-center btn-addictive magnetic-hover relative overflow-hidden"
             >
               <div className="absolute inset-0 bg-gradient-to-r from-transparent via-stone/5 to-transparent transform -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
 
               <div className="relative z-10 flex items-center">
                 <div className="w-12 h-12 bg-gradient-to-br from-stone/15 to-stone/5 rounded-2xl flex items-center justify-center mr-4 group-hover:scale-110 transition-all duration-300">
-                  <History className="w-6 h-6 text-stone" />
+                  <History className="w-6 h-6 text-stone dark:text-gray-400 transition-colors duration-300" />
                 </div>
                 <div className="text-left">
-                  <h3 className="font-bold text-ink text-base mb-1" style={{ fontFamily: "'Shippori Mincho', serif" }}>
+                  <h3 className="font-bold text-ink dark:text-white text-base mb-1 transition-colors duration-300" style={{ fontFamily: "'Shippori Mincho', serif" }}>
                     Historique
                   </h3>
                   <p className="text-xs text-stone/70">Ton parcours jusqu'ici</p>
@@ -760,7 +760,7 @@ const Journal: React.FC = () => {
                     <h3 className="font-bold text-sunset text-lg" style={{ fontFamily: "'Shippori Mincho', serif" }}>
                       Série de {stats.streak} jours
                     </h3>
-                    <p className="text-stone text-sm">
+                    <p className="text-stone dark:text-gray-300 text-sm transition-colors duration-300">
                       {stats.streak >= 30 ? 'Ta discipline est devenue nature.' :
                        stats.streak >= 14 ? 'Le rituel s\'ancre profondément.' :
                        'Chaque jour te rapproche de toi.'}
@@ -781,7 +781,7 @@ const Journal: React.FC = () => {
                     <h3 className="font-bold text-forest text-lg" style={{ fontFamily: "'Shippori Mincho', serif" }}>
                       {stats.meditation} minutes de silence
                     </h3>
-                    <p className="text-stone text-sm">
+                    <p className="text-stone dark:text-gray-300 text-sm transition-colors duration-300">
                       {stats.meditation >= 120 ? 'Dans le silence, tu as trouvé un refuge.' : 'Chaque minute d\'immobilité est une victoire.'}
                     </p>
                   </div>
@@ -820,16 +820,16 @@ const Journal: React.FC = () => {
 
           {/* Message d'encouragement personnalisé */}
           {(stats.streak > 0 || stats.checkins > 0 || stats.journals > 0 || stats.meditation > 0) && (
-            <div className="bg-gradient-to-br from-jade/8 via-wasabi/8 to-jade/5 rounded-3xl p-6 text-center border border-jade/10 relative overflow-hidden mb-8">
+            <div className="bg-gradient-to-br from-jade/8 via-wasabi/8 to-jade/5 dark:from-jade/20 dark:via-wasabi/20 dark:to-jade/15 rounded-3xl p-6 text-center border border-jade/10 dark:border-jade/30 relative overflow-hidden mb-8 transition-colors duration-300">
               <div className="relative z-10">
-                <p className="text-stone text-sm leading-relaxed mb-3">
+                <p className="text-stone dark:text-gray-300 text-sm leading-relaxed mb-3 transition-colors duration-300">
                   {stats.streak > 0
                     ? `${stats.streak} jour${stats.streak > 1 ? 's' : ''} consécutif${stats.streak > 1 ? 's' : ''}. Chaque rituel renforce ta présence à toi-même.`
                     : "Ta pratique prend forme, petit à petit."
                   }
                 </p>
 
-                <div className="text-xs text-stone/60 leading-relaxed">
+                <div className="text-xs text-stone/60 dark:text-gray-400 leading-relaxed transition-colors duration-300">
                   {engagement.level === 'Expert' && 'Ton intégration est profonde. Continue à explorer.'}
                   {engagement.level === 'Avancé' && 'Tu as trouvé ton rythme. La pratique devient naturelle.'}
                   {engagement.level === 'Régulier' && 'Tu construis une fondation solide, jour après jour.'}
@@ -890,7 +890,7 @@ const Journal: React.FC = () => {
       {/* Modal de correction des minutes */}
       {showReduceModal && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-3xl shadow-2xl w-full max-w-xs mx-2 relative overflow-hidden">
+          <div className="bg-white dark:bg-gray-800 rounded-3xl shadow-2xl w-full max-w-xs mx-2 relative overflow-hidden transition-colors duration-300">
             {/* Effet de brillance */}
             <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-shimmer-slow"></div>
             
@@ -899,16 +899,16 @@ const Journal: React.FC = () => {
                 <Timer className="w-8 h-8 text-vermilion" />
               </div>
               
-              <h3 className="text-xl font-bold text-ink mb-4 text-center" style={{ fontFamily: "'Shippori Mincho', serif" }}>
+              <h3 className="text-xl font-bold text-ink dark:text-white mb-4 text-center transition-colors duration-300" style={{ fontFamily: "'Shippori Mincho', serif" }}>
                 Corriger les minutes
               </h3>
               
-              <p className="text-stone text-sm mb-6 leading-relaxed text-center">
+              <p className="text-stone dark:text-gray-300 text-sm mb-6 leading-relaxed text-center transition-colors duration-300">
                 Combien de minutes veux-tu retirer de ta progression hebdomadaire ?
               </p>
               
               <div className="mb-6">
-                <label className="block text-sm font-medium text-ink mb-3 text-center">
+                <label className="block text-sm font-medium text-ink dark:text-white mb-3 text-center transition-colors duration-300">
                   Minutes à retirer
                 </label>
                 <input
@@ -918,7 +918,7 @@ const Journal: React.FC = () => {
                   placeholder="Ex: 5"
                   min="1"
                   max="120"
-                  className="w-full px-4 py-4 bg-stone/5 border border-stone/20 rounded-2xl focus:border-vermilion focus:ring-2 focus:ring-vermilion/20 transition-all duration-300 text-center text-lg font-bold"
+                  className="w-full px-4 py-4 bg-stone/5 dark:bg-gray-700 border border-stone/20 dark:border-gray-600 rounded-2xl focus:border-vermilion dark:focus:border-red-400 focus:ring-2 focus:ring-vermilion/20 dark:focus:ring-red-400/20 transition-all duration-300 text-center text-lg font-bold text-ink dark:text-white"
                   autoFocus
                 />
               </div>
@@ -929,7 +929,7 @@ const Journal: React.FC = () => {
                     setShowReduceModal(false);
                     setMinutesToReduce('');
                   }}
-                  className="flex-1 px-4 py-4 border border-stone/20 text-stone rounded-2xl hover:bg-stone/5 transition-all duration-300 font-medium"
+                  className="flex-1 px-4 py-4 border border-stone/20 dark:border-gray-600 text-stone dark:text-gray-300 rounded-2xl hover:bg-stone/5 dark:hover:bg-gray-700 transition-all duration-300 font-medium"
                 >
                   Annuler
                 </button>
@@ -949,7 +949,7 @@ const Journal: React.FC = () => {
       {/* Célébration d'action */}
       {showCelebration && (
         <div className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50 animate-fade-in-up pointer-events-none">
-          <div className="bg-white/95 rounded-3xl p-6 shadow-2xl border border-jade/20 text-center max-w-xs mx-4 relative overflow-hidden">
+          <div className="bg-white/95 dark:bg-gray-800/95 rounded-3xl p-6 shadow-2xl border border-jade/20 dark:border-jade/30 text-center max-w-xs mx-4 relative overflow-hidden transition-colors duration-300">
             {/* Confettis */}
             <div className="absolute inset-0 pointer-events-none">
               {Array.from({ length: 8 }).map((_, i) => (
@@ -972,11 +972,11 @@ const Journal: React.FC = () => {
                 <CheckCircle className="w-8 h-8 text-white" />
               </div>
               
-              <h3 className="text-lg font-bold text-ink mb-2" style={{ fontFamily: "'Shippori Mincho', serif" }}>
+              <h3 className="text-lg font-bold text-ink dark:text-white mb-2 transition-colors duration-300" style={{ fontFamily: "'Shippori Mincho', serif" }}>
                 ✨ Action enregistrée !
               </h3>
               
-              <p className="text-stone text-sm">
+              <p className="text-stone dark:text-gray-300 text-sm transition-colors duration-300">
                 {lastAction === 'checkin' && 'Check-in émotionnel sauvegardé'}
                 {lastAction === 'journal' && 'Journal du soir enregistré'}
                 {lastAction === 'meditation' && 'Session de méditation terminée'}
