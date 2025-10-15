@@ -36,6 +36,7 @@ const ProfilePage: React.FC = () => {
   const [showJourneyModal, setShowJourneyModal] = useState(false);
   const [showSettingsMenu, setShowSettingsMenu] = useState(false);
   const [showManualSessionModal, setShowManualSessionModal] = useState(false);
+  const [sessionToEdit, setSessionToEdit] = useState<any>(null);
   const [achievementsFilter, setAchievementsFilter] = useState<'all' | 'unlocked' | 'locked'>('all');
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [selectedDay, setSelectedDay] = useState<Date | null>(null);
@@ -301,7 +302,11 @@ const ProfilePage: React.FC = () => {
       const totalMinutes = allSessions?.reduce((sum, s) => sum + (s.duration_minutes || 0), 0) || 0;
       const totalSessions = allSessions?.length || 0;
 
-      const thisWeekMeditation = supabaseMeditationMinutes || Math.round(meditationWeekMinutes);
+      // Calculer le temps de méditation de la semaine depuis meditation_sessions
+      const thisWeekSessions = allSessions?.filter(s =>
+        new Date(s.created_at) > oneWeekAgo
+      ) || [];
+      const thisWeekMeditation = thisWeekSessions.reduce((sum, s) => sum + (s.duration_minutes || 0), 0);
       const currentStreak = await calculateJournalStreak();
 
       // Calculer toutes les dates avec activités pour le calendrier
@@ -1639,6 +1644,11 @@ const ProfilePage: React.FC = () => {
         user={user}
         stats={stats}
         activityDates={activityDates}
+        onEditSession={(session) => {
+          setSessionToEdit(session);
+          setShowManualSessionModal(true);
+          setShowJourneyModal(false);
+        }}
       />
 
       {/* Menu des paramètres */}
@@ -1650,12 +1660,17 @@ const ProfilePage: React.FC = () => {
       {/* Modal d'ajout/édition manuel de séance */}
       <ManualSessionModal
         isOpen={showManualSessionModal}
-        onClose={() => setShowManualSessionModal(false)}
+        onClose={() => {
+          setShowManualSessionModal(false);
+          setSessionToEdit(null);
+        }}
         onSave={() => {
           // Refresh data after saving
           loadUserStats();
           loadCalendarData();
+          setSessionToEdit(null);
         }}
+        sessionToEdit={sessionToEdit}
       />
     </div>
   );

@@ -1,4 +1,4 @@
-import { X, ChevronLeft, ChevronRight, Heart, Timer, BookOpen, Moon, Wind } from 'lucide-react';
+import { X, ChevronLeft, ChevronRight, Heart, Timer, BookOpen, Moon, Wind, Edit3 } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
 
@@ -15,6 +15,7 @@ interface JourneyModalProps {
     totalSessions: number;
   };
   activityDates: Date[];
+  onEditSession?: (session: any) => void;
 }
 
 interface DayActivity {
@@ -26,7 +27,7 @@ interface DayActivity {
   data: any;
 }
 
-export default function JourneyModal({ show, onClose, user, stats, activityDates }: JourneyModalProps) {
+export default function JourneyModal({ show, onClose, user, stats, activityDates, onEditSession }: JourneyModalProps) {
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [selectedDay, setSelectedDay] = useState<Date | null>(null);
   const [dayActivities, setDayActivities] = useState<DayActivity[]>([]);
@@ -82,7 +83,7 @@ export default function JourneyModal({ show, onClose, user, stats, activityDates
           type: 'meditation',
           icon: '🧘',
           title: 'Méditation',
-          description: `${m.duration} minutes`,
+          description: `${m.duration_minutes} minutes`,
           time: new Date(m.created_at),
           data: m
         }));
@@ -349,7 +350,7 @@ export default function JourneyModal({ show, onClose, user, stats, activityDates
                   {dayActivities.map((activity, i) => (
                     <div
                       key={i}
-                      className="bg-white dark:bg-gray-700 rounded-2xl p-4 border-2 border-stone/10 dark:border-gray-600 active:scale-98 transition-all"
+                      className="bg-white dark:bg-gray-700 rounded-2xl p-4 border-2 border-stone/10 dark:border-gray-600 transition-all"
                       style={{
                         animation: `fadeInUp 0.3s ease-out ${i * 0.05}s both`
                       }}
@@ -368,6 +369,21 @@ export default function JourneyModal({ show, onClose, user, stats, activityDates
                             </span>
                           </div>
                           <p className="text-xs text-stone/80 dark:text-gray-300 leading-relaxed transition-colors duration-300">{activity.description}</p>
+
+                          {/* Bouton éditer pour méditations */}
+                          {activity.type === 'meditation' && onEditSession && (
+                            <button
+                              type="button"
+                              onClick={() => {
+                                onEditSession(activity.data);
+                                setSelectedDay(null);
+                              }}
+                              className="mt-3 flex items-center gap-2 text-xs text-wasabi hover:text-jade transition-colors font-medium"
+                            >
+                              <Edit3 size={14} />
+                              Éditer la séance
+                            </button>
+                          )}
                         </div>
                       </div>
                     </div>

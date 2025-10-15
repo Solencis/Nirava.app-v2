@@ -164,8 +164,14 @@ const Journal: React.FC = () => {
                  !entry.metadata.duration_minutes));
       }) || [];
 
-      // Méditation cette semaine depuis Supabase
-      const thisWeekMeditation = supabaseMeditationMinutes || Math.round(meditationWeekMinutes);
+      // Méditation cette semaine depuis meditation_sessions
+      const { data: meditationSessions } = await supabase
+        .from('meditation_sessions')
+        .select('duration_minutes, created_at')
+        .eq('user_id', user.id)
+        .gte('created_at', oneWeekAgo.toISOString());
+
+      const thisWeekMeditation = meditationSessions?.reduce((sum, s) => sum + (s.duration_minutes || 0), 0) || 0;
 
       // Calculer le streak de journaux
       const currentStreak = await calculateJournalStreak();
