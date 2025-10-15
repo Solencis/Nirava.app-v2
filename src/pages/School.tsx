@@ -219,20 +219,25 @@ const LevelSection: React.FC<LevelSectionProps> = ({ group, allProgress, isPremi
           const currentStep = progress?.current_step || 1;
 
           return (
-            <Link
+            <div
               key={module.id}
-              to={isLocked ? '/pricing' : `/ecole/module/${module.slug}`}
               className={`block p-4 sm:p-5 rounded-xl border-2 transition-all relative ${
                 isLocked
                   ? 'border-stone/10 bg-stone/5 cursor-not-allowed'
-                  : 'border-jade/20 hover:border-jade hover:shadow-md bg-white/40 hover:bg-white/80'
+                  : 'border-jade/20 hover:border-jade hover:shadow-md bg-white/40 hover:bg-white/80 cursor-pointer'
               }`}
+              onClick={() => {
+                if (!isLocked) {
+                  window.location.href = `/ecole/module/${module.slug}`;
+                }
+              }}
             >
               {isLocked && (
-                <div className="absolute inset-0 backdrop-blur-md bg-white/30 dark:bg-gray-800/30 rounded-xl z-10 flex items-center justify-center">
+                <div className="absolute inset-0 backdrop-blur-2xl bg-white/90 dark:bg-gray-900/90 rounded-xl z-10 flex items-center justify-center">
                   <div className="text-center">
-                    <Lock className="w-8 h-8 text-stone dark:text-gray-400 mx-auto mb-2" />
-                    <p className="text-xs font-medium text-stone dark:text-gray-400">Premium</p>
+                    <Lock className="w-10 h-10 text-stone dark:text-gray-400 mx-auto mb-2" />
+                    <p className="text-sm font-semibold text-stone dark:text-gray-400">Contenu Premium</p>
+                    <p className="text-xs text-stone/70 dark:text-gray-500 mt-1">Accès complet en 2026</p>
                   </div>
                 </div>
               )}
@@ -273,7 +278,7 @@ const LevelSection: React.FC<LevelSectionProps> = ({ group, allProgress, isPremi
                   <Lock className="w-4 h-4" />
                 )}
               </div>
-            </Link>
+            </div>
           );
         })}
       </div>

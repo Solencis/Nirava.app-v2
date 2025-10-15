@@ -452,25 +452,22 @@ const DailyQuests: React.FC<DailyQuestsProps> = ({
         </div>
       )}
 
-      {questTiers.length > 1 && (
-        <div className="mt-8 space-y-6">
-          <div className="flex items-center gap-3">
-            <Star className="w-6 h-6 text-jade" />
-            <h3 className="text-xl font-bold text-charcoal">
-              Quêtes Avancées
-            </h3>
-            <div className="flex-1 h-px bg-gradient-to-r from-jade/30 to-transparent" />
-          </div>
+      {questTiers.length > 1 && (() => {
+        const currentTier = questTiers.slice(1).find(tier => userLevel >= tier.minLevel);
+        if (!currentTier) return null;
 
-          {questTiers.slice(1).map((tier) => (
+        return (
+          <div className="mt-8 space-y-6">
+            <div className="flex items-center gap-3">
+              <Star className="w-6 h-6 text-jade" />
+              <h3 className="text-xl font-bold text-charcoal">
+                Quêtes Avancées - Niveau {currentTier.minLevel}
+              </h3>
+              <div className="flex-1 h-px bg-gradient-to-r from-jade/30 to-transparent" />
+            </div>
+
+            {[currentTier].map((tier) => (
             <div key={tier.tier} className="space-y-3">
-              <div className="flex items-center gap-2 px-3 py-1.5 bg-gradient-to-r from-jade/10 to-transparent rounded-lg w-fit">
-                <Trophy className="w-4 h-4 text-jade" />
-                <span className="text-sm font-semibold text-jade">
-                  Niveau {tier.minLevel}+ débloqué
-                </span>
-              </div>
-
               {tier.quests.map((advQuest) => {
                 const isLocked = userLevel < tier.minLevel;
 
@@ -511,10 +508,18 @@ const DailyQuests: React.FC<DailyQuestsProps> = ({
                 return (
                   <div
                     key={advQuest.id}
-                    className={`bg-white rounded-2xl overflow-hidden transition-all duration-300 ${
-                      isLocked ? 'opacity-60' : 'shadow-md hover:shadow-lg'
+                    className={`bg-white rounded-2xl overflow-hidden transition-all duration-300 relative ${
+                      isLocked ? 'opacity-40 pointer-events-none' : 'shadow-md hover:shadow-lg'
                     } ${isAnimating ? 'ring-2 ring-jade animate-pulse' : ''}`}
                   >
+                    {isLocked && (
+                      <div className="absolute inset-0 backdrop-blur-sm bg-white/60 z-10 flex items-center justify-center">
+                        <div className="text-center">
+                          <Lock className="w-8 h-8 text-stone mx-auto mb-1" />
+                          <p className="text-xs font-medium text-stone">Niveau {tier.minLevel} requis</p>
+                        </div>
+                      </div>
+                    )}
                     {isAnimating && (
                       <div className="absolute inset-0 pointer-events-none z-20 flex items-center justify-center">
                         <div className="animate-float-away text-jade font-bold text-4xl flex items-center gap-2">
@@ -614,8 +619,9 @@ const DailyQuests: React.FC<DailyQuestsProps> = ({
               })}
             </div>
           ))}
-        </div>
-      )}
+          </div>
+        );
+      })()}
 
       <style>{`
         @keyframes float-away {
