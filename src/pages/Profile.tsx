@@ -58,20 +58,89 @@ const ProfilePage: React.FC = () => {
     { value: 'N4', label: 'N4 - Service', description: 'Accompagnement et transmission' }
   ];
 
-  const allAchievements = [
-    { days: 1, title: '1er jour - Éveil', fullTitle: 'Premier pas vers la conscience', icon: '🌅', description: 'Vous avez commencé votre voyage', unlocked: false },
-    { days: 3, title: '3 jours - Constance', fullTitle: 'L\'art de la régularité', icon: '🌱', description: 'Trois jours de pratique consécutifs', unlocked: false },
-    { days: 7, title: '7 jours - Ancrage', fullTitle: 'Porteur d\'intention', icon: '🌺', description: 'Une semaine de présence à soi', unlocked: false },
-    { days: 14, title: '14 jours - Rituel', fullTitle: 'Le rythme s\'installe', icon: '🌸', description: 'Deux semaines de pratique', unlocked: false },
-    { days: 21, title: '21 jours - Habitude', fullTitle: 'L\'intégration profonde', icon: '🌻', description: 'Le nouveau devient naturel', unlocked: false },
-    { days: 30, title: '30 jours - Maîtrise', fullTitle: 'Maître du calme', icon: '🌳', description: 'Un mois d\'engagement', unlocked: false },
-    { days: 50, title: '50 jours - Sagesse', fullTitle: 'Voyageur paisible', icon: '🪷', description: 'La sérénité s\'ancre', unlocked: false },
-    { days: 75, title: '75 jours - Rayonnement', fullTitle: 'Source de lumière', icon: '✨', description: 'Votre pratique inspire', unlocked: false },
-    { days: 100, title: '100 jours - Transformation', fullTitle: 'Artisan de lumière', icon: '💖', description: 'Vous êtes devenu la pratique', unlocked: false },
-    { days: 150, title: '150 jours - Maître', fullTitle: 'Gardien de l\'équilibre', icon: '🔮', description: 'La présence est votre nature', unlocked: false },
-    { days: 200, title: '200 jours - Légende', fullTitle: 'Être de conscience', icon: '🌟', description: 'Vous incarnez la paix', unlocked: false },
-    { days: 365, title: '365 jours - Illumination', fullTitle: 'Une année de pratique', icon: '🌈', description: 'Vous avez complété le cycle', unlocked: false },
-  ];
+  // Système de succès par catégories
+  const achievementCategories = {
+    streak: {
+      name: 'Série',
+      icon: '🔥',
+      description: 'Jours consécutifs de pratique',
+      achievements: [
+        { id: 'streak_1', days: 1, title: 'Éveilleur en marche', icon: '🌅', description: 'Tu es resté(e) actif(ve) pendant 1 jour', requirement: 'streak', count: 1 },
+        { id: 'streak_3', days: 3, title: 'Porteur d\'élan', icon: '🌱', description: '3 jours d\'élan, d\'espoir, de retour à soi', requirement: 'streak', count: 3 },
+        { id: 'streak_7', days: 7, title: 'Artisan du souffle', icon: '🌺', description: '7 jours pour honorer ta transformation', requirement: 'streak', count: 7 },
+        { id: 'streak_14', days: 14, title: 'Gardien de l\'instant', icon: '🌸', description: '14 jours de présence constante', requirement: 'streak', count: 14 },
+        { id: 'streak_21', days: 21, title: 'Alchimiste du quotidien', icon: '🌻', description: '21 jours, le seuil de l\'habitude sacrée', requirement: 'streak', count: 21 },
+        { id: 'streak_30', days: 30, title: 'Maître du calme', icon: '🌳', description: 'Un mois entier d\'engagement profond', requirement: 'streak', count: 30 },
+        { id: 'streak_50', days: 50, title: 'Voyageur paisible', icon: '🪷', description: '50 jours où la sérénité devient nature', requirement: 'streak', count: 50 },
+        { id: 'streak_100', days: 100, title: 'Artisan de lumière', icon: '💖', description: '100 jours, tu es devenu(e) la pratique', requirement: 'streak', count: 100 },
+        { id: 'streak_365', days: 365, title: 'Sage du cycle complet', icon: '🌈', description: 'Une année entière, tu as traversé toutes les saisons', requirement: 'streak', count: 365 },
+      ]
+    },
+    meditation: {
+      name: 'Méditation',
+      icon: '🧘',
+      description: 'Minutes de pratique méditative',
+      achievements: [
+        { id: 'med_30', title: 'Première plongée', icon: '🌊', description: '30 minutes de méditation au total', requirement: 'meditation_minutes', count: 30 },
+        { id: 'med_60', title: 'Heure de silence', icon: '⏱️', description: '1 heure de pratique méditative', requirement: 'meditation_minutes', count: 60 },
+        { id: 'med_180', title: 'Explorateur intérieur', icon: '🧭', description: '3 heures à explorer ton paysage intérieur', requirement: 'meditation_minutes', count: 180 },
+        { id: 'med_300', title: 'Maître de la présence', icon: '🕉️', description: '5 heures de pure conscience', requirement: 'meditation_minutes', count: 300 },
+        { id: 'med_600', title: 'Océan de paix', icon: '🌊', description: '10 heures immergé(e) dans la quiétude', requirement: 'meditation_minutes', count: 600 },
+        { id: 'med_1200', title: 'Gardien du vide', icon: '🌌', description: '20 heures à contempler l\'infini', requirement: 'meditation_minutes', count: 1200 },
+        { id: 'med_sessions_10', title: 'Rituel naissant', icon: '🌱', description: '10 sessions de méditation complétées', requirement: 'meditation_sessions', count: 10 },
+        { id: 'med_sessions_30', title: 'Pratique ancrée', icon: '🌳', description: '30 sessions, la méditation devient refuge', requirement: 'meditation_sessions', count: 30 },
+        { id: 'med_sessions_100', title: 'Centenaire du silence', icon: '🏔️', description: '100 sessions, tu es le temple', requirement: 'meditation_sessions', count: 100 },
+      ]
+    },
+    journal: {
+      name: 'Écriture',
+      icon: '📖',
+      description: 'Entrées dans ton journal intime',
+      achievements: [
+        { id: 'journal_1', title: 'Première confidence', icon: '✍️', description: 'Tu as écrit ta première entrée de journal', requirement: 'journal_entries', count: 1 },
+        { id: 'journal_5', title: 'Voix qui s\'éveille', icon: '📝', description: '5 entrées, ta voix intérieure prend forme', requirement: 'journal_entries', count: 5 },
+        { id: 'journal_10', title: 'Chroniqueur de l\'âme', icon: '📔', description: '10 entrées, tu deviens témoin de toi-même', requirement: 'journal_entries', count: 10 },
+        { id: 'journal_30', title: 'Gardien des mémoires', icon: '📚', description: '30 entrées, ton histoire s\'écrit', requirement: 'journal_entries', count: 30 },
+        { id: 'journal_50', title: 'Poète du quotidien', icon: '🖋️', description: '50 entrées, chaque jour devient poésie', requirement: 'journal_entries', count: 50 },
+        { id: 'journal_100', title: 'Maître conteur', icon: '📜', description: '100 entrées, tu tisses la légende de ta vie', requirement: 'journal_entries', count: 100 },
+      ]
+    },
+    breathing: {
+      name: 'Respiration',
+      icon: '💨',
+      description: 'Exercices de respiration consciente',
+      achievements: [
+        { id: 'breath_1', title: 'Premier souffle conscient', icon: '🌬️', description: 'Tu as pratiqué ton premier exercice de respiration', requirement: 'breathing_exercises', count: 1 },
+        { id: 'breath_5', title: 'Danseur du souffle', icon: '💫', description: '5 exercices, le rythme s\'installe', requirement: 'breathing_exercises', count: 5 },
+        { id: 'breath_10', title: 'Alchimiste de l\'air', icon: '🌪️', description: '10 exercices, tu transformes le souffle en énergie', requirement: 'breathing_exercises', count: 10 },
+        { id: 'breath_30', title: 'Maître du prana', icon: '✨', description: '30 exercices, tu maîtrises la force vitale', requirement: 'breathing_exercises', count: 30 },
+        { id: 'breath_50', title: 'Sage du souffle éternel', icon: '🌀', description: '50 exercices, ta respiration devient méditation', requirement: 'breathing_exercises', count: 50 },
+      ]
+    },
+    checkin: {
+      name: 'Check-in émotionnel',
+      icon: '❤️',
+      description: 'Moments de connexion avec tes émotions',
+      achievements: [
+        { id: 'checkin_1', title: 'Première écoute', icon: '💚', description: 'Tu t\'es connecté(e) à tes émotions', requirement: 'checkin_count', count: 1 },
+        { id: 'checkin_5', title: 'Observateur bienveillant', icon: '💙', description: '5 check-ins, tu apprends à t\'accueillir', requirement: 'checkin_count', count: 5 },
+        { id: 'checkin_10', title: 'Ami de ton cœur', icon: '💜', description: '10 check-ins, tu deviens ton propre refuge', requirement: 'checkin_count', count: 10 },
+        { id: 'checkin_30', title: 'Navigateur émotionnel', icon: '🧭', description: '30 check-ins, tu navigues avec sagesse', requirement: 'checkin_count', count: 30 },
+        { id: 'checkin_50', title: 'Maître de l\'accueil', icon: '🌸', description: '50 check-ins, toute émotion est bienvenue', requirement: 'checkin_count', count: 50 },
+      ]
+    },
+    dreams: {
+      name: 'Rêves',
+      icon: '🌙',
+      description: 'Rêves partagés et explorés',
+      achievements: [
+        { id: 'dream_1', title: 'Voyageur nocturne', icon: '🌠', description: 'Tu as partagé ton premier rêve', requirement: 'dream_count', count: 1 },
+        { id: 'dream_5', title: 'Explorateur onirique', icon: '💫', description: '5 rêves, tu ouvres les portes de l\'inconscient', requirement: 'dream_count', count: 5 },
+        { id: 'dream_10', title: 'Tisseur de songes', icon: '🌌', description: '10 rêves, tu cartographies ton monde intérieur', requirement: 'dream_count', count: 10 },
+        { id: 'dream_30', title: 'Sage des mystères', icon: '🔮', description: '30 rêves, tu dialogues avec ton inconscient', requirement: 'dream_count', count: 30 },
+      ]
+    }
+  };
 
   useEffect(() => {
     if (user) {
@@ -463,12 +532,55 @@ const ProfilePage: React.FC = () => {
   const monthNames = ['janvier', 'février', 'mars', 'avril', 'mai', 'juin', 'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre'];
   const dayNames = ['dim.', 'lun.', 'mar.', 'mer.', 'jeu.', 'ven.', 'sam.'];
 
-  const unlockedBadges = allAchievements.map(badge => ({
-    ...badge,
-    unlocked: stats.currentStreak >= badge.days
-  }));
+  // Calculer tous les succès avec leur statut débloqué
+  const calculateAchievements = () => {
+    const allUnlocked: any[] = [];
 
-  const displayedBadges = unlockedBadges.slice(0, 6);
+    Object.entries(achievementCategories).forEach(([categoryKey, category]) => {
+      category.achievements.forEach(achievement => {
+        let unlocked = false;
+
+        switch (achievement.requirement) {
+          case 'streak':
+            unlocked = stats.currentStreak >= achievement.count;
+            break;
+          case 'meditation_minutes':
+            unlocked = stats.totalMeditationMinutes >= achievement.count;
+            break;
+          case 'meditation_sessions':
+            unlocked = stats.totalSessions >= achievement.count;
+            break;
+          case 'journal_entries':
+            unlocked = stats.journals >= achievement.count;
+            break;
+          case 'breathing_exercises':
+            // TODO: Ajouter le compteur d'exercices de respiration
+            unlocked = false;
+            break;
+          case 'checkin_count':
+            unlocked = stats.checkins >= achievement.count;
+            break;
+          case 'dream_count':
+            unlocked = stats.dreams >= achievement.count;
+            break;
+        }
+
+        allUnlocked.push({
+          ...achievement,
+          category: categoryKey,
+          categoryName: category.name,
+          categoryIcon: category.icon,
+          unlocked
+        });
+      });
+    });
+
+    return allUnlocked;
+  };
+
+  const allAchievementsFlat = calculateAchievements();
+  const unlockedBadges = allAchievementsFlat;
+  const displayedBadges = allAchievementsFlat.filter(a => a.category === 'streak').slice(0, 6);
 
   if (!user) {
     return (
@@ -1085,9 +1197,178 @@ const ProfilePage: React.FC = () => {
               </div>
             </div>
 
-            {/* Liste des succès */}
+            {/* Liste des succès par catégories */}
             <div className="overflow-y-auto max-h-[calc(90vh-200px)] sm:max-h-[calc(85vh-200px)] px-4 py-4">
-              <div className="space-y-3">
+              {/* Affichage par catégories */}
+              {Object.entries(achievementCategories).map(([categoryKey, category]) => {
+                const categoryAchievements = allAchievementsFlat
+                  .filter(a => a.category === categoryKey)
+                  .filter(badge => {
+                    if (achievementsFilter === 'unlocked') return badge.unlocked;
+                    if (achievementsFilter === 'locked') return !badge.unlocked;
+                    return true;
+                  });
+
+                if (categoryAchievements.length === 0) return null;
+
+                return (
+                  <div key={categoryKey} className="mb-6">
+                    {/* Header de catégorie */}
+                    <div className="flex items-center gap-2 mb-3 px-1">
+                      <span className="text-2xl">{category.icon}</span>
+                      <div className="flex-1">
+                        <h3
+                          className="text-lg font-bold text-ink"
+                          style={{ fontFamily: "'Shippori Mincho', serif" }}
+                        >
+                          {category.name}
+                        </h3>
+                        <p className="text-xs text-stone/60">{category.description}</p>
+                      </div>
+                      <div className="text-xs font-medium text-jade">
+                        {categoryAchievements.filter(a => a.unlocked).length}/{categoryAchievements.length}
+                      </div>
+                    </div>
+
+                    {/* Succès de la catégorie */}
+                    <div className="space-y-3">
+                      {categoryAchievements.map((badge, index) => {
+                        // Calculer la progression selon le type
+                        let currentValue = 0;
+                        let targetValue = badge.count;
+
+                        switch (badge.requirement) {
+                          case 'streak':
+                            currentValue = stats.currentStreak;
+                            break;
+                          case 'meditation_minutes':
+                            currentValue = stats.totalMeditationMinutes;
+                            break;
+                          case 'meditation_sessions':
+                            currentValue = stats.totalSessions;
+                            break;
+                          case 'journal_entries':
+                            currentValue = stats.journals;
+                            break;
+                          case 'checkin_count':
+                            currentValue = stats.checkins;
+                            break;
+                          case 'dream_count':
+                            currentValue = stats.dreams;
+                            break;
+                        }
+
+                        const progress = Math.min((currentValue / targetValue) * 100, 100);
+                        const remaining = Math.max(targetValue - currentValue, 0);
+
+                        return (
+                          <div
+                            key={badge.id}
+                            className={`relative overflow-hidden rounded-2xl transition-all duration-300 active:scale-98 ${
+                              badge.unlocked
+                                ? 'bg-gradient-to-br from-wasabi/5 via-white to-jade/5 border-2 border-wasabi/20 shadow-md'
+                                : 'bg-white border-2 border-stone/10'
+                            }`}
+                            style={{
+                              animation: `fadeInUp 0.4s ease-out ${index * 0.02}s both`
+                            }}
+                          >
+                            {badge.unlocked && (
+                              <div className="absolute inset-0 bg-gradient-to-br from-wasabi/10 via-transparent to-jade/10 pointer-events-none" />
+                            )}
+
+                            <div className="relative p-4">
+                              <div className="flex items-start gap-3 mb-3">
+                                <div
+                                  className={`relative flex-shrink-0 w-12 h-12 rounded-2xl flex items-center justify-center text-2xl transition-all duration-300 ${
+                                    badge.unlocked
+                                      ? 'bg-gradient-to-br from-wasabi to-jade shadow-lg'
+                                      : 'bg-stone/5 grayscale opacity-50'
+                                  }`}
+                                >
+                                  {badge.icon}
+                                  {badge.unlocked && (
+                                    <div className="absolute -top-1 -right-1 w-4 h-4 bg-jade rounded-full flex items-center justify-center shadow-lg">
+                                      <Check size={10} className="text-white" />
+                                    </div>
+                                  )}
+                                </div>
+
+                                <div className="flex-1 min-w-0">
+                                  <h4
+                                    className={`font-bold text-sm leading-tight mb-1 ${
+                                      badge.unlocked ? 'text-ink' : 'text-stone/60'
+                                    }`}
+                                    style={{ fontFamily: "'Shippori Mincho', serif" }}
+                                  >
+                                    {badge.title}
+                                  </h4>
+                                  <p className={`text-xs leading-relaxed ${badge.unlocked ? 'text-stone/80' : 'text-stone/50'}`}>
+                                    {badge.description}
+                                  </p>
+                                </div>
+                              </div>
+
+                              <div className="space-y-1.5">
+                                <div className="flex items-center justify-between text-xs">
+                                  {badge.unlocked ? (
+                                    <span className="text-jade font-medium flex items-center gap-1">
+                                      <Check size={12} />
+                                      Débloqué
+                                    </span>
+                                  ) : (
+                                    <>
+                                      <span className="text-stone/60">{currentValue} / {targetValue}</span>
+                                      <span className="text-wasabi font-medium">
+                                        {remaining > 0 ? `Encore ${remaining}` : 'Presque !'}
+                                      </span>
+                                    </>
+                                  )}
+                                </div>
+                                <div className="relative h-2 bg-stone/10 rounded-full overflow-hidden">
+                                  <div
+                                    className={`absolute inset-y-0 left-0 rounded-full transition-all duration-1000 ease-out ${
+                                      badge.unlocked
+                                        ? 'bg-gradient-to-r from-jade via-wasabi to-jade'
+                                        : 'bg-gradient-to-r from-wasabi/40 to-jade/40'
+                                    }`}
+                                    style={{ width: `${progress}%` }}
+                                  />
+                                  {badge.unlocked && (
+                                    <div className="absolute inset-0 bg-white/20 animate-shimmer" />
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                );
+              })}
+
+              {/* Message si aucun succès */}
+              {allAchievementsFlat.filter(badge => {
+                if (achievementsFilter === 'unlocked') return badge.unlocked;
+                if (achievementsFilter === 'locked') return !badge.unlocked;
+                return true;
+              }).length === 0 && (
+                <div className="text-center py-12">
+                  <div className="w-20 h-20 mx-auto mb-4 bg-gradient-to-br from-wasabi/10 to-jade/10 rounded-full flex items-center justify-center">
+                    <Target size={32} className="text-wasabi" />
+                  </div>
+                  <p className="text-ink text-lg font-medium mb-2" style={{ fontFamily: "'Shippori Mincho', serif" }}>
+                    Aucun succès dans ce filtre
+                  </p>
+                  <p className="text-stone/70 text-sm">
+                    Change de filtre pour voir d'autres succès
+                  </p>
+                </div>
+              )}
+
+              {/* Ancien code à supprimer - START */}
+              <div className="hidden">
                 {unlockedBadges
                   .filter(badge => {
                     if (achievementsFilter === 'unlocked') return badge.unlocked;
@@ -1211,24 +1492,6 @@ const ProfilePage: React.FC = () => {
                     );
                   })}
               </div>
-
-              {/* Message si aucun succès */}
-              {achievementsFilter === 'unlocked' && unlockedBadges.filter(b => b.unlocked).length === 0 && (
-                <div className="text-center py-12">
-                  <div className="w-20 h-20 mx-auto mb-4 bg-gradient-to-br from-wasabi/10 to-jade/10 rounded-full flex items-center justify-center">
-                    <Target size={32} className="text-wasabi" />
-                  </div>
-                  <p
-                    className="text-ink text-lg font-medium mb-2"
-                    style={{ fontFamily: "'Shippori Mincho', serif" }}
-                  >
-                    Aucun succès débloqué
-                  </p>
-                  <p className="text-stone/70 text-sm">
-                    Pratiquez régulièrement pour débloquer vos premiers succès
-                  </p>
-                </div>
-              )}
 
               {/* Padding bottom pour swipe */}
               <div className="h-4" />
