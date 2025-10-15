@@ -3,7 +3,7 @@ import { Heart, Send, Users, Sparkles, Settings, Trash2, MessageCircle, ChevronD
 import { motion } from 'framer-motion';
 import { supabase, Post, Profile } from '../lib/supabase';
 import { useAuth } from '../hooks/useAuth';
-import { getLevelBadge, getLevelLabel } from '../utils/levelSystem';
+import { getLevelBadge, getLevelLabel, calculateLevel, getXPProgressPercentage } from '../utils/levelSystem';
 
 interface Comment {
   id: string;
@@ -816,19 +816,44 @@ const Community: React.FC = () => {
                   <div>
                     <label className="block text-sm font-medium text-ink mb-3">Niveau actuel</label>
                     <div className="bg-gradient-to-r from-wasabi/10 to-jade/10 rounded-2xl p-6 border-2 border-wasabi/20">
-                      <div className="flex items-center justify-center gap-3">
-                        <div className="w-16 h-16 bg-gradient-to-br from-wasabi to-jade rounded-full flex items-center justify-center shadow-lg">
-                          <span className="text-white font-bold text-xl">{getLevelBadge(profile.total_xp || 0)}</span>
-                        </div>
-                        <div className="text-left">
-                          <div className="text-2xl font-bold text-wasabi">{getLevelBadge(profile.total_xp || 0)}</div>
-                          <div className="text-sm text-stone/70">{getLevelLabel(getLevelBadge(profile.total_xp || 0))}</div>
-                          <div className="text-xs text-stone/60 mt-1">{profile.total_xp || 0} XP</div>
-                        </div>
-                      </div>
-                      <div className="text-center text-xs text-stone/60 mt-3">
-                        Ton niveau \u00e9volue automatiquement avec ton XP
-                      </div>
+                      {(() => {
+                        const levelInfo = calculateLevel(profile.total_xp || 0);
+                        const progress = getXPProgressPercentage(profile.total_xp || 0);
+
+                        return (
+                          <>
+                            <div className="flex items-center justify-between mb-4">
+                              <div className="flex items-center gap-3">
+                                <div className="w-12 h-12 bg-gradient-to-br from-wasabi to-jade rounded-xl flex items-center justify-center shadow-lg">
+                                  <span className="text-white font-bold text-lg">{levelInfo.level}</span>
+                                </div>
+                                <div className="text-left">
+                                  <div className="text-sm text-stone/60">Progression</div>
+                                  <div className="text-xl font-bold text-wasabi">Niveau {levelInfo.level}</div>
+                                </div>
+                              </div>
+                              <div className="text-right">
+                                <div className="text-2xl font-bold text-jade">{profile.total_xp || 0}</div>
+                                <div className="text-xs text-stone/60">/ {levelInfo.totalXpForLevel + levelInfo.xpForNextLevel} XP</div>
+                              </div>
+                            </div>
+
+                            <div className="mb-2">
+                              <div className="w-full bg-stone/20 rounded-full h-2 overflow-hidden">
+                                <div
+                                  className="bg-gradient-to-r from-wasabi to-jade h-full rounded-full transition-all duration-500"
+                                  style={{ width: `${progress}%` }}
+                                />
+                              </div>
+                            </div>
+
+                            <div className="flex items-center justify-between text-xs text-stone/60">
+                              <span>{Math.round(progress)}% complété</span>
+                              <span>{levelInfo.xpForNextLevel - levelInfo.xpForCurrentLevel} XP restants</span>
+                            </div>
+                          </>
+                        );
+                      })()}
                     </div>
                   </div>
 
