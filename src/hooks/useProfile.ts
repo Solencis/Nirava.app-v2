@@ -14,6 +14,7 @@ interface Profile {
   level: string;
   share_progress: boolean;
   subscription_status: string;
+  is_premium: boolean;
   created_at: string;
   updated_at: string;
 }

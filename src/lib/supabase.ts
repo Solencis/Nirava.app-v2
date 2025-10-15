@@ -108,6 +108,7 @@ export interface Profile {
   bio?: string;
   share_progress: boolean;
   subscription_status: 'none' | 'active' | 'cancelled';
+  is_premium: boolean;
   created_at: string;
   updated_at: string;
 }

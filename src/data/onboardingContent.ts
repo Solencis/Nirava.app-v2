@@ -12,13 +12,13 @@ export interface OnboardingSlide {
 export const onboardingSlides: OnboardingSlide[] = [
   {
     id: 1,
-    title: 'Bienvenue chez toi',
-    subtitle: 'Un espace pour grandir en conscience',
-    description: 'Nirava t\'invite à un voyage intérieur. Pas à pas, module après module, découvre comment respirer pleinement, accueillir tes émotions et transformer tes habitudes. Ici, tu avances à ton rythme, en douceur.',
-    icon: '🌱',
+    title: 'Bienvenue sur Nirava',
+    subtitle: 'Version prototype en accès limité',
+    description: 'Cette version est un prototype de l\'application finale qui sera lancée courant 2026. Certaines fonctionnalités sont en développement, des bugs peuvent survenir, et les contenus sont limités. L\'accès complet avec tous les modules et fonctionnalités sera disponible dans la version payante. Merci de votre compréhension et de votre soutien dans cette aventure.',
+    icon: '🚀',
     gradient: 'from-emerald-400 via-teal-400 to-cyan-400',
     textColor: 'text-emerald-900',
-    ctaText: 'Commencer le voyage'
+    ctaText: 'J\'ai compris'
   },
   {
     id: 2,

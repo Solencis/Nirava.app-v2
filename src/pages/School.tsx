@@ -12,7 +12,7 @@ const School: React.FC = () => {
   const { data: allProgress = {} } = useAllProgress();
 
   const levelGroups = getModulesByLevel();
-  const isPremium = profile?.plan === 'premium';
+  const isPremium = profile?.is_premium || false;
 
   const globalStats = levelGroups.reduce((acc, group) => {
     const stats = calculateLevelStats(group.level, allProgress);
@@ -222,12 +222,20 @@ const LevelSection: React.FC<LevelSectionProps> = ({ group, allProgress, isPremi
             <Link
               key={module.id}
               to={isLocked ? '/pricing' : `/ecole/module/${module.slug}`}
-              className={`block p-4 sm:p-5 rounded-xl border-2 transition-all ${
+              className={`block p-4 sm:p-5 rounded-xl border-2 transition-all relative ${
                 isLocked
-                  ? 'border-stone/10 bg-stone/5 opacity-50 cursor-not-allowed'
+                  ? 'border-stone/10 bg-stone/5 cursor-not-allowed'
                   : 'border-jade/20 hover:border-jade hover:shadow-md bg-white/40 hover:bg-white/80'
               }`}
             >
+              {isLocked && (
+                <div className="absolute inset-0 backdrop-blur-md bg-white/30 dark:bg-gray-800/30 rounded-xl z-10 flex items-center justify-center">
+                  <div className="text-center">
+                    <Lock className="w-8 h-8 text-stone dark:text-gray-400 mx-auto mb-2" />
+                    <p className="text-xs font-medium text-stone dark:text-gray-400">Premium</p>
+                  </div>
+                </div>
+              )}
               <div className="flex items-start justify-between mb-3">
                 <div className="flex-1">
                   <div className="flex items-center gap-2 mb-1">
