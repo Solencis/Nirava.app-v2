@@ -289,11 +289,6 @@ const Community: React.FC = () => {
 
       if (error) throw error;
       setShowSettings(false);
-      
-      // Celebration effect
-      setCelebrationType('post');
-      setShowCelebration(true);
-      setTimeout(() => setShowCelebration(false), 2000);
     } catch (error) {
       console.error('Error updating profile:', error);
     }
@@ -899,12 +894,12 @@ const Community: React.FC = () => {
                       />
                     ) : (
                       <div className="w-10 h-10 bg-gradient-to-br from-wasabi to-jade rounded-full flex items-center justify-center mr-3 shadow-md">
-                        <span className="text-white font-bold text-sm">{getLevelBadge(profile.total_xp || 0)}</span>
+                        <span className="text-white font-bold text-sm">{calculateLevel(profile.total_xp || 0).level}</span>
                       </div>
                     )}
                     <div>
                       <div className="font-bold text-ink text-sm">{profile.display_name}</div>
-                      <div className="text-xs text-wasabi font-medium">{getLevelBadge(profile.total_xp || 0)}</div>
+                      <div className="text-xs text-wasabi font-medium">Niveau {calculateLevel(profile.total_xp || 0).level}</div>
                     </div>
                   </div>
                   <button
@@ -1042,7 +1037,7 @@ const Community: React.FC = () => {
                             />
                           ) : (
                             <div className="w-10 h-10 bg-gradient-to-br from-wasabi to-jade rounded-full flex items-center justify-center mr-3 shadow-md">
-                              <span className="text-white text-xs font-bold">{getLevelBadge(post.profiles?.total_xp || 0)}</span>
+                              <span className="text-white text-xs font-bold">{calculateLevel(post.profiles?.total_xp || 0).level}</span>
                             </div>
                           )}
                           <div>
@@ -1050,7 +1045,7 @@ const Community: React.FC = () => {
                               {post.profiles?.display_name || 'Utilisateur'}
                             </div>
                             <div className="flex items-center">
-                              <span className="text-xs text-wasabi font-medium">{getLevelBadge(post.profiles?.total_xp || 0)}</span>
+                              <span className="text-xs text-wasabi font-medium">Niveau {calculateLevel(post.profiles?.total_xp || 0).level}</span>
                               {post.user_id === user?.id && (
                                 <Crown className="w-3 h-3 text-sunset ml-1" />
                               )}
@@ -1248,7 +1243,7 @@ const Community: React.FC = () => {
                               />
                             ) : (
                               <div className="w-10 h-10 bg-gradient-to-br from-wasabi to-jade rounded-full flex items-center justify-center shadow-lg animate-pulse-glow flex-shrink-0">
-                                <span className="text-white font-bold text-sm">{getLevelBadge(profile?.total_xp || 0)}</span>
+                                <span className="text-white font-bold text-sm">{calculateLevel(profile?.total_xp || 0).level}</span>
                               </div>
                             )}
                             <div className="flex-1">
@@ -1376,7 +1371,7 @@ const Community: React.FC = () => {
                   />
                 ) : (
                   <div className="w-16 h-16 bg-gradient-to-br from-wasabi to-jade rounded-full flex items-center justify-center mr-4 shadow-lg animate-pulse-glow border-4 border-white">
-                    <span className="text-white font-bold text-lg">{getLevelBadge(userProfileData.total_xp || 0)}</span>
+                    <span className="text-white font-bold text-lg">{calculateLevel(userProfileData.total_xp || 0).level}</span>
                   </div>
                 )}
                 <div>
@@ -1423,7 +1418,7 @@ const Community: React.FC = () => {
                 <div className="text-center mb-4">
                   <div className="flex items-center justify-center mb-2">
                     <Star className="w-5 h-5 text-wasabi mr-2 animate-twinkle" />
-                    <span className="text-wasabi font-bold">Niveau {getLevelBadge(userProfileData.total_xp || 0)}</span>
+                    <span className="text-wasabi font-bold">Niveau {calculateLevel(userProfileData.total_xp || 0).level}</span>
                     <Star className="w-5 h-5 text-wasabi ml-2 animate-twinkle" style={{ animationDelay: '0.5s' }} />
                   </div>
                   {showUserProfile === user?.id && (
