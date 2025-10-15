@@ -14,6 +14,7 @@ import Achievements from '../components/Achievements';
 import XPBar from '../components/XPBar';
 import JourneyModal from '../components/JourneyModal';
 import SettingsMenu from '../components/SettingsMenu';
+import ManualSessionModal from '../components/ManualSessionModal';
 
 const ProfilePage: React.FC = () => {
   const { user, signOut } = useAuth();
@@ -34,6 +35,7 @@ const ProfilePage: React.FC = () => {
   const [showAllAchievements, setShowAllAchievements] = useState(false);
   const [showJourneyModal, setShowJourneyModal] = useState(false);
   const [showSettingsMenu, setShowSettingsMenu] = useState(false);
+  const [showManualSessionModal, setShowManualSessionModal] = useState(false);
   const [achievementsFilter, setAchievementsFilter] = useState<'all' | 'unlocked' | 'locked'>('all');
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [selectedDay, setSelectedDay] = useState<Date | null>(null);
@@ -935,6 +937,7 @@ const ProfilePage: React.FC = () => {
         {/* Bouton ajout manuel */}
         <button
           type="button"
+          onClick={() => setShowManualSessionModal(true)}
           className="w-full bg-white/80 dark:bg-gray-800/80 backdrop-blur border border-wasabi/30 dark:border-jade/30 text-wasabi dark:text-jade py-4 rounded-xl font-medium hover:bg-wasabi/10 dark:hover:bg-jade/20 transition-all duration-300 shadow-soft"
           style={{ fontFamily: "'Shippori Mincho', serif" }}
         >
@@ -1642,6 +1645,17 @@ const ProfilePage: React.FC = () => {
       <SettingsMenu
         show={showSettingsMenu}
         onClose={() => setShowSettingsMenu(false)}
+      />
+
+      {/* Modal d'ajout/édition manuel de séance */}
+      <ManualSessionModal
+        isOpen={showManualSessionModal}
+        onClose={() => setShowManualSessionModal(false)}
+        onSave={() => {
+          // Refresh data after saving
+          loadUserStats();
+          loadCalendarData();
+        }}
       />
     </div>
   );

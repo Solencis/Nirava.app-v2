@@ -318,7 +318,7 @@ export default function SettingsMenu({ show, onClose }: SettingsMenuProps) {
 
               {/* Contact */}
               <a
-                href="mailto:support@nirava.app"
+                href="mailto:contact@nirava.earth"
                 className="w-full bg-white dark:bg-gray-800 rounded-2xl p-4 border-2 border-stone/10 dark:border-gray-700 hover:border-wasabi/30 active:scale-98 transition-all duration-200 mb-3 block"
               >
                 <div className="flex items-center justify-between">
@@ -331,7 +331,7 @@ export default function SettingsMenu({ show, onClose }: SettingsMenuProps) {
                         Nous contacter
                       </p>
                       <p className="text-xs text-stone/60 dark:text-gray-400">
-                        support@nirava.app
+                        contact@nirava.earth
                       </p>
                     </div>
                   </div>
