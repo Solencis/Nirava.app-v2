@@ -33,6 +33,7 @@ const ManualSessionModal: React.FC<ManualSessionModalProps> = ({
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [error, setError] = useState('');
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   // Populate form when editing
   useEffect(() => {
@@ -118,12 +119,9 @@ const ManualSessionModal: React.FC<ManualSessionModalProps> = ({
   const handleDelete = async () => {
     if (!sessionToEdit || !user) return;
 
-    if (!confirm('Êtes-vous sûr de vouloir supprimer cette séance ?')) {
-      return;
-    }
-
     setDeleting(true);
     setError('');
+    setShowDeleteConfirm(false);
 
     try {
       const { error: deleteError } = await supabase
@@ -272,7 +270,7 @@ const ManualSessionModal: React.FC<ManualSessionModalProps> = ({
             {sessionToEdit && (
               <button
                 type="button"
-                onClick={handleDelete}
+                onClick={() => setShowDeleteConfirm(true)}
                 disabled={deleting}
                 className="flex-1 bg-red-500 hover:bg-red-600 disabled:bg-red-300 text-white py-3 rounded-xl font-medium transition-all duration-300 flex items-center justify-center gap-2"
                 style={{ fontFamily: "'Shippori Mincho', serif" }}
@@ -292,6 +290,45 @@ const ManualSessionModal: React.FC<ManualSessionModalProps> = ({
               {saving ? 'Enregistrement...' : sessionToEdit ? 'Mettre à jour' : 'Ajouter'}
             </button>
           </div>
+
+          {/* Confirmation de suppression */}
+          {showDeleteConfirm && (
+            <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[100] p-4">
+              <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-sm p-6 transition-colors duration-300">
+                <div className="text-center mb-6">
+                  <div className="w-16 h-16 bg-red-100 dark:bg-red-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <Trash2 size={32} className="text-red-600 dark:text-red-400" />
+                  </div>
+                  <h3 className="text-xl font-bold text-ink dark:text-white mb-2" style={{ fontFamily: "'Shippori Mincho', serif" }}>
+                    Supprimer cette séance ?
+                  </h3>
+                  <p className="text-sm text-stone/70 dark:text-gray-400">
+                    Cette action est irréversible. La séance sera définitivement supprimée.
+                  </p>
+                </div>
+                <div className="flex gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setShowDeleteConfirm(false)}
+                    disabled={deleting}
+                    className="flex-1 bg-stone/10 dark:bg-gray-700 hover:bg-stone/20 dark:hover:bg-gray-600 text-ink dark:text-white py-3 rounded-xl font-medium transition-all duration-300"
+                    style={{ fontFamily: "'Shippori Mincho', serif" }}
+                  >
+                    Annuler
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleDelete}
+                    disabled={deleting}
+                    className="flex-1 bg-red-600 hover:bg-red-700 disabled:bg-red-400 text-white py-3 rounded-xl font-medium transition-all duration-300 flex items-center justify-center gap-2"
+                    style={{ fontFamily: "'Shippori Mincho', serif" }}
+                  >
+                    {deleting ? 'Suppression...' : 'Supprimer'}
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>
