@@ -12,6 +12,7 @@ import { useNavigate } from 'react-router-dom';
 import IOSInstallHint from '../components/IOSInstallHint';
 import Achievements from '../components/Achievements';
 import XPBar from '../components/XPBar';
+import JourneyModal from '../components/JourneyModal';
 
 const ProfilePage: React.FC = () => {
   const { user, signOut } = useAuth();
@@ -33,6 +34,8 @@ const ProfilePage: React.FC = () => {
   const [showJourneyModal, setShowJourneyModal] = useState(false);
   const [achievementsFilter, setAchievementsFilter] = useState<'all' | 'unlocked' | 'locked'>('all');
   const [currentMonth, setCurrentMonth] = useState(new Date());
+  const [selectedDay, setSelectedDay] = useState<Date | null>(null);
+  const [dayActivities, setDayActivities] = useState<any[]>([]);
   const [stats, setStats] = useState({
     checkins: 0,
     journals: 0,
@@ -531,6 +534,87 @@ const ProfilePage: React.FC = () => {
 
   const monthNames = ['janvier', 'février', 'mars', 'avril', 'mai', 'juin', 'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre'];
   const dayNames = ['dim.', 'lun.', 'mar.', 'mer.', 'jeu.', 'ven.', 'sam.'];
+
+  // Charger les activités d'un jour spécifique
+  const loadDayActivities = async (date: Date) => {
+    if (!user) return;
+
+    const startOfDay = new Date(date);
+    startOfDay.setHours(0, 0, 0, 0);
+    const endOfDay = new Date(date);
+    endOfDay.setHours(23, 59, 59, 999);
+
+    try {
+      const activities: any[] = [];
+
+      // Charger les check-ins du jour
+      const { data: checkins } = await supabase
+        .from('checkins')
+        .select('*')
+        .eq('user_id', user.id)
+        .gte('created_at', startOfDay.toISOString())
+        .lte('created_at', endOfDay.toISOString())
+        .order('created_at', { ascending: false });
+
+      if (checkins) {
+        checkins.forEach(c => activities.push({
+          type: 'checkin',
+          icon: '❤️',
+          title: 'Check-in émotionnel',
+          description: `Émotion: ${c.emotion}`,
+          time: new Date(c.created_at),
+          data: c
+        }));
+      }
+
+      // Charger les méditations du jour
+      const { data: meditations } = await supabase
+        .from('meditation_sessions')
+        .select('*')
+        .eq('user_id', user.id)
+        .gte('created_at', startOfDay.toISOString())
+        .lte('created_at', endOfDay.toISOString())
+        .order('created_at', { ascending: false });
+
+      if (meditations) {
+        meditations.forEach(m => activities.push({
+          type: 'meditation',
+          icon: '🧘',
+          title: 'Méditation',
+          description: `${m.duration} minutes`,
+          time: new Date(m.created_at),
+          data: m
+        }));
+      }
+
+      // Charger les journaux du jour
+      const { data: journals } = await supabase
+        .from('journals')
+        .select('*')
+        .eq('user_id', user.id)
+        .gte('created_at', startOfDay.toISOString())
+        .lte('created_at', endOfDay.toISOString())
+        .order('created_at', { ascending: false });
+
+      if (journals) {
+        journals.forEach(j => activities.push({
+          type: 'journal',
+          icon: j.type === 'dream' ? '🌙' : '📖',
+          title: j.type === 'dream' ? 'Rêve' : 'Écriture',
+          description: j.content.substring(0, 60) + (j.content.length > 60 ? '...' : ''),
+          time: new Date(j.created_at),
+          data: j
+        }));
+      }
+
+      // Trier par heure
+      activities.sort((a, b) => b.time.getTime() - a.time.getTime());
+      setDayActivities(activities);
+      setSelectedDay(date);
+    } catch (error) {
+      console.error('Error loading day activities:', error);
+    }
+  };
 
   // Calculer tous les succès avec leur statut débloqué
   const calculateAchievements = () => {
@@ -1500,209 +1584,14 @@ const ProfilePage: React.FC = () => {
         </div>
       )}
 
-      {/* Modal Votre Parcours */}
-      {showJourneyModal && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4 z-50 animate-in fade-in duration-300">
-          <div className="bg-gradient-to-b from-sand via-white to-sand rounded-t-3xl sm:rounded-2xl shadow-2xl w-full sm:max-w-2xl mx-0 sm:mx-2 max-h-[85vh] overflow-hidden animate-in slide-in-from-bottom duration-300">
-            <div className="sticky top-0 bg-gradient-to-r from-jade to-wasabi text-white p-6 z-10">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h2
-                    className="text-2xl font-bold mb-1"
-                    style={{ fontFamily: "'Shippori Mincho', serif" }}
-                  >
-                    Votre Parcours
-                  </h2>
-                  <p className="text-white/90 text-sm">
-                    {stats.currentStreak} jours de pratique
-                  </p>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => setShowJourneyModal(false)}
-                  className="w-10 h-10 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center transition-all duration-300"
-                >
-                  <X size={20} />
-                </button>
-              </div>
-            </div>
-
-            <div className="overflow-y-auto max-h-[calc(85vh-120px)] p-6">
-              {/* Timeline visuelle */}
-              <div className="relative">
-                {/* Ligne verticale centrale */}
-                <div className="absolute left-8 top-0 bottom-0 w-0.5 bg-gradient-to-b from-wasabi via-jade to-stone/20" />
-
-                {/* Statistiques en timeline */}
-                <div className="space-y-6">
-                  {/* Check-ins */}
-                  <div className="relative pl-20 animate-in slide-in-from-left duration-500">
-                    <div className="absolute left-4 w-8 h-8 bg-gradient-to-br from-wasabi to-jade rounded-full flex items-center justify-center shadow-lg border-4 border-white z-10">
-                      <Heart size={16} className="text-white" />
-                    </div>
-                    <div className="bg-white rounded-2xl p-5 shadow-soft border border-stone/10">
-                      <div className="flex items-center justify-between mb-2">
-                        <h3
-                          className="font-bold text-ink"
-                          style={{ fontFamily: "'Shippori Mincho', serif" }}
-                        >
-                          Check-ins émotionnels
-                        </h3>
-                        <span className="text-2xl font-bold text-wasabi">{stats.checkins}</span>
-                      </div>
-                      <p className="text-sm text-stone">
-                        Moments de connexion avec vos émotions
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* Méditations */}
-                  <div className="relative pl-20 animate-in slide-in-from-left duration-500 delay-100">
-                    <div className="absolute left-4 w-8 h-8 bg-gradient-to-br from-jade to-wasabi rounded-full flex items-center justify-center shadow-lg border-4 border-white z-10">
-                      <Timer size={16} className="text-white" />
-                    </div>
-                    <div className="bg-white rounded-2xl p-5 shadow-soft border border-stone/10">
-                      <div className="flex items-center justify-between mb-2">
-                        <h3
-                          className="font-bold text-ink"
-                          style={{ fontFamily: "'Shippori Mincho', serif" }}
-                        >
-                          Temps de méditation
-                        </h3>
-                        <span className="text-2xl font-bold text-jade">{stats.totalMeditationMinutes}min</span>
-                      </div>
-                      <p className="text-sm text-stone">
-                        {stats.totalSessions} séances de pratique guidée
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* Écrits */}
-                  <div className="relative pl-20 animate-in slide-in-from-left duration-500 delay-200">
-                    <div className="absolute left-4 w-8 h-8 bg-gradient-to-br from-wasabi to-jade rounded-full flex items-center justify-center shadow-lg border-4 border-white z-10">
-                      <BookOpen size={16} className="text-white" />
-                    </div>
-                    <div className="bg-white rounded-2xl p-5 shadow-soft border border-stone/10">
-                      <div className="flex items-center justify-between mb-2">
-                        <h3
-                          className="font-bold text-ink"
-                          style={{ fontFamily: "'Shippori Mincho', serif" }}
-                        >
-                          Écrits & Rêves
-                        </h3>
-                        <span className="text-2xl font-bold text-wasabi">{stats.journals + stats.dreams}</span>
-                      </div>
-                      <p className="text-sm text-stone">
-                        {stats.journals} écrits · {stats.dreams} rêves partagés
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* Série actuelle */}
-                  <div className="relative pl-20 animate-in slide-in-from-left duration-500 delay-300">
-                    <div className="absolute left-4 w-8 h-8 bg-gradient-to-br from-jade to-wasabi rounded-full flex items-center justify-center shadow-lg border-4 border-white z-10">
-                      <Flame size={16} className="text-white" />
-                    </div>
-                    <div className="bg-gradient-to-br from-wasabi/10 to-jade/10 rounded-2xl p-5 shadow-soft border-2 border-wasabi/30">
-                      <div className="flex items-center justify-between mb-2">
-                        <h3
-                          className="font-bold text-ink"
-                          style={{ fontFamily: "'Shippori Mincho', serif" }}
-                        >
-                          Série actuelle
-                        </h3>
-                        <span className="text-3xl font-bold bg-gradient-to-r from-wasabi to-jade bg-clip-text text-transparent">
-                          {stats.currentStreak}
-                        </span>
-                      </div>
-                      <p className="text-sm text-stone mb-3">
-                        Jours consécutifs de pratique
-                      </p>
-                      <div className="flex gap-1">
-                        {Array.from({ length: Math.min(stats.currentStreak, 7) }).map((_, i) => (
-                          <div
-                            key={i}
-                            className="flex-1 h-2 bg-gradient-to-r from-wasabi to-jade rounded-full animate-in zoom-in duration-300"
-                            style={{ animationDelay: `${i * 50}ms` }}
-                          />
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Prochain objectif */}
-                  {stats.currentStreak > 0 && (
-                    <div className="relative pl-20 animate-in slide-in-from-left duration-500 delay-400">
-                      <div className="absolute left-4 w-8 h-8 bg-gradient-to-br from-stone/30 to-stone/50 rounded-full flex items-center justify-center shadow-lg border-4 border-white z-10">
-                        <Target size={16} className="text-white" />
-                      </div>
-                      <div className="bg-white rounded-2xl p-5 shadow-soft border border-stone/10">
-                        <h3
-                          className="font-bold text-ink mb-2"
-                          style={{ fontFamily: "'Shippori Mincho', serif" }}
-                        >
-                          Prochain objectif
-                        </h3>
-                        {(() => {
-                          const nextBadge = unlockedBadges.find(b => !b.unlocked);
-                          if (nextBadge) {
-                            const daysLeft = nextBadge.days - stats.currentStreak;
-                            return (
-                              <>
-                                <p className="text-sm text-stone mb-3">
-                                  <span className="font-medium text-wasabi">{nextBadge.fullTitle || nextBadge.title}</span> dans {daysLeft} jour{daysLeft > 1 ? 's' : ''}
-                                </p>
-                                <div className="flex items-center gap-2">
-                                  <div className="flex-1 h-2 bg-stone/10 rounded-full overflow-hidden">
-                                    <div
-                                      className="h-full bg-gradient-to-r from-wasabi to-jade transition-all duration-1000"
-                                      style={{
-                                        width: `${(stats.currentStreak / nextBadge.days) * 100}%`
-                                      }}
-                                    />
-                                  </div>
-                                  <span className="text-xs text-stone font-medium">
-                                    {stats.currentStreak}/{nextBadge.days}
-                                  </span>
-                                </div>
-                              </>
-                            );
-                          }
-                          return (
-                            <p className="text-sm text-stone">
-                              Vous avez débloqué tous les succès ! 🎉
-                            </p>
-                          );
-                        })()}
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Message d'encouragement */}
-                  {stats.currentStreak === 0 && (
-                    <div className="relative pl-20 animate-in slide-in-from-left duration-500 delay-400">
-                      <div className="absolute left-4 w-8 h-8 bg-gradient-to-br from-wasabi/50 to-jade/50 rounded-full flex items-center justify-center shadow-lg border-4 border-white z-10">
-                        <Target size={16} className="text-white" />
-                      </div>
-                      <div className="bg-gradient-to-br from-sand to-white rounded-2xl p-5 shadow-soft border border-stone/10">
-                        <h3
-                          className="font-bold text-ink mb-2"
-                          style={{ fontFamily: "'Shippori Mincho', serif" }}
-                        >
-                          Commencez votre voyage
-                        </h3>
-                        <p className="text-sm text-stone">
-                          Faites un check-in, écrivez dans votre journal ou pratiquez une méditation pour commencer votre série.
-                        </p>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* Modal Votre Parcours - Nouveau avec calendrier interactif */}
+      <JourneyModal
+        show={showJourneyModal}
+        onClose={() => setShowJourneyModal(false)}
+        user={user}
+        stats={stats}
+        activityDates={activityDates}
+      />
     </div>
   );
 };
