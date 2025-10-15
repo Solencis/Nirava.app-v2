@@ -13,6 +13,7 @@ import IOSInstallHint from '../components/IOSInstallHint';
 import Achievements from '../components/Achievements';
 import XPBar from '../components/XPBar';
 import JourneyModal from '../components/JourneyModal';
+import SettingsMenu from '../components/SettingsMenu';
 
 const ProfilePage: React.FC = () => {
   const { user, signOut } = useAuth();
@@ -32,6 +33,7 @@ const ProfilePage: React.FC = () => {
   const [showLogoutModal, setShowLogoutModal] = useState(false);
   const [showAllAchievements, setShowAllAchievements] = useState(false);
   const [showJourneyModal, setShowJourneyModal] = useState(false);
+  const [showSettingsMenu, setShowSettingsMenu] = useState(false);
   const [achievementsFilter, setAchievementsFilter] = useState<'all' | 'unlocked' | 'locked'>('all');
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [selectedDay, setSelectedDay] = useState<Date | null>(null);
@@ -807,13 +809,24 @@ const ProfilePage: React.FC = () => {
               <p className="text-sm text-stone/70">Membre depuis {getJoinDate()}</p>
             </div>
           </div>
-          <button
-            type="button"
-            onClick={() => setEditing(true)}
-            className="bg-white/60 backdrop-blur-sm p-2.5 rounded-xl hover:bg-white/80 transition-all duration-300 text-ink border border-stone/10 shadow-soft"
-          >
-            <Edit3 size={18} />
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => setShowSettingsMenu(true)}
+              className="bg-white/60 backdrop-blur-sm p-2.5 rounded-xl hover:bg-white/80 active:scale-95 transition-all duration-300 text-ink border border-stone/10 shadow-soft"
+              aria-label="Paramètres"
+            >
+              <Settings size={18} />
+            </button>
+            <button
+              type="button"
+              onClick={() => setEditing(true)}
+              className="bg-white/60 backdrop-blur-sm p-2.5 rounded-xl hover:bg-white/80 active:scale-95 transition-all duration-300 text-ink border border-stone/10 shadow-soft"
+              aria-label="Modifier le profil"
+            >
+              <Edit3 size={18} />
+            </button>
+          </div>
         </div>
       </div>
 
@@ -1623,6 +1636,12 @@ const ProfilePage: React.FC = () => {
         user={user}
         stats={stats}
         activityDates={activityDates}
+      />
+
+      {/* Menu des paramètres */}
+      <SettingsMenu
+        show={showSettingsMenu}
+        onClose={() => setShowSettingsMenu(false)}
       />
     </div>
   );
