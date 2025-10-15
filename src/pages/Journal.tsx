@@ -586,7 +586,7 @@ const Journal: React.FC = () => {
             {/* Journal de rêves */}
             <button
               onClick={() => handleActionClick('dreams', () => setShowDreamJournal(true))}
-              className="group bg-white/95 backdrop-blur-md rounded-3xl p-6 shadow-2xl border border-stone/10 text-center transition-all duration-300 hover:scale-[1.02] hover:shadow-3xl hover:bg-blue-50/50 min-h-[160px] flex flex-col justify-center btn-addictive magnetic-hover relative overflow-hidden"
+              className="group bg-white/95 dark:bg-gray-800/95 backdrop-blur-md rounded-3xl p-6 shadow-2xl border border-stone/10 dark:border-gray-700 text-center transition-all duration-300 hover:scale-[1.02] hover:shadow-3xl hover:bg-blue-50/50 dark:hover:bg-blue-900/20 min-h-[160px] flex flex-col justify-center btn-addictive magnetic-hover relative overflow-hidden"
             >
               <div className="absolute inset-0 bg-gradient-to-r from-transparent via-blue-100/30 to-transparent transform -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
               
@@ -597,7 +597,7 @@ const Journal: React.FC = () => {
                 <h3 className="font-bold text-ink dark:text-white mb-2 text-base transition-colors duration-300" style={{ fontFamily: "'Shippori Mincho', serif" }}>
                   Journal de rêves
                 </h3>
-                <p className="text-xs text-stone/80 mb-3 leading-relaxed">Tes rêves contiennent des messages. Note-les avant qu'ils ne s'évanouissent</p>
+                <p className="text-xs text-stone/80 dark:text-gray-300 mb-3 leading-relaxed transition-colors duration-300">Tes rêves contiennent des messages. Note-les avant qu'ils ne s'évanouissent</p>
                 <div className="text-sm text-blue-600 font-bold bg-blue-100 px-3 py-1 rounded-full">
                   {stats.dreams} rêves cette semaine
                 </div>
@@ -612,7 +612,7 @@ const Journal: React.FC = () => {
             {/* Journal du soir */}
             <button
               onClick={() => handleActionClick('journal', () => setShowJournal(true))}
-              className="group bg-white/95 backdrop-blur-md rounded-3xl p-6 shadow-2xl border border-stone/10 text-center transition-all duration-300 hover:scale-[1.02] hover:shadow-3xl hover:bg-vermilion/5 min-h-[160px] flex flex-col justify-center btn-addictive magnetic-hover relative overflow-hidden"
+              className="group bg-white/95 dark:bg-gray-800/95 backdrop-blur-md rounded-3xl p-6 shadow-2xl border border-stone/10 dark:border-gray-700 text-center transition-all duration-300 hover:scale-[1.02] hover:shadow-3xl hover:bg-vermilion/5 dark:hover:bg-vermilion/10 min-h-[160px] flex flex-col justify-center btn-addictive magnetic-hover relative overflow-hidden"
             >
               <div className="absolute inset-0 bg-gradient-to-r from-transparent via-vermilion/10 to-transparent transform -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
               
@@ -623,7 +623,7 @@ const Journal: React.FC = () => {
                 <h3 className="font-bold text-ink dark:text-white mb-2 text-base transition-colors duration-300" style={{ fontFamily: "'Shippori Mincho', serif" }}>
                   Journal du soir
                 </h3>
-                <p className="text-xs text-stone/80 mb-3 leading-relaxed">Le rituel qui ancre ta journée. Pose tes mots, libère ton esprit</p>
+                <p className="text-xs text-stone/80 dark:text-gray-300 mb-3 leading-relaxed transition-colors duration-300">Le rituel qui ancre ta journée. Pose tes mots, libère ton esprit</p>
                 <div className="text-sm text-vermilion font-bold bg-vermilion/10 px-3 py-1 rounded-full">
                   {stats.streak} jours consécutifs
                 </div>
@@ -650,7 +650,7 @@ const Journal: React.FC = () => {
               whileHover={{ scale: 1.03, y: -4 }}
               whileTap={{ scale: 0.98 }}
               onClick={() => handleActionClick('meditation', () => setShowMeditation(true))}
-              className="bg-gradient-to-br from-white to-forest/5 backdrop-blur-md rounded-3xl p-6 shadow-lg border border-forest/10 text-center transition-all duration-300 min-h-[170px] flex flex-col justify-center relative overflow-hidden"
+              className="bg-gradient-to-br from-white to-forest/5 dark:from-gray-800 dark:to-forest/10 backdrop-blur-md rounded-3xl p-6 shadow-lg border border-forest/10 dark:border-forest/20 text-center transition-all duration-300 min-h-[170px] flex flex-col justify-center relative overflow-hidden"
             >
               <div className="relative z-10">
                 <div className="w-16 h-16 mx-auto mb-4 relative">
@@ -662,7 +662,7 @@ const Journal: React.FC = () => {
                 <h3 className="font-bold text-ink dark:text-white mb-2 text-base transition-colors duration-300" style={{ fontFamily: "'Shippori Mincho', serif" }}>
                   Méditation
                 </h3>
-                <p className="text-xs text-stone/60 leading-relaxed">Un espace de silence pour observer</p>
+                <p className="text-xs text-stone/60 dark:text-gray-400 leading-relaxed transition-colors duration-300">Un espace de silence pour observer</p>
               </div>
             </motion.button>
           </div>
@@ -677,7 +677,7 @@ const Journal: React.FC = () => {
               whileHover={{ scale: 1.02, x: 4 }}
               whileTap={{ scale: 0.98 }}
               onClick={() => handleActionClick('breathing', () => setShowBreathing(true))}
-              className="bg-gradient-to-r from-white to-jade/5 backdrop-blur-md rounded-3xl p-5 shadow-lg border border-jade/10 transition-all duration-300 relative overflow-hidden"
+              className="bg-gradient-to-r from-white to-jade/5 dark:from-gray-800 dark:to-jade/10 backdrop-blur-md rounded-3xl p-5 shadow-lg border border-jade/10 dark:border-jade/20 transition-all duration-300 relative overflow-hidden"
             >
               <div className="flex items-center">
                 <div className="w-14 h-14 relative mr-4 flex-shrink-0">
@@ -690,7 +690,7 @@ const Journal: React.FC = () => {
                   <h3 className="font-bold text-ink dark:text-white mb-1 text-base transition-colors duration-300" style={{ fontFamily: "'Shippori Mincho', serif" }}>
                     Respiration guidée
                   </h3>
-                  <p className="text-xs text-stone/60 leading-relaxed">Reviens à ton souffle</p>
+                  <p className="text-xs text-stone/60 dark:text-gray-400 leading-relaxed transition-colors duration-300">Reviens à ton souffle</p>
                 </div>
               </div>
             </motion.button>

@@ -81,10 +81,10 @@ const DreamJournalMobile: React.FC<DreamJournalMobileProps> = ({ onClose, onSave
             <Sparkles className="w-12 h-12 text-blue-600" />
           </div>
 
-          <h2 className="text-3xl font-bold text-ink mb-3" style={{ fontFamily: "'Shippori Mincho', serif" }}>
+          <h2 className="text-3xl font-bold text-ink dark:text-white mb-3 transition-colors duration-300" style={{ fontFamily: "'Shippori Mincho', serif" }}>
             Rêve capturé !
           </h2>
-          <p className="text-stone mb-8 max-w-xs">
+          <p className="text-stone dark:text-gray-300 mb-8 max-w-xs transition-colors duration-300">
             Ton rêve a été enregistré. Il pourra t'aider à mieux te comprendre.
           </p>
 
@@ -98,7 +98,7 @@ const DreamJournalMobile: React.FC<DreamJournalMobileProps> = ({ onClose, onSave
 
             <button
               onClick={onClose}
-              className="w-full px-6 py-3 border-2 border-stone/20 text-stone rounded-full active:scale-95 transition-transform"
+              className="w-full px-6 py-3 border-2 border-stone/20 dark:border-gray-600 text-stone dark:text-gray-300 rounded-full active:scale-95 transition-transform"
             >
               Terminer
             </button>
@@ -116,12 +116,12 @@ const DreamJournalMobile: React.FC<DreamJournalMobileProps> = ({ onClose, onSave
           onClick={onClose}
           className="w-10 h-10 rounded-full bg-stone/10 flex items-center justify-center active:scale-95 transition-transform"
         >
-          <X className="w-5 h-5 text-stone" />
+          <X className="w-5 h-5 text-stone dark:text-gray-300" />
         </button>
 
         <div className="flex items-center gap-2">
           <Cloud className="w-5 h-5 text-blue-600" />
-          <span className="font-semibold text-ink" style={{ fontFamily: "'Shippori Mincho', serif" }}>
+          <span className="font-semibold text-ink dark:text-white transition-colors duration-300" style={{ fontFamily: "'Shippori Mincho', serif" }}>
             Journal de rêves
           </span>
         </div>
@@ -142,16 +142,16 @@ const DreamJournalMobile: React.FC<DreamJournalMobileProps> = ({ onClose, onSave
         <div className="bg-blue-50 rounded-2xl p-4 mb-6 border border-blue-100">
           <div className="flex items-center gap-2 mb-2">
             <Moon className="w-5 h-5 text-blue-600" />
-            <span className="font-medium text-ink text-sm">Question guide</span>
+            <span className="font-medium text-ink dark:text-white text-sm transition-colors duration-300">Question guide</span>
           </div>
-          <p className="text-ink text-center italic" style={{ fontFamily: "'Shippori Mincho', serif" }}>
+          <p className="text-ink dark:text-white text-center italic transition-colors duration-300" style={{ fontFamily: "'Shippori Mincho', serif" }}>
             {selectedPrompt}
           </p>
         </div>
 
         {/* Title */}
         <div className="mb-6">
-          <label className="block text-sm font-medium text-ink mb-3">
+          <label className="block text-sm font-medium text-ink dark:text-white mb-3 transition-colors duration-300">
             Titre du rêve (optionnel)
           </label>
           <input
@@ -159,14 +159,14 @@ const DreamJournalMobile: React.FC<DreamJournalMobileProps> = ({ onClose, onSave
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             placeholder="Ex: Le jardin lumineux, La maison de mon enfance..."
-            className="w-full px-4 py-3 bg-white border border-stone/20 rounded-2xl focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all"
+            className="w-full px-4 py-3 bg-white dark:bg-gray-700 border border-stone/20 dark:border-gray-600 rounded-2xl focus:border-blue-500 dark:focus:border-blue-400 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-400/20 transition-all text-ink dark:text-white"
             style={{ fontSize: '16px' }}
           />
         </div>
 
         {/* Dream Type */}
         <div className="mb-6">
-          <label className="block text-sm font-medium text-ink mb-3">
+          <label className="block text-sm font-medium text-ink dark:text-white mb-3 transition-colors duration-300">
             Type de rêve
           </label>
           <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
@@ -180,11 +180,11 @@ const DreamJournalMobile: React.FC<DreamJournalMobileProps> = ({ onClose, onSave
                 className={`flex-shrink-0 px-4 py-3 rounded-2xl border-2 transition-all active:scale-95 ${
                   dreamType === type.value
                     ? 'bg-blue-50 border-blue-500'
-                    : 'bg-white border-stone/10'
+                    : 'bg-white dark:bg-gray-800 border-stone/10 dark:border-gray-600'
                 }`}
               >
                 <div className="text-2xl mb-1">{type.emoji}</div>
-                <div className={`text-xs ${dreamType === type.value ? 'text-blue-600 font-medium' : 'text-stone'}`}>
+                <div className={`text-xs transition-colors duration-300 ${dreamType === type.value ? 'text-blue-600 dark:text-blue-400 font-medium' : 'text-stone dark:text-gray-300'}`}>
                   {type.label}
                 </div>
               </button>
@@ -194,7 +194,7 @@ const DreamJournalMobile: React.FC<DreamJournalMobileProps> = ({ onClose, onSave
 
         {/* Clarity */}
         <div className="mb-6">
-          <label className="block text-sm font-medium text-ink mb-3">
+          <label className="block text-sm font-medium text-ink dark:text-white mb-3 transition-colors duration-300">
             Clarté du souvenir: {clarity}/10
           </label>
           <input
@@ -205,7 +205,7 @@ const DreamJournalMobile: React.FC<DreamJournalMobileProps> = ({ onClose, onSave
             onChange={(e) => setClarity(parseInt(e.target.value))}
             className="w-full h-2 bg-stone/20 rounded-full appearance-none cursor-pointer"
           />
-          <div className="flex justify-between text-xs text-stone mt-1">
+          <div className="flex justify-between text-xs text-stone dark:text-gray-400 mt-1 transition-colors duration-300">
             <span>Flou</span>
             <span>Très net</span>
           </div>
@@ -213,19 +213,19 @@ const DreamJournalMobile: React.FC<DreamJournalMobileProps> = ({ onClose, onSave
 
         {/* Content */}
         <div className="mb-6">
-          <label className="block text-sm font-medium text-ink mb-3">
+          <label className="block text-sm font-medium text-ink dark:text-white mb-3 transition-colors duration-300">
             Décris ton rêve
           </label>
           <textarea
             value={content}
             onChange={(e) => setContent(e.target.value)}
             placeholder="Raconte ton rêve en détail... Les lieux, les personnes, les émotions, les symboles..."
-            className="w-full min-h-[300px] px-4 py-4 bg-white border border-stone/20 rounded-2xl focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all resize-none"
+            className="w-full min-h-[300px] px-4 py-4 bg-white dark:bg-gray-700 border border-stone/20 dark:border-gray-600 rounded-2xl focus:border-blue-500 dark:focus:border-blue-400 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-400/20 transition-all resize-none text-ink dark:text-white"
             style={{ fontSize: '16px' }}
             autoFocus
           />
           <div className="flex items-center justify-between mt-2 px-2">
-            <span className="text-xs text-stone">
+            <span className="text-xs text-stone dark:text-gray-400 transition-colors duration-300">
               {wordCount} {wordCount > 1 ? 'mots' : 'mot'}
             </span>
             {content.length > 50 && (
@@ -252,8 +252,8 @@ const DreamJournalMobile: React.FC<DreamJournalMobileProps> = ({ onClose, onSave
 
         {/* Tips */}
         <div className="bg-blue-50 rounded-2xl p-4 border border-blue-100">
-          <h3 className="text-sm font-semibold text-ink mb-2">💡 Conseils</h3>
-          <ul className="text-xs text-stone space-y-1">
+          <h3 className="text-sm font-semibold text-ink dark:text-white mb-2 transition-colors duration-300">💡 Conseils</h3>
+          <ul className="text-xs text-stone dark:text-gray-300 space-y-1 transition-colors duration-300">
             <li>• Note ton rêve dès le réveil</li>
             <li>• Décris d'abord les émotions ressenties</li>
             <li>• Note les symboles et détails marquants</li>

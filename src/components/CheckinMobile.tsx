@@ -276,7 +276,7 @@ const CheckinMobile: React.FC<CheckinMobileProps> = ({ onClose, onSave }) => {
                     onChange={(e) => setNote(e.target.value)}
                     placeholder="Tes pensées du moment..."
                     rows={4}
-                    className="w-full px-4 py-3 bg-white border border-stone/20 rounded-2xl focus:border-jade focus:ring-2 focus:ring-jade/20 transition-all resize-none"
+                    className="w-full px-4 py-3 bg-white dark:bg-gray-700 border border-stone/20 dark:border-gray-600 rounded-2xl focus:border-jade dark:focus:border-jade focus:ring-2 focus:ring-jade/20 dark:focus:ring-jade/30 transition-all resize-none text-ink dark:text-white"
                     style={{ fontSize: '16px' }}
                   />
                 </div>
