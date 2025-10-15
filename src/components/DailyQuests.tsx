@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Heart, BookOpen, Timer, Check, ChevronRight, Sparkles, Trophy, Flame, Star, Target, Zap, Wind, Lock } from 'lucide-react';
 import { useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '../hooks/useAuth';
@@ -45,6 +45,10 @@ const DailyQuests: React.FC<DailyQuestsProps> = ({
   const [timeLeft, setTimeLeft] = useState('');
   const [breathingSessions, setBreathingSessions] = useState(0);
   const [animatingXP, setAnimatingXP] = useState<string | null>(null);
+
+  // Ref pour garder une trace persistante des claims de cette session
+  // Cela empêche les re-renders de réinitialiser l'état
+  const claimedThisSessionRef = useRef<Set<string>>(new Set());
 
   const userLevel = xpProgress.level || 1;
   const questTiers = groupQuestsByTier(userLevel);
@@ -108,6 +112,14 @@ const DailyQuests: React.FC<DailyQuestsProps> = ({
         'daily-mastery': weekData.daily_mastery_last_claim_date === todayDate
       };
       console.log('[DailyQuests] Claimed status loaded:', claimedStatus);
+
+      // Synchroniser le ref avec les données de la DB
+      Object.entries(claimedStatus).forEach(([questId, isClaimed]) => {
+        if (isClaimed) {
+          claimedThisSessionRef.current.add(questId);
+        }
+      });
+
       setClaimed(claimedStatus);
     } else {
       console.log('[DailyQuests] No week data found, resetting claimed status');
@@ -228,14 +240,17 @@ const DailyQuests: React.FC<DailyQuestsProps> = ({
     if (!user?.id) return;
 
     // Vérifier immédiatement si déjà réclamé (protection côté client)
-    if (claimed[quest.id]) {
-      console.warn('Quest already claimed (client check)');
+    if (claimed[quest.id] || claimedThisSessionRef.current.has(quest.id)) {
+      console.warn('[DailyQuests] Quest already claimed:', quest.id);
       return;
     }
 
     try {
-      // Mettre à jour le state immédiatement pour bloquer les double-clics
+      // Ajouter au ref immédiatement pour bloquer définitivement
+      claimedThisSessionRef.current.add(quest.id);
       console.log('[DailyQuests] Claiming quest:', quest.id);
+
+      // Mettre à jour le state immédiatement pour bloquer les double-clics
       setClaimed(prev => {
         const newClaimed = { ...prev, [quest.id]: true };
         console.log('[DailyQuests] Updated claimed state:', newClaimed);
@@ -402,7 +417,8 @@ const DailyQuests: React.FC<DailyQuestsProps> = ({
 
       <div className="space-y-3">
         {quests.map((quest, index) => {
-          const isClaimed = claimed[quest.id];
+          // Vérifier à la fois le state et le ref pour la persistance
+          const isClaimed = claimed[quest.id] || claimedThisSessionRef.current.has(quest.id);
           const canClaim = quest.completed && !isClaimed;
           const isAnimating = animatingXP === quest.id;
 
@@ -543,7 +559,8 @@ const DailyQuests: React.FC<DailyQuestsProps> = ({
                   }
                 }
 
-                const isClaimed = claimed[advQuest.id];
+                // Vérifier à la fois le state et le ref pour la persistance
+                const isClaimed = claimed[advQuest.id] || claimedThisSessionRef.current.has(advQuest.id);
                 const canClaim = completed && !isClaimed && !isLocked;
                 const isAnimating = animatingXP === advQuest.id;
 
