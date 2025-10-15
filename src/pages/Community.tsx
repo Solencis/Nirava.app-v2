@@ -430,14 +430,15 @@ const Community: React.FC = () => {
     if (!user || !commentToDelete) return;
 
     try {
+      // Les admins peuvent supprimer n'importe quel commentaire
+      // RLS gère la vérification is_admin côté serveur
       const { error } = await supabase
         .from('post_comments')
         .delete()
-        .eq('id', commentToDelete)
-        .eq('user_id', user.id);
+        .eq('id', commentToDelete);
 
       if (error) throw error;
-      
+
       // Reload posts to reflect the deletion
       await loadPosts();
     } catch (error) {
@@ -474,14 +475,15 @@ const Community: React.FC = () => {
     if (!user || !postToDelete) return;
 
     try {
+      // Les admins peuvent supprimer n'importe quel post
+      // RLS gère la vérification is_admin côté serveur
       const { error } = await supabase
         .from('posts')
         .delete()
-        .eq('id', postToDelete)
-        .eq('user_id', user.id);
+        .eq('id', postToDelete);
 
       if (error) throw error;
-      
+
       // Reload posts immediately to reflect the deletion
       await loadPosts();
     } catch (error) {

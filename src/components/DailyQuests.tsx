@@ -81,12 +81,17 @@ const DailyQuests: React.FC<DailyQuestsProps> = ({
     monday.setHours(0, 0, 0, 0);
     const weekStart = monday.toISOString().split('T')[0];
 
-    const { data: weekData } = await supabase
+    const { data: weekData, error } = await supabase
       .from('weekly_quests')
       .select('*')
       .eq('user_id', user.id)
       .eq('week_start', weekStart)
       .maybeSingle();
+
+    if (error) {
+      console.error('Error loading claimed status:', error);
+      return;
+    }
 
     if (weekData) {
       const todayDate = new Date().toISOString().split('T')[0];
@@ -102,8 +107,10 @@ const DailyQuests: React.FC<DailyQuestsProps> = ({
         'meditation-60': weekData.meditation_60_last_claim_date === todayDate,
         'daily-mastery': weekData.daily_mastery_last_claim_date === todayDate
       };
+      console.log('[DailyQuests] Claimed status loaded:', claimedStatus);
       setClaimed(claimedStatus);
     } else {
+      console.log('[DailyQuests] No week data found, resetting claimed status');
       setClaimed({});
     }
   };
@@ -114,7 +121,10 @@ const DailyQuests: React.FC<DailyQuestsProps> = ({
 
   useEffect(() => {
     const handleFocus = () => {
-      loadClaimedStatus();
+      // Ne pas recharger si une animation est en cours (claim en cours)
+      if (!animatingXP) {
+        loadClaimedStatus();
+      }
     };
 
     window.addEventListener('focus', handleFocus);
@@ -124,7 +134,7 @@ const DailyQuests: React.FC<DailyQuestsProps> = ({
       window.removeEventListener('focus', handleFocus);
       document.removeEventListener('visibilitychange', handleFocus);
     };
-  }, [user]);
+  }, [user, animatingXP]);
 
   useEffect(() => {
     const updateTimer = () => {
@@ -225,10 +235,12 @@ const DailyQuests: React.FC<DailyQuestsProps> = ({
 
     try {
       // Mettre à jour le state immédiatement pour bloquer les double-clics
-      setClaimed(prev => ({
-        ...prev,
-        [quest.id]: true
-      }));
+      console.log('[DailyQuests] Claiming quest:', quest.id);
+      setClaimed(prev => {
+        const newClaimed = { ...prev, [quest.id]: true };
+        console.log('[DailyQuests] Updated claimed state:', newClaimed);
+        return newClaimed;
+      });
 
       setAnimatingXP(quest.id);
 
@@ -337,7 +349,9 @@ const DailyQuests: React.FC<DailyQuestsProps> = ({
       queryClient.invalidateQueries({ queryKey: ['weekly-xp', user.id] });
       queryClient.invalidateQueries({ queryKey: ['profile', user.id] });
 
-      await loadClaimedStatus();
+      // Ne pas recharger loadClaimedStatus ici car on a déjà mis à jour le state
+      // et cela pourrait l'écraser si la DB n'est pas encore synchronisée
+      console.log('[DailyQuests] Quest claimed successfully:', quest.id);
 
       setTimeout(() => {
         setAnimatingXP(null);
