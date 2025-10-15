@@ -1057,14 +1057,14 @@ const Community: React.FC = () => {
                         <div className="text-xs text-stone/60 mb-1">
                           {getRelativeTime(post.created_at)}
                         </div>
-                        {user && post.user_id === user.id && (
+                        {user && (post.user_id === user.id || profile?.is_admin) && (
                           <button
                             onClick={() => {
                               handleDeleteClick(post.id);
                               hapticFeedback('medium');
                             }}
                             className="text-stone/60 hover:text-red-600 transition-all duration-300 p-1 rounded-full hover:bg-red-50"
-                            title="Supprimer mon message"
+                            title={profile?.is_admin && post.user_id !== user.id ? "Supprimer (Admin)" : "Supprimer mon message"}
                           >
                             <Trash2 size={14} />
                           </button>
@@ -1316,14 +1316,14 @@ const Community: React.FC = () => {
                                     </div>
                                     <p className="text-ink leading-relaxed ml-10 text-base">{comment.content}</p>
                                   </div>
-                                  {user && comment.user_id === user.id && (
+                                  {user && (comment.user_id === user.id || profile?.is_admin) && (
                                     <button
                                       onClick={() => {
                                         handleDeleteComment(comment.id);
                                         hapticFeedback('medium');
                                       }}
                                       className="text-stone/60 hover:text-red-600 transition-all duration-300 ml-3 p-2 rounded-full hover:bg-red-50 transform hover:scale-110 active:scale-90"
-                                      title="Supprimer mon commentaire"
+                                      title={profile?.is_admin && comment.user_id !== user.id ? "Supprimer (Admin)" : "Supprimer mon commentaire"}
                                     >
                                       <Trash2 size={16} />
                                     </button>

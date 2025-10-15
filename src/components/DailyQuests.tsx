@@ -217,22 +217,38 @@ const DailyQuests: React.FC<DailyQuestsProps> = ({
   const handleClaim = async (quest: Quest) => {
     if (!user?.id) return;
 
+    // Vérifier immédiatement si déjà réclamé (protection côté client)
+    if (claimed[quest.id]) {
+      console.warn('Quest already claimed (client check)');
+      return;
+    }
+
     try {
+      // Mettre à jour le state immédiatement pour bloquer les double-clics
+      setClaimed(prev => ({
+        ...prev,
+        [quest.id]: true
+      }));
+
       setAnimatingXP(quest.id);
 
       const quest_xp = quest.xp;
 
-      const { data: profile } = await supabase
+      const { data: profile, error: profileError } = await supabase
         .from('profiles')
         .select('total_xp')
         .eq('id', user.id)
         .single();
 
+      if (profileError) throw profileError;
+
       if (profile) {
-        await supabase
+        const { error: updateError } = await supabase
           .from('profiles')
           .update({ total_xp: profile.total_xp + quest_xp })
           .eq('id', user.id);
+
+        if (updateError) throw updateError;
       }
 
       const today = new Date();
@@ -243,12 +259,14 @@ const DailyQuests: React.FC<DailyQuestsProps> = ({
       monday.setHours(0, 0, 0, 0);
       const weekStart = monday.toISOString().split('T')[0];
 
-      const { data: existingWeek } = await supabase
+      const { data: existingWeek, error: weekError } = await supabase
         .from('weekly_quests')
         .select('*')
         .eq('user_id', user.id)
         .eq('week_start', weekStart)
         .maybeSingle();
+
+      if (weekError) throw weekError;
 
       const questFieldMap: Record<string, string> = {
         'checkin': 'checkin_xp',
@@ -283,13 +301,13 @@ const DailyQuests: React.FC<DailyQuestsProps> = ({
       if (existingWeek) {
         const lastClaimDate = existingWeek[claimDateField];
         if (lastClaimDate === todayDate) {
-          console.warn('Quest already claimed today');
+          console.warn('Quest already claimed today (server check)');
           setAnimatingXP(null);
           return;
         }
 
         const currentXP = existingWeek[xpField] || 0;
-        await supabase
+        const { error: updateWeekError } = await supabase
           .from('weekly_quests')
           .update({
             [xpField]: currentXP + quest_xp,
@@ -297,8 +315,10 @@ const DailyQuests: React.FC<DailyQuestsProps> = ({
             updated_at: new Date().toISOString()
           })
           .eq('id', existingWeek.id);
+
+        if (updateWeekError) throw updateWeekError;
       } else {
-        await supabase
+        const { error: insertError } = await supabase
           .from('weekly_quests')
           .insert({
             user_id: user.id,
@@ -310,16 +330,12 @@ const DailyQuests: React.FC<DailyQuestsProps> = ({
             meditation_completed: quest.id === 'meditation',
             breathing_completed: quest.id === 'breathing'
           });
+
+        if (insertError) throw insertError;
       }
 
       queryClient.invalidateQueries({ queryKey: ['weekly-xp', user.id] });
       queryClient.invalidateQueries({ queryKey: ['profile', user.id] });
-
-      // Mettre à jour immédiatement le state local
-      setClaimed(prev => ({
-        ...prev,
-        [quest.id]: true
-      }));
 
       await loadClaimedStatus();
 
@@ -332,6 +348,12 @@ const DailyQuests: React.FC<DailyQuestsProps> = ({
       }
     } catch (error) {
       console.error('Error claiming quest XP:', error);
+      // Réinitialiser le state en cas d'erreur pour permettre une nouvelle tentative
+      setClaimed(prev => {
+        const newClaimed = { ...prev };
+        delete newClaimed[quest.id];
+        return newClaimed;
+      });
       setAnimatingXP(null);
     }
   };
