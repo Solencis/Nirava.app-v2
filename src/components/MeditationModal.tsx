@@ -245,18 +245,18 @@ const MeditationModal: React.FC<MeditationModalProps> = ({ isOpen, onClose, onSa
 
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-2 z-50">
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm mx-2 max-h-[90vh] overflow-y-auto">
+      <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-sm mx-2 max-h-[90vh] overflow-y-auto transition-colors duration-300">
         <div className="p-6">
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center">
               <Timer className="w-6 h-6 text-forest mr-3" />
-              <h2 className="text-xl font-bold text-ink" style={{ fontFamily: "'Shippori Mincho', serif" }}>
+              <h2 className="text-xl font-bold text-ink dark:text-white transition-colors duration-300" style={{ fontFamily: "'Shippori Mincho', serif" }}>
                 Méditation
               </h2>
             </div>
             <button
               onClick={onClose}
-              className="w-10 h-10 rounded-full bg-stone/10 flex items-center justify-center text-stone hover:text-vermilion transition-colors duration-300"
+              className="w-10 h-10 rounded-full bg-stone/10 dark:bg-gray-700 flex items-center justify-center text-stone dark:text-gray-300 hover:text-vermilion dark:hover:text-red-400 transition-colors duration-300"
             >
               <X size={20} />
             </button>
@@ -266,7 +266,7 @@ const MeditationModal: React.FC<MeditationModalProps> = ({ isOpen, onClose, onSa
             <div className="space-y-6">
               {/* Mode de méditation */}
               <div>
-                <label className="block text-sm font-medium text-ink mb-3">
+                <label className="block text-sm font-medium text-ink dark:text-white mb-3 transition-colors duration-300">
                   Mode de méditation
                 </label>
                 <div className="grid grid-cols-2 gap-3">
@@ -304,7 +304,7 @@ const MeditationModal: React.FC<MeditationModalProps> = ({ isOpen, onClose, onSa
               {/* Durées prédéfinies */}
               {!isFreeMode && (
                 <div>
-                <label className="block text-sm font-medium text-ink mb-3">
+                <label className="block text-sm font-medium text-ink dark:text-white mb-3 transition-colors duration-300">
                   Choisir une durée
                 </label>
                 <div className="grid grid-cols-2 gap-3">
@@ -331,7 +331,7 @@ const MeditationModal: React.FC<MeditationModalProps> = ({ isOpen, onClose, onSa
               {/* Durée personnalisée */}
               {!isFreeMode && (
                 <div>
-                <label className="block text-sm font-medium text-ink mb-2">
+                <label className="block text-sm font-medium text-ink dark:text-white mb-2 transition-colors duration-300">
                   Durée personnalisée
                 </label>
                 <div className="flex gap-2">
@@ -370,8 +370,8 @@ const MeditationModal: React.FC<MeditationModalProps> = ({ isOpen, onClose, onSa
                     <div className="flex items-center">
                       <span className="text-lg mr-2">{currentAmbience.emoji}</span>
                       <div>
-                        <div className="text-sm font-medium text-ink">{currentAmbience.title} en cours</div>
-                        <div className="text-xs text-stone">Ambiance sonore active</div>
+                        <div className="text-sm font-medium text-ink dark:text-white transition-colors duration-300">{currentAmbience.title} en cours</div>
+                        <div className="text-xs text-stone dark:text-gray-400 transition-colors duration-300">Ambiance sonore active</div>
                       </div>
                     </div>
                     <button
@@ -416,7 +416,7 @@ const MeditationModal: React.FC<MeditationModalProps> = ({ isOpen, onClose, onSa
                   </p>
                   
                   <div className="mb-6">
-                    <label className="block text-sm font-medium text-ink mb-2">
+                    <label className="block text-sm font-medium text-ink dark:text-white mb-2 transition-colors duration-300">
                       Minutes à retirer
                     </label>
                     <input
@@ -437,7 +437,7 @@ const MeditationModal: React.FC<MeditationModalProps> = ({ isOpen, onClose, onSa
                         setShowReduceModal(false);
                         setMinutesToReduce('');
                       }}
-                      className="flex-1 px-4 py-3 border border-stone/20 text-stone rounded-xl hover:bg-stone/5 transition-colors duration-300"
+                      className="flex-1 px-4 py-3 border border-stone/20 dark:border-gray-600 text-stone dark:text-gray-300 rounded-xl hover:bg-stone/5 dark:hover:bg-gray-700 transition-colors duration-300"
                     >
                       Annuler
                     </button>
@@ -484,10 +484,10 @@ const MeditationModal: React.FC<MeditationModalProps> = ({ isOpen, onClose, onSa
                 </svg>
                 <div className="absolute inset-0 flex items-center justify-center">
                   <div className="text-center">
-                    <div className="text-3xl font-bold text-ink mb-1">
+                    <div className="text-3xl font-bold text-ink dark:text-white mb-1 transition-colors duration-300">
                       {isFreeMode ? formatTime(meditationState.elapsed) : formatTime(meditationState.remaining || 0)}
                     </div>
-                    <div className="text-sm text-stone">
+                    <div className="text-sm text-stone dark:text-gray-400 transition-colors duration-300">
                       {isFreeMode ? 'Méditation libre' : `${Math.round(meditationState.remaining !== null ? ((duration * 60 - meditationState.remaining) / (duration * 60)) * 100 : 0)}%`}
                     </div>
                   </div>

@@ -97,7 +97,7 @@ const JournalModal: React.FC<JournalModalProps> = ({ isOpen, onClose, onSave }) 
 
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-2 z-50">
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm mx-2 max-h-[90vh] overflow-y-auto">
+      <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-sm mx-2 max-h-[90vh] overflow-y-auto transition-colors duration-300">
         <div className="p-6">
           {savedActivity ? (
             // Success state with sharing option
@@ -106,11 +106,11 @@ const JournalModal: React.FC<JournalModalProps> = ({ isOpen, onClose, onSave }) 
                 <Moon className="w-8 h-8 text-vermilion" />
               </div>
               
-              <h2 className="text-xl font-bold text-ink mb-2" style={{ fontFamily: "'Shippori Mincho', serif" }}>
+              <h2 className="text-xl font-bold text-ink dark:text-white mb-2 transition-colors duration-300" style={{ fontFamily: "'Shippori Mincho', serif" }}>
                 Journal sauvegardé !
               </h2>
               
-              <p className="text-stone mb-6 leading-relaxed">
+              <p className="text-stone dark:text-gray-300 mb-6 leading-relaxed transition-colors duration-300">
                 Tes réflexions du soir ont été enregistrées. Tu peux maintenant les partager avec la communauté si tu le souhaites.
               </p>
               
@@ -130,7 +130,7 @@ const JournalModal: React.FC<JournalModalProps> = ({ isOpen, onClose, onSave }) 
                     setSavedActivity(null);
                     onClose();
                   }}
-                  className="w-full px-4 py-3 border border-stone/20 text-stone rounded-xl hover:bg-stone/5 transition-colors duration-300"
+                  className="w-full px-4 py-3 border border-stone/20 dark:border-gray-600 text-stone dark:text-gray-300 rounded-xl hover:bg-stone/5 dark:hover:bg-gray-700 transition-colors duration-300"
                 >
                   Garder privé
                 </button>
@@ -142,20 +142,20 @@ const JournalModal: React.FC<JournalModalProps> = ({ isOpen, onClose, onSave }) 
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center">
               <Moon className="w-6 h-6 text-vermilion mr-3" />
-              <h2 className="text-xl font-bold text-ink" style={{ fontFamily: "'Shippori Mincho', serif" }}>
+              <h2 className="text-xl font-bold text-ink dark:text-white transition-colors duration-300" style={{ fontFamily: "'Shippori Mincho', serif" }}>
                 Journal du soir
               </h2>
             </div>
             <button
               onClick={onClose}
-              className="w-10 h-10 rounded-full bg-stone/10 flex items-center justify-center text-stone hover:text-vermilion transition-colors duration-300"
+              className="w-10 h-10 rounded-full bg-stone/10 dark:bg-gray-700 flex items-center justify-center text-stone dark:text-gray-300 hover:text-vermilion dark:hover:text-red-400 transition-colors duration-300"
             >
               <X size={20} />
             </button>
           </div>
           
           {/* Prompt guidé */}
-          <div className="bg-vermilion/5 rounded-xl p-4 mb-6 border border-vermilion/10">
+          <div className="bg-vermilion/5 dark:bg-vermilion/10 rounded-xl p-4 mb-6 border border-vermilion/10 dark:border-vermilion/20 transition-colors duration-300">
             <p className="text-vermilion text-sm font-medium text-center">
               {currentPrompt}
             </p>
@@ -163,7 +163,7 @@ const JournalModal: React.FC<JournalModalProps> = ({ isOpen, onClose, onSave }) 
           
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-ink mb-2">
+              <label className="block text-sm font-medium text-ink dark:text-white mb-2 transition-colors duration-300">
                 Tes réflexions du jour
               </label>
               <textarea
@@ -171,17 +171,17 @@ const JournalModal: React.FC<JournalModalProps> = ({ isOpen, onClose, onSave }) 
                 onChange={(e) => setContent(e.target.value)}
                 placeholder="Écris librement tes pensées, ressentis, découvertes..."
                 rows={6}
-                className="w-full px-4 py-3 bg-stone/5 border border-stone/20 rounded-xl focus:border-vermilion focus:ring-2 focus:ring-vermilion/20 transition-all duration-300 resize-none"
+                className="w-full px-4 py-3 bg-stone/5 dark:bg-gray-700 border border-stone/20 dark:border-gray-600 rounded-xl focus:border-vermilion dark:focus:border-red-400 focus:ring-2 focus:ring-vermilion/20 dark:focus:ring-red-400/20 transition-all duration-300 resize-none text-ink dark:text-white"
                 required
               />
-              <div className="text-xs text-stone mt-1 text-right">
+              <div className="text-xs text-stone dark:text-gray-400 mt-1 text-right transition-colors duration-300">
                 {content.length} caractères
               </div>
             </div>
             
             {/* Sélection d'emoji */}
             <div>
-              <label className="block text-sm font-medium text-ink mb-2">
+              <label className="block text-sm font-medium text-ink dark:text-white mb-2 transition-colors duration-300">
                 Humeur du jour (optionnel)
               </label>
               <div className="flex flex-wrap gap-2">
@@ -204,7 +204,7 @@ const JournalModal: React.FC<JournalModalProps> = ({ isOpen, onClose, onSave }) 
             
             {/* Photo upload */}
             <div>
-              <label className="block text-sm font-medium text-ink mb-2">
+              <label className="block text-sm font-medium text-ink dark:text-white mb-2 transition-colors duration-300">
                 Photo (optionnel)
               </label>
               <PhotoUpload
@@ -219,7 +219,7 @@ const JournalModal: React.FC<JournalModalProps> = ({ isOpen, onClose, onSave }) 
               <button
                 type="button"
                 onClick={onClose}
-                className="flex-1 px-4 py-3 border border-stone/20 text-stone rounded-xl hover:bg-stone/5 transition-colors duration-300"
+                className="flex-1 px-4 py-3 border border-stone/20 dark:border-gray-600 text-stone dark:text-gray-300 rounded-xl hover:bg-stone/5 dark:hover:bg-gray-700 transition-colors duration-300"
               >
                 Annuler
               </button>

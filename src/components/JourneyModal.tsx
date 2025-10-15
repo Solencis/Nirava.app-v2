@@ -170,7 +170,7 @@ export default function JourneyModal({ show, onClose, user, stats, activityDates
         onClick={onClose}
       >
         <div
-          className="absolute inset-x-0 bottom-0 sm:bottom-auto sm:top-1/2 sm:left-1/2 sm:-translate-x-1/2 sm:-translate-y-1/2 bg-white rounded-t-3xl sm:rounded-3xl shadow-2xl w-full sm:max-w-lg max-h-[90vh] sm:max-h-[85vh] overflow-hidden animate-in slide-in-from-bottom sm:zoom-in duration-300"
+          className="absolute inset-x-0 bottom-0 sm:bottom-auto sm:top-1/2 sm:left-1/2 sm:-translate-x-1/2 sm:-translate-y-1/2 bg-white dark:bg-gray-800 rounded-t-3xl sm:rounded-3xl shadow-2xl w-full sm:max-w-lg max-h-[90vh] sm:max-h-[85vh] overflow-hidden animate-in slide-in-from-bottom sm:zoom-in duration-300 transition-colors"
           onClick={(e) => e.stopPropagation()}
         >
           {/* Header */}
@@ -200,7 +200,7 @@ export default function JourneyModal({ show, onClose, user, stats, activityDates
             </div>
 
             {/* Navigation mois */}
-            <div className="flex items-center justify-between bg-white/10 backdrop-blur rounded-xl px-3 py-2">
+            <div className="flex items-center justify-between bg-white/10 dark:bg-black/20 backdrop-blur rounded-xl px-3 py-2">
               <button
                 type="button"
                 onClick={() => setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1))}
@@ -226,7 +226,7 @@ export default function JourneyModal({ show, onClose, user, stats, activityDates
             {/* Jours de la semaine */}
             <div className="grid grid-cols-7 gap-1 mb-2">
               {dayNames.map((day, i) => (
-                <div key={i} className="text-center text-xs font-medium text-stone/60 py-2">
+                <div key={i} className="text-center text-xs font-medium text-stone/60 dark:text-gray-400 py-2 transition-colors duration-300">
                   {day}
                 </div>
               ))}
@@ -266,10 +266,10 @@ export default function JourneyModal({ show, onClose, user, stats, activityDates
 
             {/* Légende */}
             <div className="mt-6 p-4 bg-sand/50 rounded-2xl">
-              <h4 className="text-sm font-bold text-ink mb-2" style={{ fontFamily: "'Shippori Mincho', serif" }}>
+              <h4 className="text-sm font-bold text-ink dark:text-white mb-2 transition-colors duration-300" style={{ fontFamily: "'Shippori Mincho', serif" }}>
                 Légende
               </h4>
-              <div className="space-y-2 text-xs text-stone">
+              <div className="space-y-2 text-xs text-stone dark:text-gray-300 transition-colors duration-300">
                 <div className="flex items-center gap-2">
                   <div className="w-6 h-6 rounded-lg bg-gradient-to-br from-wasabi/20 to-jade/20" />
                   <span>Jour avec activité (clique pour voir)</span>
@@ -283,19 +283,19 @@ export default function JourneyModal({ show, onClose, user, stats, activityDates
 
             {/* Stats rapides */}
             <div className="mt-4 grid grid-cols-2 gap-3">
-              <div className="bg-white rounded-2xl p-4 border-2 border-stone/10">
+              <div className="bg-white dark:bg-gray-700 rounded-2xl p-4 border-2 border-stone/10 dark:border-gray-600 transition-colors duration-300">
                 <div className="flex items-center gap-2 mb-1">
                   <Heart size={16} className="text-wasabi" />
-                  <span className="text-xs text-stone/60">Check-ins</span>
+                  <span className="text-xs text-stone/60 dark:text-gray-400 transition-colors duration-300">Check-ins</span>
                 </div>
-                <span className="text-2xl font-bold text-ink">{stats.checkins}</span>
+                <span className="text-2xl font-bold text-ink dark:text-white transition-colors duration-300">{stats.checkins}</span>
               </div>
-              <div className="bg-white rounded-2xl p-4 border-2 border-stone/10">
+              <div className="bg-white dark:bg-gray-700 rounded-2xl p-4 border-2 border-stone/10 dark:border-gray-600 transition-colors duration-300">
                 <div className="flex items-center gap-2 mb-1">
                   <BookOpen size={16} className="text-jade" />
-                  <span className="text-xs text-stone/60">Écrits</span>
+                  <span className="text-xs text-stone/60 dark:text-gray-400 transition-colors duration-300">Écrits</span>
                 </div>
-                <span className="text-2xl font-bold text-ink">{stats.journals}</span>
+                <span className="text-2xl font-bold text-ink dark:text-white transition-colors duration-300">{stats.journals}</span>
               </div>
             </div>
 
@@ -311,7 +311,7 @@ export default function JourneyModal({ show, onClose, user, stats, activityDates
           onClick={() => setSelectedDay(null)}
         >
           <div
-            className="absolute inset-x-0 bottom-0 sm:bottom-auto sm:top-1/2 sm:left-1/2 sm:-translate-x-1/2 sm:-translate-y-1/2 bg-white rounded-t-3xl sm:rounded-3xl shadow-2xl w-full sm:max-w-md max-h-[80vh] overflow-hidden animate-in slide-in-from-bottom duration-300"
+            className="absolute inset-x-0 bottom-0 sm:bottom-auto sm:top-1/2 sm:left-1/2 sm:-translate-x-1/2 sm:-translate-y-1/2 bg-white dark:bg-gray-800 rounded-t-3xl sm:rounded-3xl shadow-2xl w-full sm:max-w-md max-h-[80vh] overflow-hidden animate-in slide-in-from-bottom duration-300 transition-colors"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Header du jour */}
@@ -342,14 +342,14 @@ export default function JourneyModal({ show, onClose, user, stats, activityDates
               {loading ? (
                 <div className="text-center py-12">
                   <div className="w-12 h-12 border-4 border-wasabi/30 border-t-wasabi rounded-full animate-spin mx-auto" />
-                  <p className="text-stone/60 text-sm mt-4">Chargement...</p>
+                  <p className="text-stone/60 dark:text-gray-400 text-sm mt-4 transition-colors duration-300">Chargement...</p>
                 </div>
               ) : dayActivities.length > 0 ? (
                 <div className="space-y-3">
                   {dayActivities.map((activity, i) => (
                     <div
                       key={i}
-                      className="bg-white rounded-2xl p-4 border-2 border-stone/10 active:scale-98 transition-all"
+                      className="bg-white dark:bg-gray-700 rounded-2xl p-4 border-2 border-stone/10 dark:border-gray-600 active:scale-98 transition-all"
                       style={{
                         animation: `fadeInUp 0.3s ease-out ${i * 0.05}s both`
                       }}
@@ -360,14 +360,14 @@ export default function JourneyModal({ show, onClose, user, stats, activityDates
                         </div>
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center justify-between gap-2 mb-1">
-                            <h4 className="font-bold text-sm text-ink" style={{ fontFamily: "'Shippori Mincho', serif" }}>
+                            <h4 className="font-bold text-sm text-ink dark:text-white transition-colors duration-300" style={{ fontFamily: "'Shippori Mincho', serif" }}>
                               {activity.title}
                             </h4>
-                            <span className="text-xs text-stone/60">
+                            <span className="text-xs text-stone/60 dark:text-gray-400 transition-colors duration-300">
                               {activity.time.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}
                             </span>
                           </div>
-                          <p className="text-xs text-stone/80 leading-relaxed">{activity.description}</p>
+                          <p className="text-xs text-stone/80 dark:text-gray-300 leading-relaxed transition-colors duration-300">{activity.description}</p>
                         </div>
                       </div>
                     </div>
@@ -378,10 +378,10 @@ export default function JourneyModal({ show, onClose, user, stats, activityDates
                   <div className="w-16 h-16 bg-stone/5 rounded-full flex items-center justify-center mx-auto mb-4">
                     <span className="text-3xl">📭</span>
                   </div>
-                  <p className="text-ink font-medium mb-1" style={{ fontFamily: "'Shippori Mincho', serif" }}>
+                  <p className="text-ink dark:text-white font-medium mb-1 transition-colors duration-300" style={{ fontFamily: "'Shippori Mincho', serif" }}>
                     Aucune activité
                   </p>
-                  <p className="text-stone/60 text-sm">Rien n'a été enregistré ce jour</p>
+                  <p className="text-stone/60 dark:text-gray-400 text-sm transition-colors duration-300">Rien n'a été enregistré ce jour</p>
                 </div>
               )}
 

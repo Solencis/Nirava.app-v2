@@ -270,19 +270,19 @@ const BreathingMobile: React.FC<BreathingMobileProps> = ({ onClose, onComplete }
   };
 
   return (
-    <div className="fixed inset-0 bg-gradient-to-br from-jade/5 via-white to-wasabi/5 z-50 overflow-y-auto">
+    <div className="fixed inset-0 bg-gradient-to-br from-jade/5 via-white to-wasabi/5 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 z-50 overflow-y-auto transition-colors duration-300">
       <div className="min-h-screen p-4 pb-24">
         <div className="max-w-lg mx-auto">
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center">
               <Wind className="w-6 h-6 text-jade mr-2" />
-              <h1 className="text-2xl font-bold text-ink" style={{ fontFamily: "'Shippori Mincho', serif" }}>
+              <h1 className="text-2xl font-bold text-ink dark:text-white transition-colors duration-300" style={{ fontFamily: "'Shippori Mincho', serif" }}>
                 Respiration
               </h1>
             </div>
             <button
               onClick={onClose}
-              className="w-10 h-10 rounded-full bg-stone/10 flex items-center justify-center text-stone hover:text-vermilion transition-colors"
+              className="w-10 h-10 rounded-full bg-stone/10 dark:bg-gray-700 flex items-center justify-center text-stone dark:text-gray-300 hover:text-vermilion dark:hover:text-red-400 transition-colors"
             >
               <X size={20} />
             </button>
@@ -290,7 +290,7 @@ const BreathingMobile: React.FC<BreathingMobileProps> = ({ onClose, onComplete }
 
           {!selectedExercise ? (
             <div className="space-y-4">
-              <p className="text-stone text-sm mb-6">
+              <p className="text-stone dark:text-gray-300 text-sm mb-6 transition-colors duration-300">
                 Choisis une technique de respiration adaptée à ton besoin du moment.
               </p>
 
@@ -298,20 +298,20 @@ const BreathingMobile: React.FC<BreathingMobileProps> = ({ onClose, onComplete }
                 <button
                   key={exercise.id}
                   onClick={() => startExercise(exercise)}
-                  className="w-full bg-white rounded-2xl p-5 shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1 border border-stone/10 text-left"
+                  className="w-full bg-white dark:bg-gray-800 rounded-2xl p-5 shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1 border border-stone/10 dark:border-gray-700 text-left"
                 >
                   <div className="flex items-start">
                     <div className="text-3xl mr-4">
                       {exercise.icon}
                     </div>
                     <div className="flex-1">
-                      <h3 className="font-bold text-lg text-ink mb-1" style={{ fontFamily: "'Shippori Mincho', serif" }}>
+                      <h3 className="font-bold text-lg text-ink dark:text-white mb-1 transition-colors duration-300" style={{ fontFamily: "'Shippori Mincho', serif" }}>
                         {exercise.name}
                       </h3>
-                      <p className="text-sm text-stone leading-relaxed">
+                      <p className="text-sm text-stone dark:text-gray-300 leading-relaxed transition-colors duration-300">
                         {exercise.description}
                       </p>
-                      <p className="text-xs text-stone/60 mt-2">
+                      <p className="text-xs text-stone/60 dark:text-gray-400 mt-2 transition-colors duration-300">
                         {exercise.cycles} cycles • {exercise.phases.reduce((acc, p) => acc + p.duration, 0)}s par cycle
                       </p>
                     </div>
@@ -325,10 +325,10 @@ const BreathingMobile: React.FC<BreathingMobileProps> = ({ onClose, onComplete }
               <div className="w-24 h-24 bg-gradient-to-br from-jade to-wasabi rounded-full flex items-center justify-center mx-auto mb-6 animate-bounce-slow">
                 <span className="text-4xl">✨</span>
               </div>
-              <h2 className="text-2xl font-bold text-ink mb-3" style={{ fontFamily: "'Shippori Mincho', serif" }}>
+              <h2 className="text-2xl font-bold text-ink dark:text-white mb-3 transition-colors duration-300" style={{ fontFamily: "'Shippori Mincho', serif" }}>
                 Exercice terminé !
               </h2>
-              <p className="text-stone mb-8">
+              <p className="text-stone dark:text-gray-300 mb-8 transition-colors duration-300">
                 Bravo, tu as complété {totalCycles} cycles de {selectedExercise.name}
               </p>
               <div className="space-y-3">
@@ -343,7 +343,7 @@ const BreathingMobile: React.FC<BreathingMobileProps> = ({ onClose, onComplete }
                     setSelectedExercise(null);
                     setShowComplete(false);
                   }}
-                  className="w-full bg-stone/10 text-ink py-4 rounded-xl font-medium hover:bg-stone/20 transition-colors"
+                  className="w-full bg-stone/10 dark:bg-gray-700 text-ink dark:text-white py-4 rounded-xl font-medium hover:bg-stone/20 dark:hover:bg-gray-600 transition-colors"
                 >
                   Choisir un autre exercice
                 </button>
@@ -352,7 +352,7 @@ const BreathingMobile: React.FC<BreathingMobileProps> = ({ onClose, onComplete }
           ) : (
             <div className="text-center">
               <div className="mb-6">
-                <div className="flex items-center justify-between text-xs text-stone mb-2">
+                <div className="flex items-center justify-between text-xs text-stone dark:text-gray-300 mb-2 transition-colors duration-300">
                   <span>Cycle {currentCycle + 1}/{totalCycles}</span>
                   <button
                     onClick={addMoreCycles}
@@ -362,7 +362,7 @@ const BreathingMobile: React.FC<BreathingMobileProps> = ({ onClose, onComplete }
                     +3
                   </button>
                 </div>
-                <div className="w-full bg-stone/20 h-1.5 rounded-full overflow-hidden">
+                <div className="w-full bg-stone/20 dark:bg-gray-700 h-1.5 rounded-full overflow-hidden transition-colors duration-300">
                   <div
                     className="bg-gradient-to-r from-jade to-wasabi h-1.5 rounded-full transition-all duration-300"
                     style={{ width: `${((currentCycle / totalCycles) * 100)}%` }}
@@ -378,19 +378,19 @@ const BreathingMobile: React.FC<BreathingMobileProps> = ({ onClose, onComplete }
                   }}
                 />
                 <div className="relative z-10 text-center">
-                  <div className="text-5xl font-bold text-ink mb-2" style={{ fontFamily: "'Shippori Mincho', serif" }}>
+                  <div className="text-5xl font-bold text-ink dark:text-white mb-2 transition-colors duration-300" style={{ fontFamily: "'Shippori Mincho', serif" }}>
                     {timeLeft > 0 ? timeLeft : ''}
                   </div>
-                  <div className="text-lg text-ink font-medium animate-pulse">
+                  <div className="text-lg text-ink dark:text-white font-medium animate-pulse transition-colors duration-300">
                     {selectedExercise.phases[currentPhase].instruction}
                   </div>
                   {isPaused && (
-                    <div className="text-sm text-stone/60 mt-2">En pause</div>
+                    <div className="text-sm text-stone/60 dark:text-gray-400 mt-2 transition-colors duration-300">En pause</div>
                   )}
                 </div>
               </div>
 
-              <div className="text-xs text-stone/60 mb-6">
+              <div className="text-xs text-stone/60 dark:text-gray-400 mb-6 transition-colors duration-300">
                 🔔 Son apaisant à chaque phase
               </div>
 
