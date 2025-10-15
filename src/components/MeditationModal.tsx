@@ -5,6 +5,7 @@ import ShareToCommunityButton from './ShareToCommuityButton';
 import { JournalActivity } from '../lib/supabase';
 import { useAuth } from '../hooks/useAuth';
 import { useCreateJournal } from '../hooks/useJournals';
+import { useCreateMeditationSession } from '../hooks/useMeditation';
 
 interface MeditationModalProps {
   isOpen: boolean;
@@ -15,6 +16,7 @@ interface MeditationModalProps {
 const MeditationModal: React.FC<MeditationModalProps> = ({ isOpen, onClose, onSave }) => {
   const { user } = useAuth();
   const createJournalMutation = useCreateJournal();
+  const createMeditationSessionMutation = useCreateMeditationSession();
   const {
     current: currentAmbience,
     isPlaying: ambienceIsPlaying,
@@ -112,19 +114,34 @@ const MeditationModal: React.FC<MeditationModalProps> = ({ isOpen, onClose, onSa
 
     // Use actual elapsed time, not target duration
     const sessionDuration = Math.round(meditationState.elapsed / 60);
-    
+
+    // S'assurer d'avoir au moins 1 minute
+    if (sessionDuration < 1) {
+      console.warn('Session too short, not saving');
+      return;
+    }
+
     try {
-      // Utiliser React Query pour créer l'entrée journal
+      // Créer l'entrée dans meditation_sessions
+      const meditationSession = await createMeditationSessionMutation.mutateAsync({
+        duration_minutes: sessionDuration,
+        mode: isFreeMode ? 'free' : 'guided',
+        completed: true
+      });
+
+      console.log('✅ Session de méditation sauvegardée:', meditationSession.id, `${sessionDuration}min`);
+
+      // Créer aussi une entrée journal pour l'historique et le partage
       const journalEntry = await createJournalMutation.mutateAsync({
         type: 'meditation',
         content: `Méditation de ${sessionDuration} minutes`,
         metadata: {
           duration_minutes: sessionDuration,
-          mode: isFreeMode ? 'libre' : 'guidée'
+          mode: isFreeMode ? 'libre' : 'guidée',
+          meditation_session_id: meditationSession.id
         }
       });
 
-      console.log('✅ Méditation sauvegardée dans Supabase:', journalEntry.id);
       // Créer l'activité pour le partage
       const session: JournalActivity = {
         id: journalEntry.id,
@@ -133,10 +150,10 @@ const MeditationModal: React.FC<MeditationModalProps> = ({ isOpen, onClose, onSa
         duration: sessionDuration,
         created_at: journalEntry.created_at
       };
-      
+
       // Sauvegarder l'activité pour le partage
       setSavedActivity(session);
-      
+
       onSave();
     } catch (error) {
       console.error('Error saving meditation session:', error);
