@@ -3,6 +3,7 @@ import { Heart, Send, Users, Sparkles, Settings, Trash2, MessageCircle, ChevronD
 import { motion } from 'framer-motion';
 import { supabase, Post, Profile } from '../lib/supabase';
 import { useAuth } from '../hooks/useAuth';
+import { getLevelBadge, getLevelLabel } from '../utils/levelSystem';
 
 interface Comment {
   id: string;
@@ -35,6 +36,7 @@ const Community: React.FC = () => {
   const [submitting, setSubmitting] = useState(false);
   const [showUserProfile, setShowUserProfile] = useState<string | null>(null);
   const [userProfileData, setUserProfileData] = useState<Profile | null>(null);
+  const [userProfileStats, setUserProfileStats] = useState<{ checkins: number; journals: number; meditation: number; streak: number } | null>(null);
   const [showPhotoModal, setShowPhotoModal] = useState<string | null>(null);
   const [isVisible, setIsVisible] = useState(false);
   const [pulseKey, setPulseKey] = useState(0);
@@ -102,14 +104,14 @@ const Community: React.FC = () => {
     try {
       const { data, error } = await supabase
         .from('profiles')
-        .select('*')
+        .select('*, total_xp')
         .eq('id', user.id)
         .maybeSingle();
 
       if (error) {
         console.error('Error loading profile:', error);
         // Créer un profil par défaut si erreur
-        setProfile({
+        const defaultProfile = {
           id: user.id,
           display_name: user.email?.split('@')[0] || `Voyageur${Math.floor(Math.random() * 1000)}`,
           level: 'N1',
@@ -117,9 +119,11 @@ const Community: React.FC = () => {
           bio: '',
           photo_url: '',
           subscription_status: 'none',
+          total_xp: 0,
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString()
-        });
+        };
+        setProfile(defaultProfile);
         return;
       }
 
@@ -130,7 +134,8 @@ const Community: React.FC = () => {
           display_name: user.email?.split('@')[0] || `Voyageur${Math.floor(Math.random() * 1000)}`,
           level: 'N1',
           share_progress: true,
-          subscription_status: 'none'
+          subscription_status: 'none',
+          total_xp: 0
         };
 
         const { data: createdProfile, error: createError } = await supabase
@@ -182,7 +187,8 @@ const Community: React.FC = () => {
             id,
             display_name,
             level,
-            photo_url
+            photo_url,
+            total_xp
           ),
           post_likes (
             id,
@@ -197,7 +203,8 @@ const Community: React.FC = () => {
               id,
               display_name,
               level,
-              photo_url
+              photo_url,
+              total_xp
             )
           )
         `)
@@ -276,8 +283,7 @@ const Community: React.FC = () => {
       const { error } = await supabase
         .from('profiles')
         .update({
-          display_name: profile.display_name,
-          level: profile.level
+          display_name: profile.display_name
         })
         .eq('id', user.id);
 
@@ -495,7 +501,7 @@ const Community: React.FC = () => {
     try {
       const { data, error } = await supabase
         .from('profiles')
-        .select('*')
+        .select('*, total_xp')
         .eq('id', userId)
         .single();
 
@@ -511,11 +517,17 @@ const Community: React.FC = () => {
       // Permettre de voir son propre profil aussi
       setUserProfileData(profile);
       setShowUserProfile(userId);
+      // Charger les stats pour l'utilisateur courant
+      const stats = await getUserStats(userId);
+      setUserProfileStats(stats);
       return;
     }
-    
+
     setShowUserProfile(userId);
     await loadUserProfile(userId);
+    // Charger les stats pour l'utilisateur sélectionné
+    const stats = await getUserStats(userId);
+    setUserProfileStats(stats);
     
     // Haptic feedback
     if ('vibrate' in navigator) {
@@ -523,18 +535,73 @@ const Community: React.FC = () => {
     }
   };
 
-  const getUserStats = (userId: string) => {
-    // Pour l'instant, générer des stats fictives car on n'a pas accès aux données des autres utilisateurs
-    // En production, il faudrait une table publique de stats ou une API dédiée
-    const randomSeed = userId.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
-    const random = (seed: number) => (seed * 9301 + 49297) % 233280 / 233280;
-    
-    return {
-      checkins: Math.floor(random(randomSeed) * 7) + 1,
-      journals: Math.floor(random(randomSeed + 1) * 5) + 1,
-      meditation: Math.floor(random(randomSeed + 2) * 60) + 10,
-      streak: Math.floor(random(randomSeed + 3) * 14) + 1
-    };
+  const getUserStats = async (userId: string) => {
+    try {
+      const oneWeekAgo = new Date();
+      oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+
+      // Check-ins cette semaine
+      const { data: checkins } = await supabase
+        .from('checkins')
+        .select('id')
+        .eq('user_id', userId)
+        .gte('created_at', oneWeekAgo.toISOString());
+
+      // Journaux cette semaine
+      const { data: journals } = await supabase
+        .from('journals')
+        .select('id')
+        .eq('user_id', userId)
+        .eq('type', 'journal')
+        .gte('created_at', oneWeekAgo.toISOString());
+
+      // Méditations cette semaine
+      const { data: meditations } = await supabase
+        .from('meditation_sessions')
+        .select('duration_minutes')
+        .eq('user_id', userId)
+        .gte('created_at', oneWeekAgo.toISOString());
+
+      const meditationMinutes = meditations?.reduce((sum, s) => sum + (s.duration_minutes || 0), 0) || 0;
+
+      // Streak de journaux
+      const { data: allJournals } = await supabase
+        .from('journals')
+        .select('created_at')
+        .eq('user_id', userId)
+        .eq('type', 'journal')
+        .order('created_at', { ascending: false });
+
+      let streak = 0;
+      if (allJournals && allJournals.length > 0) {
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        let checkDate = new Date(today);
+
+        const journalDates = new Set(
+          allJournals.map(j => {
+            const d = new Date(j.created_at);
+            d.setHours(0, 0, 0, 0);
+            return d.getTime();
+          })
+        );
+
+        while (journalDates.has(checkDate.getTime())) {
+          streak++;
+          checkDate.setDate(checkDate.getDate() - 1);
+        }
+      }
+
+      return {
+        checkins: checkins?.length || 0,
+        journals: journals?.length || 0,
+        meditation: meditationMinutes,
+        streak
+      };
+    } catch (error) {
+      console.error('Error loading user stats:', error);
+      return { checkins: 0, journals: 0, meditation: 0, streak: 0 };
+    }
   };
 
   const getJoinDate = (createdAt: string) => {
@@ -745,35 +812,26 @@ const Community: React.FC = () => {
                       style={{ fontSize: '16px' }}
                     />
                   </div>
-                  
+
                   <div>
                     <label className="block text-sm font-medium text-ink mb-3">Niveau actuel</label>
-                    <div className="grid grid-cols-2 gap-3">
-                      {levels.map(level => (
-                        <button
-                          key={level}
-                          onClick={() => {
-                            setProfile({ ...profile, level });
-                            hapticFeedback('light');
-                          }}
-                          className={`p-4 rounded-2xl border-2 transition-all duration-300 transform hover:scale-105 active:scale-95 ${
-                            profile.level === level
-                              ? 'bg-gradient-to-br from-wasabi/20 to-jade/20 border-wasabi text-wasabi shadow-lg'
-                              : 'bg-stone/5 border-stone/20 text-stone hover:border-wasabi/30'
-                          }`}
-                        >
-                          <div className="text-lg font-bold">{level}</div>
-                          <div className="text-xs opacity-80">
-                            {level === 'N1' && 'Découverte'}
-                            {level === 'N2' && 'Pratique'}
-                            {level === 'N3' && 'Intégration'}
-                            {level === 'N4' && 'Maîtrise'}
-                          </div>
-                        </button>
-                      ))}
+                    <div className="bg-gradient-to-r from-wasabi/10 to-jade/10 rounded-2xl p-6 border-2 border-wasabi/20">
+                      <div className="flex items-center justify-center gap-3">
+                        <div className="w-16 h-16 bg-gradient-to-br from-wasabi to-jade rounded-full flex items-center justify-center shadow-lg">
+                          <span className="text-white font-bold text-xl">{getLevelBadge(profile.total_xp || 0)}</span>
+                        </div>
+                        <div className="text-left">
+                          <div className="text-2xl font-bold text-wasabi">{getLevelBadge(profile.total_xp || 0)}</div>
+                          <div className="text-sm text-stone/70">{getLevelLabel(getLevelBadge(profile.total_xp || 0))}</div>
+                          <div className="text-xs text-stone/60 mt-1">{profile.total_xp || 0} XP</div>
+                        </div>
+                      </div>
+                      <div className="text-center text-xs text-stone/60 mt-3">
+                        Ton niveau \u00e9volue automatiquement avec ton XP
+                      </div>
                     </div>
                   </div>
-                  
+
                   <div className="flex gap-3">
                     <button
                       onClick={() => {
@@ -816,12 +874,12 @@ const Community: React.FC = () => {
                       />
                     ) : (
                       <div className="w-10 h-10 bg-gradient-to-br from-wasabi to-jade rounded-full flex items-center justify-center mr-3 shadow-md">
-                        <span className="text-white font-bold text-sm">{profile.level}</span>
+                        <span className="text-white font-bold text-sm">{getLevelBadge(profile.total_xp || 0)}</span>
                       </div>
                     )}
                     <div>
                       <div className="font-bold text-ink text-sm">{profile.display_name}</div>
-                      <div className="text-xs text-wasabi font-medium">{profile.level}</div>
+                      <div className="text-xs text-wasabi font-medium">{getLevelBadge(profile.total_xp || 0)}</div>
                     </div>
                   </div>
                   <button
@@ -959,7 +1017,7 @@ const Community: React.FC = () => {
                             />
                           ) : (
                             <div className="w-10 h-10 bg-gradient-to-br from-wasabi to-jade rounded-full flex items-center justify-center mr-3 shadow-md">
-                              <span className="text-white text-xs font-bold">{post.profiles?.level || 'N1'}</span>
+                              <span className="text-white text-xs font-bold">{getLevelBadge(post.profiles?.total_xp || 0)}</span>
                             </div>
                           )}
                           <div>
@@ -967,7 +1025,7 @@ const Community: React.FC = () => {
                               {post.profiles?.display_name || 'Utilisateur'}
                             </div>
                             <div className="flex items-center">
-                              <span className="text-xs text-wasabi font-medium">{post.profiles?.level || 'N1'}</span>
+                              <span className="text-xs text-wasabi font-medium">{getLevelBadge(post.profiles?.total_xp || 0)}</span>
                               {post.user_id === user?.id && (
                                 <Crown className="w-3 h-3 text-sunset ml-1" />
                               )}
@@ -1165,7 +1223,7 @@ const Community: React.FC = () => {
                               />
                             ) : (
                               <div className="w-10 h-10 bg-gradient-to-br from-wasabi to-jade rounded-full flex items-center justify-center shadow-lg animate-pulse-glow flex-shrink-0">
-                                <span className="text-white font-bold text-sm">{profile?.level || 'N1'}</span>
+                                <span className="text-white font-bold text-sm">{getLevelBadge(profile?.total_xp || 0)}</span>
                               </div>
                             )}
                             <div className="flex-1">
@@ -1279,6 +1337,7 @@ const Community: React.FC = () => {
             onClick={() => {
               setShowUserProfile(null);
               setUserProfileData(null);
+              setUserProfileStats(null);
             }}
           />
           <div className="fixed top-20 left-4 right-4 z-50 bg-white/98 backdrop-blur-md rounded-3xl shadow-2xl border border-stone/10 p-6 animate-fade-in-up max-w-sm mx-auto">
@@ -1292,7 +1351,7 @@ const Community: React.FC = () => {
                   />
                 ) : (
                   <div className="w-16 h-16 bg-gradient-to-br from-wasabi to-jade rounded-full flex items-center justify-center mr-4 shadow-lg animate-pulse-glow border-4 border-white">
-                    <span className="text-white font-bold text-lg">{userProfileData.level}</span>
+                    <span className="text-white font-bold text-lg">{getLevelBadge(userProfileData.total_xp || 0)}</span>
                   </div>
                 )}
                 <div>
@@ -1339,62 +1398,52 @@ const Community: React.FC = () => {
                 <div className="text-center mb-4">
                   <div className="flex items-center justify-center mb-2">
                     <Star className="w-5 h-5 text-wasabi mr-2 animate-twinkle" />
-                    <span className="text-wasabi font-bold">Niveau {userProfileData.level}</span>
+                    <span className="text-wasabi font-bold">Niveau {getLevelBadge(userProfileData.total_xp || 0)}</span>
                     <Star className="w-5 h-5 text-wasabi ml-2 animate-twinkle" style={{ animationDelay: '0.5s' }} />
                   </div>
                   {showUserProfile === user?.id && (
                     <span className="text-wasabi/60 text-xs">(Tes statistiques)</span>
                   )}
                 </div>
-              
-                {(() => {
-                  // Utiliser les vraies stats pour l'utilisateur connecté
-                  const stats = showUserProfile === user?.id 
-                    ? {
-                        checkins: JSON.parse(localStorage.getItem('checkin-history') || '[]').filter((entry: any) => {
-                          const oneWeekAgo = new Date();
-                          oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
-                          return new Date(entry.timestamp || entry.created_at) > oneWeekAgo;
-                        }).length,
-                        journals: JSON.parse(localStorage.getItem('journal-entries') || '[]').length,
-                        meditation: Math.round(JSON.parse(localStorage.getItem('nirava_audio') || '{}').state?.meditationWeekMinutes || 0),
-                        streak: parseInt(localStorage.getItem('current-streak') || '0')
-                      }
-                    : getUserStats(userProfileData.id);
-                  
-                  return (
+
+                {userProfileStats ? (
+                  <>
                     <div className="grid grid-cols-2 gap-3">
                       <div className="text-center bg-white/80 rounded-xl p-3 border border-jade/20">
                         <div className="w-8 h-8 bg-gradient-to-br from-jade/20 to-forest/20 rounded-lg flex items-center justify-center mx-auto mb-2">
                           <Heart size={16} className="text-jade" />
                         </div>
-                        <div className="text-xl font-bold text-jade">{stats.checkins}</div>
+                        <div className="text-xl font-bold text-jade">{userProfileStats.checkins}</div>
                         <div className="text-xs text-stone">Check-ins</div>
                       </div>
                       <div className="text-center bg-white/80 rounded-xl p-3 border border-vermilion/20">
                         <div className="w-8 h-8 bg-gradient-to-br from-vermilion/20 to-sunset/20 rounded-lg flex items-center justify-center mx-auto mb-2">
                           <BookOpen size={16} className="text-vermilion" />
                         </div>
-                        <div className="text-xl font-bold text-vermilion">{stats.journals}</div>
+                        <div className="text-xl font-bold text-vermilion">{userProfileStats.journals}</div>
                         <div className="text-xs text-stone">Journaux</div>
                       </div>
                       <div className="text-center bg-white/80 rounded-xl p-3 border border-forest/20">
                         <div className="w-8 h-8 bg-gradient-to-br from-forest/20 to-jade/20 rounded-lg flex items-center justify-center mx-auto mb-2">
                           <Timer size={16} className="text-forest" />
                         </div>
-                        <div className="text-xl font-bold text-forest">{stats.meditation}</div>
+                        <div className="text-xl font-bold text-forest">{userProfileStats.meditation}</div>
                         <div className="text-xs text-stone">Min médita</div>
                       </div>
                       <div className="text-center bg-white/80 rounded-xl p-3 border border-sunset/20">
                         <div className="w-8 h-8 bg-gradient-to-br from-sunset/20 to-vermilion/20 rounded-lg flex items-center justify-center mx-auto mb-2">
                           <Flame size={16} className="text-sunset" />
                         </div>
-                        <div className="text-xl font-bold text-sunset">{stats.streak}</div>
+                        <div className="text-xl font-bold text-sunset">{userProfileStats.streak}</div>
                         <div className="text-xs text-stone">Série</div>
                       </div>
                     </div>
-                  );
-                })()}
+                  </>
+                ) : (
+                  <div className="text-center text-stone/60 py-4">
+                    Chargement des statistiques...
+                  </div>
+                )}
               </div>
             </div>
 
