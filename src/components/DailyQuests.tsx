@@ -75,7 +75,12 @@ const DailyQuests: React.FC<DailyQuestsProps> = ({
   }, [user]);
 
   const loadClaimedStatus = async () => {
-    if (!user?.id) return;
+    if (!user?.id) {
+      console.log('[DailyQuests] No user, skipping loadClaimedStatus');
+      return;
+    }
+
+    console.log('[DailyQuests] Loading claimed status for user:', user.id);
 
     const today = new Date();
     const monday = new Date(today);
@@ -85,6 +90,8 @@ const DailyQuests: React.FC<DailyQuestsProps> = ({
     monday.setHours(0, 0, 0, 0);
     const weekStart = monday.toISOString().split('T')[0];
 
+    console.log('[DailyQuests] Week start:', weekStart);
+
     const { data: weekData, error } = await supabase
       .from('weekly_quests')
       .select('*')
@@ -93,12 +100,16 @@ const DailyQuests: React.FC<DailyQuestsProps> = ({
       .maybeSingle();
 
     if (error) {
-      console.error('Error loading claimed status:', error);
+      console.error('[DailyQuests] Error loading claimed status:', error);
       return;
     }
 
+    console.log('[DailyQuests] Week data from DB:', weekData);
+
     if (weekData) {
       const todayDate = new Date().toISOString().split('T')[0];
+      console.log('[DailyQuests] Today date:', todayDate);
+
       const claimedStatus: Record<string, boolean> = {
         checkin: weekData.checkin_last_claim_date === todayDate,
         journal: weekData.journal_last_claim_date === todayDate,
@@ -111,19 +122,24 @@ const DailyQuests: React.FC<DailyQuestsProps> = ({
         'meditation-60': weekData.meditation_60_last_claim_date === todayDate,
         'daily-mastery': weekData.daily_mastery_last_claim_date === todayDate
       };
-      console.log('[DailyQuests] Claimed status loaded:', claimedStatus);
+      console.log('[DailyQuests] Claimed status computed:', claimedStatus);
 
       // Synchroniser le ref avec les données de la DB
       Object.entries(claimedStatus).forEach(([questId, isClaimed]) => {
         if (isClaimed) {
           claimedThisSessionRef.current.add(questId);
+          console.log('[DailyQuests] Added to ref:', questId);
         }
       });
+
+      console.log('[DailyQuests] Ref contents:', Array.from(claimedThisSessionRef.current));
 
       setClaimed(claimedStatus);
     } else {
       console.log('[DailyQuests] No week data found, resetting claimed status');
       setClaimed({});
+      // Réinitialiser le ref aussi
+      claimedThisSessionRef.current.clear();
     }
   };
 
