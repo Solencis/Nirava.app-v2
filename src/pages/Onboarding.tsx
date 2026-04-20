@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ChevronRight, Sparkles, X } from 'lucide-react';
+import { ChevronRight, Sparkles, ArrowRight } from 'lucide-react';
 import { onboardingSlides } from '../data/onboardingContent';
 import { useOnboarding } from '../hooks/useOnboarding';
 
@@ -8,133 +8,153 @@ export default function Onboarding() {
   const navigate = useNavigate();
   const { completeOnboarding } = useOnboarding();
   const [currentSlide, setCurrentSlide] = useState(0);
+  const [animating, setAnimating] = useState(false);
+  const [direction, setDirection] = useState<'in' | 'out'>('in');
 
   const isLastSlide = currentSlide === onboardingSlides.length - 1;
-  const currentSlideData = onboardingSlides[currentSlide];
+  const slide = onboardingSlides[currentSlide];
 
-  const handleNext = () => {
+  useEffect(() => {
+    setDirection('in');
+    setAnimating(true);
+    const t = setTimeout(() => setAnimating(false), 400);
+    return () => clearTimeout(t);
+  }, [currentSlide]);
+
+  const goNext = () => {
+    if (animating) return;
     if (currentSlide < onboardingSlides.length - 1) {
+      setDirection('out');
       setCurrentSlide(prev => prev + 1);
     }
   };
 
-  const handleSkip = async () => {
+  const finish = async (destination: '/auth' | '/pricing') => {
     try {
       await completeOnboarding();
-      navigate('/auth');
-    } catch (error) {
-      console.error('Error completing onboarding:', error);
-      navigate('/auth');
-    }
-  };
-
-  const handleFreeAccess = async () => {
-    try {
-      await completeOnboarding();
-      navigate('/auth');
-    } catch (error) {
-      console.error('Error completing onboarding:', error);
-      navigate('/auth');
-    }
-  };
-
-  const handleFullAccess = async () => {
-    try {
-      await completeOnboarding();
-      navigate('/pricing');
-    } catch (error) {
-      console.error('Error completing onboarding:', error);
-      navigate('/pricing');
+    } catch (_) {
+    } finally {
+      navigate(destination);
     }
   };
 
   return (
-    <div className="min-h-screen w-full bg-gradient-to-br from-slate-50 to-slate-100 flex flex-col">
-      {/* Header avec bouton Skip */}
-      <div className="flex justify-between items-center p-4">
-        <div className="w-10 h-10" />
+    <div className="min-h-screen w-full bg-gradient-to-br from-slate-50 via-white to-slate-100 flex flex-col overflow-hidden">
+
+      <div className="flex justify-between items-center px-5 pt-5 pb-2">
+        {currentSlide > 0 ? (
+          <button
+            onClick={() => !animating && setCurrentSlide(prev => prev - 1)}
+            className="text-sm text-gray-400 hover:text-gray-600 transition-colors font-medium px-1 py-1"
+          >
+            Retour
+          </button>
+        ) : (
+          <div className="w-12" />
+        )}
+
         {!isLastSlide && (
           <button
-            onClick={handleSkip}
-            className="bg-white rounded-full p-2 shadow-md hover:shadow-lg transition-shadow"
+            onClick={() => finish('/auth')}
+            className="text-sm text-gray-400 hover:text-gray-600 transition-colors font-medium"
           >
-            <X className="w-6 h-6 text-gray-600" />
+            Passer
           </button>
         )}
       </div>
 
-      {/* Progress indicators */}
-      <div className="flex gap-2 justify-center px-4 mb-8">
+      <div className="flex gap-1.5 justify-center px-6 py-3">
         {onboardingSlides.map((_, index) => (
           <div
             key={index}
-            className={`h-1 rounded-full transition-all duration-300 ${
-              index === currentSlide
-                ? 'w-8 bg-gradient-to-r ' + currentSlideData.gradient
-                : 'w-1 bg-gray-300'
-            }`}
+            className="h-1 rounded-full transition-all duration-500"
+            style={{
+              width: index === currentSlide ? '2rem' : '0.4rem',
+              background: index === currentSlide
+                ? `linear-gradient(to right, var(--tw-gradient-from, #34d399), var(--tw-gradient-to, #22d3ee))`
+                : index < currentSlide
+                  ? '#34d399'
+                  : '#e2e8f0'
+            }}
           />
         ))}
       </div>
 
-      {/* Content */}
-      <div className="flex-1 flex items-center justify-center px-6">
-        <div className="text-center max-w-lg">
-          {/* Icon */}
-          <div className="text-7xl mb-6">
-            {currentSlideData.icon}
+      <div
+        className="flex-1 flex items-center justify-center px-6 py-4"
+        style={{
+          opacity: animating ? 0 : 1,
+          transform: animating ? 'translateY(16px)' : 'translateY(0)',
+          transition: 'opacity 0.35s ease, transform 0.35s ease'
+        }}
+      >
+        <div className="text-center max-w-md w-full">
+          <div
+            className={`w-24 h-24 mx-auto mb-8 rounded-3xl bg-gradient-to-br ${slide.gradient} flex items-center justify-center shadow-lg`}
+            style={{ fontSize: '2.5rem' }}
+          >
+            {slide.icon}
           </div>
 
-          {/* Title */}
-          <h2 className={`text-3xl font-bold mb-3 bg-gradient-to-r ${currentSlideData.gradient} bg-clip-text text-transparent`}>
-            {currentSlideData.title}
+          <h2
+            className={`text-3xl font-bold mb-3 bg-gradient-to-r ${slide.gradient} bg-clip-text text-transparent leading-tight`}
+          >
+            {slide.title}
           </h2>
 
-          {/* Subtitle */}
-          {currentSlideData.subtitle && (
-            <p className={`text-lg ${currentSlideData.textColor} font-medium mb-6 opacity-80`}>
-              {currentSlideData.subtitle}
+          {slide.subtitle && (
+            <p className={`text-base font-semibold mb-5 ${slide.textColor} opacity-70 tracking-wide`}>
+              {slide.subtitle}
             </p>
           )}
 
-          {/* Description */}
-          <p className="text-base text-gray-600 leading-relaxed px-4">
-            {currentSlideData.description.length > 180
-              ? currentSlideData.description.substring(0, 180) + '...'
-              : currentSlideData.description
-            }
+          <p className="text-base text-gray-500 leading-relaxed">
+            {slide.description}
           </p>
+
+          {currentSlide === 0 && (
+            <div className="mt-6 inline-flex items-center gap-2 bg-amber-50 border border-amber-200 rounded-xl px-4 py-2.5">
+              <span className="text-amber-500 text-lg">⚠️</span>
+              <span className="text-xs text-amber-700 font-medium text-left">
+                Version prototype — des bugs peuvent survenir
+              </span>
+            </div>
+          )}
         </div>
       </div>
 
-      {/* Bottom actions */}
-      <div className="p-6 space-y-3 pb-safe">
+      <div className="px-5 pb-8 pt-4 space-y-3">
         {isLastSlide ? (
-          <div className="space-y-3">
+          <>
             <button
-              onClick={handleFreeAccess}
-              className="w-full py-4 bg-white text-gray-800 rounded-2xl font-semibold shadow-lg hover:shadow-xl transition-shadow flex items-center justify-center gap-2"
-            >
-              <Sparkles className="w-5 h-5 text-emerald-600" />
-              <span>Continuer gratuitement</span>
-            </button>
-            <button
-              onClick={handleFullAccess}
-              className={`w-full py-4 bg-gradient-to-r ${currentSlideData.gradient} text-white rounded-2xl font-semibold shadow-lg hover:shadow-xl transition-shadow flex items-center justify-center gap-2`}
+              onClick={() => finish('/auth')}
+              className={`w-full py-4 bg-gradient-to-r ${slide.gradient} text-white rounded-2xl font-bold shadow-lg active:scale-98 transition-transform flex items-center justify-center gap-2 text-base`}
             >
               <Sparkles className="w-5 h-5" />
-              <span>Activer l'accès complet</span>
+              <span>Commencer gratuitement</span>
             </button>
-          </div>
+            <button
+              onClick={() => finish('/pricing')}
+              className="w-full py-4 bg-white border border-gray-200 text-gray-700 rounded-2xl font-semibold shadow-sm hover:shadow-md transition-shadow flex items-center justify-center gap-2 text-base"
+            >
+              <ArrowRight className="w-4 h-4 text-gray-400" />
+              <span>Voir l'accès complet</span>
+            </button>
+          </>
         ) : (
           <button
-            onClick={handleNext}
-            className={`w-full py-4 bg-gradient-to-r ${currentSlideData.gradient} text-white rounded-2xl font-bold shadow-lg hover:shadow-xl transition-shadow flex items-center justify-center gap-2`}
+            onClick={goNext}
+            disabled={animating}
+            className={`w-full py-4 bg-gradient-to-r ${slide.gradient} text-white rounded-2xl font-bold shadow-lg active:scale-98 transition-transform flex items-center justify-center gap-2 text-base disabled:opacity-70`}
           >
-            <span>{currentSlideData.ctaText || 'Suivant'}</span>
+            <span>{slide.ctaText || 'Suivant'}</span>
             <ChevronRight className="w-5 h-5" />
           </button>
         )}
+
+        <p className="text-center text-xs text-gray-400 pt-1">
+          {currentSlide + 1} sur {onboardingSlides.length}
+        </p>
       </div>
     </div>
   );
