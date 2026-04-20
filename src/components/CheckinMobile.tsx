@@ -109,9 +109,11 @@ const CheckinMobile: React.FC<CheckinMobileProps> = ({ onClose, onSave }) => {
   const [need, setNeed] = useState<Need | null>(null);
   const [note, setNote] = useState('');
   const [done, setDone] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const handleSubmit = async () => {
     if (!emotion || !user) return;
+    setError(null);
     try {
       await createCheckinMutation.mutateAsync({
         emotion: emotion.value,
@@ -122,6 +124,7 @@ const CheckinMobile: React.FC<CheckinMobileProps> = ({ onClose, onSave }) => {
       setDone(true);
     } catch (err) {
       console.error('Error saving checkin:', err);
+      setError(err instanceof Error ? err.message : 'Erreur lors de l\'enregistrement');
     }
   };
 
@@ -383,6 +386,12 @@ const CheckinMobile: React.FC<CheckinMobileProps> = ({ onClose, onSave }) => {
               <div className="bg-jade/5 dark:bg-jade/10 border border-jade/20 dark:border-jade/30 rounded-2xl p-4 mb-6">
                 <p className="text-xs text-jade font-medium mb-1">Pour ton besoin de {need.label}</p>
                 <p className="text-sm text-ink dark:text-white italic">{need.suggestion}</p>
+              </div>
+            )}
+
+            {error && (
+              <div className="mb-4 px-4 py-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-2xl text-sm text-red-600 dark:text-red-400">
+                {error}
               </div>
             )}
 

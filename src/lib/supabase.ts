@@ -139,15 +139,15 @@ export interface ProgressEntry {
 // ============================================================
 
 export const getCurrentUser = async () => {
-  const { data: { user }, error } = await supabase.auth.getUser();
-  if (error) throw error;
-  return user;
+  const { data: { session } } = await supabase.auth.getSession();
+  return session?.user ?? null;
 };
 
 export const requireAuth = async () => {
-  const user = await getCurrentUser();
-  if (!user) throw new Error('User not authenticated');
-  return user;
+  const { data: { session }, error } = await supabase.auth.getSession();
+  if (error) throw error;
+  if (!session?.user) throw new Error('User not authenticated');
+  return session.user;
 };
 
 export const signInWithPassword = async (email: string, password: string) => {

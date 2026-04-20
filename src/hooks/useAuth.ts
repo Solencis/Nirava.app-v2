@@ -159,8 +159,7 @@ export const useAuth = () => {
         const newProfile = {
           id: user.id,
           display_name: displayName,
-          level: 'N1',
-          share_progress: true,
+          email: user.email,
           subscription_status: 'none'
         };
 
