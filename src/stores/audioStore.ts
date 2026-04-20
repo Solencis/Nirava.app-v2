@@ -55,6 +55,7 @@ interface AudioActions {
     progress: number;
   };
   reduceMeditationTime: (minutes: number) => void;
+  playCompletionGong: () => void;
 }
 
 const getCurrentWeek = () => {

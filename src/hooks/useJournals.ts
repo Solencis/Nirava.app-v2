@@ -2,143 +2,33 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { getJournals, createJournal, JournalEntry, supabase } from '../lib/supabase';
 import { useAuth } from './useAuth';
 
-const PAGE_SIZE = 50;
-
-// Hook pour récupérer les journaux avec RLS sécurisé
 export const useJournals = (page = 0) => {
   const { user, isReady } = useAuth();
-  
+
   return useQuery({
     queryKey: ['journals', user?.id, page],
     queryFn: async (): Promise<JournalEntry[]> => {
-      if (!user?.id) {
-        throw new Error('User not authenticated');
-      }
-
-      console.log('Fetching journals for user:', user.id, 'page:', page);
-      
-      // Utilise la fonction optimisée avec RLS
-      const data = await getJournals(PAGE_SIZE);
-      
-      console.log('Journals fetched:', data?.length || 0);
-      return data || [];
+      if (!user?.id) throw new Error('User not authenticated');
+      const data = await getJournals(50);
+      return (data || []) as JournalEntry[];
     },
     enabled: isReady(),
-    staleTime: 5 * 60 * 1000, // 5 minutes
-    gcTime: 30 * 60 * 1000, // 30 minutes
+    staleTime: 5 * 60 * 1000,
+    gcTime: 30 * 60 * 1000,
     retry: false,
     refetchOnMount: false,
   });
 };
 
-// Hook pour créer un journal avec UI optimiste
 export const useCreateJournal = () => {
   const { user } = useAuth();
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (journalData: Omit<JournalEntry, 'id' | 'user_id' | 'created_at' | 'updated_at'>) => {
-      if (!user?.id) {
-        throw new Error('User not authenticated');
-      }
-
-      console.log('Creating journal for user:', user.id);
-
-      // IMPORTANT: createJournal récupère automatiquement user_id via getUser()
+    mutationFn: async (journalData: { type?: string; content: string; emotion?: string; image_url?: string; metadata?: any }) => {
+      if (!user?.id) throw new Error('User not authenticated');
       const data = await createJournal(journalData);
-
-      console.log('Journal created:', data.id);
       return data;
-    },
-    onMutate: async (newJournal) => {
-      // UI optimiste
-      const queryKey = ['journals', user?.id, 0];
-      
-      await queryClient.cancelQueries({ queryKey });
-      
-      const previousJournals = queryClient.getQueryData<JournalEntry[]>(queryKey);
-      
-      // Ajouter optimistiquement
-      const optimisticJournal: JournalEntry = {
-        id: `temp-${Date.now()}`,
-        user_id: user!.id,
-        ...newJournal,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
-      };
-      
-      queryClient.setQueryData<JournalEntry[]>(queryKey, (old = []) => [optimisticJournal, ...old]);
-      
-      return { previousJournals };
-    },
-    onError: (err, newJournal, context) => {
-      // Rollback en cas d'erreur
-      if (context?.previousJournals) {
-        queryClient.setQueryData(['journals', user?.id, 0], context.previousJournals);
-      }
-      console.error('Error creating journal:', err);
-    },
-    onSuccess: (data) => {
-      // Remplacer par les vraies données
-      const queryKey = ['journals', user?.id, 0];
-      queryClient.setQueryData<JournalEntry[]>(queryKey, (old = []) => {
-        const withoutOptimistic = old.filter(item => !item.id.startsWith('temp-'));
-        return [data, ...withoutOptimistic];
-      });
-    },
-  });
-};
-
-// Hook pour soft delete d'un journal (mise à la corbeille)
-export const useSoftDeleteJournal = () => {
-  const { user } = useAuth();
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: async (journalId: string) => {
-      if (!user?.id) {
-        throw new Error('User not authenticated');
-      }
-
-      const { error } = await supabase
-        .from('journals')
-        .update({ deleted_at: new Date().toISOString() })
-        .eq('id', journalId)
-        .eq('user_id', user.id);
-
-      if (error) throw error;
-
-      return journalId;
-    },
-    onSuccess: (deletedId) => {
-      const queryKey = ['journals', user?.id, 0];
-      queryClient.setQueryData<JournalEntry[]>(queryKey, (old = []) =>
-        old.filter(item => item.id !== deletedId)
-      );
-    },
-  });
-};
-
-// Hook pour restaurer un journal de la corbeille
-export const useRestoreJournal = () => {
-  const { user } = useAuth();
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: async (journalId: string) => {
-      if (!user?.id) {
-        throw new Error('User not authenticated');
-      }
-
-      const { error } = await supabase
-        .from('journals')
-        .update({ deleted_at: null })
-        .eq('id', journalId)
-        .eq('user_id', user.id);
-
-      if (error) throw error;
-
-      return journalId;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['journals', user?.id] });
@@ -146,25 +36,19 @@ export const useRestoreJournal = () => {
   });
 };
 
-// Hook pour supprimer définitivement un journal
 export const useDeleteJournal = () => {
   const { user } = useAuth();
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: async (journalId: string) => {
-      if (!user?.id) {
-        throw new Error('User not authenticated');
-      }
-
+      if (!user?.id) throw new Error('User not authenticated');
       const { error } = await supabase
-        .from('journals')
+        .from('journal_entries')
         .delete()
         .eq('id', journalId)
         .eq('user_id', user.id);
-
       if (error) throw error;
-
       return journalId;
     },
     onSuccess: (deletedId) => {

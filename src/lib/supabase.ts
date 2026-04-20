@@ -234,6 +234,7 @@ export const getJournals = async (limit = 50) => {
 export const createJournal = async (journalData: {
   type?: string;
   content: string;
+  emotion?: string;
   image_url?: string;
   metadata?: any;
 }) => {
@@ -244,6 +245,7 @@ export const createJournal = async (journalData: {
       user_id: user.id,
       type: journalData.type || 'journal',
       content: journalData.content,
+      emotion: journalData.emotion,
       image_url: journalData.image_url,
       metadata: journalData.metadata
     })
