@@ -5,18 +5,17 @@ import { resolve } from 'path';
 // https://vitejs.dev/config/
 export default defineConfig({
   base: '/',
-  build: { outDir: 'dist', assetsDir: 'assets' },
   plugins: [react()],
   resolve: {
     alias: {
       '@': resolve(__dirname, './src'),
     },
   },
-  base: '/',
   define: {
     __APP_VERSION__: JSON.stringify(process.env.npm_package_version),
   },
   build: {
+    outDir: 'dist',
     target: 'es2015',
     minify: 'terser',
     terserOptions: {
