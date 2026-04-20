@@ -17,13 +17,13 @@ export default function OnboardingGuard({ children }: OnboardingGuardProps) {
   const { needsOnboarding, loading: onboardingLoading } = useOnboarding();
   const redirectedRef = useRef(false);
 
-  const loading = authLoading || onboardingLoading;
-
   const currentPath = location.pathname;
   const isAllowedRoute = ALLOWED_ROUTES.some(route => currentPath.startsWith(route));
 
+  const isLoading = authLoading || onboardingLoading;
+
   useEffect(() => {
-    if (loading) return;
+    if (isLoading) return;
     if (isAllowedRoute) {
       redirectedRef.current = false;
       return;
@@ -41,10 +41,14 @@ export default function OnboardingGuard({ children }: OnboardingGuardProps) {
       navigate('/onboarding', { replace: true });
       return;
     }
-  }, [needsOnboarding, loading, user, isAllowedRoute, navigate]);
+  }, [needsOnboarding, isLoading, user, isAllowedRoute, navigate]);
 
-  if (loading) {
+  if (isLoading) {
     return <LoadingSkeleton />;
+  }
+
+  if (!isAllowedRoute && !user) {
+    return null;
   }
 
   if (!isAllowedRoute && user && needsOnboarding) {

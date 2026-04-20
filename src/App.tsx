@@ -11,6 +11,7 @@ import { migrateLocalStorageToSupabase } from './utils/migrateLocalStorage';
 import { supabase } from './lib/supabase';
 import { useAuthStore } from './stores/authStore';
 import { createOrUpdateProfile } from './hooks/useAuth';
+import { initOnboardingStatus } from './hooks/useOnboarding';
 import { queryClient } from './providers/QueryProvider';
 import Home from './pages/Home';
 import School from './pages/School';
@@ -65,6 +66,7 @@ function App() {
           setSession(null);
           setUser(null);
           setLoading(false);
+          await initOnboardingStatus(null);
           return;
         }
 
@@ -73,11 +75,13 @@ function App() {
         setLoading(false);
 
         await createOrUpdateProfile(session.user);
+        await initOnboardingStatus(session.user.id);
       } catch {
         if (!mounted) return;
         setSession(null);
         setUser(null);
         setLoading(false);
+        await initOnboardingStatus(null);
       }
     };
 
@@ -91,10 +95,14 @@ function App() {
       setLoading(false);
 
       if (event === 'SIGNED_IN' && session?.user) {
-        (async () => { await createOrUpdateProfile(session.user); })();
+        (async () => {
+          await createOrUpdateProfile(session.user);
+          await initOnboardingStatus(session.user.id);
+        })();
       } else if (event === 'SIGNED_OUT') {
         localStorage.removeItem('user-profile');
         queryClient.clear();
+        initOnboardingStatus(null);
       }
     });
 

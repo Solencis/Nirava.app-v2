@@ -1,52 +1,45 @@
-import { useEffect } from 'react';
 import { supabase } from '../lib/supabase';
-import { useAuth } from './useAuth';
 import { useOnboardingStore } from '../stores/onboardingStore';
+import { useAuth } from './useAuth';
 
 const ONBOARDING_KEY = 'nirava.onboarded';
 
-export function useOnboarding() {
-  const { user, loading: authLoading } = useAuth();
-  const { needsOnboarding, loading, setNeedsOnboarding, setLoading } = useOnboardingStore();
+export async function initOnboardingStatus(userId: string | null) {
+  const { setNeedsOnboarding, setLoading } = useOnboardingStore.getState();
 
-  useEffect(() => {
-    if (!authLoading) {
-      checkOnboardingStatus();
-    }
-  }, [user?.id, authLoading]);
-
-  const checkOnboardingStatus = async () => {
-    try {
-      setLoading(true);
-
-      if (!user) {
-        const localOnboarded = localStorage.getItem(ONBOARDING_KEY) === 'true';
-        setNeedsOnboarding(!localOnboarded);
-        setLoading(false);
-        return;
-      }
-
-      const { data: profile, error } = await supabase
-        .from('profiles')
-        .select('onboarded')
-        .eq('id', user.id)
-        .maybeSingle();
-
-      if (error) {
-        const localOnboarded = localStorage.getItem(ONBOARDING_KEY) === 'true';
-        setNeedsOnboarding(!localOnboarded);
-      } else {
-        const userOnboarded = profile?.onboarded || false;
-        localStorage.setItem(ONBOARDING_KEY, userOnboarded.toString());
-        setNeedsOnboarding(!userOnboarded);
-      }
-    } catch {
+  setLoading(true);
+  try {
+    if (!userId) {
       const localOnboarded = localStorage.getItem(ONBOARDING_KEY) === 'true';
       setNeedsOnboarding(!localOnboarded);
-    } finally {
-      setLoading(false);
+      return;
     }
-  };
+
+    const { data: profile, error } = await supabase
+      .from('profiles')
+      .select('onboarded')
+      .eq('id', userId)
+      .maybeSingle();
+
+    if (error) {
+      const localOnboarded = localStorage.getItem(ONBOARDING_KEY) === 'true';
+      setNeedsOnboarding(!localOnboarded);
+    } else {
+      const userOnboarded = profile?.onboarded || false;
+      localStorage.setItem(ONBOARDING_KEY, userOnboarded.toString());
+      setNeedsOnboarding(!userOnboarded);
+    }
+  } catch {
+    const localOnboarded = localStorage.getItem(ONBOARDING_KEY) === 'true';
+    setNeedsOnboarding(!localOnboarded);
+  } finally {
+    setLoading(false);
+  }
+}
+
+export function useOnboarding() {
+  const { user } = useAuth();
+  const { needsOnboarding, loading, setNeedsOnboarding } = useOnboardingStore();
 
   const completeOnboarding = async () => {
     localStorage.setItem(ONBOARDING_KEY, 'true');
@@ -59,7 +52,7 @@ export function useOnboarding() {
           .update({ onboarded: true })
           .eq('id', user.id);
       } catch {
-        // silently fail — local state already updated
+        // silently fail
       }
     }
   };
@@ -85,6 +78,5 @@ export function useOnboarding() {
     loading,
     completeOnboarding,
     resetOnboarding,
-    checkOnboardingStatus
   };
 }

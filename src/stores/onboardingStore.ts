@@ -9,7 +9,7 @@ interface OnboardingState {
 
 export const useOnboardingStore = create<OnboardingState>()((set) => ({
   needsOnboarding: true,
-  loading: true,
+  loading: false,
   setNeedsOnboarding: (value) => set({ needsOnboarding: value }),
   setLoading: (value) => set({ loading: value }),
 }));
