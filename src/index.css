@@ -862,6 +862,29 @@ input[type="range"]::-moz-range-track {
   animation: slide-up 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
+@keyframes slide-in-right {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+.animate-slide-in-right {
+  animation: slide-in-right 0.28s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.pt-safe-top {
+  padding-top: max(1.5rem, env(safe-area-inset-top));
+}
+
+.pb-safe-bottom {
+  padding-bottom: max(1.5rem, env(safe-area-inset-bottom));
+}
+
 .animate-scale-in {
   animation: scale-in 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
