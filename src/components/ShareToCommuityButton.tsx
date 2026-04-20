@@ -1,6 +1,14 @@
 import React, { useState } from 'react';
 import { Share2, Users, AlertTriangle, CheckCircle, Heart, MessageCircle, Timer, Eye, Zap, Brain } from 'lucide-react';
-import { supabase, JournalActivity, createPost } from '../lib/supabase';
+import { supabase, JournalActivity } from '../lib/supabase';
+
+const createPost = async (data: any) => {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error('Not authenticated');
+  const { data: post, error } = await supabase.from('posts').insert({ ...data, user_id: user.id }).select().single();
+  if (error) throw error;
+  return post;
+};
 import { useAuth } from '../hooks/useAuth';
 
 interface ShareToCommunityButtonProps {

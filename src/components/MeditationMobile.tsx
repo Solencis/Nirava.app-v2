@@ -1,7 +1,6 @@
-import React, { useState, useEffect } from 'react';
-import { X, Play, Pause, RotateCcw, Check, Timer as TimerIcon, SkipForward, Minus } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { X, Play, Pause, SkipForward, Check, ChevronRight } from 'lucide-react';
 import { useAudioStore } from '../stores/audioStore';
-import AmbianceControl from './AmbianceControl';
 import { useAuth } from '../hooks/useAuth';
 import { useCreateMeditationSession } from '../hooks/useMeditation';
 
@@ -9,104 +8,116 @@ interface MeditationMobileProps {
   onClose: () => void;
 }
 
+interface Session {
+  minutes: number;
+  label: string;
+  description: string;
+  color: string;
+}
+
+const SESSIONS: Session[] = [
+  { minutes: 3, label: '3 minutes', description: 'Pause express · Idéal à tout moment', color: 'from-teal-400 to-teal-600' },
+  { minutes: 5, label: '5 minutes', description: 'Centrage · Pour commencer la journée', color: 'from-jade to-forest' },
+  { minutes: 10, label: '10 minutes', description: 'Ancrage · Profondeur et clarté mentale', color: 'from-amber-400 to-amber-600' },
+  { minutes: 15, label: '15 minutes', description: 'Immersion · Détente profonde', color: 'from-blue-400 to-blue-600' },
+  { minutes: 20, label: '20 minutes', description: 'Plénitude · Recharge totale', color: 'from-rose-400 to-rose-600' },
+  { minutes: 30, label: '30 minutes', description: 'Voyage intérieur · Transformation', color: 'from-violet-400 to-violet-600' },
+];
+
+const BREATHING_PHRASES = [
+  'Inspire profondément...',
+  'Retiens doucement...',
+  'Expire lentement...',
+  'Laisse aller...',
+];
+
+const MINDFULNESS_PROMPTS = [
+  'Observe tes pensées comme des nuages qui passent',
+  'Porte ton attention sur les sensations de ta respiration',
+  'Détends progressivement chaque muscle de ton corps',
+  'Laisse ton esprit s\'apaiser naturellement',
+  'Tu es présent, ici et maintenant',
+  'Chaque expiration est une libération',
+  'Accueille ce moment avec bienveillance',
+];
+
 const MeditationMobile: React.FC<MeditationMobileProps> = ({ onClose }) => {
   const { user } = useAuth();
   const createMeditationMutation = useCreateMeditationSession();
   const {
-    startMeditation,
-    pauseMeditation,
-    resumeMeditation,
-    stopMeditation,
-    resetMeditation,
-    getMeditationState,
-    reduceMeditationTime,
-    current: currentAmbience,
-    isPlaying: ambienceIsPlaying,
-    pause: pauseAmbience,
-    play: playAmbience,
-    playNext,
-    playCompletionGong,
-    soundEnabled
+    startMeditation, pauseMeditation, resumeMeditation, stopMeditation, resetMeditation,
+    getMeditationState, current: currentAmbience, isPlaying: ambiencePlaying,
+    pause: pauseAmbience, play: playAmbience, playNext, playCompletionGong, soundEnabled
   } = useAudioStore();
 
-  const [selectedDuration, setSelectedDuration] = useState<number | null>(null);
-  const [customMinutes, setCustomMinutes] = useState<string>('');
-  const [showSuccess, setShowSuccess] = useState(false);
-  const [showReduceModal, setShowReduceModal] = useState(false);
-  const [minutesToReduce, setMinutesToReduce] = useState('');
-  const [savedMinutes, setSavedMinutes] = useState(0);
+  const [view, setView] = useState<'select' | 'active' | 'success'>('select');
+  const [selectedSession, setSelectedSession] = useState<Session | null>(null);
   const [isFreeMode, setIsFreeMode] = useState(false);
+  const [savedMinutes, setSavedMinutes] = useState(0);
+  const [promptIndex, setPromptIndex] = useState(0);
+  const [breathPhase, setBreathPhase] = useState(0);
+  const promptTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const breathTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   const meditationState = getMeditationState();
 
-  const durations = [
-    { minutes: 3, label: '3 min', desc: 'Pause rapide' },
-    { minutes: 5, label: '5 min', desc: 'Centrage' },
-    { minutes: 10, label: '10 min', desc: 'Respiration' },
-    { minutes: 15, label: '15 min', desc: 'Méditation' },
-    { minutes: 20, label: '20 min', desc: 'Profonde' },
-  ];
-
-  // Gong de début
   const playStartGong = () => {
-    if (!soundEnabled) return; // Ne pas jouer si sons désactivés
-
+    if (!soundEnabled) return;
     try {
-      const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
-
-      const oscillator1 = audioContext.createOscillator();
-      const oscillator2 = audioContext.createOscillator();
-      const oscillator3 = audioContext.createOscillator();
-      const gainNode = audioContext.createGain();
-      const gainNode2 = audioContext.createGain();
-      const gainNode3 = audioContext.createGain();
-      const masterGain = audioContext.createGain();
-
-      oscillator1.connect(gainNode);
-      oscillator2.connect(gainNode2);
-      oscillator3.connect(gainNode3);
-      gainNode.connect(masterGain);
-      gainNode2.connect(masterGain);
-      gainNode3.connect(masterGain);
-      masterGain.connect(audioContext.destination);
-
-      // Fréquences pour gong de début (plus aigu)
-      oscillator1.frequency.setValueAtTime(330, audioContext.currentTime);
-      oscillator1.frequency.exponentialRampToValueAtTime(165, audioContext.currentTime + 3);
-
-      oscillator2.frequency.setValueAtTime(440, audioContext.currentTime);
-      oscillator2.frequency.exponentialRampToValueAtTime(220, audioContext.currentTime + 3);
-
-      oscillator3.frequency.setValueAtTime(550, audioContext.currentTime);
-      oscillator3.frequency.exponentialRampToValueAtTime(275, audioContext.currentTime + 3);
-
-      masterGain.gain.setValueAtTime(0.6, audioContext.currentTime);
-      masterGain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 3);
-
-      oscillator1.start(audioContext.currentTime);
-      oscillator1.stop(audioContext.currentTime + 3);
-      oscillator2.start(audioContext.currentTime);
-      oscillator2.stop(audioContext.currentTime + 3);
-      oscillator3.start(audioContext.currentTime);
-      oscillator3.stop(audioContext.currentTime + 3);
-    } catch (error) {
-      console.error('Erreur gong de début:', error);
-    }
+      const ac = new (window.AudioContext || (window as any).webkitAudioContext)();
+      const osc = ac.createOscillator();
+      const gain = ac.createGain();
+      osc.connect(gain);
+      gain.connect(ac.destination);
+      osc.frequency.setValueAtTime(396, ac.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(198, ac.currentTime + 3);
+      gain.gain.setValueAtTime(0.5, ac.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.01, ac.currentTime + 3);
+      osc.start(ac.currentTime);
+      osc.stop(ac.currentTime + 3);
+    } catch {}
   };
 
-  // Vérifier si la méditation est terminée
   useEffect(() => {
-    if (meditationState.isActive && !meditationState.isPaused &&
-        meditationState.remaining !== null && meditationState.remaining <= 0) {
-      handleMeditationComplete();
+    if (view === 'active') {
+      promptTimerRef.current = setInterval(() => {
+        setPromptIndex(i => (i + 1) % MINDFULNESS_PROMPTS.length);
+      }, 12000);
+      breathTimerRef.current = setInterval(() => {
+        setBreathPhase(p => (p + 1) % BREATHING_PHRASES.length);
+      }, 4000);
+      return () => {
+        if (promptTimerRef.current) clearInterval(promptTimerRef.current);
+        if (breathTimerRef.current) clearInterval(breathTimerRef.current);
+      };
+    }
+  }, [view]);
+
+  useEffect(() => {
+    if (
+      meditationState.isActive &&
+      !meditationState.isPaused &&
+      meditationState.remaining !== null &&
+      meditationState.remaining <= 0
+    ) {
+      handleComplete();
     }
   }, [meditationState.remaining]);
 
-  const handleMeditationComplete = async () => {
-    const finalMinutes = Math.round(meditationState.elapsed / 60);
-    setSavedMinutes(finalMinutes);
+  const handleStart = (session: Session, freeMode = false) => {
+    setSelectedSession(session);
+    setIsFreeMode(freeMode);
+    startMeditation(freeMode ? undefined : session.minutes);
+    playStartGong();
+    setView('active');
+    if ('vibrate' in navigator) navigator.vibrate(50);
+  };
 
-    // Sauvegarder dans Supabase via le hook
+  const handleComplete = async () => {
+    const finalMinutes = Math.max(1, Math.round(meditationState.elapsed / 60));
+    setSavedMinutes(finalMinutes);
+    stopMeditation();
+    playCompletionGong();
     if (user && finalMinutes > 0) {
       try {
         await createMeditationMutation.mutateAsync({
@@ -114,46 +125,16 @@ const MeditationMobile: React.FC<MeditationMobileProps> = ({ onClose }) => {
           mode: isFreeMode ? 'free' : 'guided',
           completed: true
         });
-        console.log('✅ Méditation sauvegardée dans Supabase:', finalMinutes, 'minutes');
-      } catch (error) {
-        console.error('Erreur sauvegarde méditation:', error);
-      }
+      } catch {}
     }
-
-    stopMeditation();
-    setShowSuccess(true);
-    if ('vibrate' in navigator) navigator.vibrate([100, 50, 100]);
-  };
-
-  const handleStartMeditation = (minutes: number, freeMode: boolean = false) => {
-    setSelectedDuration(minutes);
-    setIsFreeMode(freeMode);
-    startMeditation(freeMode ? undefined : minutes);
-    playStartGong();
-    if ('vibrate' in navigator) navigator.vibrate(50);
-  };
-
-  const startCustomMeditation = () => {
-    const minutes = parseInt(customMinutes);
-    if (minutes > 0 && minutes <= 120) {
-      handleStartMeditation(minutes, false);
-    }
-  };
-
-  const handleTogglePause = () => {
-    if (meditationState.isPaused) {
-      resumeMeditation();
-    } else {
-      pauseMeditation();
-    }
-    if ('vibrate' in navigator) navigator.vibrate(30);
+    setView('success');
+    if ('vibrate' in navigator) navigator.vibrate([100, 50, 100, 50, 100]);
   };
 
   const handleStop = async () => {
     const finalMinutes = Math.max(1, Math.round(meditationState.elapsed / 60));
     setSavedMinutes(finalMinutes);
-
-    // Sauvegarder dans Supabase via le hook
+    stopMeditation();
     if (user && finalMinutes > 0) {
       try {
         await createMeditationMutation.mutateAsync({
@@ -161,79 +142,67 @@ const MeditationMobile: React.FC<MeditationMobileProps> = ({ onClose }) => {
           mode: isFreeMode ? 'free' : 'guided',
           completed: false
         });
-        console.log('✅ Méditation arrêtée et sauvegardée:', finalMinutes, 'minutes');
-      } catch (error) {
-        console.error('Erreur sauvegarde méditation:', error);
-      }
+      } catch {}
     }
-
-    stopMeditation();
-    playCompletionGong();
-    setShowSuccess(true);
-    if ('vibrate' in navigator) navigator.vibrate([100, 50, 100]);
+    setView('success');
   };
 
-  const handleReset = () => {
-    resetMeditation();
-    setSelectedDuration(null);
-  };
-
-  const handleReduceMinutes = () => {
-    const minutes = parseInt(minutesToReduce);
-    if (minutes > 0) {
-      reduceMeditationTime(minutes);
-      setShowReduceModal(false);
-      setMinutesToReduce('');
-    }
-  };
-
-  const toggleMusicPlayPause = () => {
-    if (currentAmbience) {
-      if (ambienceIsPlaying) {
-        pauseAmbience();
-      } else {
-        playAmbience(currentAmbience);
-      }
-    }
-  };
-
-  const handleSkipNext = () => {
-    if (currentAmbience) {
-      playNext();
-    }
+  const handlePause = () => {
+    if (meditationState.isPaused) resumeMeditation();
+    else pauseMeditation();
+    if ('vibrate' in navigator) navigator.vibrate(25);
   };
 
   const formatTime = (seconds: number) => {
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return `${mins}:${secs.toString().padStart(2, '0')}`;
+    const m = Math.floor(seconds / 60);
+    const s = seconds % 60;
+    return `${m}:${s.toString().padStart(2, '0')}`;
   };
 
-  const progress = meditationState.remaining !== null
-    ? ((meditationState.elapsed / ((meditationState.elapsed + meditationState.remaining) || 1)) * 100)
+  const totalSeconds = selectedSession && !isFreeMode ? selectedSession.minutes * 60 : 0;
+  const progressPct = meditationState.remaining !== null && totalSeconds > 0
+    ? ((totalSeconds - meditationState.remaining) / totalSeconds) * 100
     : 0;
 
-  if (showSuccess) {
+  const circumference = 2 * Math.PI * 110;
+  const dashOffset = circumference * (1 - progressPct / 100);
+
+  if (view === 'success') {
     return (
-      <div className="fixed inset-0 bg-gradient-to-br from-sand via-pearl to-sand/50 z-50 animate-slide-up flex flex-col">
-        <div className="flex-1 flex flex-col items-center justify-center px-4 text-center">
-          <div className="w-24 h-24 bg-jade/10 rounded-full flex items-center justify-center mx-auto mb-6 animate-scale-in">
-            <Check className="w-12 h-12 text-jade" />
-          </div>
+      <div className="fixed inset-0 bg-gradient-to-br from-jade/5 via-white to-forest/5 dark:from-gray-900 dark:via-gray-900 dark:to-gray-900 z-50 flex flex-col items-center justify-center px-6 text-center">
+        <button onClick={onClose} className="absolute top-4 right-4 w-10 h-10 rounded-full bg-stone/10 flex items-center justify-center">
+          <X className="w-5 h-5 text-stone" />
+        </button>
 
-          <h2 className="text-3xl font-bold text-ink mb-3" style={{ fontFamily: "'Shippori Mincho', serif" }}>
-            Bravo !
-          </h2>
-          <p className="text-stone mb-2">
-            Tu as médité pendant {savedMinutes} minutes
-          </p>
-          <p className="text-xs text-stone/60 mb-8">
-            Continue à prendre soin de ton esprit
-          </p>
+        <div className="w-24 h-24 rounded-full bg-gradient-to-br from-jade to-forest flex items-center justify-center mb-6 shadow-2xl shadow-jade/30">
+          <Check className="w-12 h-12 text-white" />
+        </div>
 
+        <h2 className="text-2xl font-bold text-ink dark:text-white mb-2" style={{ fontFamily: "'Shippori Mincho', serif" }}>
+          Belle session
+        </h2>
+        <p className="text-stone dark:text-gray-400 text-sm mb-2">Tu as médité pendant</p>
+        <p className="text-4xl font-bold text-jade mb-8" style={{ fontFamily: "'Shippori Mincho', serif" }}>
+          {savedMinutes} min
+        </p>
+
+        <div className="bg-white dark:bg-gray-800 rounded-2xl p-4 w-full max-w-xs border border-stone/10 dark:border-gray-700 mb-8">
+          <p className="text-xs text-stone dark:text-gray-400 italic text-center">
+            "La méditation n'est pas une fuite de la réalité, c'est une rencontre avec elle."
+          </p>
+        </div>
+
+        <div className="w-full max-w-xs space-y-3">
+          <button
+            onClick={() => { resetMeditation(); setView('select'); }}
+            className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-jade to-forest text-white py-4 rounded-full font-semibold shadow-lg active:scale-95 transition-transform"
+          >
+            Nouvelle session
+            <ChevronRight className="w-4 h-4" />
+          </button>
           <button
             onClick={onClose}
-            className="px-8 py-4 bg-gradient-to-r from-jade to-forest text-white rounded-full font-semibold active:scale-95 transition-transform shadow-lg"
+            className="w-full border-2 border-stone/20 dark:border-gray-700 text-stone dark:text-gray-400 py-3.5 rounded-full font-medium active:scale-95 transition-transform"
           >
             Terminer
           </button>
@@ -242,292 +211,169 @@ const MeditationMobile: React.FC<MeditationMobileProps> = ({ onClose }) => {
     );
   }
 
-  if (meditationState.isActive) {
+  if (view === 'active') {
     return (
-      <div className="fixed inset-0 bg-gradient-to-br from-sand via-pearl to-sand/50 z-50 animate-slide-up flex flex-col">
-        {/* Header */}
-        <div className="bg-white/80 backdrop-blur-lg border-b border-stone/10 px-4 py-4 flex items-center justify-between shrink-0">
+      <div className="fixed inset-0 bg-gradient-to-b from-gray-950 via-gray-900 to-gray-950 z-50 flex flex-col">
+        <div className="flex items-center justify-between px-5 py-4">
           <button
-            onClick={handleReset}
-            className="text-stone active:scale-95 transition-transform"
+            onClick={() => { resetMeditation(); setView('select'); }}
+            className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center active:scale-95 transition-transform"
           >
-            <RotateCcw className="w-5 h-5" />
+            <X className="w-5 h-5 text-white/60" />
           </button>
-
-          <div className="flex items-center gap-2">
-            <TimerIcon className="w-5 h-5 text-jade" />
-            <span className="font-semibold text-ink" style={{ fontFamily: "'Shippori Mincho', serif" }}>
-              Méditation
-            </span>
-          </div>
-
-          <div className="flex items-center gap-2">
+          <span className="text-white/60 text-sm font-medium">
+            {isFreeMode ? 'Mode libre' : selectedSession?.label}
+          </span>
+          <div className="flex gap-2">
             <button
-              onClick={handleSkipNext}
-              className="w-10 h-10 rounded-full bg-stone/10 flex items-center justify-center active:scale-95 transition-transform"
-              title="Musique suivante"
-              disabled={!currentAmbience}
+              onClick={() => {
+                if (currentAmbience) {
+                  ambiencePlaying ? pauseAmbience() : playAmbience(currentAmbience);
+                }
+              }}
+              className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center active:scale-95 transition-transform"
             >
-              <SkipForward className="w-5 h-5 text-jade" />
+              {ambiencePlaying ? <Pause className="w-4 h-4 text-white/60" /> : <Play className="w-4 h-4 text-white/60 ml-0.5" />}
             </button>
-            <button
-              onClick={toggleMusicPlayPause}
-              className="w-10 h-10 rounded-full bg-stone/10 flex items-center justify-center active:scale-95 transition-transform"
-              title={ambienceIsPlaying ? 'Pause musique' : 'Play musique'}
-            >
-              {ambienceIsPlaying ? (
-                <Pause className="w-5 h-5 text-jade" />
-              ) : (
-                <Play className="w-5 h-5 text-stone ml-0.5" />
-              )}
-            </button>
-            <button
-              onClick={onClose}
-              className="w-10 h-10 rounded-full bg-stone/10 flex items-center justify-center active:scale-95 transition-transform"
-            >
-              <X className="w-5 h-5 text-stone" />
+            <button onClick={playNext} className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center active:scale-95 transition-transform">
+              <SkipForward className="w-4 h-4 text-white/60" />
             </button>
           </div>
         </div>
 
-        {/* Timer Display */}
-        <div className="flex-1 flex flex-col items-center justify-center px-4">
+        <div className="flex-1 flex flex-col items-center justify-center">
           <div className="relative w-64 h-64 mb-8">
-            {/* Progress Circle */}
-            <svg className="w-full h-full -rotate-90">
-              <circle
-                cx="128"
-                cy="128"
-                r="120"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="8"
-                className="text-stone/10"
-              />
-              {meditationState.remaining !== null && (
+            <svg className="w-full h-full -rotate-90" viewBox="0 0 240 240">
+              <circle cx="120" cy="120" r="110" fill="none" stroke="rgba(255,255,255,0.05)" strokeWidth="8" />
+              {!isFreeMode && (
                 <circle
-                  cx="128"
-                  cy="128"
-                  r="120"
+                  cx="120" cy="120" r="110"
                   fill="none"
-                  stroke="currentColor"
+                  stroke="#059669"
                   strokeWidth="8"
                   strokeLinecap="round"
-                  className="text-jade transition-all duration-1000"
-                  strokeDasharray={`${2 * Math.PI * 120}`}
-                  strokeDashoffset={`${2 * Math.PI * 120 * (1 - progress / 100)}`}
+                  strokeDasharray={circumference}
+                  strokeDashoffset={dashOffset}
+                  style={{ transition: 'stroke-dashoffset 1s linear' }}
                 />
               )}
             </svg>
 
-            {/* Time */}
-            <div className="absolute inset-0 flex items-center justify-center">
-              <div className="text-center">
-                <div className="text-6xl font-bold text-ink mb-2" style={{ fontFamily: "'Shippori Mincho', serif" }}>
-                  {meditationState.remaining !== null
-                    ? formatTime(meditationState.remaining)
-                    : formatTime(meditationState.elapsed)}
-                </div>
-                <div className="text-sm text-stone">
-                  {meditationState.isPaused ? 'En pause' : meditationState.isActive ? 'En cours' : 'Prêt'}
-                </div>
-              </div>
+            <div className="absolute inset-0 flex flex-col items-center justify-center">
+              {meditationState.isPaused ? (
+                <span className="text-white/50 text-lg font-medium">En pause</span>
+              ) : (
+                <>
+                  <span className="text-5xl font-bold text-white" style={{ fontFamily: "'Shippori Mincho', serif" }}>
+                    {meditationState.remaining !== null
+                      ? formatTime(meditationState.remaining)
+                      : formatTime(meditationState.elapsed)}
+                  </span>
+                  <span className="text-white/40 text-xs mt-2">
+                    {isFreeMode ? 'temps écoulé' : 'restant'}
+                  </span>
+                </>
+              )}
             </div>
           </div>
 
-          {/* Breathing Guide */}
-          {meditationState.isActive && !meditationState.isPaused && (
-            <div className="text-center mb-8 animate-fade-in">
-              <div className="text-lg text-ink mb-2 animate-pulse">Respire calmement</div>
-              <div className="text-sm text-stone">Inspire... Expire...</div>
+          {!meditationState.isPaused && (
+            <div className="text-center mb-4 px-8">
+              <p className="text-white/70 text-base font-light" style={{ animation: 'fadeInOut 4s ease-in-out infinite' }}>
+                {BREATHING_PHRASES[breathPhase]}
+              </p>
             </div>
           )}
 
-          {/* Controls */}
-          <div className="flex gap-4">
+          {!meditationState.isPaused && (
+            <div className="px-10 text-center">
+              <p className="text-white/30 text-xs leading-relaxed italic">
+                {MINDFULNESS_PROMPTS[promptIndex]}
+              </p>
+            </div>
+          )}
+        </div>
+
+        <div className="pb-12 px-5">
+          <div className="flex items-center justify-center gap-6 mb-6">
             <button
-              onClick={handleTogglePause}
-              className="w-20 h-20 bg-gradient-to-br from-jade to-forest rounded-full flex items-center justify-center text-white shadow-2xl active:scale-95 transition-transform"
+              onClick={handlePause}
+              className="w-20 h-20 rounded-full bg-white/10 border-2 border-white/20 flex items-center justify-center active:scale-95 transition-transform"
             >
               {meditationState.isPaused ? (
-                <Play className="w-8 h-8 ml-1" />
+                <Play className="w-8 h-8 text-white ml-1" />
               ) : (
-                <Pause className="w-8 h-8" />
+                <Pause className="w-8 h-8 text-white" />
               )}
             </button>
-
-            <button
-              onClick={handleStop}
-              className="px-6 py-4 bg-jade text-white rounded-full font-semibold active:scale-95 transition-transform shadow-lg"
-            >
-              Terminer
-            </button>
           </div>
+
+          <button
+            onClick={handleStop}
+            className="w-full text-white/40 text-sm py-2 active:scale-95 transition-transform"
+          >
+            Terminer la session
+          </button>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="fixed inset-0 bg-gradient-to-br from-sand via-pearl to-sand/50 z-50 animate-slide-up flex flex-col">
-      {/* Header */}
-      <div className="bg-white/80 backdrop-blur-lg border-b border-stone/10 px-4 py-4 flex items-center justify-between shrink-0">
-        <button
-          onClick={onClose}
-          className="w-10 h-10 rounded-full bg-stone/10 flex items-center justify-center active:scale-95 transition-transform"
-        >
+    <div className="fixed inset-0 bg-gradient-to-b from-stone-50 via-white to-stone-50 dark:from-gray-900 dark:via-gray-900 dark:to-gray-900 z-50 flex flex-col">
+      <div className="flex items-center justify-between px-5 py-4 border-b border-stone/10 dark:border-gray-800 shrink-0">
+        <button onClick={onClose} className="w-10 h-10 rounded-full bg-stone/10 flex items-center justify-center active:scale-95 transition-transform">
           <X className="w-5 h-5 text-stone" />
         </button>
-
-        <div className="flex items-center gap-2">
-          <TimerIcon className="w-5 h-5 text-jade" />
-          <span className="font-semibold text-ink" style={{ fontFamily: "'Shippori Mincho', serif" }}>
-            Méditation
-          </span>
-        </div>
-
+        <span className="font-semibold text-ink dark:text-white text-sm" style={{ fontFamily: "'Shippori Mincho', serif" }}>
+          Méditation
+        </span>
         <div className="w-10" />
       </div>
 
-      {/* Content with scroll */}
-      <div className="flex-1 overflow-y-auto">
-        <div className="px-4 pt-8 pb-8">
-          <h2 className="text-3xl font-bold text-ink mb-3 text-center" style={{ fontFamily: "'Shippori Mincho', serif" }}>
+      <div className="flex-1 overflow-y-auto px-5 pt-6 pb-10">
+        <div className="text-center mb-6">
+          <h2 className="text-2xl font-bold text-ink dark:text-white mb-2" style={{ fontFamily: "'Shippori Mincho', serif" }}>
             Choisis ta durée
           </h2>
-          <p className="text-stone text-center mb-8">
-            Prends un moment pour te recentrer
+          <p className="text-sm text-stone dark:text-gray-400">
+            Commence là où tu en es. Même 3 minutes font une différence.
           </p>
+        </div>
 
-          {/* Custom Duration Input */}
-          <div className="max-w-sm mx-auto mb-6">
-            <div className="bg-white rounded-2xl p-4 shadow-lg border border-jade/20">
-              <label className="text-sm text-stone mb-2 block">Durée personnalisée (1-120 min)</label>
-              <div className="flex gap-2">
-                <input
-                  type="number"
-                  min="1"
-                  max="120"
-                  value={customMinutes}
-                  onChange={(e) => setCustomMinutes(e.target.value)}
-                  placeholder="Ex: 25"
-                  className="flex-1 px-4 py-3 bg-sand/30 rounded-xl text-ink text-center font-semibold focus:outline-none focus:ring-2 focus:ring-jade/50"
-                  style={{ fontFamily: "'Shippori Mincho', serif", fontSize: '16px' }}
-                />
-                <button
-                  onClick={startCustomMeditation}
-                  disabled={!customMinutes || parseInt(customMinutes) <= 0 || parseInt(customMinutes) > 120}
-                  className="px-6 py-3 bg-gradient-to-r from-jade to-forest text-white rounded-xl font-semibold active:scale-95 transition-transform shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  <Play className="w-5 h-5" />
-                </button>
-              </div>
-            </div>
-          </div>
-
-          {/* Music Selection */}
-          <div className="max-w-sm mx-auto mb-8">
-            <AmbianceControl />
-          </div>
-
-          <div className="text-center text-sm text-stone/60 mb-4">Durées recommandées</div>
-
-          <div className="space-y-3 max-w-sm mx-auto mb-8">
-            {durations.map((duration) => (
-              <button
-                key={duration.minutes}
-                onClick={() => handleStartMeditation(duration.minutes, false)}
-                className="w-full bg-white border-2 border-stone/10 rounded-2xl p-6 hover:border-jade/30 active:scale-98 transition-all group"
-              >
-                <div className="flex items-center justify-between">
-                  <div className="text-left">
-                    <div className="text-2xl font-bold text-ink mb-1 group-hover:text-jade transition-colors">
-                      {duration.label}
-                    </div>
-                    <div className="text-sm text-stone">{duration.desc}</div>
-                  </div>
-                  <div className="w-12 h-12 bg-jade/10 rounded-full flex items-center justify-center group-hover:bg-jade group-hover:scale-110 transition-all">
-                    <Play className="w-5 h-5 text-jade group-hover:text-white ml-0.5" />
-                  </div>
-                </div>
-              </button>
-            ))}
-          </div>
-
-          {/* Reduce Minutes Button */}
-          <div className="max-w-sm mx-auto mb-6">
+        <div className="space-y-2.5 mb-6">
+          {SESSIONS.map((session) => (
             <button
-              onClick={() => setShowReduceModal(true)}
-              className="w-full px-4 py-3 bg-vermilion/10 text-vermilion border border-vermilion/20 rounded-xl hover:bg-vermilion/20 transition-colors duration-300 flex items-center justify-center text-sm font-medium"
+              key={session.minutes}
+              onClick={() => { handleStart(session); if ('vibrate' in navigator) navigator.vibrate(25); }}
+              className="w-full flex items-center gap-4 bg-white dark:bg-gray-800 border border-stone/10 dark:border-gray-700 rounded-2xl p-4 hover:border-jade/30 active:scale-98 transition-all group text-left"
             >
-              <Minus className="w-4 h-4 mr-2" />
-              Corriger les minutes totales
-            </button>
-          </div>
-
-          {/* Tips */}
-          <div className="bg-jade/5 rounded-2xl p-4 border border-jade/10 max-w-sm mx-auto">
-            <h3 className="text-sm font-semibold text-ink mb-2">💡 Conseils</h3>
-            <ul className="text-xs text-stone space-y-1">
-              <li>• Trouve un endroit calme</li>
-              <li>• Assieds-toi confortablement</li>
-              <li>• Ferme les yeux si possible</li>
-              <li>• Concentre-toi sur ta respiration</li>
-            </ul>
-          </div>
-
-          {/* Reduce Minutes Modal */}
-          {showReduceModal && (
-            <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-              <div className="bg-white rounded-2xl shadow-2xl w-full max-w-xs mx-2">
-                <div className="p-6">
-                  <h3 className="text-lg font-bold text-ink mb-4" style={{ fontFamily: "'Shippori Mincho', serif" }}>
-                    Corriger les minutes
-                  </h3>
-
-                  <p className="text-stone text-sm mb-4 leading-relaxed">
-                    Combien de minutes veux-tu retirer de ta progression hebdomadaire ?
-                  </p>
-
-                  <div className="mb-6">
-                    <label className="block text-sm font-medium text-ink mb-2">
-                      Minutes à retirer
-                    </label>
-                    <input
-                      type="number"
-                      value={minutesToReduce}
-                      onChange={(e) => setMinutesToReduce(e.target.value)}
-                      placeholder="Ex: 5"
-                      min="1"
-                      max="120"
-                      className="w-full px-4 py-3 bg-stone/5 border border-stone/20 rounded-xl focus:border-vermilion focus:ring-2 focus:ring-vermilion/20 transition-all duration-300"
-                      autoFocus
-                      style={{ fontSize: '16px' }}
-                    />
-                  </div>
-
-                  <div className="flex gap-3">
-                    <button
-                      onClick={() => {
-                        setShowReduceModal(false);
-                        setMinutesToReduce('');
-                      }}
-                      className="flex-1 px-4 py-3 border border-stone/20 text-stone rounded-xl hover:bg-stone/5 transition-colors duration-300"
-                    >
-                      Annuler
-                    </button>
-                    <button
-                      onClick={handleReduceMinutes}
-                      disabled={!minutesToReduce || parseInt(minutesToReduce) <= 0}
-                      className="flex-1 px-4 py-3 bg-vermilion text-white rounded-xl hover:bg-vermilion/90 transition-colors duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                      Retirer
-                    </button>
-                  </div>
-                </div>
+              <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${session.color} flex items-center justify-center shrink-0 shadow-sm group-hover:scale-105 transition-transform`}>
+                <span className="text-white font-bold text-sm">{session.minutes}'</span>
               </div>
-            </div>
-          )}
+              <div className="flex-1">
+                <p className="font-semibold text-ink dark:text-white text-sm">{session.label}</p>
+                <p className="text-xs text-stone dark:text-gray-400 mt-0.5">{session.description}</p>
+              </div>
+              <Play className="w-5 h-5 text-stone/40 dark:text-gray-600 group-hover:text-jade transition-colors" />
+            </button>
+          ))}
+        </div>
+
+        <button
+          onClick={() => {
+            const freeSession: Session = { minutes: 0, label: 'Mode libre', description: '', color: 'from-gray-400 to-gray-600' };
+            handleStart(freeSession, true);
+          }}
+          className="w-full flex items-center justify-center gap-2 border-2 border-dashed border-stone/20 dark:border-gray-700 text-stone dark:text-gray-400 py-4 rounded-2xl font-medium active:scale-95 transition-transform hover:border-jade/30 hover:text-jade"
+        >
+          Mode libre (sans timer)
+        </button>
+
+        <div className="bg-jade/5 dark:bg-jade/10 border border-jade/20 dark:border-jade/30 rounded-2xl p-4 mt-6">
+          <p className="text-xs text-stone dark:text-gray-400 leading-relaxed">
+            <span className="font-semibold text-ink dark:text-white">Conseil :</span> Trouve un endroit calme, assieds-toi confortablement et ferme les yeux. Active une ambiance sonore pour améliorer ta séance.
+          </p>
         </div>
       </div>
     </div>
