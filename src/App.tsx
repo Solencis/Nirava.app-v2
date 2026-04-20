@@ -10,6 +10,8 @@ import ConnectivityIndicator from './components/ConnectivityIndicator';
 import { migrateLocalStorageToSupabase } from './utils/migrateLocalStorage';
 import { supabase } from './lib/supabase';
 import { useAuthStore } from './stores/authStore';
+import { createOrUpdateProfile } from './hooks/useAuth';
+import { queryClient } from './providers/QueryProvider';
 import Home from './pages/Home';
 import School from './pages/School';
 import SchoolModuleView from './pages/SchoolModuleView';
@@ -26,86 +28,113 @@ import Onboarding from './pages/Onboarding';
 
 const APP_VERSION = '1.0.2';
 
-// Component to handle scroll to top on route change
 const ScrollToTop: React.FC = () => {
   const { pathname } = useLocation();
-
-  React.useEffect(() => {
-    window.scrollTo(0, 0);
-  }, [pathname]);
-
+  React.useEffect(() => { window.scrollTo(0, 0); }, [pathname]);
   return null;
 };
 
 function App() {
-  const authStore = useAuthStore();
+  const { setUser, setSession, setLoading, signOut: storeSignOut } = useAuthStore();
 
-  // Vérifier la version et déconnecter si nécessaire
   useEffect(() => {
-    const checkVersion = async () => {
-      const storedVersion = localStorage.getItem('nirava_app_version');
+    const storedVersion = localStorage.getItem('nirava_app_version');
+    if (storedVersion && storedVersion !== APP_VERSION) {
+      storeSignOut();
+      supabase.auth.signOut();
+      localStorage.clear();
+      sessionStorage.clear();
+      localStorage.setItem('nirava_app_version', APP_VERSION);
+      window.location.replace('/');
+      return;
+    }
+    if (!storedVersion) {
+      localStorage.setItem('nirava_app_version', APP_VERSION);
+    }
 
-      if (storedVersion && storedVersion !== APP_VERSION) {
-        console.log(`🔄 Nouvelle version détectée (${storedVersion} → ${APP_VERSION}), déconnexion automatique...`);
+    migrateLocalStorageToSupabase();
 
-        // Déconnexion complète
-        authStore.signOut();
-        await supabase.auth.signOut();
+    let mounted = true;
 
-        // Nettoyage complet
-        localStorage.clear();
-        sessionStorage.clear();
+    const initSession = async () => {
+      try {
+        const { data: { session }, error } = await supabase.auth.getSession();
+        if (!mounted) return;
 
-        // Enregistrer la nouvelle version
-        localStorage.setItem('nirava_app_version', APP_VERSION);
+        if (error || !session) {
+          setSession(null);
+          setUser(null);
+          setLoading(false);
+          return;
+        }
 
-        // Rediriger vers la page d'accueil
-        window.location.replace('/');
-      } else if (!storedVersion) {
-        // Première installation
-        localStorage.setItem('nirava_app_version', APP_VERSION);
+        setSession(session);
+        setUser(session.user);
+        setLoading(false);
+
+        await createOrUpdateProfile(session.user);
+      } catch {
+        if (!mounted) return;
+        setSession(null);
+        setUser(null);
+        setLoading(false);
       }
     };
 
-    checkVersion();
-    migrateLocalStorageToSupabase();
+    initSession();
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (!mounted) return;
+
+      setSession(session);
+      setUser(session?.user ?? null);
+      setLoading(false);
+
+      if (event === 'SIGNED_IN' && session?.user) {
+        (async () => { await createOrUpdateProfile(session.user); })();
+      } else if (event === 'SIGNED_OUT') {
+        localStorage.removeItem('user-profile');
+        queryClient.clear();
+      }
+    });
+
+    return () => {
+      mounted = false;
+      subscription.unsubscribe();
+    };
   }, []);
 
   return (
     <QueryProvider>
-    <Router>
-      <ScrollToTop />
-      <GlobalAudioController />
-      <ConnectivityIndicator />
-      <OnboardingGuard>
-        <MobileLayout>
-          <Routes>
-            <Route path="/onboarding" element={<Onboarding />} />
-            <Route path="/" element={<Home />} />
-            <Route path="/auth" element={<Auth />} />
-            <Route path="/school" element={<School />} />
-            <Route path="/school/module/:slug" element={<ModuleDetail />} />
-            <Route path="/ecole" element={<School />} />
-            <Route path="/ecole/module/:slug" element={<SchoolModuleView />} />
-            <Route path="/journal" element={<Journal />} />
-            <Route path="/community" element={
-              <ProtectedRoute>
-                <Community />
-              </ProtectedRoute>
-            } />
-            <Route path="/profile" element={
-              <ProtectedRoute>
-                <Profile />
-              </ProtectedRoute>
-            } />
-            <Route path="/sounds" element={<SoundAmbience />} />
-            <Route path="/pricing" element={<Pricing />} />
-            <Route path="/about" element={<About />} />
-            <Route path="/contact" element={<Contact />} />
-          </Routes>
-        </MobileLayout>
-      </OnboardingGuard>
-    </Router>
+      <Router>
+        <ScrollToTop />
+        <GlobalAudioController />
+        <ConnectivityIndicator />
+        <OnboardingGuard>
+          <MobileLayout>
+            <Routes>
+              <Route path="/onboarding" element={<Onboarding />} />
+              <Route path="/" element={<Home />} />
+              <Route path="/auth" element={<Auth />} />
+              <Route path="/school" element={<School />} />
+              <Route path="/school/module/:slug" element={<ModuleDetail />} />
+              <Route path="/ecole" element={<School />} />
+              <Route path="/ecole/module/:slug" element={<SchoolModuleView />} />
+              <Route path="/journal" element={<Journal />} />
+              <Route path="/community" element={
+                <ProtectedRoute><Community /></ProtectedRoute>
+              } />
+              <Route path="/profile" element={
+                <ProtectedRoute><Profile /></ProtectedRoute>
+              } />
+              <Route path="/sounds" element={<SoundAmbience />} />
+              <Route path="/pricing" element={<Pricing />} />
+              <Route path="/about" element={<About />} />
+              <Route path="/contact" element={<Contact />} />
+            </Routes>
+          </MobileLayout>
+        </OnboardingGuard>
+      </Router>
     </QueryProvider>
   );
 }
