@@ -10,6 +10,7 @@ const createPost = async (data: any) => {
   return post;
 };
 import { useAuth } from '../hooks/useAuth';
+import { useI18n } from '../i18n';
 
 interface ShareToCommunityButtonProps {
   activity: JournalActivity;
@@ -17,12 +18,13 @@ interface ShareToCommunityButtonProps {
   className?: string;
 }
 
-const ShareToCommunityButton: React.FC<ShareToCommunityButtonProps> = ({ 
-  activity, 
-  onShared, 
-  className = '' 
+const ShareToCommunityButton: React.FC<ShareToCommunityButtonProps> = ({
+  activity,
+  onShared,
+  className = ''
 }) => {
   const { user } = useAuth();
+  const { t } = useI18n();
   const [sharing, setSharing] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
   const [shared, setShared] = useState(activity.shared_to_community || false);
@@ -31,82 +33,76 @@ const ShareToCommunityButton: React.FC<ShareToCommunityButtonProps> = ({
     switch (activity.type) {
       case 'checkin':
         let checkinContent = `Check-in émotionnel du jour 🌱`;
-        
+
         if (activity.emotion && activity.intensity) {
           checkinContent += `\n\nJe ressens de la ${activity.emotion.toLowerCase()} (${activity.intensity}/10)`;
         } else if (activity.emotion) {
           checkinContent += `\n\nJe ressens de la ${activity.emotion.toLowerCase()}`;
         }
-        
+
         if (activity.need) {
           checkinContent += `\nJ'ai besoin de ${activity.need.toLowerCase()}`;
         }
-        
+
         if (activity.content) {
           checkinContent += `\n\n${activity.content}`;
         }
-        
+
         return checkinContent;
-      
+
       case 'journal':
         return `Réflexions du soir 🌙\n\n${activity.content}`;
-      
+
       case 'meditation':
         const duration = activity.duration || 0;
         let meditationContent = `Méditation de ${duration} minutes 🧘`;
-        
+
         if (activity.content && activity.content !== `Méditation de ${duration} minutes`) {
           meditationContent += `\n\n${activity.content}`;
         }
-        
+
         return meditationContent;
-      
+
       case 'dream': {
         let dreamContent = `Journal de rêves ☁️`;
-        
-        // Ajouter le titre si présent
+
         const metadata = (activity as any).metadata;
         if (metadata?.title) {
           dreamContent += `\n\n**${metadata.title}**`;
         }
-        
-        // Ajouter le contenu principal
+
         if (activity.content) {
-          // Éviter le doublon - ne pas ajouter le contenu s'il contient déjà les métadonnées
           const cleanContent = activity.content
-            .replace(/\*\*.*?\*\*/g, '') // Supprimer les titres en gras
-            .replace(/💭 \*\*Émotions ressenties :\*\* .*/g, '') // Supprimer les émotions
-            .replace(/🔮 \*\*Symboles remarqués :\*\* .*/g, '') // Supprimer les symboles
+            .replace(/\*\*.*?\*\*/g, '')
+            .replace(/💭 \*\*Émotions ressenties :\*\* .*/g, '')
+            .replace(/🔮 \*\*Symboles remarqués :\*\* .*/g, '')
             .trim();
-          
+
           if (cleanContent) {
             dreamContent += `\n\n${cleanContent}`;
           }
         }
-        
-        // Ajouter les émotions si présentes
+
         if (metadata?.emotions) {
           dreamContent += `\n\n**Émotions ressenties :** ${metadata.emotions}`;
         }
-        
-        // Ajouter les symboles si présents
+
         if (metadata?.symbols) {
           dreamContent += `\n\n**Symboles remarqués :** ${metadata.symbols}`;
         }
-        
-        // Ajouter les caractéristiques spéciales
+
         const features = [];
         if (metadata?.lucidity) features.push('Rêve lucide');
         if (metadata?.recurring) features.push('Récurrent');
         if (metadata?.nightmare) features.push('Cauchemar');
-        
+
         if (features.length > 0) {
           dreamContent += `\n\n**Caractéristiques :** ${features.join(', ')}`;
         }
-        
+
         return dreamContent;
       }
-      
+
       default:
         return activity.content;
     }
@@ -122,17 +118,15 @@ const ShareToCommunityButton: React.FC<ShareToCommunityButtonProps> = ({
     }
   };
 
-  // Fonction pour rendre le contenu avec formatage markdown
   const renderFormattedContent = (content: string) => {
-    // Traitement spécial pour les rêves avec formatage markdown
     const allLines = content.split('\n');
     const maxLines = 4;
     const maxChars = 200;
-    
+
     let displayLines = [];
     let charCount = 0;
     let shouldTruncate = false;
-    
+
     for (let i = 0; i < allLines.length && displayLines.length < maxLines; i++) {
       const line = allLines[i];
       if (charCount + line.length > maxChars) {
@@ -142,19 +136,18 @@ const ShareToCommunityButton: React.FC<ShareToCommunityButtonProps> = ({
       displayLines.push(line);
       charCount += line.length;
     }
-    
+
     if (allLines.length > maxLines) {
       shouldTruncate = true;
     }
-    
+
     return (
       <div className="space-y-1 max-h-48 overflow-hidden">
         {displayLines.map((line, index) => (
           <div key={index} className="leading-relaxed text-sm">
             {line.includes('**') ? (
-              // Gérer le formatage markdown pour les textes en gras
               <div className="break-words">
-                {line.split('**').map((part, partIndex) => 
+                {line.split('**').map((part, partIndex) =>
                 partIndex % 2 === 1 ? (
                   <strong key={partIndex} className="font-bold text-ink">{part}</strong>
                 ) : (
@@ -178,17 +171,16 @@ const ShareToCommunityButton: React.FC<ShareToCommunityButtonProps> = ({
     );
   };
 
-  // Fonction pour obtenir le badge d'activité
   const getActivityBadge = (activity: JournalActivity) => {
     const badges = {
-      checkin: { text: 'Check-in', color: 'bg-jade/10 text-jade border-jade/20' },
-      journal: { text: 'Journal', color: 'bg-vermilion/10 text-vermilion border-vermilion/20' },
-      meditation: { text: 'Méditation', color: 'bg-forest/10 text-forest border-forest/20' },
-      dream: { text: 'Rêve', color: 'bg-blue-100 text-blue-700 border-blue-200' }
+      checkin: { text: t.share.checkin, color: 'bg-jade/10 text-jade border-jade/20' },
+      journal: { text: t.share.journal, color: 'bg-vermilion/10 text-vermilion border-vermilion/20' },
+      meditation: { text: t.share.meditation, color: 'bg-forest/10 text-forest border-forest/20' },
+      dream: { text: t.share.dream, color: 'bg-blue-100 text-blue-700 border-blue-200' }
     };
-    
+
     const badge = badges[activity.type] || badges.journal;
-    
+
     return (
       <span className={`px-2 py-0.5 rounded-full text-xs font-medium border ${badge.color}`}>
         {badge.text}
@@ -196,10 +188,9 @@ const ShareToCommunityButton: React.FC<ShareToCommunityButtonProps> = ({
     );
   };
 
-  // Fonction pour obtenir les badges de métadonnées
   const getMetadataBadges = (activity: JournalActivity) => {
     const badges = [];
-    
+
     if (activity.type === 'checkin') {
       if (activity.emotion) {
         badges.push(
@@ -224,7 +215,7 @@ const ShareToCommunityButton: React.FC<ShareToCommunityButtonProps> = ({
         );
       }
     }
-    
+
     if (activity.type === 'meditation' && activity.duration) {
       badges.push(
         <span key="duration" className="bg-forest/10 text-forest px-2 py-0.5 rounded-full text-xs font-medium border border-forest/20 flex items-center">
@@ -233,10 +224,10 @@ const ShareToCommunityButton: React.FC<ShareToCommunityButtonProps> = ({
         </span>
       );
     }
-    
+
     if (activity.type === 'dream' && activity.metadata) {
       const { lucidity, recurring, nightmare, clarity } = activity.metadata;
-      
+
       if (lucidity) {
         badges.push(
           <span key="lucid" className="bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full text-xs font-medium border border-blue-200 flex items-center">
@@ -269,7 +260,7 @@ const ShareToCommunityButton: React.FC<ShareToCommunityButtonProps> = ({
         );
       }
     }
-    
+
     return badges;
   };
 
@@ -279,7 +270,7 @@ const ShareToCommunityButton: React.FC<ShareToCommunityButtonProps> = ({
     setSharing(true);
     try {
       const postContent = generatePostContent(activity);
-      
+
       await createPost({
         content: postContent,
         emoji: getSourceEmoji(activity.type),
@@ -293,7 +284,6 @@ const ShareToCommunityButton: React.FC<ShareToCommunityButtonProps> = ({
         }
       });
 
-      // Mark as shared in local storage
       const storageKey = `journal-activity-${activity.id}`;
       const updatedActivity = { ...activity, shared_to_community: true };
       localStorage.setItem(storageKey, JSON.stringify(updatedActivity));
@@ -303,7 +293,6 @@ const ShareToCommunityButton: React.FC<ShareToCommunityButtonProps> = ({
       onShared?.();
     } catch (error) {
       console.error('Error sharing to community:', error);
-      // TODO: Afficher un message d'erreur à l'utilisateur
     } finally {
       setSharing(false);
     }
@@ -333,12 +322,11 @@ const ShareToCommunityButton: React.FC<ShareToCommunityButtonProps> = ({
         ) : (
           <>
             <Share2 size={16} className="mr-2" />
-            Partager dans la Communauté 🌿
+            {t.share.button} 🌿
           </>
         )}
       </button>
 
-      {/* Confirmation modal */}
       {showConfirm && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm mx-2">
@@ -378,13 +366,11 @@ const ShareToCommunityButton: React.FC<ShareToCommunityButtonProps> = ({
                       </div>
                     </div>
                   </div>
-                  
-                  {/* Contenu formaté avec markdown */}
+
                   <div className="text-ink text-sm leading-relaxed space-y-2">
                     {renderFormattedContent(generatePostContent(activity))}
                   </div>
-                  
-                  {/* Métadonnées visuelles */}
+
                   {activity.type !== 'journal' && getMetadataBadges(activity).length > 0 && (
                     <div className="mt-3 pt-2 border-t border-stone/10">
                       <div className="flex flex-wrap gap-1">
@@ -392,18 +378,17 @@ const ShareToCommunityButton: React.FC<ShareToCommunityButtonProps> = ({
                       </div>
                     </div>
                   )}
-                  
+
                   {activity.photo_url && (
                     <div className="mt-3 pt-2 border-t border-stone/10">
-                      <img 
-                        src={activity.photo_url} 
-                        alt="Photo" 
+                      <img
+                        src={activity.photo_url}
+                        alt="Photo"
                         className="w-20 h-20 object-cover rounded-lg border border-stone/10"
                       />
                     </div>
                   )}
-                  
-                  {/* Footer simulé */}
+
                   <div className="mt-3 pt-2 border-t border-stone/10 flex items-center justify-between">
                     <div className="flex items-center gap-3">
                       <div className="flex items-center text-stone/60">

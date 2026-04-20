@@ -3,67 +3,49 @@ import { motion } from 'framer-motion';
 import { Check, Sparkles, Leaf } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
-
-const plans = [
-  {
-    name: 'Découverte',
-    price: 0,
-    period: 'Gratuit',
-    description: 'Pour commencer votre voyage',
-    features: [
-      'Accès à 2 modules gratuits',
-      'Check-ins émotionnels illimités',
-      'Journal personnel',
-      'Méditations guidées de base',
-      'Accès à la communauté'
-    ],
-    cta: 'Commencer gratuitement',
-    highlighted: false,
-    priceId: null
-  },
-  {
-    name: 'Mensuel',
-    price: 15,
-    period: 'par mois',
-    description: 'Flexibilité maximale',
-    features: [
-      'Accès à tous les 7 modules',
-      'Contenu exclusif et ressources',
-      'Exercices guidés avancés',
-      'Suivi de progression détaillé',
-      'Support prioritaire',
-      'Nouvelles fonctionnalités en avant-première'
-    ],
-    cta: 'S\'abonner',
-    highlighted: false,
-    priceId: 'monthly'
-  },
-  {
-    name: 'Annuel',
-    price: 12,
-    period: 'par mois',
-    originalPrice: 15,
-    description: 'Meilleure valeur',
-    billedAs: '144€ facturés annuellement',
-    features: [
-      'Tous les avantages du plan mensuel',
-      '20% de réduction',
-      'Accès à vie aux modules complétés',
-      'Séances de groupe mensuelles',
-      'Contenu bonus exclusif',
-      'Certification de fin de parcours'
-    ],
-    cta: 'S\'abonner',
-    highlighted: true,
-    priceId: 'yearly',
-    badge: 'Économisez 20%'
-  }
-];
+import { useI18n } from '../i18n';
 
 export default function Pricing() {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { t } = useI18n();
   const [isLoading, setIsLoading] = useState<string | null>(null);
+
+  const plans = [
+    {
+      name: t.pricing.free.name,
+      price: 0,
+      period: t.pricing.free.period,
+      description: t.pricing.free.desc,
+      features: t.pricing.free.features,
+      cta: t.pricing.free.cta,
+      highlighted: false,
+      priceId: null
+    },
+    {
+      name: t.pricing.monthly.name,
+      price: 15,
+      period: t.pricing.monthly.period,
+      description: t.pricing.monthly.desc,
+      features: t.pricing.monthly.features,
+      cta: t.pricing.monthly.cta,
+      highlighted: false,
+      priceId: 'monthly'
+    },
+    {
+      name: t.pricing.annual.name,
+      price: 12,
+      period: t.pricing.annual.period,
+      originalPrice: 15,
+      description: t.pricing.annual.desc,
+      billedAs: t.pricing.annual.billing,
+      features: t.pricing.annual.features,
+      cta: t.pricing.annual.cta,
+      highlighted: true,
+      priceId: 'yearly',
+      badge: t.pricing.annual.badge
+    }
+  ];
 
   const handleSelectPlan = async (priceId: string | null) => {
     if (!priceId) {
@@ -82,7 +64,7 @@ export default function Pricing() {
 
     setIsLoading(priceId);
 
-    alert('Intégration Stripe à venir. Pour activer les paiements, suivez les instructions sur https://bolt.new/setup/stripe');
+    alert(t.pricing.stripeAlert);
     setIsLoading(null);
   };
 
@@ -97,11 +79,11 @@ export default function Pricing() {
           <div className="flex items-center justify-center gap-2 mb-4">
             <Leaf className="w-8 h-8 text-emerald-600" />
             <h1 className="text-4xl md:text-5xl font-bold text-gray-900">
-              Choisissez votre parcours
+              {t.pricing.title}
             </h1>
           </div>
           <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-            Investissez dans votre bien-être avec un parcours conçu pour transformer votre vie en profondeur
+            {t.pricing.subtitle}
           </p>
         </motion.div>
 
@@ -172,7 +154,7 @@ export default function Pricing() {
                     : 'bg-emerald-600 text-white hover:bg-emerald-700'
                 } disabled:opacity-50 disabled:cursor-not-allowed`}
               >
-                {isLoading === plan.priceId ? 'Chargement...' : plan.cta}
+                {isLoading === plan.priceId ? t.pricing.loading : plan.cta}
               </button>
             </motion.div>
           ))}
@@ -185,10 +167,10 @@ export default function Pricing() {
           className="bg-white rounded-2xl shadow-lg p-8 text-center"
         >
           <h3 className="text-2xl font-bold text-gray-900 mb-4">
-            Garantie satisfait ou remboursé 30 jours
+            {t.pricing.guaranteeTitle}
           </h3>
           <p className="text-gray-600 max-w-2xl mx-auto">
-            Nous sommes convaincus que Nirava transformera votre vie. Si vous n'êtes pas entièrement satisfait dans les 30 premiers jours, nous vous remboursons intégralement, sans questions.
+            {t.pricing.guaranteeText}
           </p>
         </motion.div>
       </div>

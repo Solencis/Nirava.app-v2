@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { X, Plus, Calendar, Clock, Save, Trash2 } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 import { supabase } from '../lib/supabase';
+import { useI18n } from '../i18n';
 
 interface ManualSessionModalProps {
   isOpen: boolean;
@@ -26,6 +27,7 @@ const ManualSessionModal: React.FC<ManualSessionModalProps> = ({
   sessionToEdit
 }) => {
   const { user } = useAuth();
+  const { t } = useI18n();
   const [sessionType, setSessionType] = useState<'meditation' | 'breathing'>('meditation');
   const [duration, setDuration] = useState('');
   const [sessionDate, setSessionDate] = useState('');
@@ -35,7 +37,6 @@ const ManualSessionModal: React.FC<ManualSessionModalProps> = ({
   const [error, setError] = useState('');
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
-  // Populate form when editing
   useEffect(() => {
     if (sessionToEdit) {
       setDuration(sessionToEdit.duration_minutes.toString());
@@ -48,7 +49,6 @@ const ManualSessionModal: React.FC<ManualSessionModalProps> = ({
       setSessionDate(dateStr);
       setSessionTime(timeStr);
     } else {
-      // Reset form for new session
       setDuration('');
       setSessionType('meditation');
       setSessionDate('');
@@ -75,11 +75,9 @@ const ManualSessionModal: React.FC<ManualSessionModalProps> = ({
     setError('');
 
     try {
-      // Combine date and time into a proper timestamp
       const sessionDateTime = new Date(`${sessionDate}T${sessionTime}:00`);
 
       if (sessionToEdit) {
-        // Update existing session
         const { error: updateError } = await supabase
           .from('meditation_sessions')
           .update({
@@ -92,7 +90,6 @@ const ManualSessionModal: React.FC<ManualSessionModalProps> = ({
 
         if (updateError) throw updateError;
       } else {
-        // Create new session
         const { error: insertError } = await supabase
           .from('meditation_sessions')
           .insert({
@@ -149,14 +146,13 @@ const ManualSessionModal: React.FC<ManualSessionModalProps> = ({
   return (
     <div className="fixed inset-0 bg-ink/60 dark:bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4">
       <div className="bg-white dark:bg-gray-800 rounded-3xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto transition-colors duration-300">
-        {/* Header */}
         <div className="sticky top-0 bg-gradient-to-br from-jade via-wasabi to-jade dark:from-jade/80 dark:via-wasabi/80 dark:to-jade/80 p-6 rounded-t-3xl">
           <div className="flex items-center justify-between mb-2">
             <h2
               className="text-2xl font-medium text-white"
               style={{ fontFamily: "'Shippori Mincho', serif" }}
             >
-              {sessionToEdit ? 'Modifier la séance' : 'Ajouter une séance'}
+              {sessionToEdit ? t.manualSession.editTitle : t.manualSession.addTitle}
             </h2>
             <button
               onClick={onClose}
@@ -173,19 +169,16 @@ const ManualSessionModal: React.FC<ManualSessionModalProps> = ({
           </p>
         </div>
 
-        {/* Content */}
         <div className="p-6 space-y-6">
-          {/* Error Message */}
           {error && (
             <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-300 px-4 py-3 rounded-xl text-sm">
               {error}
             </div>
           )}
 
-          {/* Type Selection */}
           <div>
             <label className="block text-sm font-medium text-ink dark:text-white mb-3" style={{ fontFamily: "'Shippori Mincho', serif" }}>
-              Type de séance
+              {t.manualSession.type}
             </label>
             <div className="grid grid-cols-2 gap-3">
               <button
@@ -199,7 +192,7 @@ const ManualSessionModal: React.FC<ManualSessionModalProps> = ({
               >
                 <div className="text-2xl mb-1">🧘</div>
                 <div className="text-sm font-medium text-ink dark:text-white" style={{ fontFamily: "'Shippori Mincho', serif" }}>
-                  Méditation
+                  {t.manualSession.typeMeditation}
                 </div>
               </button>
               <button
@@ -213,17 +206,16 @@ const ManualSessionModal: React.FC<ManualSessionModalProps> = ({
               >
                 <div className="text-2xl mb-1">🌬️</div>
                 <div className="text-sm font-medium text-ink dark:text-white" style={{ fontFamily: "'Shippori Mincho', serif" }}>
-                  Respiration
+                  {t.manualSession.typeBreathing}
                 </div>
               </button>
             </div>
           </div>
 
-          {/* Duration */}
           <div>
             <label className="block text-sm font-medium text-ink dark:text-white mb-2" style={{ fontFamily: "'Shippori Mincho', serif" }}>
               <Clock size={16} className="inline mr-2" />
-              Durée (minutes)
+              {t.manualSession.duration}
             </label>
             <input
               type="number"
@@ -236,11 +228,10 @@ const ManualSessionModal: React.FC<ManualSessionModalProps> = ({
             />
           </div>
 
-          {/* Date */}
           <div>
             <label className="block text-sm font-medium text-ink dark:text-white mb-2" style={{ fontFamily: "'Shippori Mincho', serif" }}>
               <Calendar size={16} className="inline mr-2" />
-              Date
+              {t.manualSession.date}
             </label>
             <input
               type="date"
@@ -251,7 +242,6 @@ const ManualSessionModal: React.FC<ManualSessionModalProps> = ({
             />
           </div>
 
-          {/* Time */}
           <div>
             <label className="block text-sm font-medium text-ink dark:text-white mb-2" style={{ fontFamily: "'Shippori Mincho', serif" }}>
               <Clock size={16} className="inline mr-2" />
@@ -265,7 +255,6 @@ const ManualSessionModal: React.FC<ManualSessionModalProps> = ({
             />
           </div>
 
-          {/* Action Buttons */}
           <div className="flex gap-3 pt-4">
             {sessionToEdit && (
               <button
@@ -276,7 +265,7 @@ const ManualSessionModal: React.FC<ManualSessionModalProps> = ({
                 style={{ fontFamily: "'Shippori Mincho', serif" }}
               >
                 <Trash2 size={18} />
-                {deleting ? 'Suppression...' : 'Supprimer'}
+                {deleting ? 'Suppression...' : t.common.delete}
               </button>
             )}
             <button
@@ -287,11 +276,10 @@ const ManualSessionModal: React.FC<ManualSessionModalProps> = ({
               style={{ fontFamily: "'Shippori Mincho', serif" }}
             >
               <Save size={18} />
-              {saving ? 'Enregistrement...' : sessionToEdit ? 'Mettre à jour' : 'Ajouter'}
+              {saving ? t.common.saving : t.common.save}
             </button>
           </div>
 
-          {/* Confirmation de suppression */}
           {showDeleteConfirm && (
             <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[100] p-4">
               <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-sm p-6 transition-colors duration-300">
@@ -314,7 +302,7 @@ const ManualSessionModal: React.FC<ManualSessionModalProps> = ({
                     className="flex-1 bg-stone/10 dark:bg-gray-700 hover:bg-stone/20 dark:hover:bg-gray-600 text-ink dark:text-white py-3 rounded-xl font-medium transition-all duration-300"
                     style={{ fontFamily: "'Shippori Mincho', serif" }}
                   >
-                    Annuler
+                    {t.common.cancel}
                   </button>
                   <button
                     type="button"
@@ -323,7 +311,7 @@ const ManualSessionModal: React.FC<ManualSessionModalProps> = ({
                     className="flex-1 bg-red-600 hover:bg-red-700 disabled:bg-red-400 text-white py-3 rounded-xl font-medium transition-all duration-300 flex items-center justify-center gap-2"
                     style={{ fontFamily: "'Shippori Mincho', serif" }}
                   >
-                    {deleting ? 'Suppression...' : 'Supprimer'}
+                    {deleting ? 'Suppression...' : t.common.delete}
                   </button>
                 </div>
               </div>

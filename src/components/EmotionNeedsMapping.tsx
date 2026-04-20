@@ -1,6 +1,9 @@
 import React from 'react';
+import { useI18n } from '../i18n';
 
 const EmotionNeedsMapping: React.FC = () => {
+  const { t } = useI18n();
+
   const mappings = [
     {
       emotion: 'Colère',
@@ -38,25 +41,25 @@ const EmotionNeedsMapping: React.FC = () => {
     <div className="bg-white/90 backdrop-blur-sm rounded-2xl p-6 shadow-soft border border-stone/10">
       <div className="flex items-center mb-6">
         <span className="text-2xl mr-3">🌱</span>
-        <h3 
+        <h3
           className="text-xl font-bold text-ink"
           style={{ fontFamily: "'Shippori Mincho', serif" }}
         >
-          Émotions et besoins associés
+          {t.emotionNeeds.title}
         </h3>
       </div>
-      
+
       <p className="text-stone mb-6 font-light leading-relaxed">
-        Chaque émotion révèle des besoins profonds. Cette carte t'aide à faire le lien entre ce que tu ressens et ce dont tu as besoin.
+        {t.emotionNeeds.desc}
       </p>
-      
+
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {mappings.map((mapping, index) => (
           <div
             key={index}
             className={`${mapping.color} p-4 rounded-xl border transition-all duration-300 hover:shadow-md hover:-translate-y-1`}
           >
-            <h4 
+            <h4
               className="font-bold text-lg mb-2"
               style={{ fontFamily: "'Shippori Mincho', serif" }}
             >
@@ -68,7 +71,7 @@ const EmotionNeedsMapping: React.FC = () => {
           </div>
         ))}
       </div>
-      
+
       <div className="mt-6 p-4 bg-vermilion/5 rounded-xl border border-vermilion/10">
         <p className="text-vermilion text-sm text-center font-light">
           🔑 <strong>Clé :</strong> Identifier le besoin derrière l'émotion ouvre la voie à l'action juste.

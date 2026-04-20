@@ -2,8 +2,10 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowLeft, Play, Pause, Volume2, VolumeX, RotateCcw, Clock } from 'lucide-react';
 import { useAudioStore, AMBIENCES } from '../stores/audioStore';
+import { useI18n } from '../i18n';
 
 const SoundAmbience: React.FC = () => {
+  const { t } = useI18n();
   const {
     current,
     isPlaying,
@@ -50,18 +52,18 @@ const SoundAmbience: React.FC = () => {
       {/* Header */}
       <div className="bg-white/90 backdrop-blur-sm border-b border-stone/10 p-4 sticky top-0 z-10">
         <div className="flex items-center justify-between">
-          <Link 
+          <Link
             to="/journal"
             className="flex items-center text-stone hover:text-jade transition-colors duration-300 min-w-[44px] min-h-[44px]"
           >
             <ArrowLeft size={20} className="mr-2" />
-            Retour
+            {t.soundAmbience.back}
           </Link>
-          <h1 
+          <h1
             className="text-xl font-bold text-ink"
             style={{ fontFamily: "'Shippori Mincho', serif" }}
           >
-            Ambiance sonore
+            {t.soundAmbience.title}
           </h1>
           <div className="w-16"></div>
         </div>
@@ -73,17 +75,17 @@ const SoundAmbience: React.FC = () => {
           <div className="bg-white/90 backdrop-blur-sm rounded-2xl p-6 shadow-soft border border-stone/10 mb-6">
             <div className="text-center mb-6">
               <div className="text-4xl mb-2">{current.emoji}</div>
-              <h2 
+              <h2
                 className="text-xl font-bold text-ink mb-1"
                 style={{ fontFamily: "'Shippori Mincho', serif" }}
               >
                 {current.title}
               </h2>
               <p className="text-stone text-sm mb-2">{current.description}</p>
-              
+
               {autoStopAt && (
                 <div className="text-jade font-medium">
-                  Arrêt dans {getTimeLeft()}
+                  {t.soundAmbience.stopIn} {getTimeLeft()}
                 </div>
               )}
             </div>
@@ -93,7 +95,7 @@ const SoundAmbience: React.FC = () => {
               <button
                 onClick={() => isPlaying ? pause() : play(current)}
                 className="w-16 h-16 bg-gradient-to-r from-jade to-forest text-white rounded-full flex items-center justify-center shadow-lg hover:shadow-jade/30 transition-all duration-300 transform hover:scale-105 min-w-[44px] min-h-[44px]"
-                aria-label={isPlaying ? 'Pause' : 'Play'}
+                aria-label={isPlaying ? t.soundAmbience.pause : t.soundAmbience.play}
               >
                 {isPlaying ? <Pause size={24} /> : <Play size={24} />}
               </button>
@@ -104,7 +106,7 @@ const SoundAmbience: React.FC = () => {
               <div className="flex items-center justify-between mb-3">
                 <div className="flex items-center">
                   {volume === 0 ? <VolumeX size={20} className="text-stone" /> : <Volume2 size={20} className="text-jade" />}
-                  <span className="ml-2 text-sm font-medium text-ink">Volume</span>
+                  <span className="ml-2 text-sm font-medium text-ink">{t.soundAmbience.volume}</span>
                 </div>
                 <span className="text-sm text-stone">{Math.round((volume / 0.9) * 100)}%</span>
               </div>
@@ -121,7 +123,7 @@ const SoundAmbience: React.FC = () => {
                     background: `linear-gradient(to right, #059669 0%, #059669 ${(volume / 0.9) * 100}%, #e5e7eb ${(volume / 0.9) * 100}%, #e5e7eb 100%)`
                   }}
                 />
-                <div 
+                <div
                   className="absolute top-1/2 w-6 h-6 bg-jade rounded-full shadow-lg transform -translate-y-1/2 transition-all duration-200"
                   style={{ left: `calc(${(volume / 0.9) * 100}% - 12px)` }}
                 ></div>
@@ -132,7 +134,7 @@ const SoundAmbience: React.FC = () => {
             <div className="grid grid-cols-2 gap-4 mb-4">
               <div>
                 <label className="block text-sm font-medium text-ink mb-2">
-                  Lecture en boucle
+                  {t.soundAmbience.loop}
                 </label>
                 <button
                   onClick={() => setLoop(!loop)}
@@ -143,13 +145,13 @@ const SoundAmbience: React.FC = () => {
                   }`}
                 >
                   <RotateCcw size={16} className="mr-2" />
-                  {loop ? 'Activée' : 'Désactivée'}
+                  {loop ? t.soundAmbience.loopOn : t.soundAmbience.loopOff}
                 </button>
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-ink mb-2">
-                  Arrêt automatique
+                  {t.soundAmbience.autoStop}
                 </label>
                 <div className="space-y-2">
                   {[null, 5, 10, 20].map((minutes) => (
@@ -162,7 +164,7 @@ const SoundAmbience: React.FC = () => {
                           : 'bg-stone/5 border-stone/20 text-stone hover:border-jade/20'
                       }`}
                     >
-                      {minutes ? `${minutes} min` : 'Pas d\'arrêt'}
+                      {minutes ? `${minutes} min` : t.soundAmbience.noStop}
                     </button>
                   ))}
                 </div>
@@ -174,24 +176,24 @@ const SoundAmbience: React.FC = () => {
               onClick={stop}
               className="w-full bg-stone/10 text-stone py-3 rounded-xl hover:bg-stone/20 transition-colors duration-300 text-sm font-medium min-h-[44px]"
             >
-              Arrêter la lecture
+              {t.soundAmbience.stopPlayback}
             </button>
           </div>
         )}
 
         {/* Ambience list */}
         <div className="space-y-4">
-          <h3 
+          <h3
             className="text-lg font-bold text-ink mb-4"
             style={{ fontFamily: "'Shippori Mincho', serif" }}
           >
-            Choisir une ambiance
+            {t.soundAmbience.chooseAmbiance}
           </h3>
-          
+
           {AMBIENCES.map((ambience) => {
             const isActive = current?.key === ambience.key;
             const isCurrentlyPlaying = isActive && isPlaying;
-            
+
             return (
               <button
                 key={ambience.key}
@@ -205,7 +207,7 @@ const SoundAmbience: React.FC = () => {
                 <div className="flex items-center">
                   <div className="text-3xl mr-4">{ambience.emoji}</div>
                   <div className="flex-1">
-                    <h4 
+                    <h4
                       className="font-bold text-lg text-ink mb-1"
                       style={{ fontFamily: "'Shippori Mincho', serif" }}
                     >
@@ -213,7 +215,7 @@ const SoundAmbience: React.FC = () => {
                     </h4>
                     <p className="text-stone text-sm">{ambience.description}</p>
                   </div>
-                  
+
                   <div className="flex items-center ml-4">
                     {isCurrentlyPlaying && (
                       <div className="w-3 h-3 bg-jade rounded-full animate-pulse mr-3"></div>
@@ -221,7 +223,7 @@ const SoundAmbience: React.FC = () => {
                     {isActive && (
                       <div className="bg-jade text-white px-3 py-1 rounded-full text-xs font-medium flex items-center">
                         {isCurrentlyPlaying ? <Pause size={12} className="mr-1" /> : <Play size={12} className="mr-1" />}
-                        {isCurrentlyPlaying ? 'En cours' : 'Sélectionné'}
+                        {isCurrentlyPlaying ? t.soundAmbience.playing : t.soundAmbience.selected}
                       </div>
                     )}
                   </div>
@@ -233,15 +235,14 @@ const SoundAmbience: React.FC = () => {
 
         {/* Inspirational message */}
         <div className="mt-8 bg-gradient-to-br from-jade/5 to-forest/5 rounded-2xl p-6 text-center border border-jade/10">
-          <p 
+          <p
             className="text-ink font-medium mb-2"
             style={{ fontFamily: "'Shippori Mincho', serif" }}
           >
-            "Dans le silence des sons,<br />
-            l'âme trouve sa paix."
+            {t.soundAmbience.quote}
           </p>
           <p className="text-stone text-sm">
-            🎵 Laisse ces ambiances t'accompagner dans ta pratique quotidienne
+            {t.soundAmbience.quoteNote}
           </p>
         </div>
       </div>

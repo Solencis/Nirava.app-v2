@@ -5,9 +5,11 @@ import { useAuth } from '../hooks/useAuth';
 import { useProfile } from '../hooks/useProfile';
 import { useAllProgress } from '../hooks/useSchoolProgress';
 import { getModulesByLevel, calculateLevelStats, type LevelGroup } from '../lib/schoolModules';
+import { useI18n } from '../i18n';
 
 const School: React.FC = () => {
   const { user } = useAuth();
+  const { t } = useI18n();
   const { data: profile } = useProfile();
   const { data: allProgress = {} } = useAllProgress();
 
@@ -28,13 +30,11 @@ const School: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-sand via-pearl to-sand dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 pb-24 transition-colors duration-300">
-      {/* Motif décoratif en arrière-plan */}
       <div className="fixed inset-0 opacity-5 pointer-events-none" style={{
         backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23059669' fill-opacity='0.4'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v6h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
       }} />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 relative z-10">
-        {/* Header avec calligraphie inspirée */}
         <div className="text-center mb-8 sm:mb-12">
           <div className="inline-block mb-4">
             <div className="w-16 h-16 sm:w-20 sm:h-20 mx-auto mb-3 sm:mb-4 rounded-full bg-gradient-to-br from-jade to-forest flex items-center justify-center shadow-soft dark:shadow-jade/30">
@@ -42,24 +42,23 @@ const School: React.FC = () => {
             </div>
           </div>
           <h1 className="font-shippori text-3xl sm:text-5xl font-bold text-ink dark:text-white mb-2 sm:mb-3 px-4 transition-colors duration-300">
-            L'École Nirava
+            {t.school.title}
           </h1>
           <p className="text-base sm:text-xl text-stone dark:text-gray-300 max-w-2xl mx-auto font-inter px-6 transition-colors duration-300">
-            Le chemin de l'intégration en sept étapes
+            {t.school.subtitle}
           </p>
           <div className="mt-4 sm:mt-6 flex items-center justify-center gap-2 text-sm text-stone dark:text-gray-400 transition-colors duration-300">
             <div className="w-6 sm:w-8 h-px bg-jade"></div>
-            <span className="font-shippori text-xs sm:text-sm">修行の道</span>
+            <span className="font-shippori text-xs sm:text-sm">{t.school.japanese}</span>
             <div className="w-6 sm:w-8 h-px bg-jade"></div>
           </div>
         </div>
 
-        {/* Progression globale */}
         {user && globalStats.total > 0 && (
           <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur rounded-2xl p-6 shadow-soft mb-12 border border-jade/10 dark:border-gray-700 transition-colors duration-300">
             <div className="flex items-center justify-between mb-4">
               <span className="font-shippori text-lg font-semibold text-ink dark:text-white transition-colors duration-300">
-                Ta progression
+                {t.school.yourProgress}
               </span>
               <span className="text-3xl font-bold bg-gradient-to-r from-jade to-forest bg-clip-text text-transparent">
                 {globalPercentage}%
@@ -72,26 +71,23 @@ const School: React.FC = () => {
               />
             </div>
             <p className="text-sm text-stone dark:text-gray-400 mt-3 text-center transition-colors duration-300">
-              {globalStats.completed} module{globalStats.completed > 1 ? 's' : ''} complété{globalStats.completed > 1 ? 's' : ''} sur {globalStats.total}
+              {globalStats.completed} {t.school.modules} {t.school.modulesCompleted} {globalStats.total}
             </p>
           </div>
         )}
 
-        {/* Les 7 niveaux */}
         <div className="space-y-6 sm:space-y-12">
-          {levelGroups.map((group, index) => (
+          {levelGroups.map((group) => (
             <LevelSection
               key={group.level}
               group={group}
               allProgress={allProgress}
               isPremium={isPremium}
               isLoggedIn={!!user}
-              index={index}
             />
           ))}
         </div>
 
-        {/* CTA Premium avec esthétique japonaise */}
         {!isPremium && (
           <div className="mt-16 relative">
             <div className="absolute inset-0 bg-gradient-to-br from-jade/20 to-forest/20 rounded-3xl blur-2xl"></div>
@@ -103,16 +99,16 @@ const School: React.FC = () => {
                 </svg>
               </div>
               <h3 className="font-shippori text-3xl font-bold mb-4">
-                Continue ton voyage
+                {t.school.ctaTitle}
               </h3>
               <p className="text-jade-50 mb-8 max-w-2xl mx-auto font-inter leading-relaxed">
-                Accède aux niveaux 2 à 7 et découvre l'intégralité du chemin vers ta transformation intérieure. Plus de 25 modules pour approfondir ta pratique.
+                {t.school.ctaText}
               </p>
               <Link
                 to="/pricing"
                 className="inline-flex items-center gap-2 px-8 py-4 bg-white text-jade rounded-xl font-semibold hover:bg-jade-50 transition-all shadow-lg hover:shadow-xl hover:scale-105"
               >
-                Découvrir Premium
+                {t.school.ctaButton}
                 <Sparkles className="w-5 h-5" />
               </Link>
             </div>
@@ -128,31 +124,26 @@ interface LevelSectionProps {
   allProgress: Record<string, any>;
   isPremium: boolean;
   isLoggedIn: boolean;
-  index: number;
 }
 
-const LevelSection: React.FC<LevelSectionProps> = ({ group, allProgress, isPremium, isLoggedIn, index }) => {
+const LevelSection: React.FC<LevelSectionProps> = ({ group, allProgress, isPremium, isLoggedIn }) => {
+  const { t } = useI18n();
   const isLocked = !group.isFree && !isPremium;
   const stats = calculateLevelStats(group.level, allProgress);
 
   const levelTitles: Record<string, string> = {
-    'N1': '一 · Sécurité & Ancrage',
-    'N2': '二 · Émotions, besoins, limites',
-    'N3': '三 · Régulation & Paix intérieure',
-    'N4': '四 · Relation à l\'autre',
-    'N5': '五 · Exploration symbolique',
-    'N6': '六 · Ikigai & Partage',
-    'N7': '七 · Transmission & Contribution'
+    'N1': `一 · ${t.school.levels[1]}`,
+    'N2': `二 · ${t.school.levels[2]}`,
+    'N3': `三 · ${t.school.levels[3]}`,
+    'N4': `四 · ${t.school.levels[4]}`,
+    'N5': `五 · ${t.school.levels[5]}`,
+    'N6': `六 · ${t.school.levels[6]}`,
+    'N7': `七 · ${t.school.levels[7]}`,
   };
 
   const levelEmojis: Record<string, string> = {
-    'N1': '🌍',
-    'N2': '💗',
-    'N3': '🕊',
-    'N4': '🤝',
-    'N5': '🌙',
-    'N6': '🔥',
-    'N7': '🌟'
+    'N1': '🌍', 'N2': '💗', 'N3': '🕊', 'N4': '🤝',
+    'N5': '🌙', 'N6': '🔥', 'N7': '🌟'
   };
 
   return (
@@ -163,18 +154,16 @@ const LevelSection: React.FC<LevelSectionProps> = ({ group, allProgress, isPremi
         <div className="absolute inset-0 backdrop-blur-2xl bg-white/90 dark:bg-gray-900/90 rounded-2xl sm:rounded-3xl z-10 flex items-center justify-center">
           <div className="text-center">
             <Lock className="w-12 h-12 text-stone dark:text-gray-400 mx-auto mb-3" />
-            <p className="text-lg font-semibold text-stone dark:text-gray-400">Contenu Premium</p>
-            <p className="text-sm text-stone/70 dark:text-gray-500 mt-1">Accès complet en 2026</p>
+            <p className="text-lg font-semibold text-stone dark:text-gray-400">{t.school.premiumContent}</p>
+            <p className="text-sm text-stone/70 dark:text-gray-500 mt-1">{t.school.premiumSub}</p>
           </div>
         </div>
       )}
-      {/* Header du niveau */}
+
       <div className="flex flex-col sm:flex-row items-start justify-between mb-6 sm:mb-8 gap-4">
         <div className="flex items-center gap-4 sm:gap-6 w-full sm:w-auto">
           <div className={`relative w-16 h-16 sm:w-20 sm:h-20 rounded-xl sm:rounded-2xl flex items-center justify-center flex-shrink-0 ${
-            isLocked
-              ? 'bg-gradient-to-br from-stone/20 to-stone/30'
-              : 'bg-gradient-to-br from-jade to-forest shadow-soft'
+            isLocked ? 'bg-gradient-to-br from-stone/20 to-stone/30' : 'bg-gradient-to-br from-jade to-forest shadow-soft'
           }`}>
             <span className="text-3xl sm:text-4xl">{levelEmojis[group.level]}</span>
           </div>
@@ -183,12 +172,12 @@ const LevelSection: React.FC<LevelSectionProps> = ({ group, allProgress, isPremi
               {levelTitles[group.level]}
               {!group.isFree && (
                 <span className="px-3 py-1 text-xs font-semibold rounded-full bg-gradient-to-r from-vermilion to-sunset text-white">
-                  Premium
+                  {t.school.premium}
                 </span>
               )}
             </h2>
             <p className="text-sm sm:text-base text-stone dark:text-gray-400 font-inter transition-colors duration-300">
-              {group.modules.length} module{group.modules.length > 1 ? 's' : ''}
+              {group.modules.length} {t.school.modules}
             </p>
           </div>
         </div>
@@ -205,7 +194,6 @@ const LevelSection: React.FC<LevelSectionProps> = ({ group, allProgress, isPremi
         )}
       </div>
 
-      {/* Barre de progression du niveau */}
       {isLoggedIn && !isLocked && stats.totalModules > 0 && (
         <div className="h-2 bg-pearl rounded-full overflow-hidden mb-8">
           <div
@@ -215,7 +203,6 @@ const LevelSection: React.FC<LevelSectionProps> = ({ group, allProgress, isPremi
         </div>
       )}
 
-      {/* Liste des modules */}
       <div className="grid gap-3 sm:gap-4 sm:grid-cols-2">
         {group.modules.map((module, moduleIndex) => {
           const progress = allProgress[module.slug];
@@ -230,18 +217,14 @@ const LevelSection: React.FC<LevelSectionProps> = ({ group, allProgress, isPremi
                   ? 'border-stone/10 bg-stone/5 cursor-not-allowed'
                   : 'border-jade/20 hover:border-jade hover:shadow-md bg-white/40 hover:bg-white/80 cursor-pointer'
               }`}
-              onClick={() => {
-                if (!isLocked) {
-                  window.location.href = `/ecole/module/${module.slug}`;
-                }
-              }}
+              onClick={() => { if (!isLocked) window.location.href = `/ecole/module/${module.slug}`; }}
             >
               {isLocked && (
                 <div className="absolute inset-0 backdrop-blur-2xl bg-white/90 dark:bg-gray-900/90 rounded-xl z-10 flex items-center justify-center">
                   <div className="text-center">
                     <Lock className="w-10 h-10 text-stone dark:text-gray-400 mx-auto mb-2" />
-                    <p className="text-sm font-semibold text-stone dark:text-gray-400">Contenu Premium</p>
-                    <p className="text-xs text-stone/70 dark:text-gray-500 mt-1">Accès complet en 2026</p>
+                    <p className="text-sm font-semibold text-stone dark:text-gray-400">{t.school.premiumContent}</p>
+                    <p className="text-xs text-stone/70 dark:text-gray-500 mt-1">{t.school.premiumSub}</p>
                   </div>
                 </div>
               )}
@@ -256,9 +239,7 @@ const LevelSection: React.FC<LevelSectionProps> = ({ group, allProgress, isPremi
                     {module.title}
                   </h3>
                 </div>
-                {isCompleted && (
-                  <CheckCircle2 className="w-6 h-6 text-jade flex-shrink-0" />
-                )}
+                {isCompleted && <CheckCircle2 className="w-6 h-6 text-jade flex-shrink-0" />}
                 {!isCompleted && !isLocked && progress && (
                   <div className="flex items-center gap-1 px-2 py-1 rounded-full bg-jade/10 text-xs text-jade font-semibold flex-shrink-0">
                     {currentStep}/5
@@ -266,21 +247,14 @@ const LevelSection: React.FC<LevelSectionProps> = ({ group, allProgress, isPremi
                 )}
               </div>
 
-              <p className="text-sm text-stone mb-4 font-inter leading-relaxed">
-                {module.summary}
-              </p>
+              <p className="text-sm text-stone mb-4 font-inter leading-relaxed">{module.summary}</p>
 
               <div className="flex items-center justify-between text-xs text-stone font-inter">
                 <div className="flex items-center gap-1">
                   <Clock className="w-4 h-4" />
                   <span>{module.duration}</span>
                 </div>
-                {!isLocked && (
-                  <ChevronRight className="w-4 h-4 text-jade" />
-                )}
-                {isLocked && (
-                  <Lock className="w-4 h-4" />
-                )}
+                {!isLocked ? <ChevronRight className="w-4 h-4 text-jade" /> : <Lock className="w-4 h-4" />}
               </div>
             </div>
           );

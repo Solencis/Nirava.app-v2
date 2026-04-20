@@ -7,6 +7,7 @@ import DreamJournalMobile from '../components/DreamJournalMobile';
 import BreathingMobile from '../components/BreathingMobile';
 import { useAuth } from '../hooks/useAuth';
 import { supabase } from '../lib/supabase';
+import { useI18n } from '../i18n';
 
 interface ActivityEntry {
   id: string;
@@ -34,19 +35,15 @@ interface DetailData {
   nightmare?: boolean;
 }
 
-const TYPE_CONFIG: Record<string, { emoji: string; label: string; color: string; bg: string; border: string; accent: string }> = {
-  checkin: { emoji: '💚', label: 'Check-in', color: 'text-rose-600 dark:text-rose-400', bg: 'bg-rose-50 dark:bg-rose-900/20', border: 'border-rose-200 dark:border-rose-800', accent: '#f43f5e' },
-  journal: { emoji: '📖', label: 'Journal', color: 'text-blue-600 dark:text-blue-400', bg: 'bg-blue-50 dark:bg-blue-900/20', border: 'border-blue-200 dark:border-blue-800', accent: '#3b82f6' },
-  dream: { emoji: '🌙', label: 'Rêve', color: 'text-amber-600 dark:text-amber-400', bg: 'bg-amber-50 dark:bg-amber-900/20', border: 'border-amber-200 dark:border-amber-800', accent: '#f59e0b' },
-  meditation: { emoji: '🧘', label: 'Méditation', color: 'text-jade dark:text-jade', bg: 'bg-jade/10 dark:bg-jade/20', border: 'border-jade/20 dark:border-jade/30', accent: '#059669' },
-  breathing: { emoji: '🌬️', label: 'Respiration', color: 'text-teal-600 dark:text-teal-400', bg: 'bg-teal-50 dark:bg-teal-900/20', border: 'border-teal-200 dark:border-teal-800', accent: '#14b8a6' },
-};
-
 const EMOTION_EMOJIS: Record<string, string> = {
   joyeux: '😄', heureux: '😊', serein: '😌', triste: '😢',
   anxieux: '😰', colère: '😤', fatigué: '😴', inspiré: '✨',
   reconnaissant: '🙏', calme: '🌿', stressé: '😣', confus: '🤔',
   excité: '🎉', mélancolique: '💭', déterminé: '💪', blessé: '💔',
+  alegre: '😄', feliz: '😊', sereno: '😌',
+  ansioso: '😰', enfadado: '😤', cansado: '😴', inspirado: '✨',
+  agradecido: '🙏', tranquilo: '🌿', estresado: '😣', confundido: '🤔',
+  emocionado: '🎉', melancólico: '💭', determinado: '💪', herido: '💔',
 };
 
 const getEmotionEmoji = (emotion?: string) => {
@@ -61,38 +58,39 @@ const getIntensityColors = (intensity: number) => {
   return { bg: 'bg-red-50 dark:bg-red-900/20', text: 'text-red-600', bar: 'bg-red-400' };
 };
 
-const DAYS_FR = ['Dim', 'Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam'];
-const MONTHS_FR = ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Jun', 'Jul', 'Aoû', 'Sep', 'Oct', 'Nov', 'Déc'];
-
-const formatGroupDate = (iso: string) => {
-  const d = new Date(iso);
-  const today = new Date();
-  const yesterday = new Date(today);
-  yesterday.setDate(today.getDate() - 1);
-  if (d.toDateString() === today.toDateString()) return "Aujourd'hui";
-  if (d.toDateString() === yesterday.toDateString()) return 'Hier';
-  return `${DAYS_FR[d.getDay()]} ${d.getDate()} ${MONTHS_FR[d.getMonth()]}`;
-};
-
 const formatTime = (iso: string) => {
   const d = new Date(iso);
   return `${d.getHours().toString().padStart(2, '0')}:${d.getMinutes().toString().padStart(2, '0')}`;
 };
 
-const formatFullDate = (iso: string) =>
-  new Date(iso).toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
-
-const DetailView: React.FC<{ detail: DetailData; onBack: () => void; onDelete: () => void }> = ({ detail, onBack, onDelete }) => {
+const DetailView: React.FC<{ detail: DetailData; onBack: () => void; onDelete: () => void; t: any; lang: string }> = ({ detail, onBack, onDelete, t, lang }) => {
   const intensityColors = detail.intensity ? getIntensityColors(detail.intensity) : null;
-  const cfg = TYPE_CONFIG[detail.type] || TYPE_CONFIG.journal;
+
+  const typeConfig: Record<string, { emoji: string; label: string; color: string; bg: string }> = {
+    checkin: { emoji: '💚', label: t.journal.checkinLabel, color: 'text-rose-600', bg: 'bg-rose-50' },
+    journal: { emoji: '📖', label: t.nav.journal, color: 'text-blue-600', bg: 'bg-blue-50' },
+    dream: { emoji: '🌙', label: t.dreamJournal.title, color: 'text-amber-600', bg: 'bg-amber-50' },
+  };
+
+  const cfg = typeConfig[detail.type] || typeConfig.journal;
+
+  const formatFullDate = (iso: string) =>
+    new Date(iso).toLocaleDateString(lang === 'es' ? 'es-ES' : 'fr-FR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+
+  const formatGroupDate = (iso: string) => {
+    const d = new Date(iso);
+    const today = new Date();
+    const yesterday = new Date(today);
+    yesterday.setDate(today.getDate() - 1);
+    if (d.toDateString() === today.toDateString()) return t.common.today;
+    if (d.toDateString() === yesterday.toDateString()) return t.common.yesterday;
+    return d.toLocaleDateString(lang === 'es' ? 'es-ES' : 'fr-FR', { weekday: 'short', day: 'numeric', month: 'short' });
+  };
 
   return (
     <div className="fixed inset-0 bg-white dark:bg-gray-900 z-[60] flex flex-col animate-slide-in-right">
       <div className="flex items-center gap-3 px-5 pt-14 pb-4 border-b border-stone/10 dark:border-gray-800">
-        <button
-          onClick={onBack}
-          className="w-10 h-10 rounded-full bg-stone/10 dark:bg-gray-800 flex items-center justify-center active:scale-95 transition-transform"
-        >
+        <button onClick={onBack} className="w-10 h-10 rounded-full bg-stone/10 dark:bg-gray-800 flex items-center justify-center active:scale-95 transition-transform">
           <ChevronLeft className="w-5 h-5 text-ink dark:text-white" />
         </button>
         <div className="flex-1">
@@ -101,10 +99,7 @@ const DetailView: React.FC<{ detail: DetailData; onBack: () => void; onDelete: (
             {formatGroupDate(detail.created_at)} · {formatTime(detail.created_at)}
           </p>
         </div>
-        <button
-          onClick={onDelete}
-          className="w-10 h-10 rounded-full bg-red-50 dark:bg-red-900/20 flex items-center justify-center active:scale-95 transition-transform"
-        >
+        <button onClick={onDelete} className="w-10 h-10 rounded-full bg-red-50 dark:bg-red-900/20 flex items-center justify-center active:scale-95 transition-transform">
           <Trash2 className="w-4 h-4 text-red-500" />
         </button>
       </div>
@@ -118,7 +113,7 @@ const DetailView: React.FC<{ detail: DetailData; onBack: () => void; onDelete: (
               </div>
               <div>
                 <h2 className="text-2xl font-bold text-ink dark:text-white capitalize" style={{ fontFamily: "'Shippori Mincho', serif" }}>
-                  {detail.emotion || 'Check-in émotionnel'}
+                  {detail.emotion || t.journal.checkinLabel}
                 </h2>
                 <p className="text-xs text-stone dark:text-gray-400 mt-1 flex items-center gap-1">
                   <Clock className="w-3 h-3" /> {formatFullDate(detail.created_at)}
@@ -129,30 +124,27 @@ const DetailView: React.FC<{ detail: DetailData; onBack: () => void; onDelete: (
             {detail.intensity !== undefined && (
               <div className={`rounded-2xl p-4 ${intensityColors?.bg}`}>
                 <div className="flex items-center justify-between mb-3">
-                  <span className="text-sm font-medium text-stone dark:text-gray-300">Intensité ressentie</span>
+                  <span className="text-sm font-medium text-stone dark:text-gray-300">{t.journal.intensity}</span>
                   <span className={`text-2xl font-bold ${intensityColors?.text}`}>
-                    {detail.intensity}<span className="text-sm font-normal text-stone dark:text-gray-400">/10</span>
+                    {detail.intensity}<span className="text-sm font-normal text-stone dark:text-gray-400">{t.journal.intensityScale}</span>
                   </span>
                 </div>
                 <div className="w-full bg-white/60 dark:bg-white/10 rounded-full h-2.5">
-                  <div
-                    className={`h-2.5 rounded-full transition-all duration-700 ${intensityColors?.bar}`}
-                    style={{ width: `${(detail.intensity / 10) * 100}%` }}
-                  />
+                  <div className={`h-2.5 rounded-full transition-all duration-700 ${intensityColors?.bar}`} style={{ width: `${(detail.intensity / 10) * 100}%` }} />
                 </div>
               </div>
             )}
 
             {detail.need && (
               <div className="bg-jade/5 dark:bg-jade/10 border border-jade/20 rounded-2xl p-4">
-                <p className="text-xs font-bold text-jade uppercase tracking-widest mb-1.5">Besoin identifié</p>
+                <p className="text-xs font-bold text-jade uppercase tracking-widest mb-1.5">{t.journal.identifiedNeed}</p>
                 <p className="text-ink dark:text-white font-medium capitalize text-base">{detail.need}</p>
               </div>
             )}
 
             {detail.notes && (
               <div className="bg-stone/5 dark:bg-white/5 rounded-2xl p-4">
-                <p className="text-xs font-bold text-stone dark:text-gray-400 uppercase tracking-widest mb-2">Notes</p>
+                <p className="text-xs font-bold text-stone dark:text-gray-400 uppercase tracking-widest mb-2">{t.journal.notes}</p>
                 <p className="text-ink dark:text-white leading-relaxed text-sm whitespace-pre-wrap">{detail.notes}</p>
               </div>
             )}
@@ -167,7 +159,7 @@ const DetailView: React.FC<{ detail: DetailData; onBack: () => void; onDelete: (
               </div>
               <div className="flex-1">
                 <h2 className="text-xl font-bold text-ink dark:text-white" style={{ fontFamily: "'Shippori Mincho', serif" }}>
-                  {detail.title || (detail.type === 'dream' ? 'Journal de rêve' : 'Entrée de journal')}
+                  {detail.title || (detail.type === 'dream' ? t.journal.dreamJournalTitle : t.journal.journalEntryTitle)}
                 </h2>
                 <p className="text-xs text-stone dark:text-gray-400 mt-1 flex items-center gap-1">
                   <Clock className="w-3 h-3" /> {formatFullDate(detail.created_at)}
@@ -179,17 +171,17 @@ const DetailView: React.FC<{ detail: DetailData; onBack: () => void; onDelete: (
               <div className="flex flex-wrap gap-2">
                 {detail.lucidity && (
                   <span className="inline-flex items-center gap-1.5 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 px-3 py-1.5 rounded-full text-sm font-medium">
-                    Rêve lucide
+                    {t.journal.tagLucid}
                   </span>
                 )}
                 {detail.recurring && (
                   <span className="inline-flex items-center gap-1.5 bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 px-3 py-1.5 rounded-full text-sm font-medium">
-                    Récurrent
+                    {t.journal.tagRecurring}
                   </span>
                 )}
                 {detail.nightmare && (
                   <span className="inline-flex items-center gap-1.5 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300 px-3 py-1.5 rounded-full text-sm font-medium">
-                    Cauchemar
+                    {t.journal.tagNightmare}
                   </span>
                 )}
               </div>
@@ -209,6 +201,7 @@ const DetailView: React.FC<{ detail: DetailData; onBack: () => void; onDelete: (
 
 const Journal: React.FC = () => {
   const { user } = useAuth();
+  const { t, lang } = useI18n();
 
   const [showCheckin, setShowCheckin] = useState(false);
   const [showJournal, setShowJournal] = useState(false);
@@ -221,22 +214,20 @@ const Journal: React.FC = () => {
   const [selectedDetail, setSelectedDetail] = useState<DetailData | null>(null);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
+  const typeConfig = {
+    checkin: { emoji: '💚', label: t.journal.checkinLabel, color: 'text-rose-600 dark:text-rose-400', bg: 'bg-rose-50 dark:bg-rose-900/20', border: 'border-rose-200 dark:border-rose-800' },
+    journal: { emoji: '📖', label: t.nav.journal, color: 'text-blue-600 dark:text-blue-400', bg: 'bg-blue-50 dark:bg-blue-900/20', border: 'border-blue-200 dark:border-blue-800' },
+    dream: { emoji: '🌙', label: t.dreamJournal.title, color: 'text-amber-600 dark:text-amber-400', bg: 'bg-amber-50 dark:bg-amber-900/20', border: 'border-amber-200 dark:border-amber-800' },
+    meditation: { emoji: '🧘', label: t.meditation.title, color: 'text-jade dark:text-jade', bg: 'bg-jade/10 dark:bg-jade/20', border: 'border-jade/20 dark:border-jade/30' },
+    breathing: { emoji: '🌬️', label: t.breathing.title, color: 'text-teal-600 dark:text-teal-400', bg: 'bg-teal-50 dark:bg-teal-900/20', border: 'border-teal-200 dark:border-teal-800' },
+  };
+
   const loadActivity = useCallback(async () => {
     if (!user?.id) return;
     try {
       const [journalRes, sessionsRes] = await Promise.all([
-        supabase
-          .from('journal_entries')
-          .select('id, type, content, emotion, intensity, metadata, created_at')
-          .eq('user_id', user.id)
-          .order('created_at', { ascending: false })
-          .limit(40),
-        supabase
-          .from('sessions')
-          .select('id, duration_minutes, type, created_at')
-          .eq('user_id', user.id)
-          .order('created_at', { ascending: false })
-          .limit(10)
+        supabase.from('journal_entries').select('id, type, content, emotion, intensity, metadata, created_at').eq('user_id', user.id).order('created_at', { ascending: false }).limit(40),
+        supabase.from('sessions').select('id, duration_minutes, type, created_at').eq('user_id', user.id).order('created_at', { ascending: false }).limit(10)
       ]);
 
       const entries: ActivityEntry[] = [];
@@ -244,37 +235,28 @@ const Journal: React.FC = () => {
       journalRes.data?.forEach(e => {
         if (e.type === 'checkin') {
           entries.push({
-            id: e.id,
-            type: 'checkin',
-            label: 'Check-in émotionnel',
+            id: e.id, type: 'checkin',
+            label: t.journal.checkinLabel,
             sublabel: e.emotion ? `${getEmotionEmoji(e.emotion)} ${e.emotion}${e.intensity ? ` · ${e.intensity}/10` : ''}` : undefined,
-            emoji: getEmotionEmoji(e.emotion),
-            created_at: e.created_at,
+            emoji: getEmotionEmoji(e.emotion), created_at: e.created_at,
             raw: { ...e, need: e.metadata?.need, notes: e.content }
           });
         } else {
-          const cfg = TYPE_CONFIG[e.type] || TYPE_CONFIG.journal;
+          const cfg = typeConfig[e.type as keyof typeof typeConfig] || typeConfig.journal;
           entries.push({
-            id: e.id,
-            type: e.type as any,
-            label: cfg.label,
+            id: e.id, type: e.type as any, label: cfg.label,
             sublabel: e.metadata?.title || (e.content ? e.content.slice(0, 60) + (e.content.length > 60 ? '…' : '') : undefined),
-            emoji: e.metadata?.emoji || cfg.emoji,
-            created_at: e.created_at,
-            raw: e
+            emoji: e.metadata?.emoji || cfg.emoji, created_at: e.created_at, raw: e
           });
         }
       });
 
       sessionsRes.data?.forEach(m => {
         entries.push({
-          id: m.id,
-          type: m.type === 'breathing' ? 'breathing' : 'meditation',
-          label: m.type === 'breathing' ? 'Respiration' : 'Méditation',
+          id: m.id, type: m.type === 'breathing' ? 'breathing' : 'meditation',
+          label: m.type === 'breathing' ? t.breathing.title : t.meditation.title,
           sublabel: m.duration_minutes ? `${m.duration_minutes} min` : undefined,
-          emoji: m.type === 'breathing' ? '🌬️' : '🧘',
-          created_at: m.created_at,
-          raw: m
+          emoji: m.type === 'breathing' ? '🌬️' : '🧘', created_at: m.created_at, raw: m
         });
       });
 
@@ -305,49 +287,21 @@ const Journal: React.FC = () => {
       today.setHours(0, 0, 0, 0);
       let cur = new Date(today);
       if (!byDate.has(cur.toDateString())) cur.setDate(cur.getDate() - 1);
-      while (byDate.has(cur.toDateString())) {
-        s++;
-        cur.setDate(cur.getDate() - 1);
-      }
+      while (byDate.has(cur.toDateString())) { s++; cur.setDate(cur.getDate() - 1); }
       setStreak(s);
     } catch {}
-  }, [user?.id]);
+  }, [user?.id, lang]);
 
-  useEffect(() => {
-    if (user) loadActivity();
-  }, [loadActivity, user]);
-
-  const onSaved = () => {
-    loadActivity();
-  };
+  useEffect(() => { if (user) loadActivity(); }, [loadActivity, user]);
 
   const openDetail = (entry: ActivityEntry) => {
     if (entry.type === 'meditation' || entry.type === 'breathing') return;
     const raw = entry.raw;
     if (!raw) return;
-
     if (entry.type === 'checkin') {
-      setSelectedDetail({
-        id: raw.id,
-        type: 'checkin',
-        created_at: raw.created_at,
-        emotion: raw.emotion,
-        intensity: raw.intensity,
-        need: raw.need,
-        notes: raw.notes
-      });
+      setSelectedDetail({ id: raw.id, type: 'checkin', created_at: raw.created_at, emotion: raw.emotion, intensity: raw.intensity, need: raw.need, notes: raw.notes });
     } else {
-      setSelectedDetail({
-        id: raw.id,
-        type: raw.type === 'dream' ? 'dream' : 'journal',
-        created_at: raw.created_at,
-        content: raw.content,
-        emoji: raw.metadata?.emoji,
-        title: raw.metadata?.title,
-        lucidity: raw.metadata?.lucidity,
-        recurring: raw.metadata?.recurring,
-        nightmare: raw.metadata?.nightmare
-      });
+      setSelectedDetail({ id: raw.id, type: raw.type === 'dream' ? 'dream' : 'journal', created_at: raw.created_at, content: raw.content, emoji: raw.metadata?.emoji, title: raw.metadata?.title, lucidity: raw.metadata?.lucidity, recurring: raw.metadata?.recurring, nightmare: raw.metadata?.nightmare });
     }
   };
 
@@ -357,8 +311,18 @@ const Journal: React.FC = () => {
       await supabase.from('journal_entries').delete().eq('id', selectedDetail.id).eq('user_id', user?.id);
       setSelectedDetail(null);
       setShowDeleteConfirm(false);
-      onSaved();
+      loadActivity();
     } catch {}
+  };
+
+  const formatGroupDate = (iso: string) => {
+    const d = new Date(iso);
+    const today = new Date();
+    const yesterday = new Date(today);
+    yesterday.setDate(today.getDate() - 1);
+    if (d.toDateString() === today.toDateString()) return t.common.today;
+    if (d.toDateString() === yesterday.toDateString()) return t.common.yesterday;
+    return d.toLocaleDateString(lang === 'es' ? 'es-ES' : 'fr-FR', { weekday: 'short', day: 'numeric', month: 'short' });
   };
 
   const groupByDate = (entries: ActivityEntry[]) => {
@@ -375,11 +339,11 @@ const Journal: React.FC = () => {
   const grouped = groupByDate(recentActivity);
 
   const actions = [
-    { id: 'checkin', label: 'Check-in', sublabel: 'Émotion du moment', icon: Heart, color: 'from-rose-400 to-rose-600', bg: 'bg-rose-50 dark:bg-rose-900/20', border: 'border-rose-200 dark:border-rose-800', text: 'text-rose-600 dark:text-rose-400', onClick: () => setShowCheckin(true) },
-    { id: 'journal', label: 'Journal', sublabel: 'Réflexion intime', icon: BookOpen, color: 'from-blue-400 to-blue-600', bg: 'bg-blue-50 dark:bg-blue-900/20', border: 'border-blue-200 dark:border-blue-800', text: 'text-blue-600 dark:text-blue-400', onClick: () => setShowJournal(true) },
-    { id: 'dream', label: 'Rêve', sublabel: 'Journal de nuit', icon: Moon, color: 'from-amber-400 to-amber-600', bg: 'bg-amber-50 dark:bg-amber-900/20', border: 'border-amber-200 dark:border-amber-800', text: 'text-amber-600 dark:text-amber-400', onClick: () => setShowDream(true) },
-    { id: 'breathing', label: 'Respiration', sublabel: 'Calme instantané', icon: Wind, color: 'from-teal-400 to-teal-600', bg: 'bg-teal-50 dark:bg-teal-900/20', border: 'border-teal-200 dark:border-teal-800', text: 'text-teal-600 dark:text-teal-400', onClick: () => setShowBreathing(true) },
-    { id: 'meditation', label: 'Méditation', sublabel: 'Pleine conscience', icon: Sparkles, color: 'from-jade to-forest', bg: 'bg-jade/10 dark:bg-jade/20', border: 'border-jade/30 dark:border-jade/40', text: 'text-jade', onClick: () => setShowMeditation(true) },
+    { id: 'checkin', label: t.journal.checkinLabel, sublabel: t.journal.emotionMoment, icon: Heart, color: 'from-rose-400 to-rose-600', bg: 'bg-rose-50 dark:bg-rose-900/20', border: 'border-rose-200 dark:border-rose-800', text: 'text-rose-600 dark:text-rose-400', onClick: () => setShowCheckin(true) },
+    { id: 'journal', label: t.nav.journal, sublabel: t.journal.intimateReflection, icon: BookOpen, color: 'from-blue-400 to-blue-600', bg: 'bg-blue-50 dark:bg-blue-900/20', border: 'border-blue-200 dark:border-blue-800', text: 'text-blue-600 dark:text-blue-400', onClick: () => setShowJournal(true) },
+    { id: 'dream', label: t.dreamJournal.title, sublabel: t.journal.nightJournal, icon: Moon, color: 'from-amber-400 to-amber-600', bg: 'bg-amber-50 dark:bg-amber-900/20', border: 'border-amber-200 dark:border-amber-800', text: 'text-amber-600 dark:text-amber-400', onClick: () => setShowDream(true) },
+    { id: 'breathing', label: t.breathing.title, sublabel: t.journal.instantCalm, icon: Wind, color: 'from-teal-400 to-teal-600', bg: 'bg-teal-50 dark:bg-teal-900/20', border: 'border-teal-200 dark:border-teal-800', text: 'text-teal-600 dark:text-teal-400', onClick: () => setShowBreathing(true) },
+    { id: 'meditation', label: t.meditation.title, sublabel: t.journal.mindfulness, icon: Sparkles, color: 'from-jade to-forest', bg: 'bg-jade/10 dark:bg-jade/20', border: 'border-jade/30 dark:border-jade/40', text: 'text-jade', onClick: () => setShowMeditation(true) },
   ];
 
   return (
@@ -389,14 +353,14 @@ const Journal: React.FC = () => {
         <div className="flex items-center justify-between mb-2">
           <div>
             <h1 className="text-3xl font-bold text-ink dark:text-white" style={{ fontFamily: "'Shippori Mincho', serif" }}>
-              Journal
+              {t.journal.title}
             </h1>
-            <p className="text-sm text-stone/60 dark:text-gray-500 mt-0.5">Ton espace d'introspection</p>
+            <p className="text-sm text-stone/60 dark:text-gray-500 mt-0.5">{t.journal.subtitle}</p>
           </div>
           {streak > 0 && (
             <div className="flex items-center gap-1.5 bg-gradient-to-r from-orange-500 to-rose-500 text-white px-3 py-1.5 rounded-full shadow-md">
               <Flame className="w-4 h-4" />
-              <span className="text-sm font-bold">{streak}j</span>
+              <span className="text-sm font-bold">{streak}{t.home.streakDays}</span>
             </div>
           )}
         </div>
@@ -407,26 +371,26 @@ const Journal: React.FC = () => {
           <div className="grid grid-cols-4 divide-x divide-stone/10 dark:divide-gray-700">
             <div className="text-center px-2">
               <div className="text-xl font-bold text-rose-500 mb-0.5">{weeklyStats.checkins}</div>
-              <div className="text-xs text-stone/60 dark:text-gray-500 leading-tight">Check-ins</div>
+              <div className="text-xs text-stone/60 dark:text-gray-500 leading-tight">{t.journal.checkIns}</div>
             </div>
             <div className="text-center px-2">
               <div className="text-xl font-bold text-blue-500 mb-0.5">{weeklyStats.journals}</div>
-              <div className="text-xs text-stone/60 dark:text-gray-500 leading-tight">Journaux</div>
+              <div className="text-xs text-stone/60 dark:text-gray-500 leading-tight">{t.journal.journals}</div>
             </div>
             <div className="text-center px-2">
               <div className="text-xl font-bold text-amber-500 mb-0.5">{weeklyStats.dreams}</div>
-              <div className="text-xs text-stone/60 dark:text-gray-500 leading-tight">Rêves</div>
+              <div className="text-xs text-stone/60 dark:text-gray-500 leading-tight">{t.journal.dreams}</div>
             </div>
             <div className="text-center px-2">
               <div className="text-xl font-bold text-jade mb-0.5">{weeklyStats.meditationMinutes}</div>
-              <div className="text-xs text-stone/60 dark:text-gray-500 leading-tight">Min. méd.</div>
+              <div className="text-xs text-stone/60 dark:text-gray-500 leading-tight">{t.journal.meditatedMin}</div>
             </div>
           </div>
         </div>
 
         <div>
           <h2 className="text-xs font-semibold text-stone/60 dark:text-gray-500 uppercase tracking-widest mb-3">
-            Nouvelle entrée
+            {t.journal.newEntry}
           </h2>
           <div className="grid grid-cols-2 gap-2.5">
             {actions.slice(0, 4).map(action => {
@@ -464,14 +428,13 @@ const Journal: React.FC = () => {
           </button>
         </div>
 
-        {/* Historique */}
         <div>
           <div className="flex items-center justify-between mb-3">
             <h2 className="text-xs font-semibold text-stone/60 dark:text-gray-500 uppercase tracking-widest">
-              Historique récent
+              {t.journal.recentHistory}
             </h2>
             {recentActivity.length > 0 && (
-              <span className="text-xs text-stone/40 dark:text-gray-600">{recentActivity.length} entrées</span>
+              <span className="text-xs text-stone/40 dark:text-gray-600">{recentActivity.length} {t.journal.entries}</span>
             )}
           </div>
 
@@ -480,8 +443,8 @@ const Journal: React.FC = () => {
               <div className="w-12 h-12 bg-stone/5 dark:bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-3">
                 <Plus className="w-6 h-6 text-stone/30 dark:text-gray-600" />
               </div>
-              <p className="text-sm font-medium text-ink dark:text-white mb-1">Aucune entrée encore</p>
-              <p className="text-xs text-stone/60 dark:text-gray-500">Commence par un check-in émotionnel ou un journal.</p>
+              <p className="text-sm font-medium text-ink dark:text-white mb-1">{t.journal.noEntries}</p>
+              <p className="text-xs text-stone/60 dark:text-gray-500">{t.journal.noEntriesMessage}</p>
             </div>
           ) : (
             <div className="space-y-4">
@@ -494,15 +457,12 @@ const Journal: React.FC = () => {
                   </div>
                   <div className="space-y-2">
                     {group.items.map(entry => {
-                      const cfg = TYPE_CONFIG[entry.type] || TYPE_CONFIG.journal;
+                      const cfg = typeConfig[entry.type] || typeConfig.journal;
                       const isTappable = entry.type !== 'meditation' && entry.type !== 'breathing';
 
                       return isTappable ? (
-                        <button
-                          key={entry.id}
-                          onClick={() => openDetail(entry)}
-                          className={`w-full text-left flex items-start gap-3 p-3.5 rounded-2xl ${cfg.bg} border border-stone/5 dark:border-gray-700/50 active:scale-[0.98] transition-transform group`}
-                        >
+                        <button key={entry.id} onClick={() => openDetail(entry)}
+                          className={`w-full text-left flex items-start gap-3 p-3.5 rounded-2xl ${cfg.bg} border border-stone/5 dark:border-gray-700/50 active:scale-[0.98] transition-transform group`}>
                           <div className="w-9 h-9 rounded-xl bg-white dark:bg-gray-800 flex items-center justify-center shrink-0 shadow-sm border border-stone/10 dark:border-gray-700">
                             <span className="text-lg">{entry.emoji}</span>
                           </div>
@@ -511,19 +471,14 @@ const Journal: React.FC = () => {
                               <p className={`text-sm font-semibold ${cfg.color}`}>{entry.label}</p>
                               <div className="flex items-center gap-1 shrink-0">
                                 <span className="text-xs text-stone/40 dark:text-gray-600">{formatTime(entry.created_at)}</span>
-                                <ChevronRight className="w-3.5 h-3.5 text-stone/30 dark:text-gray-600 group-hover:text-stone/60 transition-colors" />
+                                <ChevronRight className="w-3.5 h-3.5 text-stone/30 dark:text-gray-600" />
                               </div>
                             </div>
-                            {entry.sublabel && (
-                              <p className="text-xs text-stone/60 dark:text-gray-400 mt-0.5 truncate">{entry.sublabel}</p>
-                            )}
+                            {entry.sublabel && <p className="text-xs text-stone/60 dark:text-gray-400 mt-0.5 truncate">{entry.sublabel}</p>}
                           </div>
                         </button>
                       ) : (
-                        <div
-                          key={entry.id}
-                          className={`flex items-start gap-3 p-3.5 rounded-2xl ${cfg.bg} border border-stone/5 dark:border-gray-700/50`}
-                        >
+                        <div key={entry.id} className={`flex items-start gap-3 p-3.5 rounded-2xl ${cfg.bg} border border-stone/5 dark:border-gray-700/50`}>
                           <div className="w-9 h-9 rounded-xl bg-white dark:bg-gray-800 flex items-center justify-center shrink-0 shadow-sm border border-stone/10 dark:border-gray-700">
                             <span className="text-lg">{entry.emoji}</span>
                           </div>
@@ -532,9 +487,7 @@ const Journal: React.FC = () => {
                               <p className={`text-sm font-semibold ${cfg.color}`}>{entry.label}</p>
                               <span className="text-xs text-stone/40 dark:text-gray-600 shrink-0">{formatTime(entry.created_at)}</span>
                             </div>
-                            {entry.sublabel && (
-                              <p className="text-xs text-stone/60 dark:text-gray-400 mt-0.5 truncate">{entry.sublabel}</p>
-                            )}
+                            {entry.sublabel && <p className="text-xs text-stone/60 dark:text-gray-400 mt-0.5 truncate">{entry.sublabel}</p>}
                           </div>
                         </div>
                       );
@@ -551,9 +504,9 @@ const Journal: React.FC = () => {
             <div className="flex items-start gap-3">
               <Star className="w-5 h-5 text-jade shrink-0 mt-0.5" />
               <div>
-                <p className="text-sm font-semibold text-ink dark:text-white mb-1">Ton chemin</p>
+                <p className="text-sm font-semibold text-ink dark:text-white mb-1">{t.journal.yourPath}</p>
                 <p className="text-xs text-stone/70 dark:text-gray-400 leading-relaxed italic">
-                  "Chaque entrée dans ce journal est une graine plantée pour ta croissance intérieure."
+                  "{t.journal.pathQuote}"
                 </p>
               </div>
             </div>
@@ -561,18 +514,14 @@ const Journal: React.FC = () => {
         )}
       </div>
 
-      {showCheckin && <CheckinMobile onClose={() => setShowCheckin(false)} onSave={() => { setShowCheckin(false); onSaved(); }} />}
-      {showJournal && <JournalMobile onClose={() => setShowJournal(false)} onSave={() => { setShowJournal(false); onSaved(); }} />}
+      {showCheckin && <CheckinMobile onClose={() => setShowCheckin(false)} onSave={() => { setShowCheckin(false); loadActivity(); }} />}
+      {showJournal && <JournalMobile onClose={() => setShowJournal(false)} onSave={() => { setShowJournal(false); loadActivity(); }} />}
       {showMeditation && <MeditationMobile onClose={() => setShowMeditation(false)} />}
-      {showDream && <DreamJournalMobile onClose={() => setShowDream(false)} onSave={() => { setShowDream(false); onSaved(); }} />}
-      {showBreathing && <BreathingMobile onClose={() => setShowBreathing(false)} onComplete={() => { setShowBreathing(false); onSaved(); }} />}
+      {showDream && <DreamJournalMobile onClose={() => setShowDream(false)} onSave={() => { setShowDream(false); loadActivity(); }} />}
+      {showBreathing && <BreathingMobile onClose={() => setShowBreathing(false)} onComplete={() => { setShowBreathing(false); loadActivity(); }} />}
 
       {selectedDetail && (
-        <DetailView
-          detail={selectedDetail}
-          onBack={() => setSelectedDetail(null)}
-          onDelete={() => setShowDeleteConfirm(true)}
-        />
+        <DetailView detail={selectedDetail} onBack={() => setSelectedDetail(null)} onDelete={() => setShowDeleteConfirm(true)} t={t} lang={lang} />
       )}
 
       {showDeleteConfirm && (
@@ -583,23 +532,17 @@ const Journal: React.FC = () => {
               <Trash2 className="w-8 h-8 text-red-500" />
             </div>
             <h3 className="text-xl font-bold text-ink dark:text-white text-center mb-2" style={{ fontFamily: "'Shippori Mincho', serif" }}>
-              Supprimer cette entrée ?
+              {t.journal.deleteConfirm}
             </h3>
             <p className="text-sm text-stone dark:text-gray-400 text-center mb-6 leading-relaxed">
-              Elle sera déplacée dans la corbeille et pourra être restaurée depuis l'historique.
+              {t.journal.deleteNote}
             </p>
             <div className="flex gap-3">
-              <button
-                onClick={() => setShowDeleteConfirm(false)}
-                className="flex-1 py-3.5 rounded-2xl border border-stone/20 dark:border-gray-700 text-ink dark:text-white font-medium active:scale-95 transition-transform"
-              >
-                Annuler
+              <button onClick={() => setShowDeleteConfirm(false)} className="flex-1 py-3.5 rounded-2xl border border-stone/20 dark:border-gray-700 text-ink dark:text-white font-medium active:scale-95 transition-transform">
+                {t.common.cancel}
               </button>
-              <button
-                onClick={deleteEntry}
-                className="flex-1 py-3.5 rounded-2xl bg-red-500 text-white font-medium active:scale-95 transition-transform"
-              >
-                Supprimer
+              <button onClick={deleteEntry} className="flex-1 py-3.5 rounded-2xl bg-red-500 text-white font-medium active:scale-95 transition-transform">
+                {t.common.delete}
               </button>
             </div>
           </div>

@@ -5,6 +5,7 @@ import { useCreateJournal } from '../hooks/useJournals';
 import ShareToCommunityButton from './ShareToCommuityButton';
 import { JournalActivity } from '../lib/supabase';
 import PhotoUpload from './PhotoUpload';
+import { useI18n } from '../i18n';
 
 interface JournalMobileProps {
   onClose: () => void;
@@ -13,8 +14,10 @@ interface JournalMobileProps {
 
 const JournalMobile: React.FC<JournalMobileProps> = ({ onClose, onSave }) => {
   const { user } = useAuth();
+  const { t } = useI18n();
   const createJournalMutation = useCreateJournal();
   const [content, setContent] = useState('');
+  const [title, setTitle] = useState('');
   const [emotion, setEmotion] = useState('');
   const [photoUrl, setPhotoUrl] = useState('');
   const [isUploading, setIsUploading] = useState(false);
@@ -97,7 +100,7 @@ const JournalMobile: React.FC<JournalMobileProps> = ({ onClose, onSave }) => {
               onClick={onClose}
               className="w-full px-6 py-3 border-2 border-stone/20 dark:border-gray-600 text-stone dark:text-gray-300 rounded-full active:scale-95 transition-transform"
             >
-              Terminer
+              {t.common.cancel}
             </button>
           </div>
         </div>
@@ -107,7 +110,6 @@ const JournalMobile: React.FC<JournalMobileProps> = ({ onClose, onSave }) => {
 
   return (
     <div className="fixed inset-0 bg-gradient-to-br from-sand via-pearl to-sand/50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900/50 z-50 flex flex-col animate-slide-up transition-colors duration-300">
-      {/* Header */}
       <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-lg border-b border-stone/10 dark:border-gray-700 px-4 py-4 flex items-center justify-between shrink-0 transition-colors duration-300">
         <button
           onClick={onClose}
@@ -119,7 +121,7 @@ const JournalMobile: React.FC<JournalMobileProps> = ({ onClose, onSave }) => {
         <div className="flex items-center gap-2">
           <Moon className="w-5 h-5 text-vermilion" />
           <span className="font-semibold text-ink dark:text-white transition-colors duration-300" style={{ fontFamily: "'Shippori Mincho', serif" }}>
-            Journal
+            {t.journalModal.title}
           </span>
         </div>
 
@@ -129,20 +131,31 @@ const JournalMobile: React.FC<JournalMobileProps> = ({ onClose, onSave }) => {
           className="flex items-center gap-1 px-4 py-2 bg-gradient-to-r from-vermilion to-sunset text-white rounded-full font-medium active:scale-95 transition-transform disabled:opacity-50"
         >
           <Send className="w-4 h-4" />
-          Enregistrer
+          {t.common.save}
         </button>
       </div>
 
-      {/* Content */}
       <div className="flex-1 overflow-y-auto px-4 pt-6 pb-8">
-        {/* Prompt */}
         <div className="bg-vermilion/5 dark:bg-vermilion/10 rounded-2xl p-4 mb-6 border border-vermilion/10 dark:border-vermilion/20 transition-colors duration-300">
           <p className="text-ink dark:text-white text-center italic transition-colors duration-300" style={{ fontFamily: "'Shippori Mincho', serif" }}>
             {currentPrompt}
           </p>
         </div>
 
-        {/* Emotion Selection */}
+        <div className="mb-6">
+          <label className="block text-sm font-medium text-ink dark:text-white mb-3 transition-colors duration-300">
+            {t.journalModal.titleLabel}
+          </label>
+          <input
+            type="text"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            placeholder={t.journalModal.titlePlaceholder}
+            className="w-full px-4 py-3 bg-white dark:bg-gray-700 border border-stone/20 dark:border-gray-600 rounded-2xl focus:border-vermilion dark:focus:border-red-400 focus:ring-2 focus:ring-vermilion/20 dark:focus:ring-red-400/20 transition-all text-ink dark:text-white"
+            style={{ fontSize: '16px' }}
+          />
+        </div>
+
         <div className="mb-6">
           <label className="block text-sm font-medium text-ink dark:text-white mb-3 transition-colors duration-300">
             Ambiance du moment
@@ -170,7 +183,6 @@ const JournalMobile: React.FC<JournalMobileProps> = ({ onClose, onSave }) => {
           </div>
         </div>
 
-        {/* Text Area */}
         <div className="mb-6">
           <label className="block text-sm font-medium text-ink dark:text-white mb-3 transition-colors duration-300">
             Ton journal du jour
@@ -178,7 +190,7 @@ const JournalMobile: React.FC<JournalMobileProps> = ({ onClose, onSave }) => {
           <textarea
             value={content}
             onChange={(e) => setContent(e.target.value)}
-            placeholder="Écris librement tes pensées, tes ressentis, tes observations..."
+            placeholder={t.journalModal.placeholder}
             className="w-full min-h-[300px] px-4 py-4 bg-white dark:bg-gray-700 border border-stone/20 dark:border-gray-600 rounded-2xl focus:border-vermilion dark:focus:border-red-400 focus:ring-2 focus:ring-vermilion/20 dark:focus:ring-red-400/20 transition-all resize-none text-ink dark:text-white"
             style={{ fontSize: '16px' }}
             autoFocus
@@ -195,7 +207,6 @@ const JournalMobile: React.FC<JournalMobileProps> = ({ onClose, onSave }) => {
           </div>
         </div>
 
-        {/* Photo Upload */}
         <div className="mb-6">
           <label className="block text-sm font-medium text-ink mb-3 flex items-center gap-2">
             <Camera className="w-4 h-4" />
@@ -209,7 +220,6 @@ const JournalMobile: React.FC<JournalMobileProps> = ({ onClose, onSave }) => {
           />
         </div>
 
-        {/* Tips */}
         <div className="bg-jade/5 dark:bg-jade/10 rounded-2xl p-4 border border-jade/10 dark:border-jade/20 transition-colors duration-300">
           <h3 className="text-sm font-semibold text-ink dark:text-white mb-2 transition-colors duration-300">💡 Conseils</h3>
           <ul className="text-xs text-stone dark:text-gray-300 space-y-1 transition-colors duration-300">
@@ -220,7 +230,6 @@ const JournalMobile: React.FC<JournalMobileProps> = ({ onClose, onSave }) => {
         </div>
       </div>
 
-      {/* Bottom Action */}
       <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-lg border-t border-stone/10 dark:border-gray-700 px-4 py-4 shrink-0 transition-colors duration-300">
         <button
           onClick={handleSubmit}
@@ -228,11 +237,11 @@ const JournalMobile: React.FC<JournalMobileProps> = ({ onClose, onSave }) => {
           className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-vermilion to-sunset text-white px-6 py-4 rounded-full font-semibold shadow-lg active:scale-95 transition-transform disabled:opacity-50"
         >
           {createJournalMutation.isPending ? (
-            <>Enregistrement...</>
+            <>{t.common.saving}</>
           ) : (
             <>
               <Send className="w-5 h-5" />
-              Enregistrer mon journal
+              {t.common.save}
             </>
           )}
         </button>

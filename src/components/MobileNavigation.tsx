@@ -1,8 +1,10 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Home, GraduationCap, BookOpen, Users, User } from 'lucide-react';
+import { useI18n } from '../i18n';
 
 const MobileNavigation: React.FC = () => {
+  const { t } = useI18n();
   const location = useLocation();
   const [lastTap, setLastTap] = React.useState(0);
 
@@ -12,7 +14,7 @@ const MobileNavigation: React.FC = () => {
       navigator.vibrate(25);
     }
   };
-  
+
   // Handle double-tap to refresh (addictive feature)
   const handleNavTap = (path: string) => {
     const now = Date.now();
@@ -26,11 +28,11 @@ const MobileNavigation: React.FC = () => {
   };
 
   const navItems = [
-    { path: '/', label: 'Accueil', icon: Home },
-    { path: '/school', label: 'École', icon: GraduationCap },
-    { path: '/journal', label: 'Journal', icon: BookOpen },
-    { path: '/community', label: 'Communauté', icon: Users },
-    { path: '/profile', label: 'Profil', icon: User },
+    { path: '/', label: t.nav.home, icon: Home },
+    { path: '/school', label: t.nav.school, icon: GraduationCap },
+    { path: '/journal', label: t.nav.journal, icon: BookOpen },
+    { path: '/community', label: t.nav.community, icon: Users },
+    { path: '/profile', label: t.nav.profile, icon: User },
   ];
 
   const isActive = (path: string) => {
@@ -44,7 +46,7 @@ const MobileNavigation: React.FC = () => {
         {navItems.map((item) => {
           const Icon = item.icon;
           const active = isActive(item.path);
-          
+
           return (
             <Link
               key={item.path}

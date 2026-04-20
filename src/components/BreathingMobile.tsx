@@ -3,6 +3,7 @@ import { X, Wind, Play, Pause, ChevronRight, Check, RotateCcw } from 'lucide-rea
 import { useAuth } from '../hooks/useAuth';
 import { useAudioStore } from '../stores/audioStore';
 import { createBreathingSession } from '../lib/supabase';
+import { useI18n } from '../i18n';
 
 interface BreathingMobileProps {
   onClose: () => void;
@@ -93,6 +94,7 @@ const EXERCISES: Exercise[] = [
 
 const BreathingMobile: React.FC<BreathingMobileProps> = ({ onClose, onComplete }) => {
   const { user } = useAuth();
+  const { t } = useI18n();
   const { soundEnabled } = useAudioStore();
 
   const [view, setView] = useState<'select' | 'active' | 'success'>('select');
@@ -243,7 +245,7 @@ const BreathingMobile: React.FC<BreathingMobileProps> = ({ onClose, onComplete }
         </div>
 
         <h2 className="text-2xl font-bold text-ink dark:text-white mb-2" style={{ fontFamily: "'Shippori Mincho', serif" }}>
-          Exercice terminé
+          {t.breathing.finish}
         </h2>
         <p className="text-stone dark:text-gray-400 text-sm mb-2">
           {totalCycles} cycles de {exercise.name}
@@ -262,7 +264,7 @@ const BreathingMobile: React.FC<BreathingMobileProps> = ({ onClose, onComplete }
             onClick={() => { setPhase(0); setCycle(0); setView('select'); }}
             className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-teal-500 to-emerald-600 text-white py-4 rounded-full font-semibold shadow-lg active:scale-95 transition-transform"
           >
-            Répéter
+            {t.breathing.resume}
             <RotateCcw className="w-4 h-4" />
           </button>
           <button
@@ -298,7 +300,6 @@ const BreathingMobile: React.FC<BreathingMobileProps> = ({ onClose, onComplete }
           </button>
         </div>
 
-        {/* Progress bar cycles */}
         <div className="px-5 mb-4">
           <div className="flex gap-1">
             {Array.from({ length: totalCycles }).map((_, i) => (
@@ -311,10 +312,8 @@ const BreathingMobile: React.FC<BreathingMobileProps> = ({ onClose, onComplete }
           </div>
         </div>
 
-        {/* Main breathing circle */}
         <div className="flex-1 flex flex-col items-center justify-center">
           <div className="relative w-72 h-72 flex items-center justify-center">
-            {/* Outer ring (progress) */}
             <svg className="absolute inset-0 w-full h-full -rotate-90" viewBox="0 0 288 288">
               <circle cx="144" cy="144" r="130" fill="none" stroke="rgba(255,255,255,0.05)" strokeWidth="4" />
               <circle
@@ -329,7 +328,6 @@ const BreathingMobile: React.FC<BreathingMobileProps> = ({ onClose, onComplete }
               />
             </svg>
 
-            {/* Breathing circle */}
             <div
               className="w-52 h-52 rounded-full flex flex-col items-center justify-center"
               style={{
@@ -349,16 +347,19 @@ const BreathingMobile: React.FC<BreathingMobileProps> = ({ onClose, onComplete }
             </div>
           </div>
 
-          {/* Phase label */}
           <div className="mt-8 text-center">
-            <p className="text-white/50 text-sm font-medium uppercase tracking-widest">{currentPhase.label}</p>
+            <p className="text-white/50 text-sm font-medium uppercase tracking-widest">
+              {currentPhase.type === 'inhale' ? t.breathing.inhale
+                : currentPhase.type === 'hold' ? t.breathing.hold
+                : currentPhase.type === 'exhale' ? t.breathing.exhale
+                : currentPhase.label}
+            </p>
             {isPaused && (
               <p className="text-white/30 text-xs mt-2">En pause — appuie pour reprendre</p>
             )}
           </div>
         </div>
 
-        {/* Phases indicators */}
         <div className="px-8 pb-8">
           <div className="flex justify-center gap-3">
             {exercise.phases.map((p, i) => (
@@ -387,7 +388,7 @@ const BreathingMobile: React.FC<BreathingMobileProps> = ({ onClose, onComplete }
         <div className="flex items-center gap-2">
           <Wind className="w-4 h-4 text-teal-600 dark:text-teal-400" />
           <span className="font-semibold text-ink dark:text-white text-sm" style={{ fontFamily: "'Shippori Mincho', serif" }}>
-            Respiration
+            {t.breathing.title}
           </span>
         </div>
         <div className="w-10" />

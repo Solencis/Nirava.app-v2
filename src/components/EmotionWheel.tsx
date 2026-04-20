@@ -1,6 +1,9 @@
 import React from 'react';
+import { useI18n } from '../i18n';
 
 const EmotionWheel: React.FC = () => {
+  const { t } = useI18n();
+
   const emotions = [
     {
       name: 'Colère',
@@ -38,18 +41,18 @@ const EmotionWheel: React.FC = () => {
     <div className="bg-white/90 backdrop-blur-sm rounded-2xl p-6 shadow-soft border border-stone/10">
       <div className="flex items-center mb-6">
         <span className="text-2xl mr-3">🌈</span>
-        <h3 
+        <h3
           className="text-xl font-bold text-ink"
           style={{ fontFamily: "'Shippori Mincho', serif" }}
         >
-          Roue des émotions
+          {t.emotionWheel.title}
         </h3>
       </div>
-      
+
       <p className="text-stone mb-6 font-light leading-relaxed">
-        Voici quelques émotions de base et leurs nuances. Utilise-les pour mieux identifier ce que tu ressens.
+        {t.emotionWheel.desc}
       </p>
-      
+
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {emotions.map((emotion, index) => (
           <div
@@ -65,7 +68,7 @@ const EmotionWheel: React.FC = () => {
           </div>
         ))}
       </div>
-      
+
       <div className="mt-6 p-4 bg-jade/5 rounded-xl border border-jade/10">
         <p className="text-jade text-sm text-center font-light">
           💡 <strong>Astuce :</strong> Il n'y a pas de "bonne" ou "mauvaise" émotion. Chacune porte un message précieux.

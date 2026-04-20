@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Mail, MessageCircle, Send, CheckCircle } from 'lucide-react';
+import { useI18n } from '../i18n';
 
 export default function Contact() {
+  const { t } = useI18n();
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -44,11 +46,11 @@ export default function Contact() {
           <div className="flex items-center justify-center gap-2 mb-4">
             <MessageCircle className="w-10 h-10 text-emerald-600" />
             <h1 className="text-4xl md:text-5xl font-bold text-gray-900">
-              Contactez-nous
+              {t.contact.title}
             </h1>
           </div>
           <p className="text-xl text-gray-600">
-            Une question, un besoin d'aide ? Nous sommes là pour vous
+            {t.contact.subtitle}
           </p>
         </motion.div>
 
@@ -61,10 +63,10 @@ export default function Contact() {
           >
             <Mail className="w-12 h-12 text-emerald-600 mb-4" />
             <h3 className="text-2xl font-bold text-gray-900 mb-2">
-              Email
+              {t.contact.emailTitle}
             </h3>
             <p className="text-gray-600 mb-4">
-              Contactez-nous par email pour toute question
+              {t.contact.emailDesc}
             </p>
             <a
               href="mailto:contact@nirava.earth"
@@ -82,13 +84,13 @@ export default function Contact() {
           >
             <MessageCircle className="w-12 h-12 text-emerald-600 mb-4" />
             <h3 className="text-2xl font-bold text-gray-900 mb-2">
-              Support
+              {t.contact.supportTitle}
             </h3>
             <p className="text-gray-600 mb-4">
-              Temps de réponse moyen : 24h
+              {t.contact.supportDesc}
             </p>
             <p className="text-gray-500 text-sm">
-              Du lundi au vendredi, 9h-18h
+              {t.contact.supportHours}
             </p>
           </motion.div>
         </div>
@@ -100,7 +102,7 @@ export default function Contact() {
           className="bg-white rounded-2xl shadow-lg p-8"
         >
           <h2 className="text-2xl font-bold text-gray-900 mb-6">
-            Envoyez-nous un message
+            {t.contact.formTitle}
           </h2>
 
           {isSubmitted ? (
@@ -111,17 +113,17 @@ export default function Contact() {
             >
               <CheckCircle className="w-16 h-16 text-emerald-600 mx-auto mb-4" />
               <h3 className="text-2xl font-bold text-gray-900 mb-2">
-                Message envoyé !
+                {t.contact.successTitle}
               </h3>
               <p className="text-gray-600">
-                Nous vous répondrons dans les plus brefs délais
+                {t.contact.successMessage}
               </p>
             </motion.div>
           ) : (
             <form onSubmit={handleSubmit} className="space-y-6">
               <div>
                 <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
-                  Nom complet *
+                  {t.contact.fullName}
                 </label>
                 <input
                   type="text"
@@ -131,13 +133,13 @@ export default function Contact() {
                   value={formData.name}
                   onChange={handleChange}
                   className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
-                  placeholder="Votre nom"
+                  placeholder={t.contact.fullNamePlaceholder}
                 />
               </div>
 
               <div>
                 <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
-                  Email *
+                  {t.contact.emailLabel}
                 </label>
                 <input
                   type="email"
@@ -147,13 +149,13 @@ export default function Contact() {
                   value={formData.email}
                   onChange={handleChange}
                   className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
-                  placeholder="votre@email.com"
+                  placeholder={t.contact.emailPlaceholder}
                 />
               </div>
 
               <div>
                 <label htmlFor="subject" className="block text-sm font-medium text-gray-700 mb-2">
-                  Sujet *
+                  {t.contact.subjectLabel}
                 </label>
                 <select
                   id="subject"
@@ -163,18 +165,16 @@ export default function Contact() {
                   onChange={handleChange}
                   className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
                 >
-                  <option value="">Sélectionnez un sujet</option>
-                  <option value="support">Support technique</option>
-                  <option value="billing">Facturation</option>
-                  <option value="feedback">Retour d'expérience</option>
-                  <option value="partnership">Partenariat</option>
-                  <option value="other">Autre</option>
+                  <option value="">{t.contact.subjectPlaceholder}</option>
+                  {t.contact.subjects.map((subject: string) => (
+                    <option key={subject} value={subject}>{subject}</option>
+                  ))}
                 </select>
               </div>
 
               <div>
                 <label htmlFor="message" className="block text-sm font-medium text-gray-700 mb-2">
-                  Message *
+                  {t.contact.messageLabel}
                 </label>
                 <textarea
                   id="message"
@@ -184,7 +184,7 @@ export default function Contact() {
                   onChange={handleChange}
                   rows={6}
                   className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-emerald-500 focus:border-transparent resize-none"
-                  placeholder="Décrivez votre demande..."
+                  placeholder={t.contact.messagePlaceholder}
                 />
               </div>
 
@@ -194,11 +194,11 @@ export default function Contact() {
                 className="w-full bg-emerald-600 text-white py-3 px-6 rounded-xl font-semibold hover:bg-emerald-700 transition-colors flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {isLoading ? (
-                  <>Envoi en cours...</>
+                  <>{t.contact.sending}</>
                 ) : (
                   <>
                     <Send className="w-5 h-5" />
-                    Envoyer le message
+                    {t.contact.send}
                   </>
                 )}
               </button>
@@ -213,16 +213,16 @@ export default function Contact() {
           className="mt-12 text-center"
         >
           <h3 className="text-xl font-bold text-gray-900 mb-4">
-            Questions fréquentes
+            {t.contact.faqTitle}
           </h3>
           <p className="text-gray-600 mb-4">
-            Consultez notre FAQ pour trouver rapidement des réponses à vos questions
+            {t.contact.faqDesc}
           </p>
           <a
             href="/about"
             className="inline-block text-emerald-600 font-semibold hover:text-emerald-700"
           >
-            Visiter la page À propos →
+            {t.contact.faqLink}
           </a>
         </motion.div>
       </div>

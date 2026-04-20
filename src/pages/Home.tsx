@@ -10,8 +10,9 @@ import MeditationMobile from '../components/MeditationMobile';
 import BreathingMobile from '../components/BreathingMobile';
 import JournalMobile from '../components/JournalMobile';
 import { supabase } from '../lib/supabase';
+import { useI18n } from '../i18n';
 
-const GREETINGS = [
+const GREETINGS_FR = [
   'Comment vas-tu en ce moment ?',
   'Prends un instant pour toi.',
   'Respire. Tu es ici.',
@@ -19,8 +20,17 @@ const GREETINGS = [
   'Ton bien-être est une priorité.',
 ];
 
+const GREETINGS_ES = [
+  '¿Cómo estás en este momento?',
+  'Tómate un instante para ti.',
+  'Respira. Estás aquí.',
+  'Cada momento es una oportunidad.',
+  'Tu bienestar es una prioridad.',
+];
+
 const Home: React.FC = () => {
   const { user } = useAuth();
+  const { t, lang } = useI18n();
   const { data: checkinsData } = useCheckins();
   const { data: journalsData } = useJournals();
   const { data: meditationMinutes } = useMeditationWeeklyStats();
@@ -30,8 +40,11 @@ const Home: React.FC = () => {
   const [showBreathing, setShowBreathing] = useState(false);
   const [showJournal, setShowJournal] = useState(false);
   const [userStreak, setUserStreak] = useState(0);
-  const [greeting] = useState(() => GREETINGS[Math.floor(Math.random() * GREETINGS.length)]);
   const [weeklyStats, setWeeklyStats] = useState({ checkins: 0, journals: 0, meditation: 0 });
+
+  const greetings = lang === 'es' ? GREETINGS_ES : GREETINGS_FR;
+  const [greetingIndex] = useState(() => Math.floor(Math.random() * greetings.length));
+  const greeting = greetings[greetingIndex];
 
   const loadStats = useCallback(async () => {
     if (!user?.id) return;
@@ -81,9 +94,9 @@ const Home: React.FC = () => {
 
   const getTimeOfDay = () => {
     const h = new Date().getHours();
-    if (h < 12) return { label: 'Bonjour', sub: 'Commence ta journée avec intention' };
-    if (h < 18) return { label: 'Bon après-midi', sub: 'Un moment de pause te fera du bien' };
-    return { label: 'Bonsoir', sub: 'Prends soin de toi ce soir' };
+    if (h < 12) return { label: t.home.greetingMorning, sub: t.home.subtitleMorning };
+    if (h < 18) return { label: t.home.greetingAfternoon, sub: t.home.subtitleAfternoon };
+    return { label: t.home.greetingEvening, sub: t.home.subtitleEvening };
   };
 
   const timeOfDay = getTimeOfDay();
@@ -92,8 +105,8 @@ const Home: React.FC = () => {
   const actions = [
     {
       id: 'checkin',
-      label: 'Check-in',
-      sublabel: 'Émotion du moment',
+      label: t.home.checkIn,
+      sublabel: t.home.checkInSub,
       icon: Heart,
       color: 'from-rose-400 to-rose-600',
       bg: 'bg-rose-50 dark:bg-rose-900/20',
@@ -108,8 +121,8 @@ const Home: React.FC = () => {
     },
     {
       id: 'breathing',
-      label: 'Respiration',
-      sublabel: 'Calme instantané',
+      label: t.home.breathing,
+      sublabel: t.home.breathingSub,
       icon: Wind,
       color: 'from-teal-400 to-teal-600',
       bg: 'bg-teal-50 dark:bg-teal-900/20',
@@ -120,8 +133,8 @@ const Home: React.FC = () => {
     },
     {
       id: 'meditation',
-      label: 'Méditation',
-      sublabel: 'Recentre ton esprit',
+      label: t.home.meditation,
+      sublabel: t.home.meditationSub,
       icon: Sparkles,
       color: 'from-amber-400 to-amber-600',
       bg: 'bg-amber-50 dark:bg-amber-900/20',
@@ -132,8 +145,8 @@ const Home: React.FC = () => {
     },
     {
       id: 'journal',
-      label: 'Journal',
-      sublabel: 'Exprime-toi librement',
+      label: t.home.journal,
+      sublabel: t.home.journalSub,
       icon: BookOpen,
       color: 'from-blue-400 to-blue-600',
       bg: 'bg-blue-50 dark:bg-blue-900/20',
@@ -151,7 +164,6 @@ const Home: React.FC = () => {
   return (
     <div className="min-h-screen bg-gradient-to-b from-stone-50 via-white to-stone-50 dark:from-gray-950 dark:via-gray-900 dark:to-gray-950 pb-28">
 
-      {/* Header hero */}
       <div className="relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-jade/5 via-transparent to-wasabi/5 dark:from-jade/10 dark:to-wasabi/10" />
         <div className="px-5 pt-12 pb-8 relative">
@@ -159,7 +171,7 @@ const Home: React.FC = () => {
             <div>
               <p className="text-sm font-medium text-stone dark:text-gray-400 mb-1">{timeOfDay.label}{firstName ? `, ${firstName}` : ''}</p>
               <h1 className="text-3xl font-bold text-ink dark:text-white leading-tight" style={{ fontFamily: "'Shippori Mincho', serif" }}>
-                Nirava
+                {t.home.appName}
               </h1>
               <p className="text-sm text-stone/70 dark:text-gray-500 mt-1">{timeOfDay.sub}</p>
             </div>
@@ -167,12 +179,11 @@ const Home: React.FC = () => {
             {userStreak > 0 && (
               <div className="flex items-center gap-1.5 bg-gradient-to-r from-orange-500 to-rose-500 text-white px-3 py-1.5 rounded-full shadow-md">
                 <Flame className="w-4 h-4" />
-                <span className="text-sm font-bold">{userStreak}j</span>
+                <span className="text-sm font-bold">{userStreak}{t.home.streakDays}</span>
               </div>
             )}
           </div>
 
-          {/* Citation du moment */}
           <div className="bg-white/80 dark:bg-gray-800/60 backdrop-blur border border-stone/10 dark:border-gray-700 rounded-2xl p-4">
             <p className="text-sm italic text-stone dark:text-gray-400 text-center leading-relaxed">
               "{greeting}"
@@ -183,10 +194,9 @@ const Home: React.FC = () => {
 
       {user ? (
         <div className="px-5 space-y-6">
-          {/* Actions principales */}
           <div>
             <h2 className="text-xs font-semibold text-stone/60 dark:text-gray-500 uppercase tracking-widest mb-3">
-              Pratiques du jour
+              {t.home.practicesTitle}
             </h2>
             <div className="grid grid-cols-2 gap-3">
               {actions.map((action) => {
@@ -215,30 +225,28 @@ const Home: React.FC = () => {
             </div>
           </div>
 
-          {/* Stats hebdomadaires */}
           <div>
             <h2 className="text-xs font-semibold text-stone/60 dark:text-gray-500 uppercase tracking-widest mb-3">
-              Cette semaine
+              {t.home.thisWeek}
             </h2>
             <div className="bg-white dark:bg-gray-800/80 border border-stone/10 dark:border-gray-700 rounded-2xl p-4 shadow-sm">
               <div className="grid grid-cols-3 divide-x divide-stone/10 dark:divide-gray-700">
                 <div className="text-center px-2">
                   <div className="text-2xl font-bold text-rose-500 mb-1">{weeklyStats.checkins}</div>
-                  <div className="text-xs text-stone/60 dark:text-gray-500 leading-tight">Check-ins</div>
+                  <div className="text-xs text-stone/60 dark:text-gray-500 leading-tight">{t.home.checkIns}</div>
                 </div>
                 <div className="text-center px-2">
                   <div className="text-2xl font-bold text-amber-500 mb-1">{weeklyStats.meditation}</div>
-                  <div className="text-xs text-stone/60 dark:text-gray-500 leading-tight">Min. médités</div>
+                  <div className="text-xs text-stone/60 dark:text-gray-500 leading-tight">{t.home.meditatedMin}</div>
                 </div>
                 <div className="text-center px-2">
                   <div className="text-2xl font-bold text-blue-500 mb-1">{weeklyStats.journals}</div>
-                  <div className="text-xs text-stone/60 dark:text-gray-500 leading-tight">Journaux</div>
+                  <div className="text-xs text-stone/60 dark:text-gray-500 leading-tight">{t.home.journals}</div>
                 </div>
               </div>
             </div>
           </div>
 
-          {/* Liens rapides */}
           <div className="grid grid-cols-2 gap-3">
             <Link
               to="/school"
@@ -248,8 +256,8 @@ const Home: React.FC = () => {
                 <GraduationCap className="w-5 h-5 text-jade" />
               </div>
               <div>
-                <div className="text-sm font-semibold text-ink dark:text-white">École</div>
-                <div className="text-xs text-stone/60 dark:text-gray-500">Modules guidés</div>
+                <div className="text-sm font-semibold text-ink dark:text-white">{t.home.school}</div>
+                <div className="text-xs text-stone/60 dark:text-gray-500">{t.home.schoolSub}</div>
               </div>
               <ArrowRight className="w-4 h-4 text-jade ml-auto" />
             </Link>
@@ -262,21 +270,20 @@ const Home: React.FC = () => {
                 <Volume2 className="w-5 h-5 text-teal-600 dark:text-teal-400" />
               </div>
               <div>
-                <div className="text-sm font-semibold text-ink dark:text-white">Sons</div>
-                <div className="text-xs text-stone/60 dark:text-gray-500">Ambiances</div>
+                <div className="text-sm font-semibold text-ink dark:text-white">{t.home.sounds}</div>
+                <div className="text-xs text-stone/60 dark:text-gray-500">{t.home.soundsSub}</div>
               </div>
               <ArrowRight className="w-4 h-4 text-teal-600 dark:text-teal-400 ml-auto" />
             </Link>
           </div>
 
-          {/* Tip du jour */}
           <div className="bg-gradient-to-br from-jade/5 to-wasabi/5 dark:from-jade/10 dark:to-wasabi/10 border border-jade/20 dark:border-jade/30 rounded-2xl p-4">
             <div className="flex items-start gap-3">
               <Moon className="w-5 h-5 text-jade shrink-0 mt-0.5" />
               <div>
-                <p className="text-sm font-semibold text-ink dark:text-white mb-1">Conseil du jour</p>
+                <p className="text-sm font-semibold text-ink dark:text-white mb-1">{t.home.tipTitle}</p>
                 <p className="text-xs text-stone/70 dark:text-gray-400 leading-relaxed">
-                  Commence par 3 respirations profondes avant chaque activité. Cela active ton système nerveux parasympathique et réduit l'anxiété en quelques secondes.
+                  {t.home.tipText}
                 </p>
               </div>
             </div>
@@ -289,10 +296,10 @@ const Home: React.FC = () => {
           </div>
           <div>
             <h2 className="text-2xl font-bold text-ink dark:text-white mb-2" style={{ fontFamily: "'Shippori Mincho', serif" }}>
-              Bienvenue dans Nirava
+              {t.home.welcomeTitle}
             </h2>
             <p className="text-stone dark:text-gray-400 text-sm leading-relaxed max-w-xs mx-auto">
-              Ton compagnon pour calmer l'anxiété, méditer et explorer ton monde intérieur.
+              {t.home.welcomeSub}
             </p>
           </div>
 
@@ -301,14 +308,14 @@ const Home: React.FC = () => {
               to="/auth"
               className="flex items-center justify-center gap-2 w-full bg-gradient-to-r from-jade to-forest text-white py-4 rounded-full font-semibold shadow-lg shadow-jade/30 active:scale-95 transition-transform"
             >
-              Commencer
+              {t.home.start}
               <ArrowRight className="w-5 h-5" />
             </Link>
             <Link
               to="/onboarding"
               className="flex items-center justify-center w-full border-2 border-stone/20 dark:border-gray-700 text-stone dark:text-gray-400 py-3.5 rounded-full font-medium active:scale-95 transition-transform"
             >
-              En savoir plus
+              {t.home.learnMore}
             </Link>
           </div>
         </div>

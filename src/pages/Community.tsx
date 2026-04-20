@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import { supabase, Post, Profile } from '../lib/supabase';
 import { useAuth } from '../hooks/useAuth';
 import { getLevelBadge, getLevelLabel, calculateLevel, getXPProgressPercentage } from '../utils/levelSystem';
+import { useI18n } from '../i18n';
 
 interface Comment {
   id: string;
@@ -20,6 +21,7 @@ interface Comment {
 
 const Community: React.FC = () => {
   const { user, loading: authLoading } = useAuth();
+  const { t, lang } = useI18n();
   const [posts, setPosts] = useState<Post[]>([]);
   const [newPost, setNewPost] = useState('');
   const [selectedEmoji, setSelectedEmoji] = useState('');
@@ -48,16 +50,7 @@ const Community: React.FC = () => {
   const emojis = ['🌱', '🌸', '✨', '🙏', '💚', '🌿', '🧘‍♀️', '🌊', '☀️', '🌙', '🔥', '💫', '🌺', '🕊️', '🦋'];
   const levels = ['N1', 'N2', 'N3', 'N4'];
 
-  const motivationalMessages = [
-    "Partage ton authenticité 🌱",
-    "Ta voix compte dans cette communauté 💚",
-    "Ensemble, nous grandissons ✨",
-    "Chaque partage inspire les autres 🌸",
-    "Ta vulnérabilité est une force 🙏",
-    "Connecte-toi avec bienveillance 🌿"
-  ];
-
-  const [currentMessage] = useState(motivationalMessages[Math.floor(Math.random() * motivationalMessages.length)]);
+  const currentMessage = t.community.motivations[Math.floor(Math.random() * t.community.motivations.length)];
 
   useEffect(() => {
     const timer = setTimeout(() => setIsVisible(true), 200);
@@ -70,12 +63,10 @@ const Community: React.FC = () => {
       loadPosts();
       subscribeToPostChanges();
     } else if (!authLoading) {
-      // Si pas d'utilisateur et que l'auth a fini de charger, arrêter le loading
       setLoading(false);
     }
   }, [user, authLoading]);
 
-  // Timeout de sécurité pour forcer la fin du loading
   useEffect(() => {
     const timeout = setTimeout(() => {
       if (loading || authLoading) {
@@ -87,14 +78,13 @@ const Community: React.FC = () => {
     return () => clearTimeout(timeout);
   }, []);
 
-  // Simulate online users fluctuation
   useEffect(() => {
     const interval = setInterval(() => {
       setOnlineUsers(prev => {
         const change = Math.random() > 0.5 ? 1 : -1;
         return Math.max(2, Math.min(15, prev + change));
       });
-    }, 30000); // Change every 30 seconds
+    }, 30000);
     return () => clearInterval(interval);
   }, []);
 
@@ -110,7 +100,6 @@ const Community: React.FC = () => {
 
       if (error) {
         console.error('Error loading profile:', error);
-        // Créer un profil par défaut si erreur
         const defaultProfile = {
           id: user.id,
           display_name: user.email?.split('@')[0] || `Voyageur${Math.floor(Math.random() * 1000)}`,
@@ -128,7 +117,6 @@ const Community: React.FC = () => {
       }
 
       if (!data) {
-        // Profile doesn't exist, create one
         const newProfile = {
           id: user.id,
           display_name: user.email?.split('@')[0] || `Voyageur${Math.floor(Math.random() * 1000)}`,
@@ -146,7 +134,6 @@ const Community: React.FC = () => {
 
         if (createError) {
           console.error('Error creating profile:', createError);
-          // Profil par défaut en local
           setProfile({
             ...newProfile,
             bio: '',
@@ -162,7 +149,6 @@ const Community: React.FC = () => {
       }
     } catch (error) {
       console.error('Error loading profile:', error);
-      // Profil de secours
       setProfile({
         id: user.id,
         display_name: user.email?.split('@')[0] || `Voyageur${Math.floor(Math.random() * 1000)}`,
@@ -244,7 +230,7 @@ const Community: React.FC = () => {
           table: 'posts'
         },
         () => {
-          loadPosts(); // Reload posts when changes occur
+          loadPosts();
         }
       )
       .on(
@@ -255,7 +241,7 @@ const Community: React.FC = () => {
           table: 'post_likes'
         },
         () => {
-          loadPosts(); // Reload posts when likes change
+          loadPosts();
         }
       )
       .on(
@@ -266,7 +252,7 @@ const Community: React.FC = () => {
           table: 'post_comments'
         },
         () => {
-          loadPosts(); // Reload posts when comments change
+          loadPosts();
         }
       )
       .subscribe();
@@ -309,16 +295,13 @@ const Community: React.FC = () => {
 
       if (error) throw error;
 
-      // Reset form
       setNewPost('');
       setSelectedEmoji('');
-      
-      // Celebration effect
+
       setCelebrationType('post');
       setShowCelebration(true);
       setTimeout(() => setShowCelebration(false), 2000);
-      
-      // Reload posts immediately to show the new post
+
       await loadPosts();
     } catch (error) {
       console.error('Error publishing post:', error);
@@ -330,7 +313,6 @@ const Community: React.FC = () => {
   const toggleLike = async (postId: string, isCurrentlyLiked: boolean) => {
     if (!user) return;
 
-    // Immediate UI feedback
     setLikeAnimations(prev => new Set([...prev, postId]));
     setTimeout(() => {
       setLikeAnimations(prev => {
@@ -340,14 +322,12 @@ const Community: React.FC = () => {
       });
     }, 600);
 
-    // Haptic feedback
     if ('vibrate' in navigator) {
       navigator.vibrate(isCurrentlyLiked ? 20 : 40);
     }
 
     try {
       if (isCurrentlyLiked) {
-        // Remove like
         const { error } = await supabase
           .from('post_likes')
           .delete()
@@ -356,7 +336,6 @@ const Community: React.FC = () => {
 
         if (error) throw error;
       } else {
-        // Add like
         const { error } = await supabase
           .from('post_likes')
           .insert({
@@ -365,23 +344,20 @@ const Community: React.FC = () => {
           });
 
         if (error) {
-          // Ignore duplicate key violations only
           if (error.code === '23505') {
             console.log('User already liked this post, ignoring duplicate');
             return;
           }
           throw error;
         }
-        
-        // Celebration for new like
+
         if (!isCurrentlyLiked) {
           setCelebrationType('like');
           setShowCelebration(true);
           setTimeout(() => setShowCelebration(false), 1500);
         }
       }
-      
-      // Mise à jour immédiate des posts
+
       await loadPosts();
     } catch (error) {
       console.error('Error toggling like:', error);
@@ -404,15 +380,12 @@ const Community: React.FC = () => {
 
       if (error) throw error;
 
-      // Clear comment input
       setNewComment(prev => ({ ...prev, [postId]: '' }));
-      
-      // Celebration effect
+
       setCelebrationType('comment');
       setShowCelebration(true);
       setTimeout(() => setShowCelebration(false), 1500);
-      
-      // Reload posts to show new comment
+
       await loadPosts();
     } catch (error) {
       console.error('Error adding comment:', error);
@@ -430,8 +403,6 @@ const Community: React.FC = () => {
     if (!user || !commentToDelete) return;
 
     try {
-      // Les admins peuvent supprimer n'importe quel commentaire
-      // RLS gère la vérification is_admin côté serveur
       const { error } = await supabase
         .from('post_comments')
         .delete()
@@ -439,7 +410,6 @@ const Community: React.FC = () => {
 
       if (error) throw error;
 
-      // Reload posts to reflect the deletion
       await loadPosts();
     } catch (error) {
       console.error('Error deleting comment:', error);
@@ -459,8 +429,7 @@ const Community: React.FC = () => {
       }
       return newSet;
     });
-    
-    // Haptic feedback
+
     if ('vibrate' in navigator) {
       navigator.vibrate(25);
     }
@@ -475,8 +444,6 @@ const Community: React.FC = () => {
     if (!user || !postToDelete) return;
 
     try {
-      // Les admins peuvent supprimer n'importe quel post
-      // RLS gère la vérification is_admin côté serveur
       const { error } = await supabase
         .from('posts')
         .delete()
@@ -484,7 +451,6 @@ const Community: React.FC = () => {
 
       if (error) throw error;
 
-      // Reload posts immediately to reflect the deletion
       await loadPosts();
     } catch (error) {
       console.error('Error deleting post:', error);
@@ -511,10 +477,8 @@ const Community: React.FC = () => {
 
   const handleUserClick = async (userId: string) => {
     if (userId === user?.id) {
-      // Permettre de voir son propre profil aussi
       setUserProfileData(profile);
       setShowUserProfile(userId);
-      // Charger les stats pour l'utilisateur courant
       const stats = await getUserStats(userId);
       setUserProfileStats(stats);
       return;
@@ -522,11 +486,9 @@ const Community: React.FC = () => {
 
     setShowUserProfile(userId);
     await loadUserProfile(userId);
-    // Charger les stats pour l'utilisateur sélectionné
     const stats = await getUserStats(userId);
     setUserProfileStats(stats);
-    
-    // Haptic feedback
+
     if ('vibrate' in navigator) {
       navigator.vibrate(30);
     }
@@ -537,14 +499,12 @@ const Community: React.FC = () => {
       const oneWeekAgo = new Date();
       oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
 
-      // Check-ins cette semaine
       const { data: checkins } = await supabase
         .from('checkins')
         .select('id')
         .eq('user_id', userId)
         .gte('created_at', oneWeekAgo.toISOString());
 
-      // Journaux cette semaine
       const { data: journals } = await supabase
         .from('journals')
         .select('id')
@@ -552,7 +512,6 @@ const Community: React.FC = () => {
         .eq('type', 'journal')
         .gte('created_at', oneWeekAgo.toISOString());
 
-      // Méditations cette semaine
       const { data: meditations } = await supabase
         .from('meditation_sessions')
         .select('duration_minutes')
@@ -561,7 +520,6 @@ const Community: React.FC = () => {
 
       const meditationMinutes = meditations?.reduce((sum, s) => sum + (s.duration_minutes || 0), 0) || 0;
 
-      // Streak de journaux
       const { data: allJournals } = await supabase
         .from('journals')
         .select('created_at')
@@ -605,7 +563,7 @@ const Community: React.FC = () => {
     const date = new Date(createdAt);
     const now = new Date();
     const diffInDays = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60 * 24));
-    
+
     if (diffInDays < 1) return "Aujourd'hui";
     if (diffInDays < 7) return `Il y a ${diffInDays} jour${diffInDays > 1 ? 's' : ''}`;
     if (diffInDays < 30) return `Il y a ${Math.floor(diffInDays / 7)} semaine${Math.floor(diffInDays / 7) > 1 ? 's' : ''}`;
@@ -617,16 +575,16 @@ const Community: React.FC = () => {
     const now = new Date();
     const postTime = new Date(timestamp);
     const diffInMinutes = Math.floor((now.getTime() - postTime.getTime()) / (1000 * 60));
-    
+
     if (diffInMinutes < 1) return 'À l\'instant';
     if (diffInMinutes < 60) return `Il y a ${diffInMinutes} min`;
-    
+
     const diffInHours = Math.floor(diffInMinutes / 60);
     if (diffInHours < 24) return `Il y a ${diffInHours}h`;
-    
+
     const diffInDays = Math.floor(diffInHours / 24);
     if (diffInDays < 7) return `Il y a ${diffInDays}j`;
-    
+
     return postTime.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' });
   };
 
@@ -637,9 +595,9 @@ const Community: React.FC = () => {
       'N3': { color: 'from-forest to-jade', icon: '✨' },
       'N4': { color: 'from-sunset to-vermilion', icon: '👑' }
     };
-    
+
     const badge = badges[level as keyof typeof badges] || badges.N1;
-    
+
     return (
       <div className={`w-8 h-8 bg-gradient-to-br ${badge.color} rounded-full flex items-center justify-center shadow-lg border-2 border-white`}>
         <span className="text-white text-xs font-bold">{level}</span>
@@ -658,11 +616,9 @@ const Community: React.FC = () => {
     }
   };
 
-  // Loading state
   if (authLoading || loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-sand via-pearl to-sand/50 p-4 pb-24 flex items-center justify-center relative overflow-hidden">
-        {/* Animated background */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
           {Array.from({ length: 8 }).map((_, i) => (
             <div
@@ -677,14 +633,14 @@ const Community: React.FC = () => {
             />
           ))}
         </div>
-        
+
         <div className="text-center relative z-10">
           <div className="w-16 h-16 bg-gradient-to-br from-wasabi to-jade rounded-full flex items-center justify-center mx-auto mb-6 animate-breathe-enhanced shadow-2xl">
             <Users className="w-8 h-8 text-white" />
           </div>
           <div className="w-12 h-12 border-3 border-wasabi border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-stone animate-pulse">Connexion à la communauté...</p>
-          <p className="text-stone/60 text-sm mt-2">Chargement des derniers partages</p>
+          <p className="text-stone animate-pulse">{t.community.loading}</p>
+          <p className="text-stone/60 text-sm mt-2">{t.community.loadingSub}</p>
         </div>
       </div>
     );
@@ -692,7 +648,6 @@ const Community: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-sand via-pearl to-sand/50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900/50 relative overflow-hidden transition-colors duration-300">
-      {/* Particules flottantes d'arrière-plan */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         {Array.from({ length: 12 }).map((_, i) => (
           <div
@@ -709,7 +664,6 @@ const Community: React.FC = () => {
       </div>
 
       <div className={`relative z-10 transition-all duration-1000 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
-        {/* Header simplifié */}
         <div className="bg-gradient-to-br from-wasabi/10 via-jade/5 to-wasabi/5 dark:from-gray-800/50 dark:via-gray-700/30 dark:to-gray-800/20 p-6 pb-8 relative overflow-hidden transition-colors duration-300">
           <div className="text-center relative z-10">
             <motion.div
@@ -732,10 +686,9 @@ const Community: React.FC = () => {
               className="text-3xl font-bold text-ink dark:text-white mb-6 leading-tight transition-colors duration-300"
               style={{ fontFamily: "'Shippori Mincho', serif" }}
             >
-              Communauté
+              {t.community.title}
             </h1>
 
-            {/* Stats simplifiées */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -751,7 +704,7 @@ const Community: React.FC = () => {
                     </div>
                   </div>
                   <div className="text-2xl font-bold text-jade mb-1">{onlineUsers}</div>
-                  <div className="text-xs text-stone/70">En ligne</div>
+                  <div className="text-xs text-stone/70">{t.community.online}</div>
                 </div>
 
                 <div className="text-center">
@@ -762,7 +715,7 @@ const Community: React.FC = () => {
                     </div>
                   </div>
                   <div className="text-2xl font-bold text-wasabi mb-1">{posts.length}</div>
-                  <div className="text-xs text-stone/70">Messages</div>
+                  <div className="text-xs text-stone/70">{t.community.messages}</div>
                 </div>
 
                 <div className="text-center">
@@ -775,7 +728,7 @@ const Community: React.FC = () => {
                   <div className="text-2xl font-bold text-vermilion mb-1">
                     {posts.reduce((sum, post) => sum + (post.likes_count || 0), 0)}
                   </div>
-                  <div className="text-xs text-stone/70">Likes</div>
+                  <div className="text-xs text-stone/70">{t.community.likes}</div>
                 </div>
               </div>
             </motion.div>
@@ -783,23 +736,21 @@ const Community: React.FC = () => {
         </div>
 
         <div className="p-4 pb-24 -mt-4">
-          {/* Profile settings avec design premium */}
           {showSettings && profile && (
             <div className="bg-white/95 dark:bg-gray-800/95 backdrop-blur-md rounded-3xl p-6 shadow-2xl border border-stone/10 dark:border-gray-700 mb-6 animate-fade-in-up relative overflow-hidden transition-colors duration-300">
-              {/* Effet de brillance */}
               <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-shimmer-slow"></div>
-              
+
               <div className="relative z-10">
                 <div className="flex items-center mb-6">
                   <Settings className="w-6 h-6 text-wasabi mr-3 animate-spin-slow" />
                   <h3 className="text-xl font-bold text-ink dark:text-white transition-colors duration-300" style={{ fontFamily: "'Shippori Mincho', serif" }}>
-                    Mes informations
+                    {t.community.myInfo}
                   </h3>
                 </div>
-                
+
                 <div className="space-y-6">
                   <div>
-                    <label className="block text-sm font-medium text-ink dark:text-white mb-3 transition-colors duration-300">Pseudo</label>
+                    <label className="block text-sm font-medium text-ink dark:text-white mb-3 transition-colors duration-300">{t.community.pseudo}</label>
                     <input
                       type="text"
                       value={profile.display_name}
@@ -811,7 +762,7 @@ const Community: React.FC = () => {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-ink mb-3">Niveau actuel</label>
+                    <label className="block text-sm font-medium text-ink mb-3">{t.community.currentLevel}</label>
                     <div className="bg-gradient-to-r from-wasabi/10 to-jade/10 rounded-2xl p-6 border-2 border-wasabi/20">
                       {(() => {
                         const levelInfo = calculateLevel(profile.total_xp || 0);
@@ -825,8 +776,8 @@ const Community: React.FC = () => {
                                   <span className="text-white font-bold text-lg">{levelInfo.level}</span>
                                 </div>
                                 <div className="text-left">
-                                  <div className="text-sm text-stone/60">Progression</div>
-                                  <div className="text-xl font-bold text-wasabi">Niveau {levelInfo.level}</div>
+                                  <div className="text-sm text-stone/60">{t.community.progression}</div>
+                                  <div className="text-xl font-bold text-wasabi">{t.community.level} {levelInfo.level}</div>
                                 </div>
                               </div>
                               <div className="text-right">
@@ -862,13 +813,13 @@ const Community: React.FC = () => {
                       }}
                       className="flex-1 bg-gradient-to-r from-wasabi to-jade text-white py-4 rounded-2xl hover:shadow-lg hover:shadow-wasabi/30 transition-all duration-300 font-medium transform hover:scale-105 active:scale-95"
                     >
-                      Sauvegarder
+                      {t.community.saveSetting}
                     </button>
                     <button
                       onClick={() => setShowSettings(false)}
                       className="flex-1 bg-stone/10 text-stone py-4 rounded-2xl hover:bg-stone/20 transition-all duration-300 font-medium"
                     >
-                      Annuler
+                      {t.common.cancel}
                     </button>
                   </div>
                 </div>
@@ -876,7 +827,6 @@ const Community: React.FC = () => {
             </div>
           )}
 
-          {/* Composer simplifié */}
           {profile && (
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -901,7 +851,7 @@ const Community: React.FC = () => {
                     )}
                     <div>
                       <div className="font-bold text-ink text-sm">{profile.display_name}</div>
-                      <div className="text-xs text-wasabi font-medium">Niveau {calculateLevel(profile.total_xp || 0).level}</div>
+                      <div className="text-xs text-wasabi font-medium">{t.community.level} {calculateLevel(profile.total_xp || 0).level}</div>
                     </div>
                   </div>
                   <button
@@ -918,7 +868,7 @@ const Community: React.FC = () => {
                 <textarea
                   value={newPost}
                   onChange={(e) => setNewPost(e.target.value)}
-                  placeholder="Partage tes réflexions..."
+                  placeholder={t.community.placeholder}
                   rows={3}
                   maxLength={280}
                   className="w-full px-4 py-3 bg-stone/5 border border-stone/20 rounded-2xl focus:border-wasabi focus:ring-2 focus:ring-wasabi/20 transition-all duration-300 resize-none text-base leading-relaxed placeholder:text-stone/60"
@@ -963,12 +913,12 @@ const Community: React.FC = () => {
                     {submitting ? (
                       <>
                         <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
-                        Envoi...
+                        {t.community.publishing}
                       </>
                     ) : (
                       <>
                         <Send size={16} className="mr-2" />
-                        Publier
+                        {t.community.publish}
                       </>
                     )}
                   </button>
@@ -977,11 +927,9 @@ const Community: React.FC = () => {
             </motion.div>
           )}
 
-          {/* Feed avec design premium */}
           <div className="space-y-4">
             {posts.length === 0 ? (
               <div className="text-center py-16 relative">
-                {/* Particules d'attente */}
                 <div className="absolute inset-0 pointer-events-none">
                   {Array.from({ length: 6 }).map((_, i) => (
                     <div
@@ -996,20 +944,20 @@ const Community: React.FC = () => {
                     />
                   ))}
                 </div>
-                
+
                 <div className="relative z-10">
                   <div className="w-20 h-20 bg-gradient-to-br from-wasabi/20 to-jade/20 rounded-full flex items-center justify-center mx-auto mb-6 animate-breathe-enhanced shadow-2xl">
                     <Sparkles className="w-10 h-10 text-wasabi" />
                   </div>
                   <h3 className="text-2xl font-bold text-ink mb-3" style={{ fontFamily: "'Shippori Mincho', serif" }}>
-                    Première communauté !
+                    {t.community.emptyTitle}
                   </h3>
                   <p className="text-stone leading-relaxed mb-6 max-w-xs mx-auto">
-                    Sois le premier à partager une réflexion et inspire les autres membres de Nirava.
+                    {t.community.emptyMessage}
                   </p>
                   <div className="bg-gradient-to-r from-wasabi/10 to-jade/10 rounded-2xl p-4 border border-wasabi/20">
                     <p className="text-wasabi text-sm font-medium">
-                      🌱 Chaque partage fait grandir notre communauté
+                      {t.community.emptyInfo}
                     </p>
                   </div>
                 </div>
@@ -1024,7 +972,6 @@ const Community: React.FC = () => {
                   className="bg-white/95 backdrop-blur-md rounded-3xl shadow-lg p-5 border border-stone/10 transition-all duration-300 hover:shadow-xl relative overflow-hidden"
                 >
                   <div className="relative z-10">
-                    {/* Header du post simplifié */}
                     <div className="flex items-center justify-between mb-3">
                       <div className="flex items-center">
                         <button
@@ -1047,7 +994,7 @@ const Community: React.FC = () => {
                               {post.profiles?.display_name || 'Utilisateur'}
                             </div>
                             <div className="flex items-center">
-                              <span className="text-xs text-wasabi font-medium">Niveau {calculateLevel(post.profiles?.total_xp || 0).level}</span>
+                              <span className="text-xs text-wasabi font-medium">{t.community.level} {calculateLevel(post.profiles?.total_xp || 0).level}</span>
                               {post.user_id === user?.id && (
                                 <Crown className="w-3 h-3 text-sunset ml-1" />
                               )}
@@ -1074,7 +1021,6 @@ const Community: React.FC = () => {
                       </div>
                     </div>
 
-                    {/* Badge source simplifié */}
                     {post.source_type && (
                       <div className="mb-3">
                         <div className={`inline-flex items-center px-3 py-1.5 rounded-full border ${
@@ -1099,7 +1045,6 @@ const Community: React.FC = () => {
                       </div>
                     )}
 
-                    {/* Contenu simplifié */}
                     <div className="mb-3">
                       <div className="flex items-start">
                         {post.emoji && (
@@ -1110,8 +1055,7 @@ const Community: React.FC = () => {
                             {post.content.split('\n').map((paragraph, index) => (
                               <span key={index} className={paragraph.trim() ? 'block mb-2' : 'block mb-1'}>
                                 {paragraph.includes('**') ? (
-                                  // Gérer le formatage markdown simple
-                                  paragraph.split('**').map((part, partIndex) => 
+                                  paragraph.split('**').map((part, partIndex) =>
                                     partIndex % 2 === 1 ? (
                                       <strong key={partIndex} className="font-bold text-ink bg-wasabi/10 px-1 rounded">{part}</strong>
                                     ) : (
@@ -1125,7 +1069,6 @@ const Community: React.FC = () => {
                             ))}
                           </div>
 
-                          {/* Métadonnées simplifiées */}
                           {post.metadata && (
                             <div className="mt-3 p-3 bg-stone/5 rounded-xl border border-stone/10">
                               <div className="flex flex-wrap gap-2">
@@ -1164,7 +1107,6 @@ const Community: React.FC = () => {
                         </div>
                       </div>
 
-                      {/* Image avec zoom */}
                       {post.image_url && (
                         <div className="mt-3">
                           <button
@@ -1189,7 +1131,6 @@ const Community: React.FC = () => {
                       )}
                     </div>
 
-                    {/* Actions simplifiées */}
                     <div className="flex items-center gap-2 pt-3 border-t border-stone/10">
                       <button
                         onClick={() => {
@@ -1230,11 +1171,9 @@ const Community: React.FC = () => {
                         }
                       </button>
                     </div>
-                    
-                    {/* Section commentaires avec design premium */}
+
                     {expandedComments.has(post.id) && (
                       <div className="mt-6 pt-6 border-t border-stone/10 animate-fade-in-up">
-                        {/* Formulaire d'ajout de commentaire */}
                         <div className="mb-6 bg-gradient-to-r from-stone/5 to-stone/10 rounded-2xl p-4 border border-stone/10">
                           <div className="flex gap-3">
                             {profile?.photo_url ? (
@@ -1253,7 +1192,7 @@ const Community: React.FC = () => {
                                 type="text"
                                 value={newComment[post.id] || ''}
                                 onChange={(e) => setNewComment(prev => ({ ...prev, [post.id]: e.target.value }))}
-                                placeholder="Ajouter un commentaire bienveillant..."
+                                placeholder={t.community.commentPlaceholder}
                                 className="w-full px-4 py-3 bg-white border border-stone/20 rounded-2xl focus:border-wasabi focus:ring-2 focus:ring-wasabi/20 transition-all duration-300 text-base mb-3"
                                 maxLength={200}
                                 style={{ fontSize: '16px' }}
@@ -1277,13 +1216,12 @@ const Community: React.FC = () => {
                                 ) : (
                                   <Send size={16} className="mr-2" />
                                 )}
-                                {submittingComment[post.id] ? 'Envoi...' : 'Commenter'}
+                                {submittingComment[post.id] ? t.community.publishing : t.community.comment}
                               </button>
                             </div>
                           </div>
                         </div>
-                        
-                        {/* Liste des commentaires avec design premium */}
+
                         <div className="space-y-3">
                           {post.comments && post.comments.length > 0 ? (
                             post.comments
@@ -1336,7 +1274,7 @@ const Community: React.FC = () => {
                           ) : (
                             <div className="text-center py-8 bg-gradient-to-r from-stone/5 to-stone/10 rounded-2xl border border-stone/10">
                               <MessageCircle className="w-8 h-8 text-stone/30 mx-auto mb-2" />
-                              <p className="text-stone/60 text-sm">Sois le premier à commenter</p>
+                              <p className="text-stone/60 text-sm">{t.community.noComments}</p>
                             </div>
                           )}
                         </div>
@@ -1351,11 +1289,10 @@ const Community: React.FC = () => {
         </div>
       </div>
 
-      {/* User Profile Modal premium */}
       {showUserProfile && userProfileData && (
         <>
           <div
-            className="fixed inset-0 z-40 bg-black/30 backdrop-blur-sm" 
+            className="fixed inset-0 z-40 bg-black/30 backdrop-blur-sm"
             onClick={() => {
               setShowUserProfile(null);
               setUserProfileData(null);
@@ -1382,13 +1319,13 @@ const Community: React.FC = () => {
                     {showUserProfile === user?.id && (
                       <span className="text-sm text-wasabi ml-2 font-normal flex items-center">
                         <Crown size={14} className="mr-1" />
-                        (Toi)
+                        {t.community.you}
                       </span>
                     )}
                   </h3>
                   <div className="flex items-center text-sm text-stone/70">
                     <Calendar size={12} className="mr-1" />
-                    Membre depuis {getJoinDate(userProfileData.created_at)}
+                    {t.community.memberSince} {getJoinDate(userProfileData.created_at)}
                   </div>
                 </div>
               </div>
@@ -1403,7 +1340,6 @@ const Community: React.FC = () => {
               </button>
             </div>
 
-            {/* Bio si disponible */}
             {userProfileData.bio && (
               <div className="mb-4 p-4 bg-gradient-to-r from-stone/5 to-stone/10 rounded-2xl border border-stone/10">
                 <p className="text-ink text-sm leading-relaxed italic">
@@ -1412,19 +1348,18 @@ const Community: React.FC = () => {
               </div>
             )}
 
-            {/* Stats premium avec animations */}
             <div className="bg-gradient-to-r from-wasabi/10 to-jade/10 rounded-2xl p-4 border border-wasabi/20 relative overflow-hidden">
               <div className="absolute inset-0 bg-gradient-to-r from-wasabi/5 to-jade/5 animate-pulse-slow"></div>
-              
+
               <div className="relative z-10">
                 <div className="text-center mb-4">
                   <div className="flex items-center justify-center mb-2">
                     <Star className="w-5 h-5 text-wasabi mr-2 animate-twinkle" />
-                    <span className="text-wasabi font-bold">Niveau {calculateLevel(userProfileData.total_xp || 0).level}</span>
+                    <span className="text-wasabi font-bold">{t.community.level} {calculateLevel(userProfileData.total_xp || 0).level}</span>
                     <Star className="w-5 h-5 text-wasabi ml-2 animate-twinkle" style={{ animationDelay: '0.5s' }} />
                   </div>
                   {showUserProfile === user?.id && (
-                    <span className="text-wasabi/60 text-xs">(Tes statistiques)</span>
+                    <span className="text-wasabi/60 text-xs">{t.community.yourStats}</span>
                   )}
                 </div>
 
@@ -1436,45 +1371,44 @@ const Community: React.FC = () => {
                           <Heart size={16} className="text-jade" />
                         </div>
                         <div className="text-xl font-bold text-jade">{userProfileStats.checkins}</div>
-                        <div className="text-xs text-stone">Check-ins</div>
+                        <div className="text-xs text-stone">{t.community.checkIns}</div>
                       </div>
                       <div className="text-center bg-white/80 rounded-xl p-3 border border-vermilion/20">
                         <div className="w-8 h-8 bg-gradient-to-br from-vermilion/20 to-sunset/20 rounded-lg flex items-center justify-center mx-auto mb-2">
                           <BookOpen size={16} className="text-vermilion" />
                         </div>
                         <div className="text-xl font-bold text-vermilion">{userProfileStats.journals}</div>
-                        <div className="text-xs text-stone">Journaux</div>
+                        <div className="text-xs text-stone">{t.community.journals}</div>
                       </div>
                       <div className="text-center bg-white/80 rounded-xl p-3 border border-forest/20">
                         <div className="w-8 h-8 bg-gradient-to-br from-forest/20 to-jade/20 rounded-lg flex items-center justify-center mx-auto mb-2">
                           <Timer size={16} className="text-forest" />
                         </div>
                         <div className="text-xl font-bold text-forest">{userProfileStats.meditation}</div>
-                        <div className="text-xs text-stone">Min médita</div>
+                        <div className="text-xs text-stone">{t.community.meditatedMin}</div>
                       </div>
                       <div className="text-center bg-white/80 rounded-xl p-3 border border-sunset/20">
                         <div className="w-8 h-8 bg-gradient-to-br from-sunset/20 to-vermilion/20 rounded-lg flex items-center justify-center mx-auto mb-2">
                           <Flame size={16} className="text-sunset" />
                         </div>
                         <div className="text-xl font-bold text-sunset">{userProfileStats.streak}</div>
-                        <div className="text-xs text-stone">Série</div>
+                        <div className="text-xs text-stone">{t.community.streak}</div>
                       </div>
                     </div>
                   </>
                 ) : (
                   <div className="text-center text-stone/60 py-4">
-                    Chargement des statistiques...
+                    {t.community.loadingStats}
                   </div>
                 )}
               </div>
             </div>
 
-            {/* Message inspirant */}
             <div className="mt-4 text-center">
               <p className="text-stone/70 text-sm italic leading-relaxed">
-                {showUserProfile === user?.id 
-                  ? "Continue ton beau parcours ! 🌱" 
-                  : "Merci de faire partie de notre communauté 🌸"
+                {showUserProfile === user?.id
+                  ? t.community.yourJourney
+                  : t.community.thanksCommunity
                 }
               </p>
             </div>
@@ -1482,9 +1416,8 @@ const Community: React.FC = () => {
         </>
       )}
 
-      {/* Photo Modal premium */}
       {showPhotoModal && (
-        <div 
+        <div
           className="fixed inset-0 bg-black/95 backdrop-blur-sm flex items-center justify-center z-50 animate-fade-in-up"
           onClick={() => setShowPhotoModal(null)}
         >
@@ -1495,12 +1428,11 @@ const Community: React.FC = () => {
             >
               <X size={20} />
             </button>
-            
-            {/* Indicateur de fermeture */}
+
             <div className="absolute bottom-6 left-1/2 transform -translate-x-1/2 bg-black/50 text-white px-4 py-2 rounded-full text-sm backdrop-blur-sm">
-              Touche pour fermer
+              {t.community.touchToClose}
             </div>
-            
+
             <img
               src={showPhotoModal}
               alt="Photo en grand"
@@ -1511,13 +1443,11 @@ const Community: React.FC = () => {
         </div>
       )}
 
-      {/* Modal de confirmation de suppression premium */}
       {showDeleteModal && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-3xl shadow-2xl w-full max-w-sm mx-2 relative overflow-hidden">
-            {/* Effet de brillance */}
             <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-shimmer-slow"></div>
-            
+
             <div className="relative z-10 p-6">
               <div className="flex items-center mb-6">
                 <div className="w-16 h-16 bg-gradient-to-br from-red-100 to-red-200 rounded-2xl flex items-center justify-center mr-4 animate-breathe-enhanced">
@@ -1525,16 +1455,16 @@ const Community: React.FC = () => {
                 </div>
                 <div>
                   <h3 className="text-xl font-bold text-ink dark:text-white transition-colors duration-300" style={{ fontFamily: "'Shippori Mincho', serif" }}>
-                    Supprimer le message
+                    {t.community.deleteMessageTitle}
                   </h3>
-                  <p className="text-stone text-sm">Cette action est irréversible</p>
+                  <p className="text-stone text-sm">{t.community.deleteWarning}</p>
                 </div>
               </div>
-              
+
               <p className="text-stone mb-6 leading-relaxed text-center">
-                Es-tu sûr(e) de vouloir supprimer ce message ? Il sera définitivement retiré de la communauté.
+                {t.community.deleteMessageConfirm}
               </p>
-              
+
               <div className="flex gap-3">
                 <button
                   onClick={() => {
@@ -1543,7 +1473,7 @@ const Community: React.FC = () => {
                   }}
                   className="flex-1 px-4 py-4 border-2 border-stone/20 text-stone rounded-2xl hover:bg-stone/5 transition-all duration-300 font-medium transform hover:scale-105 active:scale-95"
                 >
-                  Annuler
+                  {t.common.cancel}
                 </button>
                 <button
                   onClick={() => {
@@ -1552,7 +1482,7 @@ const Community: React.FC = () => {
                   }}
                   className="flex-1 px-4 py-4 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-2xl hover:shadow-lg hover:shadow-red-300 transition-all duration-300 font-medium transform hover:scale-105 active:scale-95"
                 >
-                  Supprimer
+                  {t.common.delete}
                 </button>
               </div>
             </div>
@@ -1560,7 +1490,6 @@ const Community: React.FC = () => {
         </div>
       )}
 
-      {/* Modal de confirmation de suppression de commentaire */}
       {showCommentModal && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-3xl shadow-2xl w-full max-w-sm mx-2 relative overflow-hidden">
@@ -1571,16 +1500,16 @@ const Community: React.FC = () => {
                 </div>
                 <div>
                   <h3 className="text-xl font-bold text-ink dark:text-white transition-colors duration-300" style={{ fontFamily: "'Shippori Mincho', serif" }}>
-                    Supprimer le commentaire
+                    {t.community.deleteCommentTitle}
                   </h3>
-                  <p className="text-stone text-sm">Cette action est irréversible</p>
+                  <p className="text-stone text-sm">{t.community.deleteWarning}</p>
                 </div>
               </div>
-              
+
               <p className="text-stone mb-6 leading-relaxed text-center">
-                Es-tu sûr(e) de vouloir supprimer ce commentaire ? Il sera définitivement retiré.
+                {t.community.deleteCommentConfirm}
               </p>
-              
+
               <div className="flex gap-3">
                 <button
                   onClick={() => {
@@ -1589,13 +1518,13 @@ const Community: React.FC = () => {
                   }}
                   className="flex-1 px-4 py-4 border-2 border-stone/20 text-stone rounded-2xl hover:bg-stone/5 transition-all duration-300 font-medium"
                 >
-                  Annuler
+                  {t.common.cancel}
                 </button>
                 <button
                   onClick={confirmDeleteComment}
                   className="flex-1 px-4 py-4 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-2xl hover:shadow-lg transition-all duration-300 font-medium"
                 >
-                  Supprimer
+                  {t.common.delete}
                 </button>
               </div>
             </div>
@@ -1603,11 +1532,9 @@ const Community: React.FC = () => {
         </div>
       )}
 
-      {/* Célébration d'actions */}
       {showCelebration && (
         <div className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50 animate-fade-in-up pointer-events-none">
           <div className="bg-white/95 rounded-3xl p-6 shadow-2xl border border-wasabi/20 text-center max-w-xs mx-4 relative overflow-hidden">
-            {/* Confettis animés */}
             <div className="absolute inset-0 pointer-events-none">
               {Array.from({ length: 12 }).map((_, i) => (
                 <div
@@ -1623,24 +1550,24 @@ const Community: React.FC = () => {
                 />
               ))}
             </div>
-            
+
             <div className="relative z-10">
               <div className="w-16 h-16 bg-gradient-to-br from-wasabi to-jade rounded-full flex items-center justify-center mx-auto mb-3 shadow-2xl animate-pulse-glow">
                 {celebrationType === 'like' && <Heart className="w-8 h-8 text-white" />}
                 {celebrationType === 'comment' && <MessageCircle className="w-8 h-8 text-white" />}
                 {celebrationType === 'post' && <Send className="w-8 h-8 text-white" />}
               </div>
-              
+
               <h3 className="text-lg font-bold text-ink mb-2" style={{ fontFamily: "'Shippori Mincho', serif" }}>
-                {celebrationType === 'like' && '💚 Like ajouté !'}
-                {celebrationType === 'comment' && '💬 Commentaire publié !'}
-                {celebrationType === 'post' && '✨ Message partagé !'}
+                {celebrationType === 'like' && t.community.likeAdded}
+                {celebrationType === 'comment' && t.community.commentAdded}
+                {celebrationType === 'post' && t.community.messageShared}
               </h3>
-              
+
               <p className="text-stone text-sm">
-                {celebrationType === 'like' && 'Merci de soutenir la communauté'}
-                {celebrationType === 'comment' && 'Ta voix enrichit la conversation'}
-                {celebrationType === 'post' && 'Ton partage inspire les autres'}
+                {celebrationType === 'like' && t.community.likeMessage}
+                {celebrationType === 'comment' && t.community.commentMessage}
+                {celebrationType === 'post' && t.community.shareMessage}
               </p>
             </div>
           </div>

@@ -5,6 +5,7 @@ import { useCreateJournal } from '../hooks/useJournals';
 import ShareToCommunityButton from './ShareToCommuityButton';
 import { JournalActivity } from '../lib/supabase';
 import PhotoUpload from './PhotoUpload';
+import { useI18n } from '../i18n';
 
 interface DreamJournalMobileProps {
   onClose: () => void;
@@ -13,6 +14,7 @@ interface DreamJournalMobileProps {
 
 const DreamJournalMobile: React.FC<DreamJournalMobileProps> = ({ onClose, onSave }) => {
   const { user } = useAuth();
+  const { t } = useI18n();
   const createJournalMutation = useCreateJournal();
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
@@ -25,10 +27,10 @@ const DreamJournalMobile: React.FC<DreamJournalMobileProps> = ({ onClose, onSave
 
   const dreamTypes = [
     { emoji: '🌙', label: 'Paisible', value: 'paisible' },
-    { emoji: '✨', label: 'Lucide', value: 'lucide' },
+    { emoji: '✨', label: t.dreamJournal.lucid, value: 'lucide' },
     { emoji: '🔮', label: 'Prémonitoire', value: 'premonitoire' },
-    { emoji: '😰', label: 'Cauchemar', value: 'cauchemar' },
-    { emoji: '🔄', label: 'Récurrent', value: 'recurrent' },
+    { emoji: '😰', label: t.dreamJournal.nightmare, value: 'cauchemar' },
+    { emoji: '🔄', label: t.dreamJournal.recurring, value: 'recurrent' },
     { emoji: '🎨', label: 'Créatif', value: 'creatif' },
   ];
 
@@ -100,7 +102,7 @@ const DreamJournalMobile: React.FC<DreamJournalMobileProps> = ({ onClose, onSave
               onClick={onClose}
               className="w-full px-6 py-3 border-2 border-stone/20 dark:border-gray-600 text-stone dark:text-gray-300 rounded-full active:scale-95 transition-transform"
             >
-              Terminer
+              {t.common.cancel}
             </button>
           </div>
         </div>
@@ -110,7 +112,6 @@ const DreamJournalMobile: React.FC<DreamJournalMobileProps> = ({ onClose, onSave
 
   return (
     <div className="fixed inset-0 bg-gradient-to-br from-sand via-pearl to-sand/50 z-50 flex flex-col animate-slide-up">
-      {/* Header */}
       <div className="bg-white/80 backdrop-blur-lg border-b border-stone/10 px-4 py-4 flex items-center justify-between shrink-0">
         <button
           onClick={onClose}
@@ -122,7 +123,7 @@ const DreamJournalMobile: React.FC<DreamJournalMobileProps> = ({ onClose, onSave
         <div className="flex items-center gap-2">
           <Cloud className="w-5 h-5 text-blue-600" />
           <span className="font-semibold text-ink dark:text-white transition-colors duration-300" style={{ fontFamily: "'Shippori Mincho', serif" }}>
-            Journal de rêves
+            {t.dreamJournal.title}
           </span>
         </div>
 
@@ -132,13 +133,11 @@ const DreamJournalMobile: React.FC<DreamJournalMobileProps> = ({ onClose, onSave
           className="flex items-center gap-1 px-4 py-2 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-full font-medium active:scale-95 transition-transform disabled:opacity-50"
         >
           <Send className="w-4 h-4" />
-          Sauver
+          {t.common.save}
         </button>
       </div>
 
-      {/* Content */}
       <div className="flex-1 overflow-y-auto px-4 pt-6 pb-8">
-        {/* Prompt */}
         <div className="bg-blue-50 rounded-2xl p-4 mb-6 border border-blue-100">
           <div className="flex items-center gap-2 mb-2">
             <Moon className="w-5 h-5 text-blue-600" />
@@ -149,10 +148,9 @@ const DreamJournalMobile: React.FC<DreamJournalMobileProps> = ({ onClose, onSave
           </p>
         </div>
 
-        {/* Title */}
         <div className="mb-6">
           <label className="block text-sm font-medium text-ink dark:text-white mb-3 transition-colors duration-300">
-            Titre du rêve (optionnel)
+            {t.dreamJournal.titleLabel}
           </label>
           <input
             type="text"
@@ -164,7 +162,6 @@ const DreamJournalMobile: React.FC<DreamJournalMobileProps> = ({ onClose, onSave
           />
         </div>
 
-        {/* Dream Type */}
         <div className="mb-6">
           <label className="block text-sm font-medium text-ink dark:text-white mb-3 transition-colors duration-300">
             Type de rêve
@@ -192,7 +189,6 @@ const DreamJournalMobile: React.FC<DreamJournalMobileProps> = ({ onClose, onSave
           </div>
         </div>
 
-        {/* Clarity */}
         <div className="mb-6">
           <label className="block text-sm font-medium text-ink dark:text-white mb-3 transition-colors duration-300">
             Clarté du souvenir: {clarity}/10
@@ -211,15 +207,14 @@ const DreamJournalMobile: React.FC<DreamJournalMobileProps> = ({ onClose, onSave
           </div>
         </div>
 
-        {/* Content */}
         <div className="mb-6">
           <label className="block text-sm font-medium text-ink dark:text-white mb-3 transition-colors duration-300">
-            Décris ton rêve
+            {t.dreamJournal.emotions}
           </label>
           <textarea
             value={content}
             onChange={(e) => setContent(e.target.value)}
-            placeholder="Raconte ton rêve en détail... Les lieux, les personnes, les émotions, les symboles..."
+            placeholder={t.dreamJournal.placeholder}
             className="w-full min-h-[300px] px-4 py-4 bg-white dark:bg-gray-700 border border-stone/20 dark:border-gray-600 rounded-2xl focus:border-blue-500 dark:focus:border-blue-400 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-400/20 transition-all resize-none text-ink dark:text-white"
             style={{ fontSize: '16px' }}
             autoFocus
@@ -236,7 +231,18 @@ const DreamJournalMobile: React.FC<DreamJournalMobileProps> = ({ onClose, onSave
           </div>
         </div>
 
-        {/* Photo Upload */}
+        <div className="mb-6">
+          <label className="block text-sm font-medium text-ink dark:text-white mb-3 transition-colors duration-300">
+            {t.dreamJournal.symbols}
+          </label>
+          <input
+            type="text"
+            placeholder={t.dreamJournal.symbolsPlaceholder}
+            className="w-full px-4 py-3 bg-white dark:bg-gray-700 border border-stone/20 dark:border-gray-600 rounded-2xl focus:border-blue-500 dark:focus:border-blue-400 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-400/20 transition-all text-ink dark:text-white"
+            style={{ fontSize: '16px' }}
+          />
+        </div>
+
         <div className="mb-6">
           <label className="block text-sm font-medium text-ink mb-3 flex items-center gap-2">
             <Camera className="w-4 h-4" />
@@ -250,7 +256,6 @@ const DreamJournalMobile: React.FC<DreamJournalMobileProps> = ({ onClose, onSave
           />
         </div>
 
-        {/* Tips */}
         <div className="bg-blue-50 rounded-2xl p-4 border border-blue-100">
           <h3 className="text-sm font-semibold text-ink dark:text-white mb-2 transition-colors duration-300">💡 Conseils</h3>
           <ul className="text-xs text-stone dark:text-gray-300 space-y-1 transition-colors duration-300">
@@ -262,7 +267,6 @@ const DreamJournalMobile: React.FC<DreamJournalMobileProps> = ({ onClose, onSave
         </div>
       </div>
 
-      {/* Bottom Action */}
       <div className="bg-white/80 backdrop-blur-lg border-t border-stone/10 px-4 py-4 shrink-0">
         <button
           onClick={handleSubmit}
@@ -270,11 +274,11 @@ const DreamJournalMobile: React.FC<DreamJournalMobileProps> = ({ onClose, onSave
           className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-blue-500 to-blue-600 text-white px-6 py-4 rounded-full font-semibold shadow-lg active:scale-95 transition-transform disabled:opacity-50"
         >
           {createJournalMutation.isPending ? (
-            <>Enregistrement...</>
+            <>{t.common.saving}</>
           ) : (
             <>
               <Send className="w-5 h-5" />
-              Sauvegarder mon rêve
+              {t.common.save}
             </>
           )}
         </button>

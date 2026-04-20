@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { X, Heart, ChevronRight, Sparkles, Check, ChevronLeft } from 'lucide-react';
 import { useCreateCheckin } from '../hooks/useCheckins';
 import { useAuth } from '../hooks/useAuth';
+import { useI18n } from '../i18n';
 
 interface CheckinMobileProps {
   onClose: () => void;
@@ -24,84 +25,9 @@ interface Need {
   suggestion: string;
 }
 
-const EMOTIONS: Emotion[] = [
-  {
-    emoji: '😌', label: 'Calme', value: 'calme', color: 'bg-teal-100 border-teal-300 text-teal-700',
-    description: 'Un sentiment de paix intérieure.',
-    suggestions: ['Continue à cultiver cette sérénité', 'Profite de ce calme pour méditer', 'Ancre cet état dans ton corps']
-  },
-  {
-    emoji: '😊', label: 'Joie', value: 'joie', color: 'bg-yellow-100 border-yellow-300 text-yellow-700',
-    description: 'Une énergie légère et positive.',
-    suggestions: ['Savoure ce moment de joie', 'Partage cette énergie avec quelqu\'un', 'Note ce qui t\'a mis en joie']
-  },
-  {
-    emoji: '😰', label: 'Anxiété', value: 'anxiété', color: 'bg-orange-100 border-orange-300 text-orange-700',
-    description: 'Inquiétude face à l\'incertain.',
-    suggestions: ['Essaie la respiration 4-7-8', 'Nomme ce qui t\'inquiète précisément', 'Rappelle-toi que le moment présent est sûr']
-  },
-  {
-    emoji: '😢', label: 'Tristesse', value: 'tristesse', color: 'bg-blue-100 border-blue-300 text-blue-700',
-    description: 'Un manque ou une perte ressentie.',
-    suggestions: ['Accueille cette tristesse sans la juger', 'Prends soin de toi avec douceur', 'Permets-toi de pleurer si nécessaire']
-  },
-  {
-    emoji: '😠', label: 'Colère', value: 'colère', color: 'bg-red-100 border-red-300 text-red-700',
-    description: 'Une énergie qui signal une limite franchie.',
-    suggestions: ['La colère indique un besoin non satisfait', 'Bouge ton corps pour libérer l\'énergie', 'Écris ce qui t\'a mis en colère']
-  },
-  {
-    emoji: '😔', label: 'Mélancolie', value: 'mélancolie', color: 'bg-slate-100 border-slate-300 text-slate-600',
-    description: 'Une douce nostalgie ou lassitude.',
-    suggestions: ['Sois doux avec toi-même', 'Écoute de la musique apaisante', 'Prends un bain ou une douche chaude']
-  },
-  {
-    emoji: '😤', label: 'Frustration', value: 'frustration', color: 'bg-amber-100 border-amber-300 text-amber-700',
-    description: 'Quand ça ne se passe pas comme voulu.',
-    suggestions: ['Identifie ce qui bloque vraiment', 'Fais une pause de 5 minutes', 'Cherche ce que tu peux contrôler']
-  },
-  {
-    emoji: '🥺', label: 'Vulnérable', value: 'vulnérabilité', color: 'bg-pink-100 border-pink-300 text-pink-600',
-    description: 'Ouvert, sensible, à vif.',
-    suggestions: ['La vulnérabilité est une force', 'Parle à quelqu\'un de confiance', 'Accorde-toi de la bienveillance']
-  },
-  {
-    emoji: '😴', label: 'Épuisé', value: 'épuisement', color: 'bg-gray-100 border-gray-300 text-gray-600',
-    description: 'Le corps et l\'esprit ont besoin de repos.',
-    suggestions: ['Le repos est productif', 'Dors ou fais une sieste si tu peux', 'Limite les stimulations']
-  },
-  {
-    emoji: '🔥', label: 'Motivation', value: 'motivation', color: 'bg-emerald-100 border-emerald-300 text-emerald-700',
-    description: 'Une envie d\'agir et de créer.',
-    suggestions: ['Canalise cette énergie vers un projet', 'Commence par une petite action concrète', 'Écris tes idées maintenant']
-  },
-  {
-    emoji: '🤗', label: 'Gratitude', value: 'gratitude', color: 'bg-violet-100 border-violet-300 text-violet-600',
-    description: 'Reconnaissance pour ce qui est là.',
-    suggestions: ['Note 3 choses pour lesquelles tu es reconnaissant', 'Dis merci à quelqu\'un', 'Savoure ce sentiment']
-  },
-  {
-    emoji: '😶', label: 'Vide', value: 'vide', color: 'bg-stone-100 border-stone-300 text-stone-600',
-    description: 'Absence de ressenti clair.',
-    suggestions: ['C\'est normal de ne rien ressentir', 'Fais un check-in corporel', 'Bouge doucement ton corps']
-  },
-];
-
-const NEEDS: Need[] = [
-  { icon: '🛌', label: 'Repos', value: 'repos', suggestion: 'Donne-toi la permission de te reposer sans culpabilité.' },
-  { icon: '💚', label: 'Connexion', value: 'connexion', suggestion: 'Contacte quelqu\'un qui compte pour toi.' },
-  { icon: '🛡️', label: 'Sécurité', value: 'sécurité', suggestion: 'Crée un espace sûr autour de toi maintenant.' },
-  { icon: '⭐', label: 'Reconnaissance', value: 'reconnaissance', suggestion: 'Tu mérites d\'être vu et apprécié.' },
-  { icon: '🎯', label: 'Clarté', value: 'clarté', suggestion: 'Écris tes pensées pour les démêler.' },
-  { icon: '🌿', label: 'Nature', value: 'nature', suggestion: 'Sors dehors, même 5 minutes.' },
-  { icon: '🤝', label: 'Soutien', value: 'soutien', suggestion: 'Il est courageux de demander de l\'aide.' },
-  { icon: '✨', label: 'Sens', value: 'sens', suggestion: 'Qu\'est-ce qui compte vraiment pour toi ?' },
-  { icon: '🎨', label: 'Créativité', value: 'créativité', suggestion: 'Exprime quelque chose par un art.' },
-  { icon: '🏃', label: 'Mouvement', value: 'mouvement', suggestion: 'Bouge ton corps pour libérer l\'énergie.' },
-];
-
 const CheckinMobile: React.FC<CheckinMobileProps> = ({ onClose, onSave }) => {
   const { user } = useAuth();
+  const { t } = useI18n();
   const createCheckinMutation = useCreateCheckin();
   const [step, setStep] = useState(1);
   const [emotion, setEmotion] = useState<Emotion | null>(null);
@@ -110,6 +36,9 @@ const CheckinMobile: React.FC<CheckinMobileProps> = ({ onClose, onSave }) => {
   const [note, setNote] = useState('');
   const [done, setDone] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const EMOTIONS: Emotion[] = t.checkin.emotions;
+  const NEEDS: Need[] = t.checkin.needs;
 
   const handleSubmit = async () => {
     if (!emotion || !user) return;
@@ -202,7 +131,6 @@ const CheckinMobile: React.FC<CheckinMobileProps> = ({ onClose, onSave }) => {
 
   return (
     <div className="fixed inset-0 bg-gradient-to-b from-stone-50 via-white to-stone-50 dark:from-gray-900 dark:via-gray-900 dark:to-gray-900 z-50 flex flex-col">
-      {/* Header */}
       <div className="flex items-center justify-between px-5 py-4 border-b border-stone/10 dark:border-gray-800 shrink-0">
         {step > 1 ? (
           <button onClick={() => setStep(s => s - 1)} className="w-10 h-10 rounded-full bg-stone/10 flex items-center justify-center active:scale-95 transition-transform">
@@ -217,7 +145,7 @@ const CheckinMobile: React.FC<CheckinMobileProps> = ({ onClose, onSave }) => {
         <div className="flex items-center gap-2">
           <Heart className="w-4 h-4 text-rose-500" />
           <span className="font-semibold text-ink dark:text-white text-sm" style={{ fontFamily: "'Shippori Mincho', serif" }}>
-            Check-in émotionnel
+            {t.checkin.title}
           </span>
         </div>
 
@@ -228,18 +156,16 @@ const CheckinMobile: React.FC<CheckinMobileProps> = ({ onClose, onSave }) => {
         </div>
       </div>
 
-      {/* Content */}
       <div className="flex-1 overflow-y-auto">
 
-        {/* Étape 1 : Émotion */}
         {step === 1 && (
           <div className="px-5 pt-6 pb-24">
             <div className="text-center mb-6">
               <h2 className="text-2xl font-bold text-ink dark:text-white mb-2" style={{ fontFamily: "'Shippori Mincho', serif" }}>
-                Comment te sens-tu ?
+                {t.checkin.prompt}
               </h2>
               <p className="text-sm text-stone dark:text-gray-400">
-                Pas de bonne ou mauvaise réponse. Sois honnête avec toi-même.
+                {t.checkin.selectEmotion}
               </p>
             </div>
 
@@ -282,13 +208,12 @@ const CheckinMobile: React.FC<CheckinMobileProps> = ({ onClose, onSave }) => {
           </div>
         )}
 
-        {/* Étape 2 : Intensité */}
         {step === 2 && emotion && (
           <div className="px-5 pt-6 pb-10">
             <div className="text-center mb-8">
               <div className="text-5xl mb-3">{emotion.emoji}</div>
               <h2 className="text-2xl font-bold text-ink dark:text-white mb-2" style={{ fontFamily: "'Shippori Mincho', serif" }}>
-                À quelle intensité ?
+                {t.checkin.intensity}
               </h2>
               <p className="text-sm text-stone dark:text-gray-400">
                 Évalue ta <span className="font-medium text-ink dark:text-white capitalize">{emotion.label}</span> sur une échelle de 1 à 10
@@ -326,12 +251,12 @@ const CheckinMobile: React.FC<CheckinMobileProps> = ({ onClose, onSave }) => {
 
             <div className="mb-6">
               <label className="block text-sm font-medium text-ink dark:text-white mb-2">
-                Note libre (optionnel)
+                {t.checkin.notes}
               </label>
               <textarea
                 value={note}
                 onChange={(e) => setNote(e.target.value)}
-                placeholder="Qu'est-ce qui a déclenché cette émotion ? Comment ça se manifeste dans ton corps ?"
+                placeholder={t.checkin.notesPlaceholder}
                 rows={4}
                 className="w-full px-4 py-3 bg-white dark:bg-gray-800 border border-stone/20 dark:border-gray-700 rounded-2xl focus:border-jade focus:ring-2 focus:ring-jade/20 transition-all resize-none text-ink dark:text-white text-sm"
                 style={{ fontSize: '16px' }}
@@ -348,12 +273,11 @@ const CheckinMobile: React.FC<CheckinMobileProps> = ({ onClose, onSave }) => {
           </div>
         )}
 
-        {/* Étape 3 : Besoin */}
         {step === 3 && emotion && (
           <div className="px-5 pt-6 pb-10">
             <div className="text-center mb-6">
               <h2 className="text-2xl font-bold text-ink dark:text-white mb-2" style={{ fontFamily: "'Shippori Mincho', serif" }}>
-                De quoi as-tu besoin ?
+                {t.checkin.need}
               </h2>
               <p className="text-sm text-stone dark:text-gray-400">
                 L'émotion exprime un besoin. Lequel résonne en ce moment ?
@@ -401,11 +325,11 @@ const CheckinMobile: React.FC<CheckinMobileProps> = ({ onClose, onSave }) => {
               className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-jade to-forest text-white py-4 rounded-full font-semibold shadow-lg active:scale-95 transition-transform disabled:opacity-60"
             >
               {createCheckinMutation.isPending ? (
-                <span>Enregistrement...</span>
+                <span>{t.common.saving}</span>
               ) : (
                 <>
                   <Check className="w-5 h-5" />
-                  Enregistrer mon check-in
+                  {t.common.save}
                 </>
               )}
             </button>

@@ -3,6 +3,7 @@ import { X, Play, Pause, SkipForward, Check, ChevronRight } from 'lucide-react';
 import { useAudioStore } from '../stores/audioStore';
 import { useAuth } from '../hooks/useAuth';
 import { useCreateMeditationSession } from '../hooks/useMeditation';
+import { useI18n } from '../i18n';
 
 interface MeditationMobileProps {
   onClose: () => void;
@@ -43,6 +44,7 @@ const MINDFULNESS_PROMPTS = [
 
 const MeditationMobile: React.FC<MeditationMobileProps> = ({ onClose }) => {
   const { user } = useAuth();
+  const { t } = useI18n();
   const createMeditationMutation = useCreateMeditationSession();
   const {
     startMeditation, pauseMeditation, resumeMeditation, stopMeditation, resetMeditation,
@@ -204,7 +206,7 @@ const MeditationMobile: React.FC<MeditationMobileProps> = ({ onClose }) => {
             onClick={onClose}
             className="w-full border-2 border-stone/20 dark:border-gray-700 text-stone dark:text-gray-400 py-3.5 rounded-full font-medium active:scale-95 transition-transform"
           >
-            Terminer
+            {t.common.cancel}
           </button>
         </div>
       </div>
@@ -312,7 +314,7 @@ const MeditationMobile: React.FC<MeditationMobileProps> = ({ onClose }) => {
             onClick={handleStop}
             className="w-full text-white/40 text-sm py-2 active:scale-95 transition-transform"
           >
-            Terminer la session
+            {t.meditation.inProgress}
           </button>
         </div>
       </div>
@@ -326,7 +328,7 @@ const MeditationMobile: React.FC<MeditationMobileProps> = ({ onClose }) => {
           <X className="w-5 h-5 text-stone" />
         </button>
         <span className="font-semibold text-ink dark:text-white text-sm" style={{ fontFamily: "'Shippori Mincho', serif" }}>
-          Méditation
+          {t.meditation.title}
         </span>
         <div className="w-10" />
       </div>
@@ -334,10 +336,10 @@ const MeditationMobile: React.FC<MeditationMobileProps> = ({ onClose }) => {
       <div className="flex-1 overflow-y-auto px-5 pt-6 pb-10">
         <div className="text-center mb-6">
           <h2 className="text-2xl font-bold text-ink dark:text-white mb-2" style={{ fontFamily: "'Shippori Mincho', serif" }}>
-            Choisis ta durée
+            {t.meditation.durationLabel}
           </h2>
           <p className="text-sm text-stone dark:text-gray-400">
-            Commence là où tu en es. Même 3 minutes font une différence.
+            {t.meditation.durationPlaceholder}
           </p>
         </div>
 

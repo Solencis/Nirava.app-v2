@@ -1,30 +1,30 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ChevronRight, Sparkles, ArrowRight } from 'lucide-react';
-import { onboardingSlides } from '../data/onboardingContent';
+import { getOnboardingSlides } from '../data/onboardingContent';
 import { useOnboarding } from '../hooks/useOnboarding';
+import { useI18n } from '../i18n';
 
 export default function Onboarding() {
   const navigate = useNavigate();
   const { completeOnboarding } = useOnboarding();
+  const { t, lang } = useI18n();
   const [currentSlide, setCurrentSlide] = useState(0);
   const [animating, setAnimating] = useState(false);
-  const [direction, setDirection] = useState<'in' | 'out'>('in');
 
-  const isLastSlide = currentSlide === onboardingSlides.length - 1;
-  const slide = onboardingSlides[currentSlide];
+  const slides = getOnboardingSlides(lang);
+  const isLastSlide = currentSlide === slides.length - 1;
+  const slide = slides[currentSlide];
 
   useEffect(() => {
-    setDirection('in');
     setAnimating(true);
-    const t = setTimeout(() => setAnimating(false), 400);
-    return () => clearTimeout(t);
+    const timer = setTimeout(() => setAnimating(false), 400);
+    return () => clearTimeout(timer);
   }, [currentSlide]);
 
   const goNext = () => {
     if (animating) return;
-    if (currentSlide < onboardingSlides.length - 1) {
-      setDirection('out');
+    if (currentSlide < slides.length - 1) {
       setCurrentSlide(prev => prev + 1);
     }
   };
@@ -47,7 +47,7 @@ export default function Onboarding() {
             onClick={() => !animating && setCurrentSlide(prev => prev - 1)}
             className="text-sm text-gray-400 hover:text-gray-600 transition-colors font-medium px-1 py-1"
           >
-            Retour
+            {t.onboarding.back}
           </button>
         ) : (
           <div className="w-12" />
@@ -58,23 +58,21 @@ export default function Onboarding() {
             onClick={() => finish('/auth')}
             className="text-sm text-gray-400 hover:text-gray-600 transition-colors font-medium"
           >
-            Passer
+            {t.onboarding.skip}
           </button>
         )}
       </div>
 
       <div className="flex gap-1.5 justify-center px-6 py-3">
-        {onboardingSlides.map((_, index) => (
+        {slides.map((_, index) => (
           <div
             key={index}
             className="h-1 rounded-full transition-all duration-500"
             style={{
               width: index === currentSlide ? '2rem' : '0.4rem',
               background: index === currentSlide
-                ? `linear-gradient(to right, var(--tw-gradient-from, #34d399), var(--tw-gradient-to, #22d3ee))`
-                : index < currentSlide
-                  ? '#34d399'
-                  : '#e2e8f0'
+                ? `linear-gradient(to right, #34d399, #22d3ee)`
+                : index < currentSlide ? '#34d399' : '#e2e8f0'
             }}
           />
         ))}
@@ -96,9 +94,7 @@ export default function Onboarding() {
             {slide.icon}
           </div>
 
-          <h2
-            className={`text-3xl font-bold mb-3 bg-gradient-to-r ${slide.gradient} bg-clip-text text-transparent leading-tight`}
-          >
+          <h2 className={`text-3xl font-bold mb-3 bg-gradient-to-r ${slide.gradient} bg-clip-text text-transparent leading-tight`}>
             {slide.title}
           </h2>
 
@@ -116,7 +112,7 @@ export default function Onboarding() {
             <div className="mt-6 inline-flex items-center gap-2 bg-amber-50 border border-amber-200 rounded-xl px-4 py-2.5">
               <span className="text-amber-500 text-lg">⚠️</span>
               <span className="text-xs text-amber-700 font-medium text-left">
-                Version prototype — des bugs peuvent survenir
+                {t.onboarding.prototypeWarning}
               </span>
             </div>
           )}
@@ -131,14 +127,14 @@ export default function Onboarding() {
               className={`w-full py-4 bg-gradient-to-r ${slide.gradient} text-white rounded-2xl font-bold shadow-lg active:scale-98 transition-transform flex items-center justify-center gap-2 text-base`}
             >
               <Sparkles className="w-5 h-5" />
-              <span>Commencer gratuitement</span>
+              <span>{t.onboarding.startFree}</span>
             </button>
             <button
               onClick={() => finish('/pricing')}
               className="w-full py-4 bg-white border border-gray-200 text-gray-700 rounded-2xl font-semibold shadow-sm hover:shadow-md transition-shadow flex items-center justify-center gap-2 text-base"
             >
               <ArrowRight className="w-4 h-4 text-gray-400" />
-              <span>Voir l'accès complet</span>
+              <span>{t.onboarding.seeFullAccess}</span>
             </button>
           </>
         ) : (
@@ -147,13 +143,13 @@ export default function Onboarding() {
             disabled={animating}
             className={`w-full py-4 bg-gradient-to-r ${slide.gradient} text-white rounded-2xl font-bold shadow-lg active:scale-98 transition-transform flex items-center justify-center gap-2 text-base disabled:opacity-70`}
           >
-            <span>{slide.ctaText || 'Suivant'}</span>
+            <span>{slide.ctaText || t.onboarding.next}</span>
             <ChevronRight className="w-5 h-5" />
           </button>
         )}
 
         <p className="text-center text-xs text-gray-400 pt-1">
-          {currentSlide + 1} sur {onboardingSlides.length}
+          {currentSlide + 1} {t.onboarding.of} {slides.length}
         </p>
       </div>
     </div>

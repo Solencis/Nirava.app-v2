@@ -15,6 +15,7 @@ import XPBar from '../components/XPBar';
 import JourneyModal from '../components/JourneyModal';
 import SettingsMenu from '../components/SettingsMenu';
 import ManualSessionModal from '../components/ManualSessionModal';
+import { useI18n } from '../i18n';
 
 const ProfilePage: React.FC = () => {
   const { user, signOut } = useAuth();
@@ -25,6 +26,7 @@ const ProfilePage: React.FC = () => {
   const { data: journalsData } = useJournals();
   const { data: supabaseMeditationMinutes } = useMeditationWeeklyStats();
   const { profile: userProfile, xpProgress } = useProfile();
+  const { t, lang } = useI18n();
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState(false);
@@ -61,18 +63,17 @@ const ProfilePage: React.FC = () => {
   const [activityDates, setActivityDates] = useState<Date[]>([]);
 
   const levels = [
-    { value: 'N1', label: 'N1 - Découverte', description: 'Premiers pas dans l\'intégration émotionnelle' },
-    { value: 'N2', label: 'N2 - Approfondissement', description: 'Techniques avancées et pratiques régulières' },
-    { value: 'N3', label: 'N3 - Intégration', description: 'Travail de l\'ombre et archétypes' },
-    { value: 'N4', label: 'N4 - Service', description: 'Accompagnement et transmission' }
+    { value: 'N1', label: lang === 'es' ? 'N1 - Descubrimiento' : 'N1 - Découverte', description: lang === 'es' ? 'Primeros pasos en la integración emocional' : 'Premiers pas dans l\'intégration émotionnelle' },
+    { value: 'N2', label: lang === 'es' ? 'N2 - Profundización' : 'N2 - Approfondissement', description: lang === 'es' ? 'Técnicas avanzadas y prácticas regulares' : 'Techniques avancées et pratiques régulières' },
+    { value: 'N3', label: lang === 'es' ? 'N3 - Integración' : 'N3 - Intégration', description: lang === 'es' ? 'Trabajo de sombra y arquetipos' : 'Travail de l\'ombre et archétypes' },
+    { value: 'N4', label: lang === 'es' ? 'N4 - Servicio' : 'N4 - Service', description: lang === 'es' ? 'Acompañamiento y transmisión' : 'Accompagnement et transmission' }
   ];
 
-  // Système de succès par catégories
   const achievementCategories = {
     streak: {
-      name: 'Série',
+      name: t.achievements.categories.streak,
       icon: '🔥',
-      description: 'Jours consécutifs de pratique',
+      description: lang === 'es' ? 'Días consecutivos de práctica' : 'Jours consécutifs de pratique',
       achievements: [
         { id: 'streak_1', days: 1, title: 'Éveilleur en marche', icon: '🌅', description: 'Tu es resté(e) actif(ve) pendant 1 jour', requirement: 'streak', count: 1 },
         { id: 'streak_3', days: 3, title: 'Porteur d\'élan', icon: '🌱', description: '3 jours d\'élan, d\'espoir, de retour à soi', requirement: 'streak', count: 3 },
@@ -86,9 +87,9 @@ const ProfilePage: React.FC = () => {
       ]
     },
     meditation: {
-      name: 'Méditation',
+      name: t.achievements.categories.meditation,
       icon: '🧘',
-      description: 'Minutes de pratique méditative',
+      description: lang === 'es' ? 'Minutos de práctica meditativa' : 'Minutes de pratique méditative',
       achievements: [
         { id: 'med_30', title: 'Première plongée', icon: '🌊', description: '30 minutes de méditation au total', requirement: 'meditation_minutes', count: 30 },
         { id: 'med_60', title: 'Heure de silence', icon: '⏱️', description: '1 heure de pratique méditative', requirement: 'meditation_minutes', count: 60 },
@@ -102,9 +103,9 @@ const ProfilePage: React.FC = () => {
       ]
     },
     journal: {
-      name: 'Écriture',
+      name: t.achievements.categories.writing,
       icon: '📖',
-      description: 'Entrées dans ton journal intime',
+      description: lang === 'es' ? 'Entradas en tu diario íntimo' : 'Entrées dans ton journal intime',
       achievements: [
         { id: 'journal_1', title: 'Première confidence', icon: '✍️', description: 'Tu as écrit ta première entrée de journal', requirement: 'journal_entries', count: 1 },
         { id: 'journal_5', title: 'Voix qui s\'éveille', icon: '📝', description: '5 entrées, ta voix intérieure prend forme', requirement: 'journal_entries', count: 5 },
@@ -115,9 +116,9 @@ const ProfilePage: React.FC = () => {
       ]
     },
     breathing: {
-      name: 'Respiration',
+      name: t.achievements.categories.breathing,
       icon: '💨',
-      description: 'Exercices de respiration consciente',
+      description: lang === 'es' ? 'Ejercicios de respiración consciente' : 'Exercices de respiration consciente',
       achievements: [
         { id: 'breath_1', title: 'Premier souffle conscient', icon: '🌬️', description: 'Tu as pratiqué ton premier exercice de respiration', requirement: 'breathing_exercises', count: 1 },
         { id: 'breath_5', title: 'Danseur du souffle', icon: '💫', description: '5 exercices, le rythme s\'installe', requirement: 'breathing_exercises', count: 5 },
@@ -127,9 +128,9 @@ const ProfilePage: React.FC = () => {
       ]
     },
     checkin: {
-      name: 'Check-in émotionnel',
+      name: t.achievements.categories.checkin,
       icon: '❤️',
-      description: 'Moments de connexion avec tes émotions',
+      description: lang === 'es' ? 'Momentos de conexión con tus emociones' : 'Moments de connexion avec tes émotions',
       achievements: [
         { id: 'checkin_1', title: 'Première écoute', icon: '💚', description: 'Tu t\'es connecté(e) à tes émotions', requirement: 'checkin_count', count: 1 },
         { id: 'checkin_5', title: 'Observateur bienveillant', icon: '💙', description: '5 check-ins, tu apprends à t\'accueillir', requirement: 'checkin_count', count: 5 },
@@ -139,9 +140,9 @@ const ProfilePage: React.FC = () => {
       ]
     },
     dreams: {
-      name: 'Rêves',
+      name: t.achievements.categories.dreams,
       icon: '🌙',
-      description: 'Rêves partagés et explorés',
+      description: lang === 'es' ? 'Sueños compartidos y explorados' : 'Rêves partagés et explorés',
       achievements: [
         { id: 'dream_1', title: 'Voyageur nocturne', icon: '🌠', description: 'Tu as partagé ton premier rêve', requirement: 'dream_count', count: 1 },
         { id: 'dream_5', title: 'Explorateur onirique', icon: '💫', description: '5 rêves, tu ouvres les portes de l\'inconscient', requirement: 'dream_count', count: 5 },
@@ -302,38 +303,32 @@ const ProfilePage: React.FC = () => {
       const totalMinutes = allSessions?.reduce((sum, s) => sum + (s.duration_minutes || 0), 0) || 0;
       const totalSessions = allSessions?.length || 0;
 
-      // Calculer le temps de méditation de la semaine depuis meditation_sessions
       const thisWeekSessions = allSessions?.filter(s =>
         new Date(s.created_at) > oneWeekAgo
       ) || [];
       const thisWeekMeditation = thisWeekSessions.reduce((sum, s) => sum + (s.duration_minutes || 0), 0);
       const currentStreak = await calculateJournalStreak();
 
-      // Calculer toutes les dates avec activités pour le calendrier
       const allActivityDates: Date[] = [];
 
-      // Dates de check-ins
       checkinsData?.forEach(c => {
         const date = new Date(c.created_at);
         date.setHours(0, 0, 0, 0);
         allActivityDates.push(date);
       });
 
-      // Dates de journals
       journalsData?.forEach(j => {
         const date = new Date(j.created_at);
         date.setHours(0, 0, 0, 0);
         allActivityDates.push(date);
       });
 
-      // Dates de méditations
       allSessions?.forEach(s => {
         const date = new Date((s as any).created_at);
         date.setHours(0, 0, 0, 0);
         allActivityDates.push(date);
       });
 
-      // Dédupliquer les dates (même jour = une seule date)
       const uniqueDates = Array.from(
         new Set(allActivityDates.map(d => d.toISOString()))
       ).map(iso => new Date(iso));
@@ -433,9 +428,9 @@ const ProfilePage: React.FC = () => {
     } catch (error: any) {
       console.error('Error uploading photo:', error);
       if (error.message?.includes('bucket') || error.message?.includes('Bucket') || error.message?.includes('stockage')) {
-        setPhotoError('⚠️ Configuration requise : Le bucket "journal-images" doit être créé dans votre projet Supabase');
+        setPhotoError(t.profile.bucketError);
       } else {
-        setPhotoError('Erreur lors de l\'upload. Vérifiez votre configuration Supabase.');
+        setPhotoError(t.profile.uploadError);
       }
     } finally {
       setUploadingPhoto(false);
@@ -450,7 +445,7 @@ const ProfilePage: React.FC = () => {
       setEditForm(prev => ({ ...prev, photo_url: '' }));
     } catch (error) {
       console.error('Error deleting photo:', error);
-      setPhotoError('Erreur lors de la suppression');
+      setPhotoError(t.profile.uploadError);
     }
   };
 
@@ -504,26 +499,26 @@ const ProfilePage: React.FC = () => {
   const getSubscriptionStatus = () => {
     switch (profile?.subscription_status) {
       case 'active':
-        return { text: 'Actif', color: 'text-wasabi', bg: 'bg-wasabi/10' };
+        return { text: lang === 'es' ? 'Activo' : 'Actif', color: 'text-wasabi', bg: 'bg-wasabi/10' };
       case 'cancelled':
-        return { text: 'Annulé', color: 'text-vermilion', bg: 'bg-vermilion/10' };
+        return { text: lang === 'es' ? 'Cancelado' : 'Annulé', color: 'text-vermilion', bg: 'bg-vermilion/10' };
       default:
-        return { text: 'Gratuit', color: 'text-stone', bg: 'bg-stone/10' };
+        return { text: lang === 'es' ? 'Gratuito' : 'Gratuit', color: 'text-stone', bg: 'bg-stone/10' };
     }
   };
 
   const getJoinDate = () => {
-    if (!profile?.created_at) return 'Récemment';
+    if (!profile?.created_at) return lang === 'es' ? 'Recientemente' : 'Récemment';
 
     const joinDate = new Date(profile.created_at);
     const now = new Date();
     const diffInDays = Math.floor((now.getTime() - joinDate.getTime()) / (1000 * 60 * 60 * 24));
 
-    if (diffInDays < 1) return "Aujourd'hui";
-    if (diffInDays < 7) return `Il y a ${diffInDays} jour${diffInDays > 1 ? 's' : ''}`;
-    if (diffInDays < 30) return `Il y a ${Math.floor(diffInDays / 7)} semaine${Math.floor(diffInDays / 7) > 1 ? 's' : ''}`;
-    if (diffInDays < 365) return `Il y a ${Math.floor(diffInDays / 30)} mois`;
-    return `Il y a ${Math.floor(diffInDays / 365)} an${Math.floor(diffInDays / 365) > 1 ? 's' : ''}`;
+    if (diffInDays < 1) return lang === 'es' ? 'Hoy' : "Aujourd'hui";
+    if (diffInDays < 7) return lang === 'es' ? `Hace ${diffInDays} día${diffInDays > 1 ? 's' : ''}` : `Il y a ${diffInDays} jour${diffInDays > 1 ? 's' : ''}`;
+    if (diffInDays < 30) return lang === 'es' ? `Hace ${Math.floor(diffInDays / 7)} semana${Math.floor(diffInDays / 7) > 1 ? 's' : ''}` : `Il y a ${Math.floor(diffInDays / 7)} semaine${Math.floor(diffInDays / 7) > 1 ? 's' : ''}`;
+    if (diffInDays < 365) return lang === 'es' ? `Hace ${Math.floor(diffInDays / 30)} mes${Math.floor(diffInDays / 30) > 1 ? 'es' : ''}` : `Il y a ${Math.floor(diffInDays / 30)} mois`;
+    return lang === 'es' ? `Hace ${Math.floor(diffInDays / 365)} año${Math.floor(diffInDays / 365) > 1 ? 's' : ''}` : `Il y a ${Math.floor(diffInDays / 365)} an${Math.floor(diffInDays / 365) > 1 ? 's' : ''}`;
   };
 
   const renderCalendar = () => {
@@ -573,10 +568,9 @@ const ProfilePage: React.FC = () => {
     setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1));
   };
 
-  const monthNames = ['janvier', 'février', 'mars', 'avril', 'mai', 'juin', 'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre'];
-  const dayNames = ['dim.', 'lun.', 'mar.', 'mer.', 'jeu.', 'ven.', 'sam.'];
+  const monthNames = t.profile.months;
+  const dayNames = t.profile.days;
 
-  // Charger les activités d'un jour spécifique
   const loadDayActivities = async (date: Date) => {
     if (!user) return;
 
@@ -588,7 +582,6 @@ const ProfilePage: React.FC = () => {
     try {
       const activities: any[] = [];
 
-      // Charger les check-ins du jour
       const { data: checkins } = await supabase
         .from('checkins')
         .select('*')
@@ -601,14 +594,13 @@ const ProfilePage: React.FC = () => {
         checkins.forEach(c => activities.push({
           type: 'checkin',
           icon: '❤️',
-          title: 'Check-in émotionnel',
-          description: `Émotion: ${c.emotion}`,
+          title: lang === 'es' ? 'Check-in emocional' : 'Check-in émotionnel',
+          description: `${lang === 'es' ? 'Emoción' : 'Émotion'}: ${c.emotion}`,
           time: new Date(c.created_at),
           data: c
         }));
       }
 
-      // Charger les méditations du jour
       const { data: meditations } = await supabase
         .from('meditation_sessions')
         .select('*')
@@ -621,14 +613,13 @@ const ProfilePage: React.FC = () => {
         meditations.forEach(m => activities.push({
           type: 'meditation',
           icon: '🧘',
-          title: 'Méditation',
+          title: lang === 'es' ? 'Meditación' : 'Méditation',
           description: `${m.duration} minutes`,
           time: new Date(m.created_at),
           data: m
         }));
       }
 
-      // Charger les journaux du jour
       const { data: journals } = await supabase
         .from('journals')
         .select('*')
@@ -641,14 +632,13 @@ const ProfilePage: React.FC = () => {
         journals.forEach(j => activities.push({
           type: 'journal',
           icon: j.type === 'dream' ? '🌙' : '📖',
-          title: j.type === 'dream' ? 'Rêve' : 'Écriture',
+          title: j.type === 'dream' ? (lang === 'es' ? 'Sueño' : 'Rêve') : (lang === 'es' ? 'Escritura' : 'Écriture'),
           description: j.content.substring(0, 60) + (j.content.length > 60 ? '...' : ''),
           time: new Date(j.created_at),
           data: j
         }));
       }
 
-      // Trier par heure
       activities.sort((a, b) => b.time.getTime() - a.time.getTime());
       setDayActivities(activities);
       setSelectedDay(date);
@@ -657,7 +647,6 @@ const ProfilePage: React.FC = () => {
     }
   };
 
-  // Calculer tous les succès avec leur statut débloqué
   const calculateAchievements = () => {
     const allUnlocked: any[] = [];
 
@@ -679,7 +668,6 @@ const ProfilePage: React.FC = () => {
             unlocked = stats.journals >= achievement.count;
             break;
           case 'breathing_exercises':
-            // TODO: Ajouter le compteur d'exercices de respiration
             unlocked = false;
             break;
           case 'checkin_count':
@@ -711,12 +699,12 @@ const ProfilePage: React.FC = () => {
     return (
       <div className="min-h-screen bg-sand p-4 pb-24 flex items-center justify-center">
         <div className="text-center">
-          <p className="text-stone mb-4">Vous devez être connecté pour accéder à votre profil</p>
+          <p className="text-stone mb-4">{t.profile.notConnected}</p>
           <a
             href="/"
             className="px-6 py-3 bg-wasabi text-white rounded-xl hover:bg-wasabi/90 transition-colors duration-300 inline-block"
           >
-            Retour à l'accueil
+            {t.profile.backHome}
           </a>
         </div>
       </div>
@@ -728,7 +716,7 @@ const ProfilePage: React.FC = () => {
       <div className="min-h-screen bg-sand p-4 pb-24 flex items-center justify-center">
         <div className="text-center max-w-sm mx-auto">
           <div className="w-8 h-8 border-2 border-wasabi border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-stone mb-4">Chargement du profil...</p>
+          <p className="text-stone mb-4">{t.profile.loading}</p>
           <a
             href="#"
             onClick={(e) => {
@@ -740,7 +728,7 @@ const ProfilePage: React.FC = () => {
             }}
             className="px-4 py-2 text-sm text-stone hover:text-ink underline transition-colors cursor-pointer"
           >
-            Problème de chargement ? Déconnexion forcée
+            {t.profile.troubleLoading}
           </a>
         </div>
       </div>
@@ -751,7 +739,7 @@ const ProfilePage: React.FC = () => {
     return (
       <div className="min-h-screen bg-sand p-4 pb-24 flex items-center justify-center">
         <div className="text-center max-w-sm mx-auto">
-          <p className="text-stone mb-4">Erreur lors du chargement du profil</p>
+          <p className="text-stone mb-4">{t.profile.errorLoading}</p>
           <div className="space-y-3">
             <button
               type="button"
@@ -761,7 +749,7 @@ const ProfilePage: React.FC = () => {
               }}
               className="w-full px-4 py-3 bg-wasabi text-white rounded-xl hover:bg-wasabi/90 transition-colors duration-300 font-medium"
             >
-              Réessayer
+              {t.common.retry}
             </button>
             <a
               href="#"
@@ -774,11 +762,11 @@ const ProfilePage: React.FC = () => {
               }}
               className="block w-full px-4 py-3 bg-red-50 border border-red-200 text-red-600 rounded-xl hover:bg-red-100 transition-colors duration-300 font-medium text-center cursor-pointer"
             >
-              Déconnexion forcée
+              {t.profile.forceLogout}
             </a>
           </div>
           <p className="text-xs text-stone/60 mt-4">
-            La déconnexion forcée nettoie toutes les données locales
+            {t.profile.forceLogoutNote}
           </p>
         </div>
       </div>
@@ -789,7 +777,6 @@ const ProfilePage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-sand dark:bg-gray-900 pb-24 transition-colors duration-300">
-      {/* Header zen avec nom */}
       <div className="bg-gradient-to-br from-wasabi/5 via-transparent to-jade/5 dark:from-gray-800/50 dark:via-transparent dark:to-gray-800/50 p-6 border-b border-stone/10 dark:border-gray-700 transition-colors duration-300">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-3">
@@ -813,7 +800,7 @@ const ProfilePage: React.FC = () => {
               >
                 {profile.display_name}
               </h1>
-              <p className="text-sm text-stone/70 dark:text-gray-400 transition-colors duration-300">Membre depuis {getJoinDate()}</p>
+              <p className="text-sm text-stone/70 dark:text-gray-400 transition-colors duration-300">{t.profile.memberSince} {getJoinDate()}</p>
             </div>
           </div>
           <div className="flex items-center gap-2">
@@ -821,7 +808,7 @@ const ProfilePage: React.FC = () => {
               type="button"
               onClick={() => setShowSettingsMenu(true)}
               className="bg-white/60 dark:bg-gray-800/60 backdrop-blur-sm p-2.5 rounded-xl hover:bg-white/80 dark:hover:bg-gray-800/80 active:scale-95 transition-all duration-300 text-ink dark:text-white border border-stone/10 dark:border-gray-700 shadow-soft"
-              aria-label="Paramètres"
+              aria-label={t.profile.settingsAria}
             >
               <Settings size={18} />
             </button>
@@ -829,7 +816,7 @@ const ProfilePage: React.FC = () => {
               type="button"
               onClick={() => setEditing(true)}
               className="bg-white/60 dark:bg-gray-800/60 backdrop-blur-sm p-2.5 rounded-xl hover:bg-white/80 dark:hover:bg-gray-800/80 active:scale-95 transition-all duration-300 text-ink dark:text-white border border-stone/10 dark:border-gray-700 shadow-soft"
-              aria-label="Modifier le profil"
+              aria-label={t.profile.editAria}
             >
               <Edit3 size={18} />
             </button>
@@ -838,7 +825,6 @@ const ProfilePage: React.FC = () => {
       </div>
 
       <div className="p-4 space-y-4">
-        {/* Carte Série (Streak) - Style zen */}
         <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur rounded-2xl p-6 shadow-soft border border-stone/10 dark:border-gray-700 transition-colors duration-300">
           <div className="flex items-center gap-3 mb-4">
             <div className="w-12 h-12 bg-gradient-to-br from-sunset/20 to-vermilion/10 rounded-full flex items-center justify-center">
@@ -848,7 +834,7 @@ const ProfilePage: React.FC = () => {
               className="text-xl font-medium text-ink dark:text-white transition-colors duration-300"
               style={{ fontFamily: "'Shippori Mincho', serif" }}
             >
-              Série
+              {t.profile.streak}
             </h2>
           </div>
           <div className="flex items-baseline gap-2">
@@ -858,11 +844,10 @@ const ProfilePage: React.FC = () => {
             >
               {stats.currentStreak}
             </span>
-            <span className="text-stone/70 dark:text-gray-400 text-lg transition-colors duration-300">jour{stats.currentStreak > 1 ? 's' : ''}</span>
+            <span className="text-stone/70 dark:text-gray-400 text-lg transition-colors duration-300">{lang === 'es' ? `día${stats.currentStreak > 1 ? 's' : ''}` : `jour${stats.currentStreak > 1 ? 's' : ''}`}</span>
           </div>
         </div>
 
-        {/* Temps total et Sessions - Style zen épuré */}
         <div className="grid grid-cols-2 gap-3">
           <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur rounded-2xl p-5 shadow-soft border border-stone/10 dark:border-gray-700 transition-colors duration-300">
             <div className="flex items-center gap-2 mb-3">
@@ -871,7 +856,7 @@ const ProfilePage: React.FC = () => {
                 className="text-sm font-medium text-stone/80 dark:text-gray-400 transition-colors duration-300"
                 style={{ fontFamily: "'Shippori Mincho', serif" }}
               >
-                Temps total
+                {t.profile.totalTime}
               </h3>
             </div>
             <div className="flex items-baseline gap-1.5">
@@ -892,7 +877,7 @@ const ProfilePage: React.FC = () => {
                 className="text-sm font-medium text-stone/80 dark:text-gray-400 transition-colors duration-300"
                 style={{ fontFamily: "'Shippori Mincho', serif" }}
               >
-                Sessions
+                {t.profile.sessions}
               </h3>
             </div>
             <div className="flex items-baseline gap-1.5">
@@ -907,14 +892,13 @@ const ProfilePage: React.FC = () => {
           </div>
         </div>
 
-        {/* Succès - fond clair */}
         <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur rounded-2xl p-6 shadow-soft border border-stone/10 dark:border-gray-700 transition-colors duration-300">
           <div className="flex items-center justify-between mb-5">
             <h2
               className="text-xl font-medium text-ink dark:text-white transition-colors duration-300"
               style={{ fontFamily: "'Shippori Mincho', serif" }}
             >
-              Succès
+              {t.profile.achievements}
             </h2>
             <button
               type="button"
@@ -922,7 +906,7 @@ const ProfilePage: React.FC = () => {
               className="text-wasabi text-sm font-medium hover:text-jade transition-colors"
               style={{ fontFamily: "'Shippori Mincho', serif" }}
             >
-              Tout afficher
+              {t.profile.viewAll}
             </button>
           </div>
           <div className="grid grid-cols-3 gap-4">
@@ -939,24 +923,22 @@ const ProfilePage: React.FC = () => {
           </div>
         </div>
 
-        {/* Bouton ajout manuel */}
         <button
           type="button"
           onClick={() => setShowManualSessionModal(true)}
           className="w-full bg-white/80 dark:bg-gray-800/80 backdrop-blur border border-wasabi/30 dark:border-jade/30 text-wasabi dark:text-jade py-4 rounded-xl font-medium hover:bg-wasabi/10 dark:hover:bg-jade/20 transition-all duration-300 shadow-soft"
           style={{ fontFamily: "'Shippori Mincho', serif" }}
         >
-          Ajouter une séance manuellement
+          {t.profile.addSession}
         </button>
 
-        {/* Calendrier */}
         <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur rounded-2xl p-6 shadow-soft border border-stone/10 dark:border-gray-700 transition-colors duration-300">
           <div className="flex items-center justify-between mb-5">
             <h2
               className="text-xl font-medium text-ink dark:text-white transition-colors duration-300"
               style={{ fontFamily: "'Shippori Mincho', serif" }}
             >
-              Calendrier
+              {t.profile.calendar}
             </h2>
             <button
               type="button"
@@ -964,7 +946,7 @@ const ProfilePage: React.FC = () => {
               className="text-wasabi text-sm font-medium hover:text-jade transition-colors"
               style={{ fontFamily: "'Shippori Mincho', serif" }}
             >
-              Votre parcours
+              {t.profile.yourJourney}
             </button>
           </div>
 
@@ -1006,13 +988,12 @@ const ProfilePage: React.FC = () => {
           </div>
         </div>
 
-        {/* XP Bar */}
         {userProfile && (
           <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur rounded-2xl p-6 shadow-soft border border-stone/10 dark:border-gray-700 transition-colors duration-300">
             <XPBar
               current={xpProgress.current}
               max={xpProgress.needed}
-              label="Progression"
+              label={t.profile.progression}
               variant="level"
               level={xpProgress.level}
               compact={false}
@@ -1020,7 +1001,6 @@ const ProfilePage: React.FC = () => {
           </div>
         )}
 
-        {/* Actions */}
         <div className="space-y-3">
           <button
             type="button"
@@ -1029,7 +1009,7 @@ const ProfilePage: React.FC = () => {
             style={{ fontFamily: "'Shippori Mincho', serif" }}
           >
             <PlayCircle size={18} className="mr-2" />
-            Revoir l'introduction
+            {t.profile.reviewIntro}
           </button>
 
           <button
@@ -1039,7 +1019,7 @@ const ProfilePage: React.FC = () => {
             style={{ fontFamily: "'Shippori Mincho', serif" }}
           >
             <LogOut size={18} className="mr-2" />
-            Se déconnecter
+            {t.profile.signOut}
           </button>
 
           <div className="bg-stone/5 backdrop-blur border border-stone/20 rounded-xl p-4">
@@ -1047,7 +1027,7 @@ const ProfilePage: React.FC = () => {
               className="text-xs text-stone/70 mb-3 text-center"
               style={{ fontFamily: "'Shippori Mincho', serif" }}
             >
-              Problème de synchronisation ou de chargement ?
+              {t.profile.troubleSync}
             </p>
             <a
               href="#"
@@ -1061,7 +1041,7 @@ const ProfilePage: React.FC = () => {
               className="block w-full bg-white/80 backdrop-blur border border-stone/30 text-stone py-3 rounded-xl hover:bg-stone/10 transition-all duration-300 text-sm font-medium text-center cursor-pointer shadow-soft"
               style={{ fontFamily: "'Shippori Mincho', serif" }}
             >
-              Déconnexion forcée
+              {t.profile.forceLogout}
             </a>
           </div>
         </div>
@@ -1069,7 +1049,6 @@ const ProfilePage: React.FC = () => {
 
       <IOSInstallHint />
 
-      {/* Modal d'édition (identique à l'original) */}
       {editing && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4 z-50">
           <div className="bg-white dark:bg-gray-800 rounded-t-3xl sm:rounded-2xl shadow-2xl w-full sm:max-w-md mx-0 sm:mx-2 max-h-[90vh] overflow-y-auto transition-colors duration-300">
@@ -1079,7 +1058,7 @@ const ProfilePage: React.FC = () => {
                   className="text-xl font-bold text-ink dark:text-white transition-colors duration-300"
                   style={{ fontFamily: "'Shippori Mincho', serif" }}
                 >
-                  Modifier mon profil
+                  {t.profile.editProfile}
                 </h2>
                 <button
                   type="button"
@@ -1099,7 +1078,7 @@ const ProfilePage: React.FC = () => {
                     className="block text-sm font-medium text-ink dark:text-white mb-3 transition-colors duration-300"
                     style={{ fontFamily: "'Shippori Mincho', serif" }}
                   >
-                    Photo de profil
+                    {t.profile.photoLabel}
                   </label>
 
                   <div className="relative w-24 h-24 mx-auto mb-4">
@@ -1136,7 +1115,7 @@ const ProfilePage: React.FC = () => {
                       onClick={handleRemovePhoto}
                       className="text-red-600 hover:text-red-700 text-sm transition-colors"
                     >
-                      Supprimer la photo
+                      {t.profile.deletePhoto}
                     </button>
                   )}
 
@@ -1149,12 +1128,12 @@ const ProfilePage: React.FC = () => {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-ink dark:text-white mb-2 transition-colors duration-300">Nom d'affichage</label>
+                  <label className="block text-sm font-medium text-ink dark:text-white mb-2 transition-colors duration-300">{t.profile.displayName}</label>
                   <input
                     type="text"
                     value={editForm.display_name}
                     onChange={(e) => setEditForm({ ...editForm, display_name: e.target.value })}
-                    placeholder="Ton nom"
+                    placeholder={t.profile.displayNamePlaceholder}
                     className="w-full px-4 py-4 bg-stone/5 dark:bg-gray-700 border border-stone/20 dark:border-gray-600 rounded-xl focus:border-wasabi dark:focus:border-jade focus:ring-2 focus:ring-wasabi/20 dark:focus:ring-jade/20 transition-all text-base text-ink dark:text-white"
                     maxLength={50}
                   />
@@ -1162,11 +1141,11 @@ const ProfilePage: React.FC = () => {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-ink dark:text-white mb-2 transition-colors duration-300">Bio</label>
+                  <label className="block text-sm font-medium text-ink dark:text-white mb-2 transition-colors duration-300">{t.profile.bio}</label>
                   <textarea
                     value={editForm.bio}
                     onChange={(e) => setEditForm({ ...editForm, bio: e.target.value })}
-                    placeholder="Parle-nous de toi..."
+                    placeholder={t.profile.bioPlaceholder}
                     rows={4}
                     className="w-full px-4 py-4 bg-stone/5 dark:bg-gray-700 border border-stone/20 dark:border-gray-600 rounded-xl focus:border-wasabi dark:focus:border-jade focus:ring-2 focus:ring-wasabi/20 dark:focus:ring-jade/20 transition-all resize-none text-base text-ink dark:text-white"
                     maxLength={200}
@@ -1182,7 +1161,7 @@ const ProfilePage: React.FC = () => {
                     }}
                     className="flex-1 px-4 py-4 border border-stone/20 dark:border-gray-600 text-stone dark:text-gray-300 rounded-xl hover:bg-stone/5 dark:hover:bg-gray-700 transition-colors font-medium"
                   >
-                    Annuler
+                    {t.common.cancel}
                   </button>
                   <button
                     onClick={handleSave}
@@ -1192,12 +1171,12 @@ const ProfilePage: React.FC = () => {
                     {saving ? (
                       <>
                         <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
-                        Sauvegarde...
+                        {t.common.saving}
                       </>
                     ) : (
                       <>
                         <Save size={18} className="mr-2" />
-                        Sauvegarder
+                        {t.common.save}
                       </>
                     )}
                   </button>
@@ -1208,7 +1187,6 @@ const ProfilePage: React.FC = () => {
         </div>
       )}
 
-      {/* Modal de déconnexion */}
       {showLogoutModal && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
           <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 max-w-sm w-full shadow-2xl border border-stone/10 dark:border-gray-700 transition-colors duration-300">
@@ -1220,13 +1198,13 @@ const ProfilePage: React.FC = () => {
                 className="text-xl font-bold text-ink dark:text-white mb-2 transition-colors duration-300"
                 style={{ fontFamily: "'Shippori Mincho', serif" }}
               >
-                Déconnexion
+                {t.profile.logoutTitle}
               </h3>
               <p
                 className="text-stone/70 dark:text-gray-300 transition-colors duration-300"
                 style={{ fontFamily: "'Shippori Mincho', serif" }}
               >
-                Es-tu sûr(e) de vouloir te déconnecter ?
+                {t.profile.logoutConfirm}
               </p>
             </div>
 
@@ -1237,7 +1215,7 @@ const ProfilePage: React.FC = () => {
                 className="flex-1 px-4 py-3 border border-stone/30 dark:border-gray-600 text-stone dark:text-gray-300 rounded-xl hover:bg-stone/5 dark:hover:bg-gray-700 transition-all duration-300 font-medium shadow-soft"
                 style={{ fontFamily: "'Shippori Mincho', serif" }}
               >
-                Annuler
+                {t.common.cancel}
               </button>
               <button
                 type="button"
@@ -1245,14 +1223,13 @@ const ProfilePage: React.FC = () => {
                 className="flex-1 px-4 py-3 bg-wasabi text-white rounded-xl hover:bg-jade transition-all duration-300 font-medium shadow-soft"
                 style={{ fontFamily: "'Shippori Mincho', serif" }}
               >
-                Se déconnecter
+                {t.profile.logoutTitle}
               </button>
             </div>
           </div>
         </div>
       )}
 
-      {/* Modal Tous les Succès - Version Mobile Optimisée */}
       {showAllAchievements && (
         <div
           className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 animate-in fade-in duration-300"
@@ -1262,9 +1239,7 @@ const ProfilePage: React.FC = () => {
             className="absolute inset-x-0 bottom-0 sm:bottom-auto sm:top-1/2 sm:left-1/2 sm:-translate-x-1/2 sm:-translate-y-1/2 bg-white dark:bg-gray-800 rounded-t-3xl sm:rounded-3xl shadow-2xl w-full sm:max-w-lg max-h-[90vh] sm:max-h-[85vh] overflow-hidden animate-in slide-in-from-bottom sm:zoom-in duration-300 transition-colors"
             onClick={(e) => e.stopPropagation()}
           >
-            {/* Header avec swipe indicator */}
             <div className="sticky top-0 bg-gradient-to-br from-wasabi via-jade to-wasabi/80 text-white px-6 pt-3 pb-5 z-10">
-              {/* Swipe indicator mobile */}
               <div className="flex justify-center mb-3 sm:hidden">
                 <div className="w-12 h-1 bg-white/30 rounded-full" />
               </div>
@@ -1275,7 +1250,7 @@ const ProfilePage: React.FC = () => {
                     className="text-2xl font-bold mb-1"
                     style={{ fontFamily: "'Shippori Mincho', serif" }}
                   >
-                    🏆 Vos Succès
+                    🏆 {t.profile.achievementsTitle}
                   </h2>
                   <div className="flex items-center gap-2 text-white/90 text-sm">
                     <div className="flex items-center gap-1">
@@ -1284,7 +1259,7 @@ const ProfilePage: React.FC = () => {
                     </div>
                     <span>/</span>
                     <span>{unlockedBadges.length}</span>
-                    <span className="text-white/70">débloqués</span>
+                    <span className="text-white/70">{t.profile.achievementsUnlocked}</span>
                   </div>
                 </div>
                 <button
@@ -1296,7 +1271,6 @@ const ProfilePage: React.FC = () => {
                 </button>
               </div>
 
-              {/* Tabs de filtrage */}
               <div className="flex gap-2 bg-white/10 dark:bg-black/20 backdrop-blur p-1 rounded-xl">
                 <button
                   type="button"
@@ -1307,7 +1281,7 @@ const ProfilePage: React.FC = () => {
                       : 'text-white/80 hover:text-white active:scale-95'
                   }`}
                 >
-                  Tous ({unlockedBadges.length})
+                  {`${t.profile.filterAll} (${unlockedBadges.length})`}
                 </button>
                 <button
                   type="button"
@@ -1318,7 +1292,7 @@ const ProfilePage: React.FC = () => {
                       : 'text-white/80 hover:text-white active:scale-95'
                   }`}
                 >
-                  ✓ Obtenus ({unlockedBadges.filter(b => b.unlocked).length})
+                  {`${t.profile.filterObtained} (${unlockedBadges.filter(b => b.unlocked).length})`}
                 </button>
                 <button
                   type="button"
@@ -1329,14 +1303,12 @@ const ProfilePage: React.FC = () => {
                       : 'text-white/80 hover:text-white active:scale-95'
                   }`}
                 >
-                  À venir ({unlockedBadges.filter(b => !b.unlocked).length})
+                  {`${t.profile.filterUpcoming} (${unlockedBadges.filter(b => !b.unlocked).length})`}
                 </button>
               </div>
             </div>
 
-            {/* Liste des succès par catégories */}
             <div className="overflow-y-auto max-h-[calc(90vh-200px)] sm:max-h-[calc(85vh-200px)] px-4 py-4">
-              {/* Affichage par catégories */}
               {Object.entries(achievementCategories).map(([categoryKey, category]) => {
                 const categoryAchievements = allAchievementsFlat
                   .filter(a => a.category === categoryKey)
@@ -1350,7 +1322,6 @@ const ProfilePage: React.FC = () => {
 
                 return (
                   <div key={categoryKey} className="mb-6">
-                    {/* Header de catégorie */}
                     <div className="flex items-center gap-2 mb-3 px-1">
                       <span className="text-2xl">{category.icon}</span>
                       <div className="flex-1">
@@ -1367,10 +1338,8 @@ const ProfilePage: React.FC = () => {
                       </div>
                     </div>
 
-                    {/* Succès de la catégorie */}
                     <div className="space-y-3">
                       {categoryAchievements.map((badge, index) => {
-                        // Calculer la progression selon le type
                         let currentValue = 0;
                         let targetValue = badge.count;
 
@@ -1451,13 +1420,13 @@ const ProfilePage: React.FC = () => {
                                   {badge.unlocked ? (
                                     <span className="text-jade font-medium flex items-center gap-1">
                                       <Check size={12} />
-                                      Débloqué
+                                      {t.profile.achievementUnlocked}
                                     </span>
                                   ) : (
                                     <>
                                       <span className="text-stone/60">{currentValue} / {targetValue}</span>
                                       <span className="text-wasabi font-medium">
-                                        {remaining > 0 ? `Encore ${remaining}` : 'Presque !'}
+                                        {remaining > 0 ? `${t.profile.achievementRemaining} ${remaining}` : t.profile.achievementAlmost}
                                       </span>
                                     </>
                                   )}
@@ -1485,7 +1454,6 @@ const ProfilePage: React.FC = () => {
                 );
               })}
 
-              {/* Message si aucun succès */}
               {allAchievementsFlat.filter(badge => {
                 if (achievementsFilter === 'unlocked') return badge.unlocked;
                 if (achievementsFilter === 'locked') return !badge.unlocked;
@@ -1496,15 +1464,14 @@ const ProfilePage: React.FC = () => {
                     <Target size={32} className="text-wasabi" />
                   </div>
                   <p className="text-ink text-lg font-medium mb-2" style={{ fontFamily: "'Shippori Mincho', serif" }}>
-                    Aucun succès dans ce filtre
+                    {t.profile.noAchievements}
                   </p>
                   <p className="text-stone/70 text-sm">
-                    Change de filtre pour voir d'autres succès
+                    {t.profile.noAchievementsMessage}
                   </p>
                 </div>
               )}
 
-              {/* Ancien code à supprimer - START */}
               <div className="hidden">
                 {unlockedBadges
                   .filter(badge => {
@@ -1528,13 +1495,11 @@ const ProfilePage: React.FC = () => {
                           animation: `fadeInUp 0.4s ease-out ${index * 0.03}s both`
                         }}
                       >
-                        {/* Effet glow pour succès débloqués */}
                         {badge.unlocked && (
                           <div className="absolute inset-0 bg-gradient-to-br from-wasabi/10 via-transparent to-jade/10 pointer-events-none" />
                         )}
 
                         <div className="relative p-4">
-                          {/* Header avec icône et badge */}
                           <div className="flex items-start gap-3 mb-3">
                             <div
                               className={`relative flex-shrink-0 w-14 h-14 rounded-2xl flex items-center justify-center text-3xl transition-all duration-300 ${
@@ -1577,7 +1542,6 @@ const ProfilePage: React.FC = () => {
                             </div>
                           </div>
 
-                          {/* Barre de progression */}
                           <div className="space-y-1.5">
                             <div className="flex items-center justify-between text-xs">
                               {badge.unlocked ? (
@@ -1613,7 +1577,6 @@ const ProfilePage: React.FC = () => {
                             </div>
                           </div>
 
-                          {/* Badge "Prochain objectif" */}
                           {!badge.unlocked && index === unlockedBadges.findIndex(b => !b.unlocked) && (
                             <div className="mt-3 px-3 py-2 bg-gradient-to-r from-wasabi/10 to-jade/10 rounded-xl border border-wasabi/20">
                               <div className="flex items-center gap-2">
@@ -1630,14 +1593,12 @@ const ProfilePage: React.FC = () => {
                   })}
               </div>
 
-              {/* Padding bottom pour swipe */}
               <div className="h-4" />
             </div>
           </div>
         </div>
       )}
 
-      {/* Modal Votre Parcours - Nouveau avec calendrier interactif */}
       <JourneyModal
         show={showJourneyModal}
         onClose={() => setShowJourneyModal(false)}
@@ -1651,13 +1612,11 @@ const ProfilePage: React.FC = () => {
         }}
       />
 
-      {/* Menu des paramètres */}
       <SettingsMenu
         show={showSettingsMenu}
         onClose={() => setShowSettingsMenu(false)}
       />
 
-      {/* Modal d'ajout/édition manuel de séance */}
       <ManualSessionModal
         isOpen={showManualSessionModal}
         onClose={() => {
@@ -1665,7 +1624,6 @@ const ProfilePage: React.FC = () => {
           setSessionToEdit(null);
         }}
         onSave={() => {
-          // Refresh data after saving
           loadUserStats();
           loadCalendarData();
           setSessionToEdit(null);
