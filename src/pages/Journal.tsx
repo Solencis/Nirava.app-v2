@@ -1,14 +1,11 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Heart, Wind, BookOpen, Moon, Sparkles, Plus, Flame, Clock, Star, ChevronLeft, ChevronRight, X, Trash2, RotateCcw } from 'lucide-react';
+import { Heart, Wind, BookOpen, Moon, Sparkles, Plus, Flame, Clock, Star, ChevronLeft, ChevronRight, Trash2 } from 'lucide-react';
 import CheckinMobile from '../components/CheckinMobile';
 import JournalMobile from '../components/JournalMobile';
 import MeditationMobile from '../components/MeditationMobile';
 import DreamJournalMobile from '../components/DreamJournalMobile';
 import BreathingMobile from '../components/BreathingMobile';
 import { useAuth } from '../hooks/useAuth';
-import { useCheckins } from '../hooks/useCheckins';
-import { useJournals } from '../hooks/useJournals';
-import { useMeditationWeeklyStats } from '../hooks/useMeditation';
 import { supabase } from '../lib/supabase';
 
 interface ActivityEntry {
@@ -212,9 +209,6 @@ const DetailView: React.FC<{ detail: DetailData; onBack: () => void; onDelete: (
 
 const Journal: React.FC = () => {
   const { user } = useAuth();
-  const { data: checkinsData, refetch: refetchCheckins } = useCheckins();
-  const { data: journalsData, refetch: refetchJournals } = useJournals();
-  const { data: meditationMinutes } = useMeditationWeeklyStats();
 
   const [showCheckin, setShowCheckin] = useState(false);
   const [showJournal, setShowJournal] = useState(false);
@@ -223,53 +217,62 @@ const Journal: React.FC = () => {
   const [showBreathing, setShowBreathing] = useState(false);
   const [recentActivity, setRecentActivity] = useState<ActivityEntry[]>([]);
   const [streak, setStreak] = useState(0);
-  const [weeklyStats, setWeeklyStats] = useState({ checkins: 0, journals: 0, dreams: 0 });
+  const [weeklyStats, setWeeklyStats] = useState({ checkins: 0, journals: 0, dreams: 0, meditationMinutes: 0 });
   const [selectedDetail, setSelectedDetail] = useState<DetailData | null>(null);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   const loadActivity = useCallback(async () => {
     if (!user?.id) return;
     try {
-      const [checkinsRes, journalsRes, meditationsRes] = await Promise.all([
-        supabase.from('checkins').select('id, emotion, intensity, need, notes, created_at').eq('user_id', user.id).is('deleted_at', null).order('created_at', { ascending: false }).limit(20),
-        supabase.from('journals').select('id, type, content, emotion, metadata, created_at').eq('user_id', user.id).is('deleted_at', null).order('created_at', { ascending: false }).limit(20),
-        supabase.from('meditation_sessions').select('id, duration_minutes, created_at').eq('user_id', user.id).order('created_at', { ascending: false }).limit(10)
+      const [journalRes, sessionsRes] = await Promise.all([
+        supabase
+          .from('journal_entries')
+          .select('id, type, content, emotion, intensity, metadata, created_at')
+          .eq('user_id', user.id)
+          .order('created_at', { ascending: false })
+          .limit(40),
+        supabase
+          .from('sessions')
+          .select('id, duration_minutes, type, created_at')
+          .eq('user_id', user.id)
+          .order('created_at', { ascending: false })
+          .limit(10)
       ]);
 
       const entries: ActivityEntry[] = [];
 
-      checkinsRes.data?.forEach(c => {
-        entries.push({
-          id: c.id,
-          type: 'checkin',
-          label: 'Check-in émotionnel',
-          sublabel: c.emotion ? `${getEmotionEmoji(c.emotion)} ${c.emotion}${c.intensity ? ` · ${c.intensity}/10` : ''}` : undefined,
-          emoji: getEmotionEmoji(c.emotion),
-          created_at: c.created_at,
-          raw: c
-        });
+      journalRes.data?.forEach(e => {
+        if (e.type === 'checkin') {
+          entries.push({
+            id: e.id,
+            type: 'checkin',
+            label: 'Check-in émotionnel',
+            sublabel: e.emotion ? `${getEmotionEmoji(e.emotion)} ${e.emotion}${e.intensity ? ` · ${e.intensity}/10` : ''}` : undefined,
+            emoji: getEmotionEmoji(e.emotion),
+            created_at: e.created_at,
+            raw: { ...e, need: e.metadata?.need, notes: e.content }
+          });
+        } else {
+          const cfg = TYPE_CONFIG[e.type] || TYPE_CONFIG.journal;
+          entries.push({
+            id: e.id,
+            type: e.type as any,
+            label: cfg.label,
+            sublabel: e.metadata?.title || (e.content ? e.content.slice(0, 60) + (e.content.length > 60 ? '…' : '') : undefined),
+            emoji: e.metadata?.emoji || cfg.emoji,
+            created_at: e.created_at,
+            raw: e
+          });
+        }
       });
 
-      journalsRes.data?.forEach(j => {
-        const cfg = TYPE_CONFIG[j.type] || TYPE_CONFIG.journal;
-        entries.push({
-          id: j.id,
-          type: j.type as any,
-          label: cfg.label,
-          sublabel: j.metadata?.title || (j.content ? j.content.slice(0, 60) + (j.content.length > 60 ? '…' : '') : undefined),
-          emoji: j.metadata?.emoji || cfg.emoji,
-          created_at: j.created_at,
-          raw: j
-        });
-      });
-
-      meditationsRes.data?.forEach(m => {
+      sessionsRes.data?.forEach(m => {
         entries.push({
           id: m.id,
-          type: 'meditation',
-          label: 'Méditation',
+          type: m.type === 'breathing' ? 'breathing' : 'meditation',
+          label: m.type === 'breathing' ? 'Respiration' : 'Méditation',
           sublabel: m.duration_minutes ? `${m.duration_minutes} min` : undefined,
-          emoji: '🧘',
+          emoji: m.type === 'breathing' ? '🌬️' : '🧘',
           created_at: m.created_at,
           raw: m
         });
@@ -281,10 +284,14 @@ const Journal: React.FC = () => {
       const oneWeekAgo = new Date();
       oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
       const thisWeek = entries.filter(e => new Date(e.created_at) > oneWeekAgo);
+      const meditationMinutesThisWeek = (sessionsRes.data || [])
+        .filter(s => new Date(s.created_at) > oneWeekAgo && s.type !== 'breathing')
+        .reduce((sum, s) => sum + (s.duration_minutes || 0), 0);
       setWeeklyStats({
         checkins: thisWeek.filter(e => e.type === 'checkin').length,
         journals: thisWeek.filter(e => e.type === 'journal').length,
-        dreams: thisWeek.filter(e => e.type === 'dream').length
+        dreams: thisWeek.filter(e => e.type === 'dream').length,
+        meditationMinutes: meditationMinutesThisWeek
       });
 
       const byDate = new Map<string, boolean>();
@@ -308,12 +315,10 @@ const Journal: React.FC = () => {
 
   useEffect(() => {
     if (user) loadActivity();
-  }, [loadActivity, user, checkinsData, journalsData]);
+  }, [loadActivity, user]);
 
   const onSaved = () => {
     loadActivity();
-    refetchCheckins();
-    refetchJournals();
   };
 
   const openDetail = (entry: ActivityEntry) => {
@@ -349,11 +354,7 @@ const Journal: React.FC = () => {
   const deleteEntry = async () => {
     if (!selectedDetail) return;
     try {
-      if (selectedDetail.type === 'checkin') {
-        await supabase.from('checkins').update({ deleted_at: new Date().toISOString() }).eq('id', selectedDetail.id);
-      } else {
-        await supabase.from('journals').update({ deleted_at: new Date().toISOString() }).eq('id', selectedDetail.id);
-      }
+      await supabase.from('journal_entries').delete().eq('id', selectedDetail.id).eq('user_id', user?.id);
       setSelectedDetail(null);
       setShowDeleteConfirm(false);
       onSaved();
@@ -417,7 +418,7 @@ const Journal: React.FC = () => {
               <div className="text-xs text-stone/60 dark:text-gray-500 leading-tight">Rêves</div>
             </div>
             <div className="text-center px-2">
-              <div className="text-xl font-bold text-jade mb-0.5">{meditationMinutes || 0}</div>
+              <div className="text-xl font-bold text-jade mb-0.5">{weeklyStats.meditationMinutes}</div>
               <div className="text-xs text-stone/60 dark:text-gray-500 leading-tight">Min. méd.</div>
             </div>
           </div>
